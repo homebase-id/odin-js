@@ -3,9 +3,11 @@ import { ApiType, BaseDotYouClient, DotYouClient } from '../../core/DotYouClient
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { exportEccPublicKey, getEccSharedSecret, importRemotePublicEccKey } from '../providers/EccKeyProvider';
-import { encodeBase64UrlJson } from './Base64UrlJson';
+import { decodeBase64UrlJson, encodeBase64UrlJson } from './Base64UrlJson';
 import {
   BeginBundleTokenExchangeResponse,
+  BundleAuthorizationPreview,
+  BundleAuthorizationRequest,
   BundleAuthorizeParams,
   BundleTokenCredentials,
   BundleTokenExchangeResponse,
@@ -23,7 +25,7 @@ export const BUNDLE_ACTING_APP_HEADER = 'X-ODIN-APP-ID';
 // Owner endpoints (pass the owner console's DotYouClient)
 // ---------------------------------------------------------------------------------------------
 
-/** Issues a token for the client whose public key is in the request; step 2 of the exchange. */
+/** Issues a token for already-registered apps (ids only). The one-shot `authorizeBundle` is the primary path. */
 export const issueBundleToken = (dotYouClient: BaseDotYouClient, request: IssueBundleTokenRequest) =>
   withV2Errors(dotYouClient, async () => {
     const client = createV2AxiosClient(dotYouClient);
@@ -77,11 +79,55 @@ export const removeAppFromBundleToken = (
 export const exportBundlePublicKey = async (publicKey: CryptoKey) =>
   uint8ArrayToBase64(stringToUint8Array(await exportEccPublicKey(publicKey)));
 
-/** `https://{identity}/owner/bundle-tokens/authorize?p={base64url(JSON)}` */
-export const getBundleAuthorizeUrl = (identity: string, params: BundleAuthorizeParams) =>
-  `https://${identity}/owner/bundle-tokens/authorize?${new URLSearchParams({
+/**
+ * `https://{identity}/owner/bundle-tokens/authorize#p={base64url(JSON)}`. The request travels in the
+ * fragment, which never reaches the server, so several manifests are not limited by URL-length limits.
+ */
+export const getBundleAuthorizeUrl = (
+  identity: string,
+  params: Omit<BundleAuthorizeParams, 'appIds'>
+) =>
+  `https://${identity}/owner/bundle-tokens/authorize#${new URLSearchParams({
     p: encodeBase64UrlJson(params),
   }).toString()}`;
+
+/**
+ * Reads `p` from a consent URL's fragment, falling back to the query string (older links). Legacy
+ * `appIds` payloads are converted to `apps` without manifests.
+ */
+export const readBundleAuthorizeParams = (
+  hash: string,
+  search: string
+): BundleAuthorizeParams | undefined => {
+  const fromHash = new URLSearchParams(hash.replace(/^#/, '')).get('p');
+  const fromQuery = new URLSearchParams(search).get('p');
+  const params = decodeBase64UrlJson<BundleAuthorizeParams>(fromHash || fromQuery);
+  if (!params) return undefined;
+  if (!Array.isArray(params.apps)) {
+    params.apps = (params.appIds ?? []).map((appId) => ({ appId }));
+  }
+  return params;
+};
+
+/** What authorizing would do, per app, with every problem. Writes nothing. Owner only. */
+export const previewBundleAuthorization = (
+  dotYouClient: BaseDotYouClient,
+  request: BundleAuthorizationRequest
+) =>
+  withV2Errors(dotYouClient, async () => {
+    const client = createV2AxiosClient(dotYouClient);
+    return (await client.post<BundleAuthorizationPreview>(`${root}/authorize/preview`, request)).data;
+  });
+
+/**
+ * One consent for several apps: installs/updates every app sent with a manifest, then issues one
+ * bundle token for all of them. Owner only.
+ */
+export const authorizeBundle = (dotYouClient: BaseDotYouClient, request: BundleAuthorizationRequest) =>
+  withV2Errors(dotYouClient, async () => {
+    const client = createV2AxiosClient(dotYouClient);
+    return (await client.post<BeginBundleTokenExchangeResponse>(`${root}/authorize`, request)).data;
+  });
 
 const appendParams = (url: string, params: Record<string, string>) => {
   try {

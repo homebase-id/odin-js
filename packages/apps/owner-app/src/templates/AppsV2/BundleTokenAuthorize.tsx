@@ -1,41 +1,53 @@
 import { ReactNode, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   ActionButton,
-  Alert,
   DomainHighlighter,
   LoadingBlock,
   t,
+  useCircles,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { Arrow } from '@homebase-id/common-app/icons';
+import { Arrow, Loader } from '@homebase-id/common-app/icons';
 import {
-  AppRegistrationV2,
+  authorizeBundle,
+  BundleAppPreview,
+  BundleAppRequest,
+  BundleAuthorizationPreview,
+  BundleAuthorizationRequest,
   BundleAuthorizeParams,
-  decodeBase64UrlJson,
   getBundleCancelUrl,
   getBundleRedirectUrl,
-  issueBundleToken,
+  readBundleAuthorizeParams,
+  TargetDriveV2,
 } from '@homebase-id/js-lib/auth';
-import { getDomainFromUrl, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useAppRegistrationsV2 } from '../../hooks/appsV2/useAppRegistrationsV2';
-import Section from '../../components/ui/Sections/Section';
-import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
-import {
-  Badge,
-  DriveAccessList,
-  OwnedDriveSummary,
-  V2ErrorAlert,
-} from '../../components/AppsV2/AppsV2Parts';
-import { errorMessageOf, targetDriveKey } from '../../components/AppsV2/appsV2Helpers';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDrives } from '../../hooks/drives/useDrives';
+import { useBundleAuthorizationPreview } from '../../hooks/appsV2/useBundleAuthorizationPreview';
+import { invalidateAppRegistrationsV2 } from '../../hooks/appsV2/useAppRegistrationsV2';
+import { invalidateBundleTokens } from '../../hooks/appsV2/useBundleTokens';
+import Section from '../../components/ui/Sections/Section';
+import { Badge, ProblemsList, V2ErrorAlert } from '../../components/AppsV2/AppsV2Parts';
+import { errorMessageOf, targetDriveKey } from '../../components/AppsV2/appsV2Helpers';
+import { ValidationDiffSummary } from '../../components/AppsV2/ValidationDiffSummary';
+import {
+  clearStashedBundleAuthorizeFragment,
+  readStashedBundleAuthorizeFragment,
+} from './bundleAuthorizeFragment';
 
-// /owner/bundle-tokens/authorize?p={base64url(JSON {primaryAppId, appIds, friendlyName, publicKey, redirectUri, state})}
+// /owner/bundle-tokens/authorize#p={base64url(JSON {primaryAppId, apps: [{appId, manifest?}], friendlyName, publicKey, redirectUri, state})}
+// (older links carry p in the query string, with appIds instead of apps)
 
 const BundleTokenAuthorize = () => {
-  const [searchParams] = useSearchParams();
-  const param = searchParams.get('p');
-  const params = useMemo(() => decodeBase64UrlJson<BundleAuthorizeParams>(param), [param]);
+  const location = useLocation();
+  const params = useMemo(
+    () =>
+      readBundleAuthorizeParams(location.hash, location.search) ??
+      // Arrived without the fragment (after logging in): use the one stashed on first load.
+      readBundleAuthorizeParams(readStashedBundleAuthorizeFragment(), ''),
+    [location.hash, location.search]
+  );
 
   if (!params || !params.primaryAppId || !params.publicKey || !params.redirectUri) {
     return (
@@ -61,48 +73,116 @@ const Shell = ({ children }: { children: ReactNode }) => (
   </section>
 );
 
+/** The primary app is always a member and first; duplicates are left for the server to report. */
+const orderedApps = (params: BundleAuthorizeParams): BundleAppRequest[] => {
+  const apps = params.apps ?? [];
+  const primary = apps.find((app) => stringGuidsEqual(app.appId, params.primaryAppId)) ?? {
+    appId: params.primaryAppId,
+  };
+  return [primary, ...apps.filter((app) => !stringGuidsEqual(app.appId, params.primaryAppId))];
+};
+
 const BundleConsent = ({ params }: { params: BundleAuthorizeParams }) => {
   const dotYouClient = useDotYouClientContext();
-  const { data: registrations, isLoading, error: loadError } = useAppRegistrationsV2().fetch;
-  const [isIssuing, setIsIssuing] = useState(false);
-  const [issueError, setIssueError] = useState<string | undefined>();
+  const queryClient = useQueryClient();
+  const { data: drives } = useDrives().fetch;
+  const { data: circles } = useCircles().fetch;
 
-  // The primary app is always a member, and first.
-  const appIds = [
-    params.primaryAppId,
-    ...(params.appIds ?? []).filter((id) => !stringGuidsEqual(id, params.primaryAppId)),
-  ].filter((id, index, all) => all.findIndex((other) => stringGuidsEqual(other, id)) === index);
+  const allApps = useMemo(() => orderedApps(params), [params]);
+  const [deselected, setDeselected] = useState<string[]>([]);
+  const isSelected = (appId: string) =>
+    stringGuidsEqual(appId, params.primaryAppId) ||
+    !deselected.some((id) => stringGuidsEqual(id, appId));
 
-  const members = appIds.map((appId) => ({
-    appId,
-    isPrimary: stringGuidsEqual(appId, params.primaryAppId),
-    registration: registrations?.find((r) => stringGuidsEqual(r.registration.appId, appId)),
-  }));
+  const request: BundleAuthorizationRequest = useMemo(
+    () => ({
+      primaryAppId: params.primaryAppId,
+      apps: allApps.filter(
+        (app) =>
+          stringGuidsEqual(app.appId, params.primaryAppId) ||
+          !deselected.some((id) => stringGuidsEqual(id, app.appId))
+      ),
+      friendlyName: params.friendlyName,
+      redirectUri: params.redirectUri,
+    }),
+    [params, allApps, deselected]
+  );
 
-  const blocking = registrations
-    ? members.filter((m) => !m.registration || m.registration.registration.isRevoked)
-    : [];
+  const {
+    data: preview,
+    isFetching,
+    isPlaceholderData,
+    error: previewError,
+  } = useBundleAuthorizationPreview(request);
 
-  const redirectHost = getDomainFromUrl(params.redirectUri) || params.redirectUri;
+  // The first answer covers every app, so deselected apps can still be named on their cards.
+  const [firstPreview, setFirstPreview] = useState<BundleAuthorizationPreview | undefined>();
+  if (preview && !firstPreview && !deselected.length && !isPlaceholderData) setFirstPreview(preview);
+
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
+  const [authorizeError, setAuthorizeError] = useState<string | undefined>();
+
   const redirectOrigin = (() => {
     try {
       return new URL(params.redirectUri).host;
     } catch {
-      return redirectHost;
+      return params.redirectUri;
     }
   })();
 
+  const currentPreview = preview && !isPlaceholderData ? preview : undefined;
+
+  const previewFor = (appId: string): BundleAppPreview | undefined =>
+    currentPreview?.apps.find((app) => stringGuidsEqual(app.appId, appId)) ??
+    preview?.apps.find((app) => stringGuidsEqual(app.appId, appId)) ??
+    firstPreview?.apps.find((app) => stringGuidsEqual(app.appId, appId));
+
+  const driveName = (drive: TargetDriveV2) => {
+    const key = targetDriveKey(drive);
+    for (const app of allApps) {
+      const owned = app.manifest?.ownedDrives?.find((d) => targetDriveKey(d.targetDrive) === key);
+      if (owned) return owned.name;
+    }
+    for (const app of preview?.apps ?? []) {
+      const entry = app.validation?.diff.driveAccess.find(
+        (d) => targetDriveKey(d.targetDrive) === key
+      );
+      if (entry?.driveName) return entry.driveName;
+    }
+    return drives?.find((d) => targetDriveKey(d.targetDriveInfo) === key)?.name;
+  };
+
+  const circleName = (circleId: string) =>
+    circles?.find((c) => stringGuidsEqual(c.id, circleId))?.name ??
+    allApps
+      .flatMap((app) => app.manifest?.ownedCircles ?? [])
+      .find((c) => stringGuidsEqual(c.id, circleId))?.name ??
+    circleId;
+
+  const toggle = (appId: string) => {
+    if (stringGuidsEqual(appId, params.primaryAppId)) return;
+    setAuthorizeError(undefined);
+    setDeselected((current) =>
+      current.some((id) => stringGuidsEqual(id, appId))
+        ? current.filter((id) => !stringGuidsEqual(id, appId))
+        : [...current, appId]
+    );
+  };
+
+  // Allow only on an answer for exactly the current selection.
+  const canAllow = !!currentPreview && !isFetching && currentPreview.isValid;
+
   const doAllow = async () => {
-    setIsIssuing(true);
-    setIssueError(undefined);
+    setIsAuthorizing(true);
+    setAuthorizeError(undefined);
     try {
-      const exchange = await issueBundleToken(dotYouClient, {
-        primaryAppId: params.primaryAppId,
-        appIds,
-        friendlyName: params.friendlyName,
+      const exchange = await authorizeBundle(dotYouClient, {
+        ...request,
         jwkBase64UrlPublicKey: params.publicKey,
-        redirectUri: params.redirectUri,
       });
+      invalidateAppRegistrationsV2(queryClient);
+      invalidateBundleTokens(queryClient);
+      clearStashedBundleAuthorizeFragment();
       window.location.href = getBundleRedirectUrl(
         params.redirectUri,
         dotYouClient.getHostIdentity(),
@@ -110,13 +190,20 @@ const BundleConsent = ({ params }: { params: BundleAuthorizeParams }) => {
         params.state ?? ''
       );
     } catch (error) {
-      setIssueError(errorMessageOf(error));
-      setIsIssuing(false);
+      // Applying is retry-safe server-side; re-check so the screen reflects anything already applied.
+      invalidateAppRegistrationsV2(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['bundle-authorization-preview'] });
+      setAuthorizeError(errorMessageOf(error));
+      setIsAuthorizing(false);
     }
   };
 
-  const doCancel = () =>
-    (window.location.href = getBundleCancelUrl(params.redirectUri, params.state ?? ''));
+  const doCancel = () => {
+    clearStashedBundleAuthorizeFragment();
+    window.location.href = getBundleCancelUrl(params.redirectUri, params.state ?? '');
+  };
+
+  const selectedCount = request.apps.length;
 
   return (
     <Shell>
@@ -129,162 +216,169 @@ const BundleConsent = ({ params }: { params: BundleAuthorizeParams }) => {
       </h1>
 
       <p>
-        {t('This device asks for one sign-in that works as each of these apps. It gets the access each app already has on your identity')}
-        :
+        {t(
+          'This device asks for one sign-in that works as each of these apps. Apps that are new or changed are installed or updated when you allow. Untick any app you do not want to include.'
+        )}
       </p>
 
-      {isLoading ? (
+      {!preview && isFetching ? (
         <>
           <LoadingBlock className="my-2 h-24" />
           <LoadingBlock className="my-2 h-24" />
         </>
       ) : null}
-      <V2ErrorAlert error={loadError} title={t('Could not load your apps')} />
+      <V2ErrorAlert error={previewError} title={t('Could not check this sign-in')} />
 
-      {blocking.length ? (
-        <Alert type="critical" title={t('This sign-in cannot be allowed')} className="my-5">
-          <ul className="list-disc pl-5">
-            {blocking.map((m) => (
-              <li key={m.appId}>
-                {m.registration
-                  ? `"${m.registration.registration.name}" ${t('is revoked. Restore it first.')}`
-                  : `${t('App')} ${m.appId} ${t('is not installed on your identity. Install it first.')}`}
-              </li>
-            ))}
-          </ul>
-        </Alert>
+      {currentPreview ? (
+        <ProblemsList
+          problems={currentPreview.problems}
+          title={t('This sign-in cannot be allowed')}
+        />
       ) : null}
 
-      {registrations
-        ? members.map((member) => (
+      {preview || firstPreview
+        ? allApps.map((app) => (
             <BundleAppCard
-              key={member.appId}
-              appId={member.appId}
-              isPrimary={member.isPrimary}
-              registration={member.registration}
-              allRegistrations={registrations}
+              key={app.appId}
+              request={app}
+              preview={previewFor(app.appId)}
+              isPrimary={stringGuidsEqual(app.appId, params.primaryAppId)}
+              isSelected={isSelected(app.appId)}
+              isStale={!currentPreview || isFetching}
+              onToggle={() => toggle(app.appId)}
+              disabled={isAuthorizing}
+              driveName={driveName}
+              circleName={circleName}
             />
           ))
         : null}
 
-      {issueError ? <V2ErrorAlert error={issueError} title={t('Could not sign in')} /> : null}
+      <V2ErrorAlert error={authorizeError} title={t('Could not sign in')} />
 
-      <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
+      <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse sm:items-center">
         <ActionButton
           onClick={doAllow}
           type="primary"
           icon={Arrow}
-          state={isIssuing ? 'pending' : undefined}
-          disabled={!registrations || blocking.length > 0 || isIssuing}
+          state={isAuthorizing ? 'pending' : undefined}
+          disabled={!canAllow || isAuthorizing}
         >
-          {t('Allow')}
+          {selectedCount > 1 ? `${t('Allow')} ${selectedCount} ${t('apps')}` : t('Allow')}
         </ActionButton>
-        <ActionButton type="secondary" onClick={doCancel} disabled={isIssuing}>
+        <ActionButton type="secondary" onClick={doCancel} disabled={isAuthorizing}>
           {t('Cancel')}
         </ActionButton>
+        {isFetching && preview ? (
+          <span className="flex flex-row items-center gap-2 text-sm text-slate-400 sm:mr-auto">
+            <Loader className="h-4 w-4" /> {t('Checking your selection...')}
+          </span>
+        ) : null}
       </div>
     </Shell>
   );
 };
 
+const actionLabel = (app: BundleAppPreview) => {
+  const action = `${app.action ?? ''}`.toLowerCase();
+  if (action === 'install') return t('Install');
+  if (action === 'update') return t('Update');
+  if (app.hasManifest) return t('No changes');
+  return app.isRegistered ? t('Already registered') : t('Not installed');
+};
+
 const BundleAppCard = ({
-  appId,
+  request,
+  preview,
   isPrimary,
-  registration,
-  allRegistrations,
+  isSelected,
+  isStale,
+  onToggle,
+  disabled,
+  driveName,
+  circleName,
 }: {
-  appId: string;
+  request: BundleAppRequest;
+  preview: BundleAppPreview | undefined;
   isPrimary: boolean;
-  registration: AppRegistrationV2 | undefined;
-  allRegistrations: AppRegistrationV2[];
+  isSelected: boolean;
+  isStale: boolean;
+  onToggle: () => void;
+  disabled: boolean;
+  driveName: (drive: TargetDriveV2) => string | undefined;
+  circleName: (circleId: string) => string;
 }) => {
-  const { data: drives } = useDrives().fetch;
-
-  if (!registration) {
-    return (
-      <Section
-        title={
-          <span className="flex flex-row flex-wrap items-center gap-2">
-            <span className="break-all font-mono text-base">{appId}</span>
-            {isPrimary ? <Badge tone="primary">{t('Primary')}</Badge> : null}
-            <Badge tone="critical">{t('Not installed')}</Badge>
-          </span>
-        }
-      >
-        <p className="text-slate-400">{t('This app is not installed on your identity.')}</p>
-      </Section>
-    );
-  }
-
-  const reg = registration.registration;
-  const keys = reg.grant?.permissionSet?.keys ?? [];
-  // Every app's owned drives, so each grant is labelled with the app that owns the drive.
-  const owners = new Map(
-    allRegistrations.flatMap((r) =>
-      r.ownedDrives.map((d) => [targetDriveKey(d.targetDrive), { drive: d, app: r.registration }] as const)
-    )
-  );
+  const name = preview?.name || request.manifest?.name || request.appId;
+  const appSlug = preview?.appSlug || request.manifest?.appSlug;
+  const validation = preview?.validation;
+  const problems = [...(preview?.problems ?? []), ...(validation?.problems ?? [])];
+  const action = `${preview?.action ?? ''}`.toLowerCase();
+  const inputId = `bundle-app-${request.appId}`;
 
   return (
     <Section
+      className={isSelected ? '' : 'opacity-60'}
       title={
-        <span className="flex flex-row flex-wrap items-center gap-2">
-          {reg.name}
-          {isPrimary ? <Badge tone="primary">{t('Primary')}</Badge> : null}
-          {reg.isRevoked ? <Badge tone="critical">{t('Revoked')}</Badge> : null}
-          {registration.isReserved ? <Badge>{t('Built-in')}</Badge> : null}
-          <small className="block w-full font-mono text-sm font-normal text-slate-400">
-            /apps/{reg.appSlug}
-            {reg.corsHostName ? ` · ${reg.corsHostName}` : ''}
-          </small>
-        </span>
+        <label htmlFor={inputId} className="flex cursor-pointer flex-row items-start gap-3">
+          <input
+            id={inputId}
+            type="checkbox"
+            className="mt-2 h-4 w-4"
+            checked={isSelected}
+            disabled={isPrimary || disabled}
+            onChange={onToggle}
+            title={isPrimary ? t('The primary app is always included') : undefined}
+          />
+          <span className="flex flex-col">
+            <span className="flex flex-row flex-wrap items-center gap-2">
+              {name}
+              {isPrimary ? <Badge tone="primary">{t('Primary')}</Badge> : null}
+              {preview?.isReserved ? <Badge>{t('Built-in')}</Badge> : null}
+              {preview?.isRevoked ? <Badge tone="critical">{t('Revoked')}</Badge> : null}
+              {preview ? (
+                <Badge
+                  tone={
+                    isSelected && problems.length
+                      ? 'critical'
+                      : action === 'install' || action === 'update'
+                        ? 'warning'
+                        : 'neutral'
+                  }
+                >
+                  {actionLabel(preview)}
+                </Badge>
+              ) : null}
+            </span>
+            {appSlug ? (
+              <small className="font-mono text-sm font-normal text-slate-400">/apps/{appSlug}</small>
+            ) : null}
+          </span>
+        </label>
       }
     >
-      <div className="flex flex-col gap-5">
-        {registration.ownedDrives.length ? (
-          <div>
-            <h3 className="mb-2 text-sm font-medium text-slate-400">{t('Drives it owns')}</h3>
-            <div className="flex flex-col gap-3">
-              {registration.ownedDrives.map((drive) => (
-                <OwnedDriveSummary drive={drive} appSlug={reg.appSlug} key={drive.driveId} />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-400">{t('Drive access')}</h3>
-          <DriveAccessList
-            empty={t('No drive access')}
-            entries={(reg.grant?.driveGrants ?? []).map((grant) => {
-              const drive = grant.permissionedDrive.drive;
-              const owner = owners.get(targetDriveKey(drive));
-              return {
-                targetDrive: drive,
-                permission: grant.permissionedDrive.permission,
-                driveName:
-                  owner?.drive.name ??
-                  drives?.find((d) => targetDriveKey(d.targetDriveInfo) === targetDriveKey(drive))?.name,
-                owningAppId: owner?.app.appId,
-                owningAppName: owner?.app.name,
-              };
-            })}
-          />
+      {!isSelected ? (
+        <p className="text-slate-400">
+          {t('Not included: this app will not be installed, changed or signed in.')}
+        </p>
+      ) : (
+        <div className={isStale ? 'opacity-70' : ''}>
+          {problems.length ? <ProblemsList problems={problems} /> : null}
+          {validation && request.manifest ? (
+            <ValidationDiffSummary
+              manifest={request.manifest}
+              validation={validation}
+              driveName={driveName}
+              circleName={circleName}
+              compact={true}
+            />
+          ) : !problems.length ? (
+            <p className="text-slate-400">
+              {preview?.isRegistered
+                ? t('Already installed; it keeps the access it has.')
+                : t('Checking...')}
+            </p>
+          ) : null}
         </div>
-
-        <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-400">{t('Permissions')}</h3>
-          {keys.length ? (
-            <div className="flex flex-col gap-3">
-              {keys.map((key) => (
-                <PermissionView permission={key} key={key} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-slate-400">{t('No special permissions')}</p>
-          )}
-        </div>
-      </div>
+      )}
     </Section>
   );
 };

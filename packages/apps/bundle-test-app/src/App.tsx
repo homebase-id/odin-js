@@ -4,7 +4,6 @@ import {
   createEccPair,
   exportBundlePublicKey,
   finalizeBundleAuthentication,
-  getAppRegistrationUrl,
   getBundleAuthorizeUrl,
   getV2AuthContext,
   logoutBundleToken,
@@ -19,7 +18,7 @@ import { buildManifest, PRIMARY_APP, SAMPLE_APPS } from './sampleApps';
 
 const KEY = {
   identity: 'bundle-test:identity',
-  registered: 'bundle-test:registered',
+  selected: 'bundle-test:selected-apps',
   privateKey: 'bundle-test:private-key',
   state: 'bundle-test:state',
   token: 'bundle-test:token',
@@ -95,7 +94,9 @@ let handledRedirect = false;
 
 export const App = () => {
   const [identity, setIdentity] = useState(() => localStorage.getItem(KEY.identity) ?? '');
-  const [registered, setRegistered] = useState<Record<string, boolean>>(() => readJson(KEY.registered, {}));
+  const [selectedAppIds, setSelectedAppIds] = useState<string[]>(() =>
+    readJson(KEY.selected, SAMPLE_APPS.map((a) => a.appId))
+  );
   const [token, setToken] = useState<StoredToken | undefined>(() => readJson(KEY.token, undefined));
   const [friendlyName, setFriendlyName] = useState('Bundle test app');
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | undefined>();
@@ -109,7 +110,7 @@ export const App = () => {
 
   useEffect(() => localStorage.setItem(KEY.identity, identity), [identity]);
 
-  // Handle returns from the owner console: ?registered=, ?error=, and /finalize.
+  // Handle the return from the owner console: /finalize (token or ?error=).
   useEffect(() => {
     // StrictMode runs effects twice in development; the exchange must only happen once.
     if (handledRedirect) return;
@@ -144,7 +145,7 @@ export const App = () => {
       (async () => {
         try {
           const privateKey = await loadPrivateKey();
-          if (!privateKey) throw new Error('No private key stored; start step 2 again.');
+          if (!privateKey) throw new Error('No private key stored; press Connect again.');
           const tokenIdentity = normalizeIdentity(returnedIdentity || identity);
           const credentials = await finalizeBundleAuthentication(tokenIdentity, privateKey, publicKey, salt);
           const stored: StoredToken = { identity: tokenIdentity, ...credentials, obtainedAt: Date.now() };
@@ -161,15 +162,7 @@ export const App = () => {
       return;
     }
 
-    const registeredAppId = params.get('registered');
-    if (registeredAppId) {
-      const next = { ...readJson<Record<string, boolean>>(KEY.registered, {}), [registeredAppId]: true };
-      writeJson(KEY.registered, next);
-      setRegistered(next);
-      const app = SAMPLE_APPS.find((a) => a.appId === registeredAppId);
-      setNotice({ ok: true, text: `${app?.name ?? registeredAppId} is registered.` });
-      clearUrl();
-    } else if (params.get('error')) {
+    if (params.get('error')) {
       setNotice({ ok: false, text: `Owner console returned: ${params.get('error')}` });
       clearUrl();
     }
@@ -190,15 +183,15 @@ export const App = () => {
     [token, actingAppId]
   );
 
-  const register = (appId: string) => {
-    const app = SAMPLE_APPS.find((a) => a.appId === appId);
-    if (!app || !cleanIdentity) return;
-    window.location.href = getAppRegistrationUrl(
-      cleanIdentity,
-      buildManifest(app, host),
-      `${origin}/?registered=${app.appId}`,
-      `${origin}/`
-    );
+  const isSelected = (appId: string) => appId === PRIMARY_APP.appId || selectedAppIds.includes(appId);
+
+  const toggleApp = (appId: string) => {
+    if (appId === PRIMARY_APP.appId) return;
+    const next = selectedAppIds.includes(appId)
+      ? selectedAppIds.filter((id) => id !== appId)
+      : [...selectedAppIds, appId];
+    writeJson(KEY.selected, next);
+    setSelectedAppIds(next);
   };
 
   const startBundle = async () => {
@@ -210,7 +203,11 @@ export const App = () => {
 
     window.location.href = getBundleAuthorizeUrl(cleanIdentity, {
       primaryAppId: PRIMARY_APP.appId,
-      appIds: SAMPLE_APPS.map((a) => a.appId),
+      // Every selected app with its manifest: new ones are installed, changed ones updated.
+      apps: SAMPLE_APPS.filter((a) => isSelected(a.appId)).map((a) => ({
+        appId: a.appId,
+        manifest: buildManifest(a, host),
+      })),
       friendlyName: friendlyName || 'Bundle test app',
       publicKey: await exportBundlePublicKey(pair.publicKey),
       redirectUri: `${origin}/finalize`,
@@ -266,7 +263,7 @@ export const App = () => {
 
   const resetAll = () => {
     Object.values(KEY).forEach((key) => localStorage.removeItem(key));
-    setRegistered({});
+    setSelectedAppIds(SAMPLE_APPS.map((a) => a.appId));
     setToken(undefined);
     setContext(undefined);
     setResult(undefined);
@@ -277,8 +274,9 @@ export const App = () => {
     <>
       <h1>Bundle token test app</h1>
       <p className="muted">
-        Registers three demo apps through <code>/owner/app-registration</code>, then gets one bundle token for all three
-        through <code>/owner/bundle-tokens/authorize</code>. This app runs at <code>{origin}</code>; the primary app&apos;s
+        Sends the selected demo apps, each with its manifest, in one request to{' '}
+        <code>/owner/bundle-tokens/authorize#p=</code>: the owner installs/updates them and gets one bundle token for
+        all of them in a single consent. This app runs at <code>{origin}</code>; the primary app&apos;s
         corsHostName is <code>{host}</code>.
       </p>
 
@@ -300,48 +298,49 @@ export const App = () => {
       </section>
 
       <section>
-        <h2>Step 1: Register apps</h2>
+        <h2>Step 1: Connect</h2>
         <table>
           <tbody>
             {SAMPLE_APPS.map((app) => (
               <tr key={app.appId}>
                 <td>
-                  {app.emoji} <strong>{app.name}</strong> {app.isPrimary ? '(primary)' : ''}
+                  <input
+                    type="checkbox"
+                    checked={isSelected(app.appId)}
+                    disabled={app.isPrimary}
+                    onChange={() => toggleApp(app.appId)}
+                    id={`app-${app.key}`}
+                  />
+                </td>
+                <td>
+                  <label htmlFor={`app-${app.key}`}>
+                    {app.emoji} <strong>{app.name}</strong> {app.isPrimary ? '(primary)' : ''}
+                  </label>
                   <div className="muted">
                     <code>/apps/{app.appSlug}</code> · <code>{app.appId}</code>
                   </div>
-                </td>
-                <td>{registered[app.appId] ? <span className="ok">registered</span> : <span className="muted">not yet</span>}</td>
-                <td>
-                  <button disabled={!cleanIdentity} onClick={() => register(app.appId)}>
-                    {registered[app.appId] ? 'Register / update again' : 'Register'}
-                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        <p>
+          <label>
+            Friendly name: <input value={friendlyName} onChange={(e) => setFriendlyName(e.target.value)} size={30} />
+          </label>{' '}
+          <button disabled={!cleanIdentity} onClick={startBundle}>
+            Connect
+          </button>
+        </p>
         <p className="muted">
-          &quot;Registered&quot; is only what this browser saw come back; the owner console is the source of truth.
+          Redirects to <code>https://{cleanIdentity || '{identity}'}/owner/bundle-tokens/authorize#p=…</code> with the
+          selected apps&apos; manifests and <code>redirectUri={origin}/finalize</code>. The owner may untick apps
+          (never the primary).
         </p>
       </section>
 
       <section>
-        <h2>Step 2: Get bundle token</h2>
-        <label>
-          Friendly name: <input value={friendlyName} onChange={(e) => setFriendlyName(e.target.value)} size={30} />
-        </label>{' '}
-        <button disabled={!cleanIdentity} onClick={startBundle}>
-          Get bundle token for all three apps
-        </button>
-        <p className="muted">
-          Redirects to <code>https://{cleanIdentity || '{identity}'}/owner/bundle-tokens/authorize</code> with{' '}
-          <code>redirectUri={origin}/finalize</code>.
-        </p>
-      </section>
-
-      <section>
-        <h2>Step 3: Token</h2>
+        <h2>Step 2: Token</h2>
         {token ? (
           <table>
             <tbody>
@@ -367,7 +366,7 @@ export const App = () => {
       </section>
 
       <section>
-        <h2>Step 4: Try it</h2>
+        <h2>Step 3: Try it</h2>
         {client ? (
           <>
             <label>

@@ -1,3 +1,9 @@
+import type {
+  AppManifestV2,
+  AppRegistrationProblem,
+  AppRegistrationValidationResult,
+} from './AppRegistrationV2Types';
+
 /**
  * Wire types for `/api/v2/bundle-tokens` (odin-core docs/app-registration-v2-api.md).
  */
@@ -44,17 +50,62 @@ export interface RedactedBundleToken {
   apps: BundleTokenAppInfo[];
 }
 
+/** One app in a bundle request: a manifest to install/update it, or the id alone for a registered app. */
+export interface BundleAppRequest {
+  appId: string;
+  manifest?: AppManifestV2;
+}
+
 /**
- * The JSON carried (base64url) in the `p` param of `/owner/bundle-tokens/authorize`.
+ * The JSON carried (base64url) in the `p` fragment param of `/owner/bundle-tokens/authorize#p=`.
  */
 export interface BundleAuthorizeParams {
   primaryAppId: string;
-  appIds: string[];
+  apps: BundleAppRequest[];
   friendlyName: string;
   /** Same encoding as YouAuth's `public_key` */
   publicKey: string;
   redirectUri: string;
   state: string;
+  /** Legacy (pre one-shot) links: ids only. Read as `apps` without manifests. */
+  appIds?: string[];
+}
+
+/** `POST /api/v2/bundle-tokens/authorize` and `.../authorize/preview` */
+export interface BundleAuthorizationRequest {
+  primaryAppId: string;
+  /** The owner may deselect any but the primary */
+  apps: BundleAppRequest[];
+  friendlyName: string;
+  /** Not needed for preview */
+  jwkBase64UrlPublicKey?: string;
+  redirectUri?: string;
+}
+
+/** 'none' | 'install' | 'update' */
+export type BundleAppAction = 'none' | 'install' | 'update' | string;
+
+export interface BundleAppPreview {
+  appId: string;
+  name: string;
+  appSlug: string;
+  isPrimary: boolean;
+  isRegistered: boolean;
+  isReserved: boolean;
+  isRevoked: boolean;
+  hasManifest: boolean;
+  action: BundleAppAction;
+  /** When a manifest was sent */
+  validation?: AppRegistrationValidationResult | null;
+  /** manifestAppIdMismatch, appNotRegistered, appRevoked, cross-app conflicts (slugTaken, driveOwnedElsewhere, circleOwnedElsewhere) */
+  problems: AppRegistrationProblem[];
+}
+
+export interface BundleAuthorizationPreview {
+  isValid: boolean;
+  /** Request-level: noApps, tooManyApps, friendlyNameRequired, primaryAppMissing, appIdRequired, duplicateApp, redirectNotAllowed */
+  problems: AppRegistrationProblem[];
+  apps: BundleAppPreview[];
 }
 
 /** What `finalizeBundleAuthentication` returns; both values are base64. */

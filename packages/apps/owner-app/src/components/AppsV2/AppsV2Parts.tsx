@@ -68,10 +68,16 @@ export const V2ErrorAlert = ({ error, title }: { error: unknown; title?: string 
   );
 };
 
-export const ProblemsList = ({ problems }: { problems: AppRegistrationProblem[] }) => {
+export const ProblemsList = ({
+  problems,
+  title,
+}: {
+  problems: AppRegistrationProblem[];
+  title?: string;
+}) => {
   if (!problems.length) return null;
   return (
-    <Alert type="critical" title={t('This app cannot be allowed')} className="my-5">
+    <Alert type="critical" title={title ?? t('This app cannot be allowed')} className="my-5">
       <ul className="flex list-disc flex-col gap-1 pl-5">
         {problems.map((problem, index) => (
           <li key={`${problem.code}-${index}`}>

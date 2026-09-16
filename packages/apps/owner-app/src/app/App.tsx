@@ -70,6 +70,8 @@ const AppV2Details = lazy(() => import('../templates/AppsV2/AppV2Details'));
 const BundleTokens = lazy(() => import('../templates/AppsV2/BundleTokens'));
 
 import './App.css';
+// Keeps /owner/bundle-tokens/authorize#p= across the login redirect, which drops fragments.
+import '../templates/AppsV2/bundleAuthorizeFragment';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import {
   FIRSTRUN_PATH,

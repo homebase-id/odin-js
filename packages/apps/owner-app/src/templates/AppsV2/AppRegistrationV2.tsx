@@ -4,7 +4,6 @@ import {
   ActionButton,
   DomainHighlighter,
   LoadingBlock,
-  SubtleMessage,
   t,
   useCircles,
   useDotYouClientContext,
@@ -27,17 +26,12 @@ import {
   useValidateAppManifestV2,
 } from '../../hooks/appsV2/useAppRegistrationsV2';
 import Section from '../../components/ui/Sections/Section';
-import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import {
-  CircleGrantedDrives,
-  DriveAccessList,
-  OwnedCirclePreview,
-  OwnedDriveSummary,
   ProblemsList,
   V2ErrorAlert,
 } from '../../components/AppsV2/AppsV2Parts';
 import { errorMessageOf, targetDriveKey } from '../../components/AppsV2/appsV2Helpers';
-import { PermissionKeyList } from '../../components/Apps/AppOverviewParts';
+import { ValidationDiffSummary } from '../../components/AppsV2/ValidationDiffSummary';
 
 // /owner/app-registration?m={base64url(JSON AppManifestV2)}&return={url}&cancel={url}
 
@@ -220,17 +214,6 @@ const AppRegistrationV2Consent = ({
   const isUpdate = !!validation?.isRegistered;
   const diff = validation?.diff;
   const hasProblems = !!validation && validation.problems.length > 0;
-  const nothingChanges =
-    isUpdate &&
-    !!diff &&
-    !diff.drivesToCreate.length &&
-    !diff.circlesToCreate.length &&
-    !diff.driveAccessGained.length &&
-    !diff.driveAccessLost.length &&
-    !diff.permissionKeysGained.length &&
-    !diff.permissionKeysLost.length &&
-    !diff.authorizedCirclesAdded.length &&
-    !diff.authorizedCirclesRemoved.length;
 
   return (
     <PageShell>
@@ -268,104 +251,13 @@ const AppRegistrationV2Consent = ({
 
           <ProblemsList problems={validation.problems} />
 
-          {nothingChanges ? (
-            <SubtleMessage className="my-5">{t('Nothing changes: the app is up to date.')}</SubtleMessage>
-          ) : null}
+          <ValidationDiffSummary
+            manifest={manifest}
+            validation={validation}
+            driveName={driveName}
+            circleName={circleName}
+          />
 
-          {diff.drivesToCreate.length || diff.circlesToCreate.length ? (
-            <Section title={t('Will create and own')}>
-              <div className="flex flex-col gap-4">
-                {diff.drivesToCreate.map((drive) => (
-                  <OwnedDriveSummary
-                    drive={drive}
-                    appSlug={manifest.appSlug}
-                    key={targetDriveKey(drive.targetDrive)}
-                  />
-                ))}
-                {diff.circlesToCreate.map((circle) => (
-                  <OwnedCirclePreview circle={circle} driveName={driveName} key={circle.id} />
-                ))}
-              </div>
-            </Section>
-          ) : null}
-
-          {diff.driveAccessGained.length ? (
-            <Section title={t('Will gain access to')}>
-              <DriveAccessList entries={diff.driveAccessGained} />
-            </Section>
-          ) : null}
-
-          {diff.driveAccessLost.length ? (
-            <Section title={t('Will lose access to')}>
-              <DriveAccessList entries={diff.driveAccessLost} />
-            </Section>
-          ) : null}
-
-          {diff.permissionKeysGained.length ? (
-            <Section title={t('Will be allowed to')}>
-              <div className="flex flex-col gap-4">
-                {diff.permissionKeysGained.map((key) => (
-                  <PermissionView permission={key} key={key} />
-                ))}
-              </div>
-            </Section>
-          ) : null}
-
-          {diff.permissionKeysLost.length ? (
-            <Section title={t('Will no longer be allowed to')}>
-              <div className="flex flex-col gap-4 line-through decoration-slate-400">
-                {diff.permissionKeysLost.map((key) => (
-                  <PermissionView permission={key} key={key} />
-                ))}
-              </div>
-            </Section>
-          ) : null}
-
-          {diff.authorizedCirclesAdded.length || diff.authorizedCirclesRemoved.length ? (
-            <Section title={t('Circles this app works with')}>
-              <div className="flex flex-col gap-2">
-                {diff.authorizedCirclesAdded.map((id) => (
-                  <p key={`add-${id}`}>
-                    <span className="text-green-600">+ </span>
-                    {circleName(id)}
-                  </p>
-                ))}
-                {diff.authorizedCirclesRemoved.map((id) => (
-                  <p key={`remove-${id}`} className="text-slate-400">
-                    <span className="text-red-600">- </span>
-                    {circleName(id)}
-                  </p>
-                ))}
-                {manifest.circleMemberPermissionGrant &&
-                (manifest.circleMemberPermissionGrant.drives?.length ||
-                  manifest.circleMemberPermissionGrant.permissionSet?.keys?.length) ? (
-                  <div className="mt-3">
-                    <p className="mb-1 text-sm text-slate-400">
-                      {t('Members of these circles get, within this app')}:
-                    </p>
-                    <CircleGrantedDrives
-                      grants={manifest.circleMemberPermissionGrant.drives ?? []}
-                      driveName={driveName}
-                    />
-                    {manifest.circleMemberPermissionGrant.permissionSet?.keys?.length ? (
-                      <div className="mt-2">
-                        <PermissionKeyList keys={manifest.circleMemberPermissionGrant.permissionSet.keys} />
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-              </div>
-            </Section>
-          ) : null}
-
-          {isUpdate && (diff.drivesAlreadyOwned.length || diff.circlesAlreadyOwned.length) ? (
-            <p className="my-5 text-sm text-slate-400">
-              {t('Already owns')}:{' '}
-              {[...diff.drivesAlreadyOwned.map((d) => d.name), ...diff.circlesAlreadyOwned.map((c) => c.name)].join(
-                ', '
-              )}
-            </p>
-          ) : null}
 
           {steps ? <StepList steps={steps} /> : null}
 
