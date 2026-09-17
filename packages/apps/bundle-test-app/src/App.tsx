@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   BundleTokenClient,
   createEccPair,
@@ -136,7 +136,7 @@ export const App = () => {
   const [actingAppId, setActingAppId] = useState('');
   // No header means the token's primary app.
   const actingApp = SAMPLE_APPS.find((app) => app.appId === actingAppId) ?? PRIMARY_APP;
-  const [result, setResult] = useState<{ title: string; ok: boolean; body: string } | undefined>();
+  const [result, setResult] = useState<{ action: string; title: string; ok: boolean; body: string } | undefined>();
   const [context, setContext] = useState<RedactedOdinContextV2 | undefined>();
   const [busy, setBusy] = useState(false);
 
@@ -256,13 +256,14 @@ export const App = () => {
     });
   };
 
-  const run = async (title: string, call: () => Promise<unknown>) => {
+  /** Runs one Try it action; its result is shown under that action. */
+  const run = async (action: string, title: string, call: () => Promise<unknown>) => {
     setBusy(true);
     try {
       const data = await call();
-      setResult({ title, ok: true, body: JSON.stringify(data ?? null, null, 2) });
+      setResult({ action, title, ok: true, body: JSON.stringify(data ?? null, null, 2) });
     } catch (e) {
-      setResult({ title, ok: false, body: describeError(e) });
+      setResult({ action, title, ok: false, body: describeError(e) });
     } finally {
       setBusy(false);
     }
@@ -270,7 +271,7 @@ export const App = () => {
 
   const loadContext = () =>
     client &&
-    run(`GET /api/v2/auth/context (acting as ${actingName(actingAppId)})`, async () => {
+    run('context', `GET /api/v2/auth/context (acting as ${actingName(actingAppId)})`, async () => {
       const ctx = await getV2AuthContext<RedactedOdinContextV2>(client);
       setContext(ctx);
       return ctx;
@@ -282,7 +283,7 @@ export const App = () => {
   const listAppDrives = (appId: string) => {
     const app = SAMPLE_APPS.find((a) => a.appId === appId);
     if (!client || !app) return;
-    return run(`GET /api/v2/apps/${app.appSlug}/drives (acting as ${actingName(actingAppId)})`, () =>
+    return run('list', `GET /api/v2/apps/${app.appSlug}/drives (acting as ${actingName(actingAppId)})`, () =>
       withV2Errors(client, async () => {
         const response = await client.createAxiosClient().get(`/apps/${app.appSlug}/drives`);
         return response.data;
@@ -294,7 +295,7 @@ export const App = () => {
     const app = SAMPLE_APPS.find((a) => a.appId === appId);
     if (!client || !app) return;
     const address = `/apps/${app.appSlug}/drives/${app.drive.driveSlug}`;
-    return run(`${address} → query-batch (acting as ${actingName(actingAppId)})`, () =>
+    return run(`query:${app.appId}`, `${address} → query-batch (acting as ${actingName(actingAppId)})`, () =>
       withV2Errors(client, async () => {
         const axios = client.createAxiosClient();
         const drive = (await axios.get(address)).data as { targetDrive: { alias: string; type: string } };
@@ -312,7 +313,7 @@ export const App = () => {
 
   const logout = async () => {
     if (client) {
-      await run('DELETE /api/v2/bundle-tokens/current', () => logoutBundleToken(client));
+      await run('logout', 'DELETE /api/v2/bundle-tokens/current', () => logoutBundleToken(client));
     }
     localStorage.removeItem(KEY.token);
     localStorage.removeItem(KEY.exchange);
@@ -450,80 +451,79 @@ export const App = () => {
                 ))}
               </select>
             </label>
-            <table style={{ marginTop: '0.5rem' }}>
-              <tbody>
-                <tr>
-                  <td>
-                    <button disabled={busy} onClick={loadContext}>
-                      GET /api/v2/auth/context
+            <div className="actions">
+              <Action
+                button={
+                  <button disabled={busy} onClick={loadContext}>
+                    GET /api/v2/auth/context
+                  </button>
+                }
+                result={result?.action === 'context' ? result : undefined}
+                extra={result?.action === 'context' && context ? <ContextSummary context={context} /> : null}
+              >
+                What this token can do while acting as <strong>{actingApp.name}</strong>: the caller, and every permission
+                group with its drive grants. There is one group per app in the token, because access is the union of all
+                of them.
+              </Action>
+
+              <Action
+                button={
+                  <button disabled={busy} onClick={() => listAppDrives(actingApp.appId)}>
+                    List /apps/{actingApp.appSlug}/drives
+                  </button>
+                }
+                result={result?.action === 'list' ? result : undefined}
+              >
+                Lists the drives <strong>{actingApp.name}</strong> owns, found by its app slug. Each entry has the drive
+                slug, type slug and the drive id the file APIs take.
+              </Action>
+
+              <Action
+                button={
+                  <button disabled={busy} onClick={() => queryDrive(actingApp.appId)}>
+                    Query /apps/{actingApp.appSlug}/drives/{actingApp.drive.driveSlug}
+                  </button>
+                }
+                result={result?.action === `query:${actingApp.appId}` ? result : undefined}
+              >
+                Resolves <strong>{actingApp.name}</strong>&apos;s own drive by slug, then queries its files using the id
+                that comes back. Should succeed: the app owns this drive.
+              </Action>
+
+              {SAMPLE_APPS.filter((app) => app.appId !== actingApp.appId).map((app) => (
+                <Action
+                  key={app.appId}
+                  button={
+                    <button disabled={busy} onClick={() => queryDrive(app.appId)}>
+                      Query /apps/{app.appSlug}/drives/{app.drive.driveSlug}
                     </button>
-                  </td>
-                  <td>
-                    What this token can do while acting as <strong>{actingApp.name}</strong>: the caller, and every
-                    permission group with its drive grants. There is one group per app in the token, because access
-                    is the union of all of them.
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <button disabled={busy} onClick={() => listAppDrives(actingApp.appId)}>
-                      List /apps/{actingApp.appSlug}/drives
-                    </button>
-                  </td>
-                  <td>
-                    Lists the drives <strong>{actingApp.name}</strong> owns, found by its app slug. Each entry has the
-                    drive slug, type slug and the drive id the file APIs take.
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <button disabled={busy} onClick={() => queryDrive(actingApp.appId)}>
-                      Query /apps/{actingApp.appSlug}/drives/{actingApp.drive.driveSlug}
-                    </button>
-                  </td>
-                  <td>
-                    Resolves <strong>{actingApp.name}</strong>&apos;s own drive by slug, then queries its files using the
-                    id that comes back. Should succeed: the app owns this drive.
-                  </td>
-                </tr>
-                {SAMPLE_APPS.filter((app) => app.appId !== actingApp.appId).map((app) => (
-                  <tr key={app.appId}>
-                    <td>
-                      <button disabled={busy} onClick={() => queryDrive(app.appId)}>
-                        Query /apps/{app.appSlug}/drives/{app.drive.driveSlug}
-                      </button>
-                    </td>
-                    <td>
-                      Queries <strong>{app.name}</strong>&apos;s drive while still acting as {actingApp.name}. Succeeds
-                      when {app.name} is in the token, since access is the union of every app in it; the acting app
-                      decides identity (ownership checks), not access. Refused if {app.name} was left out at consent.
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td>
-                    <button disabled={busy} onClick={logout}>
-                      Log out
-                    </button>
-                  </td>
-                  <td>
-                    Deletes this token on the server (<code>DELETE /api/v2/bundle-tokens/current</code>) and removes it
-                    from this browser. Any later call with it gets 401.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            {context ? <ContextSummary context={context} /> : null}
+                  }
+                  result={result?.action === `query:${app.appId}` ? result : undefined}
+                >
+                  Queries <strong>{app.name}</strong>&apos;s drive while still acting as {actingApp.name}. Succeeds when{' '}
+                  {app.name} is in the token, since access is the union of every app in it; the acting app decides identity
+                  (ownership checks), not access. Refused if {app.name} was left out at consent.
+                </Action>
+              ))}
+
+              <Action
+                button={
+                  <button disabled={busy} onClick={logout}>
+                    Log out
+                  </button>
+                }
+              >
+                Deletes this token on the server (<code>DELETE /api/v2/bundle-tokens/current</code>) and removes it from
+                this browser. Any later call with it gets 401.
+              </Action>
+            </div>
           </>
         ) : (
-          <p className="muted">Get a token first.</p>
-        )}
-        {result ? (
           <>
-            <h3 className={result.ok ? 'ok' : 'err'}>{result.title}</h3>
-            <pre>{result.body}</pre>
+            <p className="muted">Get a token first.</p>
+            {result?.action === 'logout' ? <ResultView result={result} /> : null}
           </>
-        ) : null}
+        )}
       </section>
 
       <p>
@@ -532,6 +532,41 @@ export const App = () => {
     </>
   );
 };
+
+type ActionResult = { title: string; ok: boolean; body: string };
+
+const ResultView = ({ result }: { result: ActionResult }) => (
+  <div className="result">
+    <div className={result.ok ? 'ok' : 'err'}>
+      {result.ok ? '✓' : '✗'} {result.title}
+    </div>
+    <pre>{result.body}</pre>
+  </div>
+);
+
+/** One Try it action: its button, what it does, and -- once run -- its result right underneath. */
+const Action = ({
+  button,
+  children,
+  result,
+  extra,
+}: {
+  button: ReactNode;
+  children: ReactNode;
+  result?: ActionResult;
+  extra?: ReactNode;
+}) => (
+  <div className="action">
+    <div className="action-button">{button}</div>
+    <div className="action-description">{children}</div>
+    {result ? (
+      <div className="action-result">
+        {extra}
+        <ResultView result={result} />
+      </div>
+    ) : null}
+  </div>
+);
 
 const TokenAnatomy = ({ token }: { token: StoredToken }) => {
   const exchange = readJson<unknown>(KEY.exchange, undefined);
