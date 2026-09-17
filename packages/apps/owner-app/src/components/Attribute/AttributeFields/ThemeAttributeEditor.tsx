@@ -15,6 +15,13 @@ const RichTextEditor = lazy(() =>
 
 const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
+const CARD_THEME_IDS = [
+  HomePageTheme.Poster,
+  HomePageTheme.Board,
+  HomePageTheme.Collage,
+  HomePageTheme.Dossier,
+].map(String);
+
 export const ThemeAttributeEditor = (props: {
   fileId?: string;
   lastModified: number | undefined;
@@ -38,15 +45,17 @@ export const ThemeAttributeEditor = (props: {
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
         />
       </div>
-      <div>
-        <Label htmlFor={HomePageThemeFields.Colors}>{t('Color set')}</Label>
-        <ColorThemeSelector
-          id={HomePageThemeFields.Colors}
-          name={HomePageThemeFields.Colors}
-          defaultValue={attribute.data?.[HomePageThemeFields.Colors] ?? ''}
-          onChange={onChange}
-        />
-      </div>
+      {CARD_THEME_IDS.includes(attribute.data?.[HomePageThemeFields.ThemeId]) ? null : (
+        <div>
+          <Label htmlFor={HomePageThemeFields.Colors}>{t('Color set')}</Label>
+          <ColorThemeSelector
+            id={HomePageThemeFields.Colors}
+            name={HomePageThemeFields.Colors}
+            defaultValue={attribute.data?.[HomePageThemeFields.Colors] ?? ''}
+            onChange={onChange}
+          />
+        </div>
+      )}
       <div>
         <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
         <ThemeSelector
@@ -85,8 +94,9 @@ const ThemeSpecificFields = ({
   const defaultValue =
     dataVal instanceof Blob ? dataVal : dataVal ? imageData?.url || undefined : undefined;
 
-  const theme =
-    themeId === HomePageTheme.VerticalPosts.toString()
+  const theme = CARD_THEME_IDS.includes(themeId)
+    ? 'Card'
+    : themeId === HomePageTheme.VerticalPosts.toString()
       ? 'Vertical'
       : themeId === HomePageTheme.HorizontalPosts.toString()
         ? 'Horizontal'
@@ -95,6 +105,41 @@ const ThemeSpecificFields = ({
           : 'Cover';
 
   switch (theme) {
+    case 'Card':
+      return (
+        <>
+          <div>
+            <Label htmlFor="tagLine">{t('Headline')}</Label>
+            <Input
+              id="tagLine"
+              name="tagLine"
+              defaultValue={attribute.data?.['tagLine'] ?? ''}
+              onChange={onChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="headerImage">{t('Second photo')}</Label>
+            <ImageSelector
+              id="headerImage"
+              name={HomePageThemeFields.HeaderImageKey}
+              defaultValue={defaultValue}
+              onChange={(e) =>
+                onChange({
+                  target: {
+                    name: e.target.name,
+                    value: e.target.value,
+                  },
+                })
+              }
+              sizeClass={`${
+                !attribute.data?.[HomePageThemeFields.HeaderImageKey]
+                  ? 'aspect-[16/9] md:aspect-[5/1]'
+                  : ''
+              }  w-full object-cover`}
+            />
+          </div>
+        </>
+      );
     case 'Vertical':
     case 'Horizontal':
       return (
