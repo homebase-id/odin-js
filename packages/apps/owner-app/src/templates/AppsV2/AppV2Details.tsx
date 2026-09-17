@@ -22,7 +22,12 @@ import {
   OwnedDriveSummary,
   V2ErrorAlert,
 } from '../../components/AppsV2/AppsV2Parts';
-import { targetDriveKey, toCircleDefinition } from '../../components/AppsV2/appsV2Helpers';
+import {
+  appReach,
+  DriveReachEntry,
+  targetDriveKey,
+  toCircleDefinition,
+} from '../../components/AppsV2/appsV2Helpers';
 import { useAppRegistrationsV2, useAppRegistrationV2 } from '../../hooks/appsV2/useAppRegistrationsV2';
 import { useBundleTokens } from '../../hooks/appsV2/useBundleTokens';
 import { useDrives } from '../../hooks/drives/useDrives';
@@ -55,17 +60,15 @@ const AppV2Details = () => {
     owners.get(targetDriveKey(drive))?.drive.name ??
     drives?.find((d) => targetDriveKey(d.targetDriveInfo) === targetDriveKey(drive))?.name;
 
-  const driveAccess: DriveAccessEntry[] = (reg.grant?.driveGrants ?? []).map((grant) => {
-    const drive = grant.permissionedDrive.drive;
-    const owner = owners.get(targetDriveKey(drive));
-    return {
-      targetDrive: drive,
-      permission: grant.permissionedDrive.permission,
-      driveName: driveName(drive),
-      owningAppId: owner?.app.appId,
-      owningAppName: owner?.app.name,
-    };
-  });
+  const reach = appReach(app, allApps, tokens, driveName);
+  const toAccessEntries = (entries: DriveReachEntry[]): DriveAccessEntry[] =>
+    entries.map((entry) => ({
+      targetDrive: entry.targetDrive,
+      permission: entry.permission,
+      driveName: entry.driveName,
+      owningAppId: entry.owner?.appId,
+      owningAppName: entry.owner?.name,
+    }));
 
   const authorizedCircles = (reg.authorizedCircles ?? []).map((circleId) => ({
     id: circleId,
@@ -153,7 +156,43 @@ const AppV2Details = () => {
 
       <div className="grid gap-4 sm:grid-flow-col sm:grid-cols-2">
         <Section title={t('Drive access')}>
-          <DriveAccessList entries={driveAccess} empty={t("This app doesn't have any drive access")} />
+          {reach.own.length + reach.otherApps.length + reach.yours.length + reach.system.length ? (
+            <div className="flex flex-col gap-5">
+              {reach.otherApps.length ? (
+                <div className="rounded border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-950">
+                  <p className="mb-2 font-semibold text-orange-700 dark:text-orange-200">
+                    {t('Other apps\' drives')} ({reach.otherApps.length})
+                  </p>
+                  <p className="mb-3 text-sm text-orange-700 dark:text-orange-200">
+                    {t('This app can reach into these apps directly, not only through a bundle token.')}
+                  </p>
+                  <DriveAccessList entries={toAccessEntries(reach.otherApps)} />
+                </div>
+              ) : null}
+              <div>
+                <p className="mb-2 font-semibold">
+                  {t('Its own drives')} ({reach.own.length})
+                </p>
+                <DriveAccessList entries={toAccessEntries(reach.own)} empty={t('None')} />
+              </div>
+              {reach.yours.length ? (
+                <div>
+                  <p className="mb-2 font-semibold">
+                    {t('Your drives')} ({reach.yours.length})
+                  </p>
+                  <p className="mb-2 text-sm text-slate-400">{t('Drives that belong to you, not to any app.')}</p>
+                  <DriveAccessList entries={toAccessEntries(reach.yours)} />
+                </div>
+              ) : null}
+              {reach.system.length ? (
+                <p className="text-sm text-slate-400">
+                  {t('Also granted the system transient drive, which every app that uses transit gets.')}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <SubtleMessage>{t("This app doesn't have any drive access")}</SubtleMessage>
+          )}
         </Section>
         <Section title={t('Permissions')}>
           {keys.length ? (
@@ -207,6 +246,28 @@ const AppV2Details = () => {
         }
       >
         <V2ErrorAlert error={tokensError} title={t('Could not load bundle tokens')} />
+        {reach.tokenPeers.length ? (
+          <div className="mb-5 rounded border border-primary/30 bg-primary/5 p-3 text-sm">
+            <p className="mb-1 font-semibold">{t('Clients holding these tokens can also reach')}:</p>
+            <ul className="flex flex-row flex-wrap gap-x-4 gap-y-1">
+              {reach.tokenPeers.map((peer) => (
+                <li key={peer.appId}>
+                  <HybridLink href={`/owner/apps-v2/${encodeURIComponent(peer.appId)}`} className="hover:underline">
+                    {peer.name}
+                  </HybridLink>{' '}
+                  <span className="text-slate-400">
+                    ({peer.tokenCount} {peer.tokenCount === 1 ? t('token') : t('tokens')})
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-slate-400">
+              {t(
+                'A bundle token reaches every app in it. This app\'s own access is unchanged; the reach belongs to the client holding the token.'
+              )}
+            </p>
+          </div>
+        ) : null}
         <BundleTokenList
           tokens={tokens}
           highlightAppId={reg.appId}

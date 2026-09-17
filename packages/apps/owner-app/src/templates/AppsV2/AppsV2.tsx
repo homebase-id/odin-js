@@ -6,6 +6,7 @@ import Section from '../../components/ui/Sections/Section';
 import { useAppRegistrationsV2 } from '../../hooks/appsV2/useAppRegistrationsV2';
 import { useBundleTokens } from '../../hooks/appsV2/useBundleTokens';
 import { Badge, V2ErrorAlert } from '../../components/AppsV2/AppsV2Parts';
+import { AppReach, appReach } from '../../components/AppsV2/appsV2Helpers';
 
 /** `/owner/apps-v2`: every registration as V2 sees it, with what each app owns. */
 const AppsV2 = () => {
@@ -53,7 +54,12 @@ const AppsV2 = () => {
         <Section>
           <div className="flex flex-col gap-1">
             {sorted.map((app) => (
-              <AppV2ListItem app={app} tokenCount={tokenCount(app.registration.appId)} key={app.registration.appId} />
+              <AppV2ListItem
+                app={app}
+                tokenCount={tokenCount(app.registration.appId)}
+                reach={appReach(app, registrations, tokens)}
+                key={app.registration.appId}
+              />
             ))}
           </div>
         </Section>
@@ -62,8 +68,17 @@ const AppsV2 = () => {
   );
 };
 
-const AppV2ListItem = ({ app, tokenCount }: { app: AppRegistrationV2; tokenCount: number }) => {
+const AppV2ListItem = ({
+  app,
+  tokenCount,
+  reach,
+}: {
+  app: AppRegistrationV2;
+  tokenCount: number;
+  reach: AppReach;
+}) => {
   const reg = app.registration;
+  const reachedApps = [...new Map(reach.otherApps.map((entry) => [entry.owner!.appId, entry.owner!.name])).values()];
   return (
     <HybridLink
       href={`/owner/apps-v2/${encodeURIComponent(reg.appId)}`}
@@ -74,6 +89,23 @@ const AppV2ListItem = ({ app, tokenCount }: { app: AppRegistrationV2; tokenCount
           <span className="dark:text-white">{reg.name}</span>
           {app.isReserved ? <Badge>{t('Built-in')}</Badge> : null}
           {reg.isRevoked ? <Badge tone="critical">{t('Revoked')}</Badge> : null}
+          {reachedApps.length ? (
+            <span title={`${t('Has access to drives owned by')}: ${reachedApps.join(', ')}`}>
+              <Badge tone="warning">
+                {t('Reaches')} {reachedApps.length} {reachedApps.length === 1 ? t('other app') : t('other apps')}
+              </Badge>
+            </span>
+          ) : null}
+          {reach.tokenPeers.length ? (
+            <span
+              title={`${t('Bundle tokens combine it with')}: ${reach.tokenPeers.map((peer) => peer.name).join(', ')}`}
+            >
+              <Badge tone="primary">
+                {t('Shares tokens with')} {reach.tokenPeers.length}{' '}
+                {reach.tokenPeers.length === 1 ? t('app') : t('apps')}
+              </Badge>
+            </span>
+          ) : null}
           {reg.corsHostName ? <span className="text-sm text-slate-400">{reg.corsHostName}</span> : null}
         </div>
         <small className="flex flex-row flex-wrap gap-x-4 text-slate-400">
