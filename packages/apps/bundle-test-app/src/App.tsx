@@ -134,6 +134,8 @@ export const App = () => {
   const [friendlyName, setFriendlyName] = useState('Bundle test app');
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | undefined>();
   const [actingAppId, setActingAppId] = useState('');
+  // No header means the token's primary app.
+  const actingApp = SAMPLE_APPS.find((app) => app.appId === actingAppId) ?? PRIMARY_APP;
   const [result, setResult] = useState<{ title: string; ok: boolean; body: string } | undefined>();
   const [context, setContext] = useState<RedactedOdinContextV2 | undefined>();
   const [busy, setBusy] = useState(false);
@@ -431,7 +433,15 @@ export const App = () => {
           <>
             <label>
               Acting app (<code>X-ODIN-APP-ID</code>):{' '}
-              <select value={actingAppId} onChange={(e) => setActingAppId(e.target.value)}>
+              <select
+                value={actingAppId}
+                onChange={(e) => {
+                  setActingAppId(e.target.value);
+                  // Results from the previous acting app would be misleading next to the new selection.
+                  setResult(undefined);
+                  setContext(undefined);
+                }}
+              >
                 <option value="">(no header: primary app)</option>
                 {SAMPLE_APPS.map((app) => (
                   <option value={app.appId} key={app.appId}>
@@ -444,19 +454,23 @@ export const App = () => {
               <button disabled={busy} onClick={loadContext}>
                 GET /api/v2/auth/context
               </button>
-              {SAMPLE_APPS.map((app) => (
-                <span key={app.appId}>
-                  <button disabled={busy} onClick={() => listAppDrives(app.appId)}>
-                    List /apps/{app.appSlug}/drives
-                  </button>
-                  <button disabled={busy} onClick={() => queryDrive(app.appId)}>
-                    Query /apps/{app.appSlug}/drives/{app.drive.driveSlug}
-                  </button>
-                </span>
-              ))}
+              <button disabled={busy} onClick={() => listAppDrives(actingApp.appId)}>
+                List /apps/{actingApp.appSlug}/drives
+              </button>
+              <button disabled={busy} onClick={() => queryDrive(actingApp.appId)}>
+                Query /apps/{actingApp.appSlug}/drives/{actingApp.drive.driveSlug}
+              </button>
               <button disabled={busy} onClick={logout}>
                 Log out
               </button>
+            </div>
+            <div style={{ marginTop: '0.5rem' }}>
+              <span className="muted">Still acting as {actingApp.name}, query another app&apos;s drive: </span>
+              {SAMPLE_APPS.filter((app) => app.appId !== actingApp.appId).map((app) => (
+                <button disabled={busy} onClick={() => queryDrive(app.appId)} key={app.appId}>
+                  /apps/{app.appSlug}/drives/{app.drive.driveSlug}
+                </button>
+              ))}
             </div>
             {context ? <ContextSummary context={context} /> : null}
           </>
