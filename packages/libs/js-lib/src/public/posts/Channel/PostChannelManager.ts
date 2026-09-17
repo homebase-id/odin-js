@@ -142,10 +142,10 @@ export const saveChannelDefinition = async (
         // Channel drives are always CDN-enabled so their payloads can be served from the CDN.
         //
         // The feed app owns every channel drive, and `channel` is the readable form of their shared
-        // type. The drive slug is deliberately not passed: the server derives it from the drive name,
-        // and only it holds the set of slugs the feed app has already used, so only it can dedupe two
-        // channels that happen to share a name. Passing appId is what enables that derivation at all —
-        // without an owning app the server leaves the drive unaddressed.
+        // type. The drive slug is deliberately passed as undefined: a channel drive is a runtime
+        // instance drive, so the server derives its slug from the drive name, and only it holds the
+        // set of slugs the feed app has already used -- only it can dedupe two channels that happen
+        // to share a name.
         await ensureDrive(
           dotYouClient,
           targetDrive,

@@ -30,6 +30,15 @@ export const updateCircleDefinition = async (
 
   const data: ServerCircleUpdateRequest = {
     ...circleDefinition,
+
+    // An update body is normally built from a fetched definition, so it arrives carrying whatever
+    // the server said about ownership. Both are dropped here (undefined keys do not survive JSON
+    // serialization): appId is set once, at create, and moves only through set-owner /
+    // reassign-owner -- round-tripping it would make every ordinary edit look like an ownership
+    // claim. isTreeDeclared is derived server-side from the build's app catalogue and is read-only.
+    appId: undefined,
+    isTreeDeclared: undefined,
+
     driveGrants:
       circleDefinition.driveGrants?.map((grant: DriveGrant) => ({
         ...grant,
