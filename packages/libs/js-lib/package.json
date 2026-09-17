@@ -83,7 +83,7 @@
     "mp4box": "^0.5.2"
   },
   "devDependencies": {
-    "vitest": "^0.34.6"
+    "vitest": "^4.1.8"
   },
   "peerDependencies": {
     "axios": "^1.7.5"
