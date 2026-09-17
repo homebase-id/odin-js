@@ -6,7 +6,7 @@ import {
   SubtleMessage,
   t,
 } from '@homebase-id/common-app';
-import { Circles as CirclesIcon, HardDrive, Phone, Refresh, Times, Trash } from '@homebase-id/common-app/icons';
+import { Circles as CirclesIcon, HardDrive, Refresh, Times, Trash } from '@homebase-id/common-app/icons';
 import { CircleDesignation, CircleGrantOn } from '@homebase-id/js-lib/network';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
@@ -274,7 +274,6 @@ export const BundleTokenView = ({
   return (
     <div className={`flex flex-col ${className ?? ''}`}>
       <div className={`flex flex-row items-center ${token.isRevoked ? 'opacity-50 hover:opacity-90' : ''}`}>
-        <Phone className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <span className="flex flex-row flex-wrap items-center gap-2">
             <span>
