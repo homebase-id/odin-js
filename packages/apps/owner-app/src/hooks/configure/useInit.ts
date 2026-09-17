@@ -36,6 +36,9 @@ export const useInit = () => {
   const doInitWithData = async (data: WelcomeData) => {
     if (!isAuthenticated) return;
 
+    // No appId on these: every circle has an owning app, and the server assigns the System app to
+    // circles created by the owner console and this wizard. Naming an id here would only be this
+    // client guessing at the same answer, and a wrong guess is permanent.
     const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
       return {
         id: toGuidId(circle.name),

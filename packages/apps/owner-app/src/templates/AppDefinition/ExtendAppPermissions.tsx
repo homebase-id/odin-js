@@ -33,7 +33,9 @@ export const ExtendAppPermissions = () => {
   const p = searchParams.get('p');
   const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
   const d = searchParams.get('d');
-  const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
+  // Empty array when the param is absent, undefined when it is malformed -- a grant missing its
+  // drive type slug, say. See drivesParamToDriveGrantRequest.
+  const driveGrants = drivesParamToDriveGrantRequest(d || undefined);
 
   const c = searchParams.get('c');
   const circleIds = c ? circleToCircleIds(c) : undefined;
@@ -41,7 +43,9 @@ export const ExtendAppPermissions = () => {
   const cp = searchParams.get('cp');
   const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
   const cd = searchParams.get('cd');
-  const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
+  const circleDriveGrants = drivesParamToDriveGrantRequest(cd || undefined);
+
+  const isBadRequest = !driveGrants || !circleDriveGrants;
 
   const {
     fetch: { data: appRegistration },
@@ -149,6 +153,10 @@ export const ExtendAppPermissions = () => {
         drivesEqual(drive.targetDriveInfo, grant.permissionedDrive.drive)
       )
   );
+
+  // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
+  // one is its bug, but dropping a drive from the prompt would grant less than was asked for.
+  if (isBadRequest) return <div>Bad request</div>;
 
   return (
     <>

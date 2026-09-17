@@ -24,6 +24,7 @@ import {
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@homebase-id/js-lib/helpers';
 import {
   ApiType,
+  CHANNEL_DRIVE_TYPE_SLUG,
   DotYouClient,
   DrivePermissionType,
   HomebaseFile,
@@ -53,6 +54,11 @@ const getExtendAuthorizationUrl = (
       d: description,
       r: allowAnonymousReads,
       s: allowSubscriptions,
+      // The readable form of this drive's type, shared by every channel drive. No drive slug: a
+      // channel drive is a runtime instance drive, so the server derives its slug from `name`
+      // against the set the feed app already holds -- only it can dedupe two channels sharing a
+      // name.
+      ts: CHANNEL_DRIVE_TYPE_SLUG,
     },
   ];
 
