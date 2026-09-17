@@ -8,7 +8,7 @@ import {
   useCircles,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { Arrow, Loader } from '@homebase-id/common-app/icons';
+import { Arrow, Loader, Phone } from '@homebase-id/common-app/icons';
 import {
   authorizeBundle,
   BundleAppPreview,
@@ -210,15 +210,22 @@ const BundleConsent = ({ params }: { params: BundleAuthorizeParams }) => {
     <Shell>
       <h1 className="mb-5 text-4xl dark:text-white">
         {t('Sign in to apps')}
-        <small className="block">{params.friendlyName || t('Unnamed device')}</small>
+        <small className="mt-2 flex flex-row items-center gap-2 text-2xl">
+          <Phone className="h-6 w-6 flex-shrink-0 text-slate-400" />
+          <span>
+            <span className="font-normal text-slate-400">{t('Device')}:</span>{' '}
+            {params.friendlyName || t('Unnamed device')}
+          </span>
+        </small>
         <small className="block text-base font-normal text-slate-400">
           {t('Returns to')} <DomainHighlighter>{redirectOrigin}</DomainHighlighter>
         </small>
       </h1>
 
       <p>
+        {t('The device')} <strong>{params.friendlyName || t('Unnamed device')}</strong>{' '}
         {t(
-          'This device asks for one sign-in that works as each of these apps. Apps that are new or changed are installed or updated when you allow. Untick any app you do not want to include.'
+          'asks for one sign-in that works as each of these apps. Apps that are new or changed are installed or updated when you allow. Untick any app you do not want to include. It will show under Bundle tokens with this name, so you can revoke this device later.'
         )}
       </p>
 
