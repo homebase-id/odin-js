@@ -11,11 +11,16 @@ const CardEmbed = () => {
   const data = useCardData();
   if (!data || !siteData) return null;
 
-  const layout =
-    presetFromParam(params.get('design')) ??
-    cardPresetForTheme(siteData.home?.templateSettings?.themeId) ??
-    'board';
-  return <HomebaseCard design={CARD_PRESETS[layout]} data={data} className="min-h-dvh" />;
+  const themeId = siteData.home?.templateSettings?.themeId;
+  // "Disable public site" - the phone embed has nothing to show either
+  if (!themeId || themeId === '0') return null;
+
+  const layout = presetFromParam(params.get('design')) ?? cardPresetForTheme(themeId) ?? 'board';
+  return (
+    <main className="min-h-dvh">
+      <HomebaseCard design={CARD_PRESETS[layout]} data={data} className="min-h-dvh" />
+    </main>
+  );
 };
 
 export default CardEmbed;

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
+import { isUsableLink } from '../../parts/Blocks';
 import { POSTS_HREF } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { BoardProfile } from './BoardProfile';
@@ -49,14 +50,14 @@ const BoardAccount = () => (
 );
 
 const BoardTopBar = ({ data }: { data: CardData }) => {
-  const [firstLink] = data.links;
+  const firstLink = data.links.find(isUsableLink);
   return (
     <header className="absolute right-8 top-[22px] z-10 flex items-center gap-6">
       <nav aria-label={t('Sections')} className="flex items-center gap-5">
         <Link to={POSTS_HREF} className={SECTION_LINK}>
           {t('Posts')}
         </Link>
-        {firstLink?.text ? (
+        {firstLink ? (
           <a
             href={firstLink.target}
             target="_blank"

@@ -5,7 +5,7 @@ import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
 import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
-import { CardBlocks } from '../../parts/Blocks';
+import { CardBlocks, isUsableLink } from '../../parts/Blocks';
 import { CardLabel, CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
@@ -59,7 +59,7 @@ const SignIn = () => (
 );
 
 const TopBar = ({ data }: { data: CardData }) => {
-  const [first] = data.links;
+  const first = data.links.find(isUsableLink);
   // Full ink rather than the reference's 85%: the nav sits on the photo
   const link = `text-sm text-[color:var(--card-ink)] underline-offset-4 hover:underline ${FOCUS}`;
   return (
@@ -68,14 +68,14 @@ const TopBar = ({ data }: { data: CardData }) => {
         <Link to={POSTS_HREF} className={link}>
           {t('Writing')}
         </Link>
-        {first?.target ? (
+        {first ? (
           <a
             href={first.target}
             target="_blank"
             rel="noopener noreferrer"
             className={`max-w-[14rem] truncate ${link}`}
           >
-            {first.text || first.target}
+            {first.text}
           </a>
         ) : null}
         <SignIn />
@@ -252,7 +252,7 @@ const Footer = ({ data }: { data: CardData }) => {
       </p>
       {isAuthenticated ? null : (
         <p className="text-[13px] text-[color:var(--card-muted)]">
-          {t("Hold one of {0}'s cards? Sign in and this page shows you more.", name)}
+          {t('Sign in to see what {0} shares with you.', name)}
         </p>
       )}
     </footer>

@@ -104,9 +104,11 @@ function App() {
           path="/card"
           element={
             <NoLayout>
-              <Suspense fallback={<></>}>
-                <CardEmbed />
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={<></>}>
+                  <CardEmbed />
+                </Suspense>
+              </ErrorBoundary>
             </NoLayout>
           }
         />

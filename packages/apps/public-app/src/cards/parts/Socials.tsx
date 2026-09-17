@@ -64,7 +64,7 @@ export const CardSocials = ({
               href={s.link}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={hostName(s.link) || s.link}
+              aria-label={s.type || hostName(s.link) || s.link}
               className={`-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`}
             >
               <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />

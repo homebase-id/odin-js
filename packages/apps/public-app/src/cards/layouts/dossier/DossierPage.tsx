@@ -57,7 +57,7 @@ export const DossierPage = ({ design, data }: LayoutProps) => (
 );
 
 const TopBar = ({ data }: { data: CardData }) => {
-  const [firstLink] = data.links.filter((link) => link.target);
+  const firstLink = data.links.find(isUsableLink);
   const navLink = `block max-w-[14rem] truncate text-[12px] ${tracked} ${muted} hover:text-[color:var(--card-ink)] ${CARD_FOCUS}`;
 
   return (
@@ -154,7 +154,7 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
       }));
     return [];
   });
-  const hasSocials = data.socials.some((social) => !!social.link);
+  const hasSocials = data.socials.length > 0;
   if (!items.length && !hasSocials) return null;
 
   return (

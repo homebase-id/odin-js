@@ -67,7 +67,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
       <CardBlocks
         design={design}
         data={data}
-        kinds={['links']}
+        kinds={['links', 'moments']}
         className="mt-7 !gap-2.5 [&>a:nth-child(even)]:rotate-[0.75deg] [&>a:nth-child(odd)]:rotate-[-0.75deg] [&>a]:shadow-[0_3px_10px_-4px_rgba(0,0,0,0.3)]"
       />
 

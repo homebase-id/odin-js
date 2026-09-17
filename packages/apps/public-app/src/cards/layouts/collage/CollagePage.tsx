@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { Link } from 'react-router-dom';
 import { Image, t } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { PostContent } from '@homebase-id/js-lib/public';
@@ -6,7 +7,7 @@ import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
-import { CardBlock, useChatHref } from '../../parts/Blocks';
+import { CardBlock, isUsableLink, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
@@ -38,7 +39,7 @@ const AuthControl = () => (
 );
 
 const TopBar = ({ data }: { data: CardData }) => {
-  const [firstLink] = data.links;
+  const firstLink = data.links.find(isUsableLink);
   return (
     <header className="absolute right-[30px] top-5 z-20 flex items-center gap-5">
       {data.posts.length || firstLink ? (
@@ -47,9 +48,9 @@ const TopBar = ({ data }: { data: CardData }) => {
           className="flex items-center gap-5 text-[13px] font-semibold"
         >
           {data.posts.length ? (
-            <a href={POSTS_HREF} className={`rounded-sm hover:underline ${FOCUS}`}>
+            <Link to={POSTS_HREF} className={`rounded-sm hover:underline ${FOCUS}`}>
               {t('Notes')}
-            </a>
+            </Link>
           ) : null}
           {firstLink ? (
             <a
@@ -83,8 +84,8 @@ const Note = ({
   return (
     <li className="relative" style={{ transform: `rotate(${tilt}deg)` }}>
       <Tape className="-top-[9px] left-1/2 h-5 w-[70px] -translate-x-1/2" />
-      <a
-        href={href}
+      <Link
+        to={href}
         className={`block h-full bg-[var(--card-surface)] p-3 pb-6 text-[color:var(--card-surface-ink)] shadow-[0_3px_9px_rgba(0,0,0,0.18)] ${FOCUS}`}
       >
         {image ? (
@@ -118,7 +119,7 @@ const Note = ({
         >
           {formatNoteDate(date)}
         </time>
-      </a>
+      </Link>
     </li>
   );
 };
@@ -136,12 +137,12 @@ const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
           {t('Notes')}
         </h2>
         <div aria-hidden className="mb-3 h-0.5 flex-1 bg-[var(--card-ink)] opacity-[0.18]" />
-        <a
-          href={POSTS_HREF}
+        <Link
+          to={POSTS_HREF}
           className={`rounded-sm pb-1 font-[family-name:var(--card-label)] text-2xl text-[color:var(--card-muted)] hover:text-[color:var(--card-ink)] ${FOCUS}`}
         >
           {t('more in the drawer')} <span aria-hidden>&rarr;</span>
-        </a>
+        </Link>
       </div>
       <ul className="grid grid-cols-3 gap-x-[46px] gap-y-10 px-3 pt-[34px]">
         {posts.map((post, index) => (
@@ -161,7 +162,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
   const chatHref = useChatHref();
   const chatBlock = design.blocks.find((b) => b.kind === 'chat');
-  const socials = data.socials.filter((s) => s.link);
+  const socials = data.socials;
   const hasCollage = !!(print || cutout);
   const hasAside = !!(chatBlock && chatHref) || socials.length > 0 || !!data.header;
   const grid =

@@ -14,7 +14,9 @@ const CardHome = ({ layout }: { layout: LayoutId }) => {
   return isDesktop ? (
     <CardPage design={design} data={data} />
   ) : (
-    <HomebaseCard design={design} data={data} className="min-h-dvh" />
+    <main className="min-h-dvh">
+      <HomebaseCard design={design} data={data} className="min-h-dvh" />
+    </main>
   );
 };
 

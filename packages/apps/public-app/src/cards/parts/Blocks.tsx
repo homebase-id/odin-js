@@ -1,4 +1,5 @@
 import type { FC, ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
@@ -38,6 +39,7 @@ const Item = ({
   url,
   thumbs,
   external,
+  internal,
 }: {
   presentation: Presentation;
   href: string;
@@ -46,39 +48,46 @@ const Item = ({
   url?: string;
   thumbs?: CardImage[];
   external?: boolean;
+  internal?: boolean;
 }) => {
   const linkProps = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 
-  if (presentation === 'bare')
-    return (
-      <a
-        href={href}
-        {...linkProps}
-        className={`block border-t border-[color:var(--card-surface)] py-3 font-[family-name:var(--card-display)] text-lg ${focus}`}
-      >
+  if (presentation === 'bare') {
+    const className = `block border-t border-[color:var(--card-surface)] py-3 font-[family-name:var(--card-display)] text-lg ${focus}`;
+    return internal ? (
+      <Link to={href} className={className}>
+        {label}
+      </Link>
+    ) : (
+      <a href={href} {...linkProps} className={className}>
         {label}
       </a>
     );
+  }
 
-  if (presentation === 'button')
-    return (
-      <a
-        href={href}
-        {...linkProps}
-        className={`inline-flex items-center gap-2 rounded-full bg-[var(--card-ink)] px-5 py-3 font-semibold text-[color:var(--card-ground)] ${focus}`}
-      >
+  if (presentation === 'button') {
+    const className = `inline-flex items-center gap-2 rounded-full bg-[var(--card-ink)] px-5 py-3 font-semibold text-[color:var(--card-ground)] ${focus}`;
+    const content = (
+      <>
         <Icon aria-hidden className="h-5 w-5" />
         {label}
+      </>
+    );
+    return internal ? (
+      <Link to={href} className={className}>
+        {content}
+      </Link>
+    ) : (
+      <a href={href} {...linkProps} className={className}>
+        {content}
       </a>
     );
+  }
 
-  if (presentation === 'row')
-    return (
-      <a
-        href={href}
-        {...linkProps}
-        className={`flex items-center gap-3 border-t border-[color:var(--card-surface)] py-3 ${focus}`}
-      >
+  if (presentation === 'row') {
+    const className = `flex items-center gap-3 border-t border-[color:var(--card-surface)] py-3 ${focus}`;
+    const content = (
+      <>
         <Icon aria-hidden className="h-4 w-4 flex-shrink-0 text-[color:var(--card-accent)]" />
         <span className="min-w-0 flex-1">
           <span className="block">{label}</span>
@@ -88,16 +97,23 @@ const Item = ({
             </span>
           ) : null}
         </span>
+      </>
+    );
+    return internal ? (
+      <Link to={href} className={className}>
+        {content}
+      </Link>
+    ) : (
+      <a href={href} {...linkProps} className={className}>
+        {content}
       </a>
     );
+  }
 
   // boxed
-  return (
-    <a
-      href={href}
-      {...linkProps}
-      className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`}
-    >
+  const className = `flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`;
+  const content = (
+    <>
       <span
         aria-hidden
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
@@ -110,7 +126,7 @@ const Item = ({
         <span className="flex gap-1">
           {thumbs.map((img) => (
             <Image
-              key={img.fileKey}
+              key={`${img.fileId}:${img.fileKey}`}
               {...img}
               fileId={img.fileId}
               fileKey={img.fileKey}
@@ -123,20 +139,32 @@ const Item = ({
       ) : (
         <Chevron aria-hidden className="h-3 w-3 opacity-60" />
       )}
+    </>
+  );
+  return internal ? (
+    <Link to={href} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <a href={href} {...linkProps} className={className}>
+      {content}
     </a>
   );
 };
 
-// A link only counts once it has both something to say and somewhere to go
+// A link only counts once it has both something to say and somewhere to go, and only if it
+// won't run script in the chat-kmp WebView that renders these
 // eslint-disable-next-line react-refresh/only-export-components
-export const isUsableLink = (link: CardLink) => !!link.target && !!link.text;
+export const isUsableLink = (link: CardLink) =>
+  !!link.text && !!link.target && !/^\s*(javascript|data|vbscript):/i.test(link.target);
 
 // Whether a block would render anything at all, so callers can drop it (and CardBlocks itself,
 // or a layout's own section heading) instead of showing an empty nav or an orphaned title.
 // eslint-disable-next-line react-refresh/only-export-components
 export const hasBlockContent = (kind: BlockKind, data: CardData, chatHref?: string) => {
   if (kind === 'chat') return !!chatHref;
-  if (kind === 'moments') return data.posts.some((post) => !!postImage(post));
+  // A phone visitor should be able to reach posts even before any post has an image
+  if (kind === 'moments') return data.posts.length > 0;
   if (kind === 'links') return data.links.some(isUsableLink);
   return false; // posts are rendered by desktop pages
 };
@@ -161,11 +189,13 @@ export const CardBlock = ({
     ) : null;
 
   if (block.kind === 'moments') {
+    if (!data.posts.length) return null;
+    // Zero thumbnails is fine: `boxed` falls back to a chevron, `row` never shows thumbs
     const thumbs = data.posts
       .map(postImage)
       .filter((img): img is CardImage => !!img)
       .slice(0, 3);
-    return thumbs.length ? (
+    return (
       <Item
         presentation={block.presentation}
         href={POSTS_HREF}
@@ -173,8 +203,9 @@ export const CardBlock = ({
         icon={ImageIcon}
         thumbs={thumbs}
         url={`${data.odinId}${POSTS_HREF}`}
+        internal
       />
-    ) : null;
+    );
   }
 
   if (block.kind === 'links')
