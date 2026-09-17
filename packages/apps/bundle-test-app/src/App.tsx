@@ -22,6 +22,8 @@ const KEY = {
   privateKey: 'bundle-test:private-key',
   state: 'bundle-test:state',
   token: 'bundle-test:token',
+  // Demo only: the raw exchange response, kept so Step 2 can show it after the redirect.
+  exchange: 'bundle-test:exchange-response',
 };
 
 interface StoredToken {
@@ -73,6 +75,37 @@ const tokenIdOf = (clientAuthToken: string) => {
     hex(a.slice(10, 16)),
   ].join('-');
 };
+
+/**
+ * The portable ClientAuthenticationToken, byte for byte: 16-byte token id (a .NET Guid), 16-byte client
+ * half of the key, 1-byte token type (18 = AppBundle). Its base64 form is the bearer token.
+ */
+const decodeToken = (clientAuthToken: string) => {
+  const bytes = base64ToBytes(clientAuthToken);
+  const type = bytes[32];
+  return {
+    id: tokenIdOf(clientAuthToken),
+    accessTokenHalfKey: bytesToBase64(bytes.slice(16, 32).buffer),
+    clientTokenType: type === 18 ? '18 (AppBundle)' : String(type),
+    byteLength: bytes.length,
+  };
+};
+
+/** Everything this app keeps in localStorage, as it is stored. */
+const readStoredEntries = () =>
+  Object.fromEntries(
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('bundle-test:'))
+      .sort()
+      .map((key) => {
+        const raw = localStorage.getItem(key) ?? '';
+        try {
+          return [key, JSON.parse(raw) as unknown];
+        } catch {
+          return [key, raw];
+        }
+      })
+  );
 
 const describeError = (error: unknown) => {
   if (error instanceof Error) {
@@ -147,7 +180,13 @@ export const App = () => {
           const privateKey = await loadPrivateKey();
           if (!privateKey) throw new Error('No private key stored; press Connect again.');
           const tokenIdentity = normalizeIdentity(returnedIdentity || identity);
-          const credentials = await finalizeBundleAuthentication(tokenIdentity, privateKey, publicKey, salt);
+          const credentials = await finalizeBundleAuthentication(
+            tokenIdentity,
+            privateKey,
+            publicKey,
+            salt,
+            (response) => writeJson(KEY.exchange, response)
+          );
           const stored: StoredToken = { identity: tokenIdentity, ...credentials, obtainedAt: Date.now() };
           writeJson(KEY.token, stored);
           setToken(stored);
@@ -274,6 +313,7 @@ export const App = () => {
       await run('DELETE /api/v2/bundle-tokens/current', () => logoutBundleToken(client));
     }
     localStorage.removeItem(KEY.token);
+    localStorage.removeItem(KEY.exchange);
     setToken(undefined);
     setContext(undefined);
   };
@@ -377,6 +417,9 @@ export const App = () => {
               </tr>
             </tbody>
           </table>
+        ) : null}
+        {token ? (
+          <TokenAnatomy token={token} />
         ) : (
           <p className="muted">No token yet.</p>
         )}
@@ -431,6 +474,39 @@ export const App = () => {
       <p>
         <button onClick={resetAll}>Reset this test app (clears local storage only)</button>
       </p>
+    </>
+  );
+};
+
+const TokenAnatomy = ({ token }: { token: StoredToken }) => {
+  const exchange = readJson<unknown>(KEY.exchange, undefined);
+  const decrypted = { clientAuthToken: token.clientAuthToken, sharedSecret: token.sharedSecret };
+
+  return (
+    <>
+      <h3>1. What the server returned</h3>
+      <p className="muted">
+        <code>POST https://{token.identity}/api/v2/bundle-tokens/exchange</code>, collected once. Both values are
+        AES-CBC encrypted with the one-time ECDH secret that only this browser could derive.
+      </p>
+      <pre>{exchange ? JSON.stringify(exchange, null, 2) : '(not captured: this token was collected before the demo recorded it)'}</pre>
+
+      <h3>2. After decrypting it (finalizeBundleAuthentication)</h3>
+      <pre>{JSON.stringify(decrypted, null, 2)}</pre>
+      <p className="muted">
+        <code>clientAuthToken</code> is the bearer token, sent as <code>Authorization: Bearer …</code> on every
+        request. <code>sharedSecret</code> never leaves the browser: it encrypts request bodies and query strings
+        and decrypts responses. Decoded, the token is:
+      </p>
+      <pre>{JSON.stringify(decodeToken(token.clientAuthToken), null, 2)}</pre>
+
+      <h3>3. What this browser stores</h3>
+      <p className="muted">
+        <code>localStorage</code> on <code>{window.location.origin}</code>; no cookies, since the token goes in a
+        header. The private key and state used during sign-in are deleted once the token is collected. Keeping the
+        token and shared secret in localStorage is fine for a demo, not for a real app.
+      </p>
+      <pre>{JSON.stringify(readStoredEntries(), null, 2)}</pre>
     </>
   );
 };

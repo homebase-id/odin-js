@@ -183,7 +183,9 @@ export const finalizeBundleAuthentication = async (
   identity: string,
   privateKey: CryptoKey,
   publicKey: string,
-  salt: string
+  salt: string,
+  /** Optional: receives the raw exchange response (still encrypted), e.g. to show it in a demo. */
+  onExchangeResponse?: (response: BundleTokenExchangeResponse) => void
 ): Promise<BundleTokenCredentials> => {
   // The server sends base64url; importRemotePublicEccKey uses atob, which wants standard base64.
   const standardPublicKey = publicKey.replace(/-/g, '+').replace(/_/g, '/');
@@ -197,6 +199,7 @@ export const finalizeBundleAuthentication = async (
   const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
 
   const token = await exchangeBundleDigestForToken(identity, base64ExchangedSecretDigest);
+  onExchangeResponse?.(token);
 
   const sharedSecret = await cbcDecrypt(
     base64ToUint8Array(token.base64SharedSecretCipher),
