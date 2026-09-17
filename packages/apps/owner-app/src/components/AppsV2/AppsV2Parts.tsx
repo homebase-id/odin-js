@@ -400,6 +400,41 @@ export const BundleTokenView = ({
   );
 };
 
+/** What a bundle token is, and what each action on one does, in owner terms. */
+export const BundleTokenDefinition = ({ className }: { className?: string }) => (
+  <div className={`rounded border border-slate-200 p-4 text-sm dark:border-slate-700 ${className ?? ''}`}>
+    <p className="mb-2 font-semibold">{t('What is a bundle token?')}</p>
+    <p className="mb-3">
+      {t(
+        'One sign-in for one client: a single app on a single device or browser, such as the app on your phone. It is created when you approve a sign-in that covers several apps, and it lets that client act as every app in it. Its name is what the client called itself when it asked.'
+      )}
+    </p>
+    <ul className="flex list-disc flex-col gap-1 pl-5">
+      <li>
+        <strong>{t('Revoke')}</strong>:{' '}
+        {t(
+          'only that client is cut off, on its next request, for every app in the token. The apps stay installed, their data stays, and your other devices keep working. You can allow it again.'
+        )}
+      </li>
+      <li>
+        <strong>{t('Delete')}</strong>:{' '}
+        {t(
+          "removes that client's sign-in for good; it has to sign in again and you approve it again. The apps and their data are not removed."
+        )}
+      </li>
+      <li>
+        <strong>{t('Remove an app')}</strong>:{' '}
+        {t(
+          'that client keeps working as the other apps but can no longer act as the removed one. The primary app cannot be removed; delete the token instead.'
+        )}
+      </li>
+    </ul>
+    <p className="mt-3 text-slate-500 dark:text-slate-400">
+      {t('To cut off an app on every device at once, revoke the app itself rather than a token.')}
+    </p>
+  </div>
+);
+
 export const BundleTokenList = ({
   tokens,
   highlightAppId,

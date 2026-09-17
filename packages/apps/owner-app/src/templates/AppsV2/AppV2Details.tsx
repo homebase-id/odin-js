@@ -16,6 +16,7 @@ import PermissionView from '../../components/PermissionViews/PermissionView/Perm
 import { CircleOverview, Fact, formatTimestamp, PermissionKeyList } from '../../components/Apps/AppOverviewParts';
 import {
   Badge,
+  BundleTokenDefinition,
   BundleTokenList,
   CircleGrantedDrives,
   DriveAccessList,
@@ -245,6 +246,7 @@ const AppV2Details = () => {
           </HybridLink>
         }
       >
+        <BundleTokenDefinition className="mb-5" />
         <V2ErrorAlert error={tokensError} title={t('Could not load bundle tokens')} />
         {reach.tokenPeers.length ? (
           <div className="mb-5 rounded border border-primary/30 bg-primary/5 p-3 text-sm">

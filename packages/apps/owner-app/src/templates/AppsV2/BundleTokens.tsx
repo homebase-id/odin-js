@@ -5,7 +5,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import Section from '../../components/ui/Sections/Section';
 import { useBundleTokens } from '../../hooks/appsV2/useBundleTokens';
 import { useAppRegistrationsV2 } from '../../hooks/appsV2/useAppRegistrationsV2';
-import { BundleTokenList, V2ErrorAlert } from '../../components/AppsV2/AppsV2Parts';
+import { BundleTokenDefinition, BundleTokenList, V2ErrorAlert } from '../../components/AppsV2/AppsV2Parts';
 
 /** `/owner/bundle-tokens?appId=`: every bundle token, or only those reaching one app. */
 const BundleTokens = () => {
@@ -29,19 +29,14 @@ const BundleTokens = () => {
           { title: appName ?? t('Bundle tokens') },
         ]}
       />
-      <p className="mb-6 max-w-2xl text-slate-400">
-        {t(
-          'A bundle token is one sign-in that works as several of your apps. Revoking it cuts off every app in it on the next request; removing an app only cuts off that app.'
-        )}
-        {appId ? (
-          <>
-            {' '}
-            <HybridLink href="/owner/bundle-tokens" className="hover:underline">
-              {t('Show all tokens')}
-            </HybridLink>
-          </>
-        ) : null}
-      </p>
+      <BundleTokenDefinition className="mb-4 max-w-3xl" />
+      {appId ? (
+        <p className="mb-6">
+          <HybridLink href="/owner/bundle-tokens" className="text-sm hover:underline">
+            {t('Show all tokens')}
+          </HybridLink>
+        </p>
+      ) : null}
 
       <V2ErrorAlert error={error} title={t('Could not load bundle tokens')} />
 
