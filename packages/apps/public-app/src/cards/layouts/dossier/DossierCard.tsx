@@ -17,7 +17,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
 
   const [portrait] = design.portraits;
   const hasBlock = (kind: BlockKind) => design.blocks.some((block) => block.kind === kind);
-  // CardBlocks always renders its <nav>, so decide here whether a section has rows at all
+  // CardBlocks hides itself once it has no rows to show, but the section heading is ours to hide
   const showContact = hasBlock('chat') && !!chatHref;
   const showElsewhere =
     (hasBlock('links') && data.links.length > 0) ||
@@ -53,6 +53,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             design={design}
             data={data}
             kinds={['chat']}
+            label={t('Contact')}
             className={`!gap-0 border-b ${hairline} [&_a]:text-[color:var(--card-accent)]`}
           />
         </section>
@@ -67,6 +68,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             design={design}
             data={data}
             kinds={['moments', 'links']}
+            label={t('Elsewhere')}
             className="!gap-0 [&_a]:border-t-0 [&_a]:py-[9px]"
           />
         </section>

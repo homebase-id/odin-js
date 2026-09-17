@@ -1,6 +1,6 @@
 import { useId, useState, type CSSProperties, type FC, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { Globe, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
@@ -10,7 +10,7 @@ import type { LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { useChatHref } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import { hairline, LocationLine, ownerName, SectionLabel } from './DossierParts';
@@ -86,7 +86,7 @@ const TopBar = ({ data }: { data: CardData }) => {
             <ul className="flex items-center gap-8">
               {data.posts.length ? (
                 <li>
-                  <Link to={`${HOME_ROOT_PATH}posts`} className={navLink}>
+                  <Link to={POSTS_HREF} className={navLink}>
                     {t('Index')}
                   </Link>
                 </li>
@@ -218,9 +218,9 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
         ? [
             {
               id: 'moments',
-              href: `${HOME_ROOT_PATH}posts`,
+              href: POSTS_HREF,
               label: t('Moments'),
-              url: `${data.odinId}/posts`,
+              url: `${data.odinId}${POSTS_HREF}`,
               icon: ImageIcon,
             },
           ]
@@ -312,9 +312,7 @@ const PostIndex = ({ data }: { data: CardData }) => {
         >
           {t('Index')}
         </h2>
-        <p className={`text-[11px] ${tracked} ${muted}`}>
-          {total === 1 ? t('1 entry') : t('{0} entries', total)} / {t('showing {0}', shown.length)}
-        </p>
+        <p className={`text-[11px] ${tracked} ${muted}`}>{t('Showing {0}', shown.length)}</p>
       </div>
       <table className="w-full table-fixed border-collapse text-left">
         <colgroup>
@@ -342,7 +340,7 @@ const PostIndex = ({ data }: { data: CardData }) => {
         </thead>
         <tbody>
           {shown.map((post, index) => (
-            <PostRow key={post.fileId} post={post} number={total - index} href={postHref(post)} />
+            <PostRow key={post.fileId} post={post} number={index + 1} href={postHref(post)} />
           ))}
         </tbody>
       </table>

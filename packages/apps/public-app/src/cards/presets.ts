@@ -52,7 +52,7 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
     palette: {
       ground: '#F3EADB',
       ink: '#3A2E22',
-      muted: '#8A7460',
+      muted: '#76614F',
       accent: '#B4553A',
       surface: '#FFFFFF',
       surfaceInk: '#3A2E22',

@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { HOME_ROOT_PATH, Image, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { Image, t, useDotYouClientContext } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { PostContent } from '@homebase-id/js-lib/public';
 import type { LayoutProps } from '../../CardDesign';
@@ -8,12 +8,10 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlock, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
 import { collageFrames, Cutout, FOCUS, Print, Tape } from './frames';
-
-const POSTS_PATH = `${HOME_ROOT_PATH}posts`;
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -71,7 +69,7 @@ const TopBar = ({ data }: { data: CardData }) => {
       {data.posts.length || firstLink ? (
         <nav aria-label={t('Sections')} className="flex items-center gap-5 text-[13px] font-semibold">
           {data.posts.length ? (
-            <a href={POSTS_PATH} className={`rounded-sm hover:underline ${FOCUS}`}>
+            <a href={POSTS_HREF} className={`rounded-sm hover:underline ${FOCUS}`}>
               {t('Notes')}
             </a>
           ) : null}
@@ -136,7 +134,7 @@ const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
         </h2>
         <div aria-hidden className="mb-3 h-0.5 flex-1 bg-[var(--card-ink)] opacity-[0.18]" />
         <a
-          href={POSTS_PATH}
+          href={POSTS_HREF}
           className={`rounded-sm pb-1 font-[family-name:var(--card-label)] text-2xl text-[color:var(--card-muted)] hover:text-[color:var(--card-ink)] ${FOCUS}`}
         >
           {t('more in the drawer')} <span aria-hidden>&rarr;</span>

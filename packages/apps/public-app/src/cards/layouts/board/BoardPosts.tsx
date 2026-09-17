@@ -1,10 +1,10 @@
 import { useId } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, Image, t } from '@homebase-id/common-app';
+import { Image, t } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
 import type { CardData } from '../../useCardData';
-import { postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { FOCUS } from './styles';
 
 type Post = HomebaseFile<PostContent>;
@@ -22,14 +22,9 @@ const OTHER_YEAR = new Intl.DateTimeFormat(undefined, {
 const formatDate = (date: Date) =>
   (date.getFullYear() === new Date().getFullYear() ? THIS_YEAR : OTHER_YEAR).format(date);
 
-// Images and videos carry thumbnails; link previews and other payloads do not
-const THUMBNAILED = /^(image|video)\//;
-const hasThumbnail = (post: Post) =>
-  THUMBNAILED.test(post.fileMetadata.appData.content.primaryMediaFile?.type ?? '');
-
 const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
   const content = post.fileMetadata.appData.content;
-  const image = hasThumbnail(post) ? postImage(post) : undefined;
+  const image = postImage(post);
   const date = postDate(post);
   // toISOString and Intl both throw on an invalid date
   const hasDate = !Number.isNaN(date.getTime());
@@ -48,7 +43,6 @@ const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
             {...image}
             fileId={image.fileId}
             fileKey={image.fileKey}
-            probablyEncrypted={post.fileMetadata.isEncrypted}
             alt=""
             fit="cover"
             className="absolute inset-0 h-full w-full"
@@ -95,7 +89,7 @@ export const BoardPosts = ({ data }: { data: CardData }) => {
           className="h-0.5 flex-1 rounded-[1px] bg-[color:color-mix(in_srgb,var(--card-ink)_22%,transparent)]"
         />
         <Link
-          to={`${HOME_ROOT_PATH}posts`}
+          to={POSTS_HREF}
           aria-label={knownCount ? t('All {0} posts', posts.length) : t('All posts')}
           className={`whitespace-nowrap text-[14px] font-semibold text-[color:color-mix(in_srgb,var(--card-ink)_82%,transparent)] hover:text-[color:var(--card-ink)] ${FOCUS}`}
         >

@@ -19,6 +19,7 @@ export type CardImage = {
   lastModified?: number;
   previewThumbnail?: EmbeddedThumb;
   targetDrive: TargetDrive;
+  probablyEncrypted?: boolean;
 };
 export type CardLink = { id: string; text: string; target: string };
 export type CardData = {

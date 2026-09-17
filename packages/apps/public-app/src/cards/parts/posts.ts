@@ -6,6 +6,8 @@ import type { CardImage } from '../useCardData';
 
 type Post = HomebaseFile<PostContent>;
 
+export const POSTS_HREF = `${HOME_ROOT_PATH}posts/${BlogConfig.PublicChannelSlug}`;
+
 export const usePostHref = () => {
   const client = useDotYouClientContext();
   const { data: channels } = useChannels({
@@ -24,13 +26,15 @@ export const usePostHref = () => {
 
 export const postImage = (post: Post): CardImage | undefined => {
   const content = post.fileMetadata.appData.content;
-  if (!content.primaryMediaFile) return undefined;
+  const primaryMediaFile = content.primaryMediaFile;
+  if (!primaryMediaFile || !/^(image|video)\//.test(primaryMediaFile.type)) return undefined;
   return {
-    fileId: content.primaryMediaFile.fileId ?? post.fileId,
-    fileKey: content.primaryMediaFile.fileKey,
+    fileId: primaryMediaFile.fileId ?? post.fileId,
+    fileKey: primaryMediaFile.fileKey,
     lastModified: post.fileMetadata.updated,
     previewThumbnail: post.fileMetadata.appData.previewThumbnail,
     targetDrive: getChannelDrive(content.channelId),
+    probablyEncrypted: post.fileMetadata.isEncrypted,
   };
 };
 

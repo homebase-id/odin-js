@@ -28,7 +28,7 @@ export const PosterCard = ({ design, data }: LayoutProps) => (
         className="break-words text-[44px] font-light leading-[0.95] tracking-[-0.02em]"
       />
       {data.headline ? <CardLabel className="pt-3">{data.headline}</CardLabel> : null}
-      <CardBlocks design={design} data={data} className={`mt-[18px] empty:hidden ${ROWS}`} />
+      <CardBlocks design={design} data={data} className={`mt-[18px] ${ROWS}`} />
       <CardSocials variant={design.socials} data={data} className="mt-[18px]" />
     </div>
   </div>

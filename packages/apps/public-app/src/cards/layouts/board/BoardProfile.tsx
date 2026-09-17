@@ -64,12 +64,7 @@ export const BoardProfile = ({
       >
         {data.odinId}
       </p>
-      {/* empty:hidden drops the gap when no block has anything to show */}
-      <CardBlocks
-        design={design}
-        data={data}
-        className={`w-full text-[15px] empty:hidden ${sizes.blocks}`}
-      />
+      <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />
       <CardSocials variant={design.socials} data={data} className={sizes.socials} />
     </>
   );

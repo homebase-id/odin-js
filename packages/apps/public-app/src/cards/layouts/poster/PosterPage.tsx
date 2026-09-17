@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, Image, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { Image, t, useDotYouClientContext } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
 import type { LayoutProps } from '../../CardDesign';
@@ -8,7 +8,7 @@ import type { CardData } from '../../useCardData';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardLabel, CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
-import { postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
 
@@ -96,7 +96,7 @@ const TopBar = ({ data }: { data: CardData }) => {
   return (
     <header className="absolute right-8 top-6 z-10 font-sans">
       <nav aria-label={t('Sections')} className="flex items-center gap-[26px]">
-        <Link to={`${HOME_ROOT_PATH}posts`} className={link}>
+        <Link to={POSTS_HREF} className={link}>
           {t('Writing')}
         </Link>
         {first?.target ? (
@@ -151,7 +151,7 @@ const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
         className="break-words pt-3.5 text-[length:clamp(76px,10vw,118px)] font-light leading-[0.93] tracking-[-0.03em]"
       />
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4 pt-[22px]">
-        <CardBlocks design={design} data={data} className={`empty:hidden ${ROW}`} />
+        <CardBlocks design={design} data={data} className={ROW} />
         <CardSocials variant={design.socials} data={data} className={`ml-auto ${GLYPHS}`} />
       </div>
     </div>

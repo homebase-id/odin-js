@@ -1,10 +1,10 @@
 import type { FC, ReactNode } from 'react';
-import { HOME_ROOT_PATH, t, useDotYouClientContext, Image } from '@homebase-id/common-app';
+import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import type { BlockKind, LayoutProps, Presentation } from '../CardDesign';
 import type { CardData, CardImage } from '../useCardData';
-import { postImage } from './posts';
+import { POSTS_HREF, postImage } from './posts';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useChatHref = () => {
@@ -55,7 +55,7 @@ const Item = ({
   if (presentation === 'button')
     return (
       <a href={href} {...linkProps} className={`inline-flex items-center gap-2 rounded-full bg-[var(--card-ink)] px-5 py-3 font-semibold text-[color:var(--card-ground)] ${focus}`}>
-        <Icon className="h-5 w-5" />
+        <Icon aria-hidden className="h-5 w-5" />
         {label}
       </a>
     );
@@ -63,7 +63,7 @@ const Item = ({
   if (presentation === 'row')
     return (
       <a href={href} {...linkProps} className={`flex items-center gap-3 border-t border-[color:var(--card-surface)] py-3 ${focus}`}>
-        <Icon className="h-4 w-4 flex-shrink-0 text-[color:var(--card-accent)]" />
+        <Icon aria-hidden className="h-4 w-4 flex-shrink-0 text-[color:var(--card-accent)]" />
         <span className="min-w-0 flex-1">
           <span className="block">{label}</span>
           {url ? <span className="block truncate text-xs text-[color:var(--card-muted)]">{hostOf(url)}</span> : null}
@@ -75,6 +75,7 @@ const Item = ({
   return (
     <a href={href} {...linkProps} className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`}>
       <span
+        aria-hidden
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
         style={{ backgroundColor: 'color-mix(in srgb, var(--card-surface-ink) 10%, transparent)' }}
       >
@@ -88,10 +89,23 @@ const Item = ({
           ))}
         </span>
       ) : (
-        <Chevron className="h-3 w-3 opacity-60" />
+        <Chevron aria-hidden className="h-3 w-3 opacity-60" />
       )}
     </a>
   );
+};
+
+// Whether a block would render anything at all, so CardBlocks can drop empty blocks
+// (and itself) before rendering a <nav> instead of hiding one after the fact.
+const blockHasContent = (
+  block: { kind: BlockKind },
+  data: CardData,
+  chatHref: string | undefined
+) => {
+  if (block.kind === 'chat') return !!chatHref;
+  if (block.kind === 'moments') return data.posts.some((post) => !!postImage(post));
+  if (block.kind === 'links') return data.links.some((link) => link.target && link.text);
+  return false; // posts are rendered by desktop pages
 };
 
 export const CardBlock = ({
@@ -111,16 +125,18 @@ export const CardBlock = ({
   if (block.kind === 'moments') {
     const thumbs = data.posts.map(postImage).filter((img): img is CardImage => !!img).slice(0, 3);
     return thumbs.length ? (
-      <Item presentation={block.presentation} href={`${HOME_ROOT_PATH}posts`} label={t('Moments')} icon={ImageIcon} thumbs={thumbs} />
+      <Item presentation={block.presentation} href={POSTS_HREF} label={t('Moments')} icon={ImageIcon} thumbs={thumbs} />
     ) : null;
   }
 
   if (block.kind === 'links')
     return (
       <>
-        {data.links.map((link) => (
-          <Item key={link.id} presentation={block.presentation} href={link.target} label={link.text} url={link.target} icon={Globe} external />
-        ))}
+        {data.links
+          .filter((link) => link.target && link.text)
+          .map((link) => (
+            <Item key={link.id} presentation={block.presentation} href={link.target} label={link.text} url={link.target} icon={Globe} external />
+          ))}
       </>
     );
 
@@ -132,11 +148,16 @@ export const CardBlocks = ({
   data,
   kinds,
   className,
-}: LayoutProps & { kinds?: BlockKind[]; className?: string }) => {
+  label,
+}: LayoutProps & { kinds?: BlockKind[]; className?: string; label?: string }) => {
   const chatHref = useChatHref();
-  const blocks = design.blocks.filter((b) => b.kind !== 'posts' && (!kinds || kinds.includes(b.kind)));
+  const blocks = design.blocks.filter(
+    (b) =>
+      b.kind !== 'posts' && (!kinds || kinds.includes(b.kind)) && blockHasContent(b, data, chatHref)
+  );
+  if (!blocks.length) return null;
   return (
-    <nav aria-label={t('Links')} className={`flex flex-col gap-2 ${className ?? ''}`}>
+    <nav aria-label={label ?? t('Links')} className={`flex flex-col gap-2 ${className ?? ''}`}>
       {blocks.map((block) => (
         <CardBlock key={block.kind} block={block} data={data} chatHref={chatHref} />
       ))}

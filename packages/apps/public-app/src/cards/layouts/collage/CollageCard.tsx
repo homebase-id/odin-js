@@ -49,14 +49,12 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
         ) : null}
       </div>
 
-      {data.links.length ? (
-        <CardBlocks
-          design={design}
-          data={data}
-          kinds={['links']}
-          className="mt-7 !gap-2.5 [&>a:nth-child(even)]:rotate-[0.75deg] [&>a:nth-child(odd)]:rotate-[-0.75deg] [&>a]:shadow-[0_3px_10px_-4px_rgba(0,0,0,0.3)]"
-        />
-      ) : null}
+      <CardBlocks
+        design={design}
+        data={data}
+        kinds={['links']}
+        className="mt-7 !gap-2.5 [&>a:nth-child(even)]:rotate-[0.75deg] [&>a:nth-child(odd)]:rotate-[-0.75deg] [&>a]:shadow-[0_3px_10px_-4px_rgba(0,0,0,0.3)]"
+      />
 
       <div className="mt-auto flex items-center gap-2.5 pt-6">
         <CardSocials variant={design.socials} data={data} className="min-w-0 flex-1" />

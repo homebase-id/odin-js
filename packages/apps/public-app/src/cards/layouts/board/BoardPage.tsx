@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import type { LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
+import { POSTS_HREF } from '../../parts/posts';
 import { BoardProfile } from './BoardProfile';
 import { BoardPosts } from './BoardPosts';
 import { FOCUS } from './styles';
@@ -83,7 +84,7 @@ const BoardTopBar = ({ data }: { data: CardData }) => {
   return (
     <header className="absolute right-8 top-[22px] z-10 flex items-center gap-6">
       <nav aria-label={t('Sections')} className="flex items-center gap-5">
-        <Link to={`${HOME_ROOT_PATH}posts`} className={SECTION_LINK}>
+        <Link to={POSTS_HREF} className={SECTION_LINK}>
           {t('Posts')}
         </Link>
         {firstLink?.text ? (

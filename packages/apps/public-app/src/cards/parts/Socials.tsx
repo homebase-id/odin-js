@@ -21,15 +21,15 @@ export const CardSocials = ({
   const socials = data.socials.filter((s) => s.link);
   if (!socials.length) return null;
 
-  if (variant === 'handles')
-    return (
-      <p className={`text-xs text-[color:var(--card-muted)] ${className ?? ''}`}>
-        {socials
-          .map((s) => (typeof s.children === 'string' ? `@${s.children}` : null))
-          .filter(Boolean)
-          .join(' · ')}
-      </p>
-    );
+  if (variant === 'handles') {
+    const handles = socials
+      .map((s) => (typeof s.children === 'string' ? `@${s.children}` : null))
+      .filter(Boolean)
+      .join(' · ');
+    return handles ? (
+      <p className={`text-xs text-[color:var(--card-muted)] ${className ?? ''}`}>{handles}</p>
+    ) : null;
+  }
 
   if (variant === 'wordmark') {
     const [first] = socials;
@@ -58,7 +58,7 @@ export const CardSocials = ({
         const Icon = s.icon;
         return (
           <li key={s.link}>
-            <a href={s.link} target="_blank" rel="noopener noreferrer" aria-label={hostName(s.link)} className="block opacity-80 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]">
+            <a href={s.link} target="_blank" rel="noopener noreferrer" aria-label={hostName(s.link) || s.link} className="block opacity-80 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]">
               <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />
             </a>
           </li>
