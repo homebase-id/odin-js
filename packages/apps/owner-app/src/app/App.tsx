@@ -264,12 +264,7 @@ function App() {
           </Route>
         </Route>
       </>
-    ),
-    {
-      future: {
-        v7_relativeSplatPath: true,
-      },
-    }
+    )
   );
 
   return (
@@ -279,13 +274,7 @@ function App() {
       </Helmet>
       <OdinQueryClient app="owner" type="indexeddb">
         <DotYouClientProvider>
-          <RouterProvider
-            router={router}
-            fallbackElement={<></>}
-            future={{
-              v7_startTransition: true,
-            }}
-          />
+          <RouterProvider router={router} />
         </DotYouClientProvider>
       </OdinQueryClient>
     </HelmetProvider>
