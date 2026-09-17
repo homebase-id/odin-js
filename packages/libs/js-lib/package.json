@@ -1,5 +1,5 @@
 {
-  "version": "0.0.7-alpha.83",
+  "version": "0.0.7-alpha.84",
   "name": "@homebase-id/js-lib",
   "author": "YouFoundation",
   "description": "Monorepo that contains all the main homebase apps, together with the JavaScript libraries",
@@ -83,7 +83,7 @@
     "mp4box": "^0.5.2"
   },
   "devDependencies": {
-    "vitest": "^0.34.6"
+    "vitest": "^4.1.8"
   },
   "peerDependencies": {
     "axios": "^1.7.5"
