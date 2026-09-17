@@ -1,4 +1,4 @@
-import type { SocialsVariant } from '../CardDesign';
+import { CARD_FOCUS, type SocialsVariant } from '../CardDesign';
 import type { CardData } from '../useCardData';
 
 const hostName = (url: string) => {
@@ -18,7 +18,7 @@ export const CardSocials = ({
   data: CardData;
   className?: string;
 }) => {
-  const socials = data.socials.filter((s) => s.link);
+  const { socials } = data;
   if (!socials.length) return null;
 
   if (variant === 'handles') {
@@ -39,7 +39,7 @@ export const CardSocials = ({
         href={first.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`flex items-center gap-3 rounded-2xl bg-[var(--card-surface)] px-4 py-3 text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)] ${className ?? ''}`}
+        className={`flex items-center gap-3 rounded-2xl bg-[var(--card-surface)] px-4 py-3 text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] ${CARD_FOCUS} ${className ?? ''}`}
       >
         <Icon className="h-7 w-7 text-[color:var(--card-accent)]" />
         <span className="leading-tight">
@@ -53,12 +53,20 @@ export const CardSocials = ({
   }
 
   return (
-    <ul className={`flex flex-wrap items-center ${variant === 'bar' ? 'justify-center gap-5' : 'gap-3'} ${className ?? ''}`}>
+    <ul
+      className={`flex flex-wrap items-center ${variant === 'bar' ? 'justify-center gap-5' : 'gap-3'} ${className ?? ''}`}
+    >
       {socials.map((s) => {
         const Icon = s.icon;
         return (
           <li key={s.link}>
-            <a href={s.link} target="_blank" rel="noopener noreferrer" aria-label={hostName(s.link) || s.link} className="block opacity-80 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]">
+            <a
+              href={s.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={hostName(s.link) || s.link}
+              className={`-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`}
+            >
               <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />
             </a>
           </li>

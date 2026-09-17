@@ -1,10 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { LayoutProps, Portrait } from '../../CardDesign';
-import type { CardData, CardImage } from '../../useCardData';
+import { ownerName, type CardData, type CardImage } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-
-export const FOCUS =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 
 type Frame = { portrait: Portrait; image: CardImage | undefined; alt: string };
 
@@ -12,7 +9,7 @@ type Frame = { portrait: Portrait; image: CardImage | undefined; alt: string };
 // Only the owner's photo is named; the header image is scenery.
 // eslint-disable-next-line react-refresh/only-export-components
 export const collageFrames = ({ design, data }: LayoutProps): [Frame?, Frame?] => {
-  const name = [data.firstName, data.surName].filter(Boolean).join(' ') || data.displayName || data.odinId;
+  const name = ownerName(data);
   const [print, cutout] = design.portraits.map((portrait) => ({
     portrait,
     image: portraitImage(portrait, data),
@@ -24,9 +21,9 @@ export const collageFrames = ({ design, data }: LayoutProps): [Frame?, Frame?] =
 // The collage signs with a first name only, as both references do; CardName falls back to the
 // display name when there is no first name
 // eslint-disable-next-line react-refresh/only-export-components
-export const signature = (data: CardData): CardData => ({ ...data, surName: undefined });
+export const firstNameOnly = (data: CardData): CardData => ({ ...data, surName: undefined });
 
-const SHADOWS = {
+const FRAME_SHADOWS = {
   soft: 'shadow-[0_4px_12px_rgba(0,0,0,0.2)]',
   hard: 'shadow-[6px_6px_0_rgba(0,0,0,0.3)]',
 };
@@ -38,7 +35,11 @@ const TAPE_STYLE: CSSProperties = {
 
 // A strip of masking tape; the caller positions and sizes it
 export const Tape = ({ className }: { className: string }) => (
-  <span aria-hidden className={`pointer-events-none absolute z-10 ${className}`} style={TAPE_STYLE} />
+  <span
+    aria-hidden
+    className={`pointer-events-none absolute z-10 ${className}`}
+    style={TAPE_STYLE}
+  />
 );
 
 const tilt = (deg?: number): CSSProperties | undefined =>
@@ -55,7 +56,7 @@ export const Print = ({
   if (!image) return null;
   return (
     <div
-      className={`relative bg-[var(--card-surface)] ${portrait.shadow ? SHADOWS[portrait.shadow] : ''} ${className}`}
+      className={`relative bg-[var(--card-surface)] ${portrait.shadow ? FRAME_SHADOWS[portrait.shadow] : ''} ${className}`}
       style={tilt(portrait.tilt)}
     >
       {portrait.tape ? <Tape className={tapeClassName} /> : null}

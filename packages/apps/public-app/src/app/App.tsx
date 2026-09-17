@@ -82,7 +82,10 @@ function App() {
             >
               <Route path="posts/:channelKey" element={<PostOverview />} />
               <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />
-              <Route path="posts/:channelKey/:postKey/:attachmentKey" element={<PostImageDetail />} />
+              <Route
+                path="posts/:channelKey/:postKey/:attachmentKey"
+                element={<PostImageDetail />}
+              />
               <Route path="linked" element={<LinksPage />} />
               <Route path="ping" element={<Ping />} />
               <Route path="*" element={<NotFound />} />

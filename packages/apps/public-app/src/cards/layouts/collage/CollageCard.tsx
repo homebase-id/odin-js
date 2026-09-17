@@ -5,7 +5,8 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { collageFrames, Cutout, FOCUS, Print, signature } from './frames';
+import { CARD_FOCUS as FOCUS } from '../../CardDesign';
+import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
 
 // Round chat button: CardBlock's button always prints its label, which does not fit beside the wordmark
 const ChatButton = () => {
@@ -34,14 +35,28 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
       {print || cutout ? (
         <div className="flex items-start">
           {print ? (
-            <Print {...print} className="ml-[1%] w-[49%] p-2 pb-8" tapeClassName="-top-2.5 left-1/2 h-5 w-[38%] -translate-x-1/2 -rotate-3" />
+            <Print
+              {...print}
+              className="ml-[1%] w-[49%] p-2 pb-8"
+              tapeClassName="-top-2.5 left-1/2 h-5 w-[38%] -translate-x-1/2 -rotate-3"
+            />
           ) : null}
-          {cutout ? <Cutout {...cutout} ring={4} className={`ml-auto mr-[1%] w-[38%] ${print ? 'mt-[18%]' : ''}`} /> : null}
+          {cutout ? (
+            <Cutout
+              {...cutout}
+              ring={4}
+              className={`ml-auto mr-[1%] w-[38%] ${print ? 'mt-[18%]' : ''}`}
+            />
+          ) : null}
         </div>
       ) : null}
 
       <div className={`relative z-10 pl-2 ${print || cutout ? '-mt-11' : 'mt-6'}`}>
-        <CardName design={design} data={signature(data)} className="text-[56px] font-bold leading-[0.86] [overflow-wrap:anywhere]" />
+        <CardName
+          design={design}
+          data={firstNameOnly(data)}
+          className="text-[56px] font-bold leading-[0.86] [overflow-wrap:anywhere]"
+        />
         {data.headline ? (
           <p className="mt-2 pl-1 font-[family-name:var(--card-label)] text-[22px] font-medium leading-6 text-[color:var(--card-muted)]">
             {data.headline}

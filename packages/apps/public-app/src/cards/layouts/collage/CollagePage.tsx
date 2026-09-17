@@ -1,17 +1,16 @@
-import { useId, useState } from 'react';
-import { Image, t, useDotYouClientContext } from '@homebase-id/common-app';
+import { useId } from 'react';
+import { Image, t } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { PostContent } from '@homebase-id/js-lib/public';
-import type { LayoutProps } from '../../CardDesign';
+import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlock, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
-import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
-import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
-import { collageFrames, Cutout, FOCUS, Print, signature, Tape } from './frames';
+import { CardSignIn } from '../../parts/SignIn';
+import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -26,48 +25,27 @@ const HERO_GRID = {
 const NOTE_TILTS = [-2, 1.5, -1, 2, -2.5, 1];
 
 const dayMonth = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long' });
-const dayMonthYear = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const dayMonthYear = new Intl.DateTimeFormat(undefined, {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
 const formatNoteDate = (date: Date) =>
   (date.getFullYear() === new Date().getFullYear() ? dayMonth : dayMonthYear).format(date);
 
-const AuthControl = () => {
-  const client = useDotYouClientContext();
-  const [isLogin, setIsLogin] = useState(false);
-
-  if (client.isOwner()) return null; // the owner has the Sidenav
-  if (client.isAuthenticated())
-    return (
-      // ProfileNav's dropdown relies on the app's text colour, not the card ink
-      <div className="text-foreground">
-        <ProfileNav />
-      </div>
-    );
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setIsLogin(true)}
-        className={`rounded-full bg-[var(--card-surface)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface-ink)] shadow-[0_2px_6px_rgba(0,0,0,0.18)] ${FOCUS}`}
-      >
-        {t('Sign in')}
-      </button>
-      <LoginDialog
-        title={t('Sign in')}
-        isOpen={isLogin}
-        onCancel={() => setIsLogin(false)}
-        returnPath={window.location.pathname}
-      />
-    </>
-  );
-};
+const AuthControl = () => (
+  <CardSignIn className="rounded-full bg-[var(--card-surface)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface-ink)] shadow-[0_2px_6px_rgba(0,0,0,0.18)]" />
+);
 
 const TopBar = ({ data }: { data: CardData }) => {
   const [firstLink] = data.links;
   return (
     <header className="absolute right-[30px] top-5 z-20 flex items-center gap-5">
       {data.posts.length || firstLink ? (
-        <nav aria-label={t('Sections')} className="flex items-center gap-5 text-[13px] font-semibold">
+        <nav
+          aria-label={t('Sections')}
+          className="flex items-center gap-5 text-[13px] font-semibold"
+        >
           {data.posts.length ? (
             <a href={POSTS_HREF} className={`rounded-sm hover:underline ${FOCUS}`}>
               {t('Notes')}
@@ -90,7 +68,15 @@ const TopBar = ({ data }: { data: CardData }) => {
   );
 };
 
-const Note = ({ post, href, tilt }: { post: HomebaseFile<PostContent>; href: string; tilt: number }) => {
+const Note = ({
+  post,
+  href,
+  tilt,
+}: {
+  post: HomebaseFile<PostContent>;
+  href: string;
+  tilt: number;
+}) => {
   const image = postImage(post);
   const date = postDate(post);
   const { caption } = post.fileMetadata.appData.content;
@@ -102,20 +88,34 @@ const Note = ({ post, href, tilt }: { post: HomebaseFile<PostContent>; href: str
         className={`block h-full bg-[var(--card-surface)] p-3 pb-6 text-[color:var(--card-surface-ink)] shadow-[0_3px_9px_rgba(0,0,0,0.18)] ${FOCUS}`}
       >
         {image ? (
-          <Image {...image} fileId={image.fileId} fileKey={image.fileKey} alt="" className="aspect-[260/118] w-full" fit="cover" />
+          <Image
+            {...image}
+            fileId={image.fileId}
+            fileKey={image.fileKey}
+            alt=""
+            className="aspect-[260/118] w-full"
+            fit="cover"
+          />
         ) : (
           <div
             aria-hidden
             className="aspect-[260/118] w-full"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--card-muted) 18%, var(--card-surface))' }}
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--card-muted) 18%, var(--card-surface))',
+            }}
           />
         )}
         {caption ? (
           <p className="line-clamp-3 pt-2.5 font-[family-name:var(--card-display)] text-[26px] font-bold leading-[26px]">
             {caption}
           </p>
-        ) : null}
-        <time dateTime={date.toISOString()} className="block pt-1.5 text-[13px] font-medium text-[color:var(--card-muted)]">
+        ) : (
+          <span className="sr-only">{t('Untitled')}</span>
+        )}
+        <time
+          dateTime={date.toISOString()}
+          className="block pt-1.5 text-[13px] font-medium text-[color:var(--card-muted)]"
+        >
           {formatNoteDate(date)}
         </time>
       </a>
@@ -129,7 +129,10 @@ const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
   return (
     <section aria-labelledby={headingId} className="px-[5.7%] pt-[18px]">
       <div className="flex items-end gap-5">
-        <h2 id={headingId} className="font-[family-name:var(--card-display)] text-[64px] font-bold leading-[50px]">
+        <h2
+          id={headingId}
+          className="font-[family-name:var(--card-display)] text-[64px] font-bold leading-[50px]"
+        >
           {t('Notes')}
         </h2>
         <div aria-hidden className="mb-3 h-0.5 flex-1 bg-[var(--card-ink)] opacity-[0.18]" />
@@ -161,7 +164,8 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
   const socials = data.socials.filter((s) => s.link);
   const hasCollage = !!(print || cutout);
   const hasAside = !!(chatBlock && chatHref) || socials.length > 0 || !!data.header;
-  const grid = HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
+  const grid =
+    HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
   // The wordmark box shows the first social; the glyphs under the name carry the rest
   const restData = { ...data, socials: socials.slice(1) };
 
@@ -183,7 +187,11 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   />
                 ) : null}
                 {cutout ? (
-                  <Cutout {...cutout} ring={7} className={`w-[61%] ${print ? '-mt-2 ml-[39%]' : 'ml-[10%] mt-11'}`} />
+                  <Cutout
+                    {...cutout}
+                    ring={7}
+                    className={`w-[61%] ${print ? '-mt-2 ml-[39%]' : 'ml-[10%] mt-11'}`}
+                  />
                 ) : null}
               </div>
             ) : null}
@@ -191,7 +199,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
             <div className="self-center py-10 [container-type:inline-size]">
               <CardName
                 design={design}
-                data={signature(data)}
+                data={firstNameOnly(data)}
                 className="origin-left -rotate-2 text-[length:clamp(56px,34cqw,124px)] font-bold leading-[0.84] [overflow-wrap:anywhere]"
               />
               {data.headline ? (
@@ -213,11 +221,22 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                     <CardBlock block={chatBlock} data={data} chatHref={chatHref} />
                   </div>
                 ) : null}
-                <CardSocials variant="wordmark" data={data} className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10" />
+                <CardSocials
+                  variant="wordmark"
+                  data={data}
+                  className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10"
+                />
                 {/* The reference captions its map with an address; the headline already sits under the name */}
                 {data.header ? (
                   <div className="h-[170px] rotate-1 overflow-hidden rounded-2xl border-[5px] border-[color:var(--card-surface)] shadow-[0_3px_9px_rgba(0,0,0,0.18)]">
-                    <Image {...data.header} fileId={data.header.fileId} fileKey={data.header.fileKey} alt="" className="h-full w-full" fit="cover" />
+                    <Image
+                      {...data.header}
+                      fileId={data.header.fileId}
+                      fileKey={data.header.fileKey}
+                      alt=""
+                      className="h-full w-full"
+                      fit="cover"
+                    />
                   </div>
                 ) : null}
               </div>

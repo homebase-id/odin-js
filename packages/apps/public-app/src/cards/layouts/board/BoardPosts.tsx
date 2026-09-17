@@ -5,7 +5,7 @@ import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
 import type { CardData } from '../../useCardData';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
-import { FOCUS } from './styles';
+import { CARD_FOCUS as FOCUS } from '../../CardDesign';
 
 type Post = HomebaseFile<PostContent>;
 
@@ -59,7 +59,9 @@ const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
           <h3 className="mt-[5px] line-clamp-3 text-pretty text-[17px] font-semibold leading-[22px]">
             {content.caption}
           </h3>
-        ) : null}
+        ) : (
+          <span className="sr-only">{t('Untitled')}</span>
+        )}
       </div>
     </Link>
   );

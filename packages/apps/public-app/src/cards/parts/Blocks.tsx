@@ -2,7 +2,12 @@ import type { FC, ReactNode } from 'react';
 import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
-import type { BlockKind, LayoutProps, Presentation } from '../CardDesign';
+import {
+  CARD_FOCUS as focus,
+  type BlockKind,
+  type LayoutProps,
+  type Presentation,
+} from '../CardDesign';
 import type { CardData, CardImage, CardLink } from '../useCardData';
 import { POSTS_HREF, postImage } from './posts';
 
@@ -43,18 +48,25 @@ const Item = ({
   external?: boolean;
 }) => {
   const linkProps = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
-  const focus = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 
   if (presentation === 'bare')
     return (
-      <a href={href} {...linkProps} className={`block border-t border-[color:var(--card-surface)] py-3 font-[family-name:var(--card-display)] text-lg ${focus}`}>
+      <a
+        href={href}
+        {...linkProps}
+        className={`block border-t border-[color:var(--card-surface)] py-3 font-[family-name:var(--card-display)] text-lg ${focus}`}
+      >
         {label}
       </a>
     );
 
   if (presentation === 'button')
     return (
-      <a href={href} {...linkProps} className={`inline-flex items-center gap-2 rounded-full bg-[var(--card-ink)] px-5 py-3 font-semibold text-[color:var(--card-ground)] ${focus}`}>
+      <a
+        href={href}
+        {...linkProps}
+        className={`inline-flex items-center gap-2 rounded-full bg-[var(--card-ink)] px-5 py-3 font-semibold text-[color:var(--card-ground)] ${focus}`}
+      >
         <Icon aria-hidden className="h-5 w-5" />
         {label}
       </a>
@@ -62,18 +74,30 @@ const Item = ({
 
   if (presentation === 'row')
     return (
-      <a href={href} {...linkProps} className={`flex items-center gap-3 border-t border-[color:var(--card-surface)] py-3 ${focus}`}>
+      <a
+        href={href}
+        {...linkProps}
+        className={`flex items-center gap-3 border-t border-[color:var(--card-surface)] py-3 ${focus}`}
+      >
         <Icon aria-hidden className="h-4 w-4 flex-shrink-0 text-[color:var(--card-accent)]" />
         <span className="min-w-0 flex-1">
           <span className="block">{label}</span>
-          {url ? <span className="block truncate text-xs text-[color:var(--card-muted)]">{displayUrl(url)}</span> : null}
+          {url ? (
+            <span className="block truncate text-xs text-[color:var(--card-muted)]">
+              {displayUrl(url)}
+            </span>
+          ) : null}
         </span>
       </a>
     );
 
   // boxed
   return (
-    <a href={href} {...linkProps} className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`}>
+    <a
+      href={href}
+      {...linkProps}
+      className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`}
+    >
       <span
         aria-hidden
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
@@ -85,7 +109,15 @@ const Item = ({
       {thumbs?.length ? (
         <span className="flex gap-1">
           {thumbs.map((img) => (
-            <Image key={img.fileKey} {...img} fileId={img.fileId} fileKey={img.fileKey} alt="" className="h-8 w-8 overflow-hidden rounded-md" fit="cover" />
+            <Image
+              key={img.fileKey}
+              {...img}
+              fileId={img.fileId}
+              fileKey={img.fileKey}
+              alt=""
+              className="h-8 w-8 overflow-hidden rounded-md"
+              fit="cover"
+            />
           ))}
         </span>
       ) : (
@@ -102,7 +134,7 @@ export const isUsableLink = (link: CardLink) => !!link.target && !!link.text;
 // Whether a block would render anything at all, so callers can drop it (and CardBlocks itself,
 // or a layout's own section heading) instead of showing an empty nav or an orphaned title.
 // eslint-disable-next-line react-refresh/only-export-components
-export const hasBlockContent = (kind: BlockKind, data: CardData, chatHref: string | undefined) => {
+export const hasBlockContent = (kind: BlockKind, data: CardData, chatHref?: string) => {
   if (kind === 'chat') return !!chatHref;
   if (kind === 'moments') return data.posts.some((post) => !!postImage(post));
   if (kind === 'links') return data.links.some(isUsableLink);
@@ -120,11 +152,19 @@ export const CardBlock = ({
 }) => {
   if (block.kind === 'chat')
     return chatHref ? (
-      <Item presentation={block.presentation} href={chatHref} label={t('Chat with me')} icon={ChatBubble} />
+      <Item
+        presentation={block.presentation}
+        href={chatHref}
+        label={t('Chat with me')}
+        icon={ChatBubble}
+      />
     ) : null;
 
   if (block.kind === 'moments') {
-    const thumbs = data.posts.map(postImage).filter((img): img is CardImage => !!img).slice(0, 3);
+    const thumbs = data.posts
+      .map(postImage)
+      .filter((img): img is CardImage => !!img)
+      .slice(0, 3);
     return thumbs.length ? (
       <Item
         presentation={block.presentation}

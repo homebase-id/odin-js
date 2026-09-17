@@ -1,15 +1,13 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useDotYouClientContext } from '@homebase-id/common-app';
-import type { LayoutProps } from '../../CardDesign';
+import { t } from '@homebase-id/common-app';
+import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
-import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
-import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
 import { POSTS_HREF } from '../../parts/posts';
+import { CardSignIn } from '../../parts/SignIn';
 import { BoardProfile } from './BoardProfile';
 import { BoardPosts } from './BoardPosts';
-import { FOCUS } from './styles';
-const SECTION_LINK = `block text-[14px] font-semibold text-[color:color-mix(in_srgb,var(--card-ink)_82%,transparent)] hover:text-[color:var(--card-ink)] ${FOCUS}`;
+
+const SECTION_LINK = `block text-[14px] font-semibold text-[color:color-mix(in_srgb,var(--card-ink)_82%,transparent)] hover:text-[color:var(--card-ink)] ${CARD_FOCUS}`;
 
 // Drawn for the 1120px page and pinned to the centre, so it keeps its place around the column
 // at any width; the page wrapper clips what falls outside.
@@ -45,39 +43,10 @@ const BoardPageArt = () => (
   </svg>
 );
 
-const BoardAccount = () => {
-  const client = useDotYouClientContext();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-
-  // The owner already has the sidenav
-  if (client.isOwner()) return null;
-
-  // ProfileNav's menu is drawn in app colours, not the card's
-  if (client.isAuthenticated())
-    return (
-      <div className="text-foreground">
-        <ProfileNav />
-      </div>
-    );
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setIsLoginOpen(true)}
-        className={`rounded-full bg-[var(--card-surface)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface-ink)] shadow-[0_3px_0_rgba(0,0,0,0.2)] active:translate-y-0.5 active:shadow-[0_1px_0_rgba(0,0,0,0.2)] ${FOCUS}`}
-      >
-        {t('Sign in')}
-      </button>
-      <LoginDialog
-        title={t('Sign in')}
-        isOpen={isLoginOpen}
-        onCancel={() => setIsLoginOpen(false)}
-        returnPath={window.location.pathname}
-      />
-    </>
-  );
-};
+// The owner already has the sidenav
+const BoardAccount = () => (
+  <CardSignIn className="rounded-full bg-[var(--card-surface)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface-ink)] shadow-[0_3px_0_rgba(0,0,0,0.2)] active:translate-y-0.5 active:shadow-[0_1px_0_rgba(0,0,0,0.2)]" />
+);
 
 const BoardTopBar = ({ data }: { data: CardData }) => {
   const [firstLink] = data.links;

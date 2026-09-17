@@ -16,7 +16,10 @@ const CARDS: Record<LayoutId, FC<LayoutProps>> = {
 export const HomebaseCard = ({ design, data, className }: LayoutProps & { className?: string }) => {
   const Layout = CARDS[design.layout];
   return (
-    <article style={cardVars(design)} className={`relative isolate overflow-hidden ${className ?? ''}`}>
+    <article
+      style={cardVars(design)}
+      className={`relative isolate overflow-hidden ${className ?? ''}`}
+    >
       <Layout design={design} data={data} />
     </article>
   );

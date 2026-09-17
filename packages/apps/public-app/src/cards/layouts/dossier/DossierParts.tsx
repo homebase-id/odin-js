@@ -1,18 +1,11 @@
 import { useId, type CSSProperties, type ReactNode } from 'react';
 import { t } from '@homebase-id/common-app';
-import type { LayoutProps } from '../../CardDesign';
+import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { useChatHref } from '../../parts/Blocks';
 import { CardLabel } from '../../parts/Type';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const ownerName = ({ firstName, surName, displayName, odinId }: CardData) =>
-  [firstName, surName].filter(Boolean).join(' ') || displayName || odinId;
-
 export const hairline = 'border-[color:var(--card-surface)]';
-
-export const dossierFocus =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 
 // CardLabel renders a <p>; the wrapper gives it heading semantics without invalid nesting
 export const SectionLabel = ({
@@ -94,7 +87,7 @@ export const DossierContact = ({
           <ContactRow term={t('Chat')} size={size}>
             <a
               href={chatHref}
-              className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${dossierFocus}`}
+              className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${CARD_FOCUS}`}
             >
               {t('open a chat')} <span aria-hidden>&#8594;</span>
             </a>

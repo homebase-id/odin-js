@@ -14,7 +14,12 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
       surfaceInk: '#F4F0EA',
     },
     ground: { photo: true, scrim: 0.85 },
-    type: { display: 'newsreader', displayCase: 'italic-2nd-line', text: 'newsreader', label: 'space-mono' },
+    type: {
+      display: 'newsreader',
+      displayCase: 'italic-2nd-line',
+      text: 'newsreader',
+      label: 'space-mono',
+    },
     portraits: [],
     blocks: [
       { kind: 'chat', presentation: 'bare' },
@@ -36,7 +41,12 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
       surfaceInk: '#16304F',
     },
     ground: { photo: false, art: 'circles' },
-    type: { display: 'montserrat-alt', displayCase: 'none', text: 'montserrat', label: 'montserrat' },
+    type: {
+      display: 'montserrat-alt',
+      displayCase: 'none',
+      text: 'montserrat',
+      label: 'montserrat',
+    },
     portraits: [{ source: 'photo', shape: 'circle', ring: 4, shadow: 'hard' }],
     blocks: [
       { kind: 'links', presentation: 'boxed' },
@@ -83,7 +93,12 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
       surfaceInk: '#E9ECF1',
     },
     ground: { photo: false },
-    type: { display: 'archivo-black', displayCase: 'upper', text: 'space-mono', label: 'space-mono' },
+    type: {
+      display: 'archivo-black',
+      displayCase: 'upper',
+      text: 'space-mono',
+      label: 'space-mono',
+    },
     portraits: [{ source: 'photo', shape: 'square', mono: true }],
     blocks: [
       { kind: 'chat', presentation: 'row' },

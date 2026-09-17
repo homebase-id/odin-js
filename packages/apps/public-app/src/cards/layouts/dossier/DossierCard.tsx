@@ -1,24 +1,24 @@
 import { useId } from 'react';
 import { t } from '@homebase-id/common-app';
 import type { BlockKind, LayoutProps } from '../../CardDesign';
-import { CardBlocks, hasBlockContent, useChatHref } from '../../parts/Blocks';
+import { CardBlocks, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import { DossierContact, hairline, LocationLine, ownerName, SectionLabel } from './DossierParts';
+import { ownerName } from '../../useCardData';
+import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: the fourth card in Anatomy.dc.html (262px wide), scaled ~1.3x for a 390px phone
 
 export const DossierCard = ({ design, data }: LayoutProps) => {
   const elsewhereId = useId();
-  const chatHref = useChatHref();
 
   const [portrait] = design.portraits;
   const hasBlock = (kind: BlockKind) => design.blocks.some((block) => block.kind === kind);
   // CardBlocks hides itself once it has no rows to show, but the section heading is ours to hide
   const showElsewhere =
-    (hasBlock('links') && hasBlockContent('links', data, chatHref)) ||
-    (hasBlock('moments') && hasBlockContent('moments', data, chatHref));
+    (hasBlock('links') && hasBlockContent('links', data)) ||
+    (hasBlock('moments') && hasBlockContent('moments', data));
 
   return (
     <div className="flex min-h-[inherit] flex-col px-5 pb-5 pt-6 text-[13px]">

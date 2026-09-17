@@ -1,26 +1,18 @@
-import { useId, useState, type FC } from 'react';
+import { useId, type FC } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useDotYouClientContext } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 import { Globe, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
-import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
-import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
-import type { LayoutProps } from '../../CardDesign';
-import type { CardData } from '../../useCardData';
+import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
+import { ownerName, type CardData } from '../../useCardData';
 import { displayUrl, isUsableLink } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
+import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import {
-  DossierContact,
-  dossierFocus,
-  hairline,
-  LocationLine,
-  ownerName,
-  SectionLabel,
-} from './DossierParts';
+import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -65,9 +57,8 @@ export const DossierPage = ({ design, data }: LayoutProps) => (
 );
 
 const TopBar = ({ data }: { data: CardData }) => {
-  const client = useDotYouClientContext();
   const [firstLink] = data.links.filter((link) => link.target);
-  const navLink = `block max-w-[14rem] truncate text-[12px] ${tracked} ${muted} hover:text-[color:var(--card-ink)] ${dossierFocus}`;
+  const navLink = `block max-w-[14rem] truncate text-[12px] ${tracked} ${muted} hover:text-[color:var(--card-ink)] ${CARD_FOCUS}`;
 
   return (
     <header className={`border-b ${hairline}`}>
@@ -99,39 +90,12 @@ const TopBar = ({ data }: { data: CardData }) => {
               ) : null}
             </ul>
           </nav>
-          {client.isOwner() ? null : client.isAuthenticated() ? (
-            // ProfileNav's dropdown is styled for the app chrome, not the card palette
-            <div className="text-foreground">
-              <ProfileNav />
-            </div>
-          ) : (
-            <SignIn />
-          )}
+          <CardSignIn
+            className={`flex-shrink-0 whitespace-nowrap bg-[var(--card-accent)] px-3 py-1.5 text-[12px] ${tracked} text-[color:var(--card-ground)]`}
+          />
         </div>
       </div>
     </header>
-  );
-};
-
-const SignIn = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        aria-haspopup="dialog"
-        onClick={() => setIsOpen(true)}
-        className={`flex-shrink-0 whitespace-nowrap bg-[var(--card-accent)] px-3 py-1.5 text-[12px] ${tracked} text-[color:var(--card-ground)] ${dossierFocus}`}
-      >
-        {t('Sign in')}
-      </button>
-      <LoginDialog
-        title={t('Sign in')}
-        isOpen={isOpen}
-        onCancel={() => setIsOpen(false)}
-        returnPath={window.location.pathname}
-      />
-    </>
   );
 };
 
@@ -220,7 +184,7 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
 };
 
 const ElsewhereRow = ({ href, label, url, icon: Icon }: Omit<ElsewhereItem, 'id'>) => {
-  const className = `group col-span-3 grid grid-cols-subgrid items-center border-t ${hairline} py-3.5 ${dossierFocus}`;
+  const className = `group col-span-3 grid grid-cols-subgrid items-center border-t ${hairline} py-3.5 ${CARD_FOCUS}`;
   const content = (
     <>
       <span
@@ -321,7 +285,7 @@ const PostRow = ({ post, number, href }: { post: Post; number: number; href: str
       <td className={`${cell} pr-5 text-[17px] leading-[23px]`}>
         <Link
           to={href}
-          className={`line-clamp-2 ${ink} hover:text-[color:var(--card-accent)] ${dossierFocus}`}
+          className={`line-clamp-2 ${ink} hover:text-[color:var(--card-accent)] ${CARD_FOCUS}`}
         >
           {content.caption?.trim() || t('Untitled')}
         </Link>

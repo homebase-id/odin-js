@@ -1,4 +1,5 @@
 import type { LayoutProps } from '../../CardDesign';
+import { ownerName } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
@@ -28,9 +29,6 @@ const SIZES = {
     socials: 'mt-[26px]',
   },
 } as const;
-
-const ownerName = ({ firstName, surName, displayName, odinId }: LayoutProps['data']) =>
-  firstName ? [firstName, surName].filter(Boolean).join(' ') : displayName || odinId;
 
 export const BoardProfile = ({
   design,

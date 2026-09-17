@@ -73,3 +73,7 @@ export const cardVars = ({ palette, type }: CardDesign) =>
     color: palette.ink,
     fontFamily: FONT_STACKS[type.text],
   }) as CSSProperties;
+
+// The one keyboard focus ring every card link and button draws
+export const CARD_FOCUS =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';

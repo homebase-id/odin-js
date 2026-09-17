@@ -6,8 +6,7 @@ import { CardSocials } from '../../parts/Socials';
 
 // The reference card is 260px wide; this is it at ~1.3x, the scale the dossier card uses.
 // Bare rows touch: a hairline above each and under the last, 19px labels, 49px tall
-const ROWS =
-  '!gap-0 [&>a]:py-2.5 [&>a]:text-[19px] [&>a]:leading-7 [&>a:last-child]:border-b';
+const ROWS = '!gap-0 [&>a]:py-2.5 [&>a]:text-[19px] [&>a]:leading-7 [&>a:last-child]:border-b';
 
 // CardGround's scrim is tied to the card height; this one follows the content,
 // so a long list of links never lifts the name onto bare photo

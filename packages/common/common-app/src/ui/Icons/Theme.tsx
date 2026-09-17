@@ -140,7 +140,14 @@ export const CollageCard: FC<IconProps> = ({ className }) => (
     className={className}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <rect x="24" y="30" width="120" height="140" transform="rotate(-5 84 100)" fill="currentColor" />
+    <rect
+      x="24"
+      y="30"
+      width="120"
+      height="140"
+      transform="rotate(-5 84 100)"
+      fill="currentColor"
+    />
     <ellipse cx="206" cy="96" rx="52" ry="64" fill="currentColor" fillOpacity="0.6" />
     <path
       d="M40 230c20-30 40 30 60 0s40 30 60 0 40 30 60 0"

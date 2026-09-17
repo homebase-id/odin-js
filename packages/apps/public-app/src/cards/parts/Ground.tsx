@@ -2,7 +2,12 @@ import { Image } from '@homebase-id/common-app';
 import type { LayoutProps } from '../CardDesign';
 
 const CirclesArt = () => (
-  <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 400 800">
+  <svg
+    aria-hidden
+    className="absolute inset-0 h-full w-full"
+    preserveAspectRatio="xMidYMid slice"
+    viewBox="0 0 400 800"
+  >
     <g fill="none" stroke="currentColor" strokeOpacity="0.14">
       <circle cx="-20" cy="150" r="130" />
       <circle cx="-20" cy="150" r="90" />
@@ -32,10 +37,20 @@ const SpeckleArt = () => (
 export const CardGround = ({ design, data }: LayoutProps) => {
   const { ground } = design;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden text-[color:var(--card-ink)]">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden text-[color:var(--card-ink)]"
+    >
       {ground.photo && data.photo ? (
         <>
-          <Image {...data.photo} fileId={data.photo.fileId} fileKey={data.photo.fileKey} alt="" className="h-full w-full" fit="cover" />
+          <Image
+            {...data.photo}
+            fileId={data.photo.fileId}
+            fileKey={data.photo.fileKey}
+            alt=""
+            className="h-full w-full"
+            fit="cover"
+          />
           <div
             className="absolute inset-0"
             style={{

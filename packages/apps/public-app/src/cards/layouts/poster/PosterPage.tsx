@@ -1,21 +1,18 @@
-import { useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { Image, t, useDotYouClientContext } from '@homebase-id/common-app';
 import type { HomebaseFile } from '@homebase-id/js-lib/core';
 import type { Article, PostContent } from '@homebase-id/js-lib/public';
-import type { LayoutProps } from '../../CardDesign';
+import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardLabel, CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
-import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
-import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
+import { CardSignIn } from '../../parts/SignIn';
 
 type Post = HomebaseFile<PostContent>;
 
-const FOCUS =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 const FOCUS_ON_PAPER =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-ground)]';
 const GUTTER = 'px-[clamp(32px,5.72vw,64px)]'; // 64px at 1120
@@ -57,37 +54,9 @@ const postText = (post: Post) => {
   };
 };
 
-const SignIn = () => {
-  const client = useDotYouClientContext();
-  const [isOpen, setIsOpen] = useState(false);
-
-  if (client.isOwner()) return null; // the owner has the Sidenav
-  if (client.isAuthenticated())
-    return (
-      // ProfileNav is app chrome with its own slate panel, so it takes the app's text colour
-      <div className="text-foreground">
-        <ProfileNav />
-      </div>
-    );
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={`rounded-full border border-[color:color-mix(in_srgb,var(--card-ink)_55%,transparent)] px-4 py-1.5 text-sm font-medium text-[color:var(--card-ink)] hover:bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] ${FOCUS}`}
-      >
-        {t('Sign in')}
-      </button>
-      <LoginDialog
-        title={t('Sign in')}
-        isOpen={isOpen}
-        onCancel={() => setIsOpen(false)}
-        returnPath={window.location.pathname}
-      />
-    </>
-  );
-};
+const SignIn = () => (
+  <CardSignIn className="rounded-full border border-[color:color-mix(in_srgb,var(--card-ink)_55%,transparent)] px-4 py-1.5 text-sm font-medium text-[color:var(--card-ink)] hover:bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)]" />
+);
 
 const TopBar = ({ data }: { data: CardData }) => {
   const [first] = data.links;

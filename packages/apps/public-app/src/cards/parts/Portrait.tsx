@@ -49,9 +49,18 @@ export const CardPortrait = ({
         className={`h-full w-full overflow-hidden ${SHAPES[portrait.shape]} ${
           portrait.shadow ? SHADOWS[portrait.shadow] : ''
         } ${portrait.mono ? 'grayscale' : ''}`}
-        style={portrait.ring ? { border: `${portrait.ring}px solid var(--card-surface)` } : undefined}
+        style={
+          portrait.ring ? { border: `${portrait.ring}px solid var(--card-surface)` } : undefined
+        }
       >
-        <Image {...image} fileId={image.fileId} fileKey={image.fileKey} alt={alt} className="h-full w-full" fit="cover" />
+        <Image
+          {...image}
+          fileId={image.fileId}
+          fileKey={image.fileKey}
+          alt={alt}
+          className="h-full w-full"
+          fit="cover"
+        />
       </div>
     </div>
   );

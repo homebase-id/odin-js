@@ -33,7 +33,9 @@ export const CardName = ({
       {last ? (
         <>
           {inline ? ' ' : null}
-          <span className={`${inline ? '' : 'block'} ${displayCase === 'italic-2nd-line' ? 'italic' : ''}`}>
+          <span
+            className={`${inline ? '' : 'block'} ${displayCase === 'italic-2nd-line' ? 'italic' : ''}`}
+          >
             {last}
           </span>
         </>
