@@ -23,6 +23,7 @@
     "build:login": "npm run build -w ./packages/apps/login-app",
     "build:provisioning": "npm run build -w ./packages/apps/provisioning-app",
     "build:community": "npm run build -w ./packages/apps/community-app",
+    "build:bundle-test": "npm run build -w ./packages/apps/bundle-test-app",
     "start": "concurrently -n w: \"npm:start:*(!provisioning|login)\"",
     "start:owner": "npm start -w ./packages/apps/owner-app",
     "start:web-drop": "npm run start -w ./packages/apps/web-drop-app",
