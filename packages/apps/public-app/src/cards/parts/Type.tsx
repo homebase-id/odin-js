@@ -1,5 +1,18 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import type { LayoutProps } from '../CardDesign';
+
+// Without a name the card falls back to the hostname; let it wrap after a dot, not mid-word
+const breakAtDots = (text: string) =>
+  text.split('.').map((part, i, parts) => (
+    <Fragment key={i}>
+      {part}
+      {i < parts.length - 1 ? (
+        <>
+          .<wbr />
+        </>
+      ) : null}
+    </Fragment>
+  ));
 
 export const CardName = ({
   design,
@@ -16,7 +29,7 @@ export const CardName = ({
         className ?? ''
       }`}
     >
-      <span className={inline ? '' : 'block'}>{first}</span>
+      <span className={inline ? '' : 'block'}>{breakAtDots(first)}</span>
       {last ? (
         <>
           {inline ? ' ' : null}

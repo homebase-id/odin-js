@@ -11,7 +11,7 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
-import { collageFrames, Cutout, FOCUS, Print, Tape } from './frames';
+import { collageFrames, Cutout, FOCUS, Print, signature, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -191,7 +191,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
             <div className="self-center py-10 [container-type:inline-size]">
               <CardName
                 design={design}
-                data={data}
+                data={signature(data)}
                 className="origin-left -rotate-2 text-[length:clamp(56px,34cqw,124px)] font-bold leading-[0.84] [overflow-wrap:anywhere]"
               />
               {data.headline ? (
@@ -214,17 +214,11 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   </div>
                 ) : null}
                 <CardSocials variant="wordmark" data={data} className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10" />
+                {/* The reference captions its map with an address; the headline already sits under the name */}
                 {data.header ? (
-                  <figure className="rotate-1">
-                    <div className="h-[170px] overflow-hidden rounded-2xl border-[5px] border-[color:var(--card-surface)] shadow-[0_3px_9px_rgba(0,0,0,0.18)]">
-                      <Image {...data.header} fileId={data.header.fileId} fileKey={data.header.fileKey} alt="" className="h-full w-full" fit="cover" />
-                    </div>
-                    {data.headline ? (
-                      <figcaption className="pt-2 text-center font-[family-name:var(--card-label)] text-[21px] text-[color:var(--card-muted)]">
-                        {data.headline}
-                      </figcaption>
-                    ) : null}
-                  </figure>
+                  <div className="h-[170px] rotate-1 overflow-hidden rounded-2xl border-[5px] border-[color:var(--card-surface)] shadow-[0_3px_9px_rgba(0,0,0,0.18)]">
+                    <Image {...data.header} fileId={data.header.fileId} fileKey={data.header.fileKey} alt="" className="h-full w-full" fit="cover" />
+                  </div>
                 ) : null}
               </div>
             ) : null}

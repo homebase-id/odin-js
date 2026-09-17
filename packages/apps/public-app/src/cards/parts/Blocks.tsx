@@ -17,13 +17,13 @@ export const useChatHref = () => {
     : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/apps/chat/open/${owner}`;
 };
 
-const hostOf = (url: string) => {
-  try {
-    return new URL(url).host.replace(/^www\./, '');
-  } catch {
-    return url;
-  }
-};
+// "https://www.github.com/homebase-id/" -> "github.com/homebase-id", as the dossier rows print it
+// eslint-disable-next-line react-refresh/only-export-components
+export const displayUrl = (url: string) =>
+  url
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
+    .replace(/^www\./, '')
+    .replace(/\/$/, '');
 
 const Item = ({
   presentation,
@@ -66,7 +66,7 @@ const Item = ({
         <Icon aria-hidden className="h-4 w-4 flex-shrink-0 text-[color:var(--card-accent)]" />
         <span className="min-w-0 flex-1">
           <span className="block">{label}</span>
-          {url ? <span className="block truncate text-xs text-[color:var(--card-muted)]">{hostOf(url)}</span> : null}
+          {url ? <span className="block truncate text-xs text-[color:var(--card-muted)]">{displayUrl(url)}</span> : null}
         </span>
       </a>
     );
@@ -126,7 +126,14 @@ export const CardBlock = ({
   if (block.kind === 'moments') {
     const thumbs = data.posts.map(postImage).filter((img): img is CardImage => !!img).slice(0, 3);
     return thumbs.length ? (
-      <Item presentation={block.presentation} href={POSTS_HREF} label={t('Moments')} icon={ImageIcon} thumbs={thumbs} />
+      <Item
+        presentation={block.presentation}
+        href={POSTS_HREF}
+        label={t('Moments')}
+        icon={ImageIcon}
+        thumbs={thumbs}
+        url={`${data.odinId}${POSTS_HREF}`}
+      />
     ) : null;
   }
 

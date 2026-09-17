@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { LayoutProps, Portrait } from '../../CardDesign';
-import type { CardImage } from '../../useCardData';
+import type { CardData, CardImage } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 
 export const FOCUS =
@@ -20,6 +20,11 @@ export const collageFrames = ({ design, data }: LayoutProps): [Frame?, Frame?] =
   }));
   return [print?.image ? print : undefined, cutout?.image ? cutout : undefined];
 };
+
+// The collage signs with a first name only, as both references do; CardName falls back to the
+// display name when there is no first name
+// eslint-disable-next-line react-refresh/only-export-components
+export const signature = (data: CardData): CardData => ({ ...data, surName: undefined });
 
 const SHADOWS = {
   soft: 'shadow-[0_4px_12px_rgba(0,0,0,0.2)]',

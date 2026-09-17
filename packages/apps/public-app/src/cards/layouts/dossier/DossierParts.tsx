@@ -1,5 +1,8 @@
-import type { ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
+import { t } from '@homebase-id/common-app';
+import type { LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
+import { useChatHref } from '../../parts/Blocks';
 import { CardLabel } from '../../parts/Type';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -7,6 +10,9 @@ export const ownerName = ({ firstName, surName, displayName, odinId }: CardData)
   [firstName, surName].filter(Boolean).join(' ') || displayName || odinId;
 
 export const hairline = 'border-[color:var(--card-surface)]';
+
+export const dossierFocus =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 
 // CardLabel renders a <p>; the wrapper gives it heading semantics without invalid nesting
 export const SectionLabel = ({
@@ -29,3 +35,77 @@ export const LocationLine = ({ data, className }: { data: CardData; className?: 
     Homebase{data.headline ? ` / ${data.headline}` : null}
   </CardLabel>
 );
+
+// The reference's body grey (#C7CEDA) sits between ink and muted
+const CONTACT_STYLE = {
+  '--dossier-body': 'color-mix(in srgb, var(--card-ink) 65%, var(--card-muted))',
+} as CSSProperties;
+
+// The card is the page's contact list at phone size (reference: 8px terms, 10px values at 260px)
+const CONTACT_SIZES = {
+  card: { row: 'gap-3 py-[11px]', term: 'w-[60px] text-[10px]', value: 'text-[13px]' },
+  page: { row: 'gap-5 py-[15px]', term: 'w-20 text-[11px]', value: 'text-[15px]' },
+};
+
+type ContactSize = keyof typeof CONTACT_SIZES;
+
+const ContactRow = ({
+  term,
+  size,
+  children,
+}: {
+  term: string;
+  size: ContactSize;
+  children: ReactNode;
+}) => (
+  <div className={`flex items-center border-t ${hairline} ${CONTACT_SIZES[size].row}`}>
+    <dt
+      className={`flex-shrink-0 uppercase tracking-[0.12em] text-[color:var(--card-muted)] ${CONTACT_SIZES[size].term}`}
+    >
+      {term}
+    </dt>
+    <dd
+      className={`min-w-0 flex-1 break-words text-[color:var(--dossier-body)] ${CONTACT_SIZES[size].value}`}
+    >
+      {children}
+    </dd>
+  </div>
+);
+
+// CHAT and CITY as term/value rows; the whole section drops out when neither applies
+export const DossierContact = ({
+  design,
+  data,
+  size,
+  className,
+}: LayoutProps & { size: ContactSize; className?: string }) => {
+  const id = useId();
+  const chatHref = useChatHref();
+  const showChat = !!chatHref && design.blocks.some((block) => block.kind === 'chat');
+  if (!showChat && !data.headline) return null;
+
+  return (
+    <section aria-labelledby={id} style={CONTACT_STYLE} className={className}>
+      <SectionLabel id={id} className="pb-3">
+        {t('Contact')}
+      </SectionLabel>
+      <dl className={`border-b ${hairline}`}>
+        {showChat ? (
+          <ContactRow term={t('Chat')} size={size}>
+            <a
+              href={chatHref}
+              className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${dossierFocus}`}
+            >
+              {t('open a chat')} <span aria-hidden>&#8594;</span>
+            </a>
+          </ContactRow>
+        ) : null}
+        {data.headline ? (
+          <ContactRow term={t('City')} size={size}>
+            {data.headline}
+          </ContactRow>
+        ) : null}
+      </dl>
+    </section>
+  );
+};

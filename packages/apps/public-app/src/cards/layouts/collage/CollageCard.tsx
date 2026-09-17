@@ -5,7 +5,7 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { collageFrames, Cutout, FOCUS, Print } from './frames';
+import { collageFrames, Cutout, FOCUS, Print, signature } from './frames';
 
 // Round chat button: CardBlock's button always prints its label, which does not fit beside the wordmark
 const ChatButton = () => {
@@ -41,7 +41,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
       ) : null}
 
       <div className={`relative z-10 pl-2 ${print || cutout ? '-mt-11' : 'mt-6'}`}>
-        <CardName design={design} data={data} className="origin-left -rotate-2 text-[56px] font-bold leading-[0.86] [overflow-wrap:anywhere]" />
+        <CardName design={design} data={signature(data)} className="text-[56px] font-bold leading-[0.86] [overflow-wrap:anywhere]" />
         {data.headline ? (
           <p className="mt-2 pl-1 font-[family-name:var(--card-label)] text-[22px] font-medium leading-6 text-[color:var(--card-muted)]">
             {data.headline}

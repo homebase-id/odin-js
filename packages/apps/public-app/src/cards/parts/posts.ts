@@ -27,7 +27,8 @@ export const usePostHref = () => {
 export const postImage = (post: Post): CardImage | undefined => {
   const content = post.fileMetadata.appData.content;
   const primaryMediaFile = content.primaryMediaFile;
-  if (!primaryMediaFile || !/^(image|video)\//.test(primaryMediaFile.type)) return undefined;
+  // Media posts carry a mime type ("image/jpeg"); an article's hero is saved as plain "image"
+  if (!primaryMediaFile || !/^(image|video)(\/|$)/.test(primaryMediaFile.type)) return undefined;
   return {
     fileId: primaryMediaFile.fileId ?? post.fileId,
     fileKey: primaryMediaFile.fileKey,

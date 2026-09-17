@@ -108,7 +108,8 @@ export const BoardPage = ({ design, data }: LayoutProps) => (
     <BoardPageArt />
     <BoardTopBar data={data} />
     <main>
-      <div className="px-10 pt-[42px]">
+      {/* 36px: the reference's 42px less the 6px ring it draws outside the portrait */}
+      <div className="px-10 pt-9">
         <div className="mx-auto flex w-full max-w-[460px] flex-col items-center">
           <BoardProfile design={design} data={data} size="page" />
         </div>

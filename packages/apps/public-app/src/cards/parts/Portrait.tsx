@@ -8,8 +8,9 @@ const SHAPES: Record<Portrait['shape'], string> = {
   rounded: 'rounded-2xl',
   ellipse: 'rounded-[50%]',
 };
+// hard: a dark drop straight down, as the board reference draws it (0 8px 18px at 45%)
 const SHADOWS = {
-  hard: 'shadow-[6px_6px_0_rgba(0,0,0,0.3)]',
+  hard: 'shadow-[0_8px_18px_rgba(0,0,0,0.45)]',
   soft: 'shadow-[0_10px_24px_-10px_rgba(0,0,0,0.35)]',
 };
 

@@ -20,7 +20,7 @@ const SIZES = {
   page: {
     portrait: 'h-[140px] w-[140px]',
     ring: 1.5,
-    name: 'text-[34px]',
+    name: 'text-[32px]',
     nameGap: 'mt-5',
     host: 'mt-1.5 text-[15px]',
     // rows grow to the reference's 58px / 14px radius; the primitive draws 52px / 12px
@@ -59,11 +59,14 @@ export const BoardProfile = ({
           sizes.name
         } ${portrait && image ? sizes.nameGap : ''}`}
       />
-      <p
-        className={`max-w-full text-center text-[color:var(--card-muted)] [overflow-wrap:anywhere] ${sizes.host}`}
-      >
-        {data.odinId}
-      </p>
+      {/* Without a name the heading already is the hostname */}
+      {ownerName(data) !== data.odinId ? (
+        <p
+          className={`max-w-full text-center text-[color:var(--card-muted)] [overflow-wrap:anywhere] ${sizes.host}`}
+        >
+          {data.odinId}
+        </p>
+      ) : null}
       <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />
       <CardSocials variant={design.socials} data={data} className={sizes.socials} />
     </>

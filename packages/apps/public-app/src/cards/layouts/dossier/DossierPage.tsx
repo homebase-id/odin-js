@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties, type FC, type ReactNode } from 'react';
+import { useId, useState, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { Globe, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
@@ -8,12 +8,19 @@ import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import type { LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
-import { isUsableLink, useChatHref } from '../../parts/Blocks';
+import { displayUrl, isUsableLink } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import { hairline, LocationLine, ownerName, SectionLabel } from './DossierParts';
+import {
+  DossierContact,
+  dossierFocus,
+  hairline,
+  LocationLine,
+  ownerName,
+  SectionLabel,
+} from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -21,14 +28,7 @@ type Post = HomebaseFile<PostContent>;
 
 const INDEX_ROWS = 7;
 
-// The reference's body grey (#C7CEDA) sits between ink and muted
-const ROOT_STYLE = {
-  '--dossier-body': 'color-mix(in srgb, var(--card-ink) 65%, var(--card-muted))',
-} as CSSProperties;
-
 const gutter = 'mx-auto w-full max-w-[1120px] px-10 lg:px-16';
-const focus =
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]';
 const ink = 'text-[color:var(--card-ink)]';
 const muted = 'text-[color:var(--card-muted)]';
 const tracked = 'uppercase tracking-[0.18em]';
@@ -42,18 +42,12 @@ const initials = ({ firstName, surName, odinId }: CardData) => {
     .join('');
 };
 
-const displayUrl = (url: string) =>
-  url
-    .replace(/^[a-z][a-z0-9+.-]*:\/\//i, '')
-    .replace(/^www\./, '')
-    .replace(/\/$/, '');
-
 const pad = (value: number, length = 2) => String(value).padStart(length, '0');
 const isoDate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 export const DossierPage = ({ design, data }: LayoutProps) => (
-  <div style={ROOT_STYLE} className="flex min-h-[inherit] flex-col">
+  <div className="flex min-h-[inherit] flex-col">
     <TopBar data={data} />
     <main className="pb-24">
       <div
@@ -61,7 +55,7 @@ export const DossierPage = ({ design, data }: LayoutProps) => (
       >
         <Identity design={design} data={data} />
         <div className="flex flex-col gap-[34px] pt-1">
-          <Contact design={design} data={data} />
+          <DossierContact design={design} data={data} size="page" />
           <Elsewhere design={design} data={data} />
         </div>
       </div>
@@ -73,7 +67,7 @@ export const DossierPage = ({ design, data }: LayoutProps) => (
 const TopBar = ({ data }: { data: CardData }) => {
   const client = useDotYouClientContext();
   const [firstLink] = data.links.filter((link) => link.target);
-  const navLink = `block max-w-[14rem] truncate text-[12px] ${tracked} ${muted} hover:text-[color:var(--card-ink)] ${focus}`;
+  const navLink = `block max-w-[14rem] truncate text-[12px] ${tracked} ${muted} hover:text-[color:var(--card-ink)] ${dossierFocus}`;
 
   return (
     <header className={`border-b ${hairline}`}>
@@ -127,7 +121,7 @@ const SignIn = () => {
         type="button"
         aria-haspopup="dialog"
         onClick={() => setIsOpen(true)}
-        className={`flex-shrink-0 whitespace-nowrap bg-[var(--card-accent)] px-3 py-1.5 text-[12px] ${tracked} text-[color:var(--card-ground)] ${focus}`}
+        className={`flex-shrink-0 whitespace-nowrap bg-[var(--card-accent)] px-3 py-1.5 text-[12px] ${tracked} text-[color:var(--card-ground)] ${dossierFocus}`}
       >
         {t('Sign in')}
       </button>
@@ -168,45 +162,6 @@ const Identity = ({ design, data }: LayoutProps) => {
   );
 };
 
-const Contact = ({ design, data }: LayoutProps) => {
-  const id = useId();
-  const chatHref = useChatHref();
-  const showChat = !!chatHref && design.blocks.some((block) => block.kind === 'chat');
-  if (!showChat && !data.headline) return null;
-
-  return (
-    <section aria-labelledby={id}>
-      <SectionLabel id={id} className="pb-3">
-        {t('Contact')}
-      </SectionLabel>
-      <dl className={`border-b ${hairline}`}>
-        {showChat ? (
-          <ContactRow term={t('Chat')}>
-            <a
-              href={chatHref}
-              className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${focus}`}
-            >
-              {t('open a chat')} <span aria-hidden>&#8594;</span>
-            </a>
-          </ContactRow>
-        ) : null}
-        {data.headline ? <ContactRow term={t('City')}>{data.headline}</ContactRow> : null}
-      </dl>
-    </section>
-  );
-};
-
-const ContactRow = ({ term, children }: { term: string; children: ReactNode }) => (
-  <div className={`flex items-center gap-5 border-t ${hairline} py-[15px]`}>
-    <dt className={`w-20 flex-shrink-0 text-[11px] uppercase tracking-[0.12em] ${muted}`}>
-      {term}
-    </dt>
-    <dd className="min-w-0 flex-1 break-words text-[15px] text-[color:var(--dossier-body)]">
-      {children}
-    </dd>
-  </div>
-);
-
 type ElsewhereItem = { id: string; href: string; label: string; url: string; icon: FC<IconProps> };
 
 const Elsewhere = ({ design, data }: LayoutProps) => {
@@ -244,9 +199,12 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
         {t('Elsewhere')}
       </SectionLabel>
       {items.length ? (
-        <ul className={`border-b ${hairline}`}>
+        // One grid for all rows, so the URLs line up behind the longest label (110px at least)
+        <ul
+          className={`grid grid-cols-[18px_fit-content(45%)_minmax(0,1fr)] gap-x-3.5 border-b ${hairline}`}
+        >
           {items.map(({ id: key, ...item }) => (
-            <li key={key}>
+            <li key={key} className="col-span-3 grid grid-cols-subgrid">
               <ElsewhereRow {...item} />
             </li>
           ))}
@@ -262,21 +220,21 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
 };
 
 const ElsewhereRow = ({ href, label, url, icon: Icon }: Omit<ElsewhereItem, 'id'>) => {
-  const className = `group flex items-center gap-3.5 border-t ${hairline} py-3.5 ${focus}`;
+  const className = `group col-span-3 grid grid-cols-subgrid items-center border-t ${hairline} py-3.5 ${dossierFocus}`;
   const content = (
     <>
       <span
         aria-hidden
-        className="flex h-[18px] w-[18px] flex-shrink-0 items-center justify-center text-[color:var(--card-accent)]"
+        className="flex h-[18px] w-[18px] items-center justify-center text-[color:var(--card-accent)]"
       >
         <Icon className="h-4 w-4" />
       </span>
       <span
-        className={`min-w-[110px] max-w-[55%] flex-shrink-0 truncate text-[15px] ${ink} group-hover:text-[color:var(--card-accent)]`}
+        className={`min-w-[110px] truncate text-[15px] ${ink} group-hover:text-[color:var(--card-accent)]`}
       >
         {label}
       </span>
-      <span className={`min-w-0 flex-1 truncate text-[13px] ${muted}`}>{url}</span>
+      <span className={`truncate text-[13px] ${muted}`}>{url}</span>
     </>
   );
 
@@ -349,7 +307,8 @@ const PostIndex = ({ data }: { data: CardData }) => {
 const PostRow = ({ post, number, href }: { post: Post; number: number; href: string }) => {
   const content = post.fileMetadata.appData.content;
   const date = isoDate(postDate(post));
-  // Articles carry their reading time in the header; other post types show their type
+  // Only articles carry a reading time; other posts leave the READ cell empty rather than
+  // printing their internal type ("tweet", "media")
   const minutes =
     content.type === 'Article' ? (content as Article).readingTimeStats?.minutes : undefined;
 
@@ -362,7 +321,7 @@ const PostRow = ({ post, number, href }: { post: Post; number: number; href: str
       <td className={`${cell} pr-5 text-[17px] leading-[23px]`}>
         <Link
           to={href}
-          className={`line-clamp-2 ${ink} hover:text-[color:var(--card-accent)] ${focus}`}
+          className={`line-clamp-2 ${ink} hover:text-[color:var(--card-accent)] ${dossierFocus}`}
         >
           {content.caption?.trim() || t('Untitled')}
         </Link>
@@ -372,9 +331,7 @@ const PostRow = ({ post, number, href }: { post: Post; number: number; href: str
           <span className="uppercase">
             {Math.ceil(minutes)} {t('min')}
           </span>
-        ) : (
-          content.type.toLowerCase()
-        )}
+        ) : null}
       </td>
     </tr>
   );

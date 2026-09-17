@@ -36,6 +36,15 @@ export type CardData = {
   posts: HomebaseFile<PostContent>[];
 };
 
+// The Homebase id social points at this very site, so a card has no use for it
+const isOwnSite = (link: string, odinId: string) => {
+  try {
+    return new URL(link).host === odinId;
+  } catch {
+    return false;
+  }
+};
+
 export const useCardData = (): CardData | undefined => {
   const { data: siteData } = useSiteData();
   const { data: links } = useLinks();
@@ -46,9 +55,10 @@ export const useCardData = (): CardData | undefined => {
   if (!siteData) return undefined;
   const { owner, home } = siteData;
   const settings = home?.templateSettings as ThemeCardSettings | undefined;
+  const odinId = window.location.hostname;
 
   return {
-    odinId: window.location.hostname,
+    odinId,
     firstName: owner?.firstName,
     surName: owner?.surName,
     displayName: owner?.displayName,
@@ -73,7 +83,7 @@ export const useCardData = (): CardData | undefined => {
         }
       : undefined,
     links: (links ?? []).map(({ id, text, target }) => ({ id, text, target })),
-    socials: socials ?? [],
+    socials: (socials ?? []).filter((social) => social.link && !isOwnSite(social.link, odinId)),
     posts: flattenInfinteData<HomebaseFile<PostContent>>(postPages, BLOG_POST_INFIITE_PAGE_SIZE).slice(0, 12),
   };
 };
