@@ -1,9 +1,8 @@
 import { useId } from 'react';
 import { t } from '@homebase-id/common-app';
 import type { BlockKind, LayoutProps } from '../../CardDesign';
-import { CardBlocks, useChatHref } from '../../parts/Blocks';
+import { CardBlocks, hasBlockContent, useChatHref } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { postImage } from '../../parts/posts';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import { hairline, LocationLine, ownerName, SectionLabel } from './DossierParts';
@@ -18,10 +17,10 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
   const [portrait] = design.portraits;
   const hasBlock = (kind: BlockKind) => design.blocks.some((block) => block.kind === kind);
   // CardBlocks hides itself once it has no rows to show, but the section heading is ours to hide
-  const showContact = hasBlock('chat') && !!chatHref;
+  const showContact = hasBlock('chat') && hasBlockContent('chat', data, chatHref);
   const showElsewhere =
-    (hasBlock('links') && data.links.length > 0) ||
-    (hasBlock('moments') && data.posts.some((post) => !!postImage(post)));
+    (hasBlock('links') && hasBlockContent('links', data, chatHref)) ||
+    (hasBlock('moments') && hasBlockContent('moments', data, chatHref));
 
   return (
     <div className="flex min-h-[inherit] flex-col px-5 pb-5 pt-6 text-[13px]">

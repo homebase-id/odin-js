@@ -8,7 +8,7 @@ import ProfileNav from '../../../components/Auth/ProfileNav/ProfileNav';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 import type { LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
-import { useChatHref } from '../../parts/Blocks';
+import { isUsableLink, useChatHref } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSocials } from '../../parts/Socials';
@@ -226,15 +226,13 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
           ]
         : [];
     if (block.kind === 'links')
-      return data.links
-        .filter((link) => link.target)
-        .map((link) => ({
-          id: link.id,
-          href: link.target,
-          label: link.text,
-          url: displayUrl(link.target),
-          icon: Globe,
-        }));
+      return data.links.filter(isUsableLink).map((link) => ({
+        id: link.id,
+        href: link.target,
+        label: link.text,
+        url: displayUrl(link.target),
+        icon: Globe,
+      }));
     return [];
   });
   const hasSocials = data.socials.some((social) => !!social.link);

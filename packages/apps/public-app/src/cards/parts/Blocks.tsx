@@ -3,7 +3,7 @@ import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import type { BlockKind, LayoutProps, Presentation } from '../CardDesign';
-import type { CardData, CardImage } from '../useCardData';
+import type { CardData, CardImage, CardLink } from '../useCardData';
 import { POSTS_HREF, postImage } from './posts';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -95,16 +95,17 @@ const Item = ({
   );
 };
 
-// Whether a block would render anything at all, so CardBlocks can drop empty blocks
-// (and itself) before rendering a <nav> instead of hiding one after the fact.
-const blockHasContent = (
-  block: { kind: BlockKind },
-  data: CardData,
-  chatHref: string | undefined
-) => {
-  if (block.kind === 'chat') return !!chatHref;
-  if (block.kind === 'moments') return data.posts.some((post) => !!postImage(post));
-  if (block.kind === 'links') return data.links.some((link) => link.target && link.text);
+// A link only counts once it has both something to say and somewhere to go
+// eslint-disable-next-line react-refresh/only-export-components
+export const isUsableLink = (link: CardLink) => !!link.target && !!link.text;
+
+// Whether a block would render anything at all, so callers can drop it (and CardBlocks itself,
+// or a layout's own section heading) instead of showing an empty nav or an orphaned title.
+// eslint-disable-next-line react-refresh/only-export-components
+export const hasBlockContent = (kind: BlockKind, data: CardData, chatHref: string | undefined) => {
+  if (kind === 'chat') return !!chatHref;
+  if (kind === 'moments') return data.posts.some((post) => !!postImage(post));
+  if (kind === 'links') return data.links.some(isUsableLink);
   return false; // posts are rendered by desktop pages
 };
 
@@ -132,11 +133,17 @@ export const CardBlock = ({
   if (block.kind === 'links')
     return (
       <>
-        {data.links
-          .filter((link) => link.target && link.text)
-          .map((link) => (
-            <Item key={link.id} presentation={block.presentation} href={link.target} label={link.text} url={link.target} icon={Globe} external />
-          ))}
+        {data.links.filter(isUsableLink).map((link) => (
+          <Item
+            key={link.id}
+            presentation={block.presentation}
+            href={link.target}
+            label={link.text}
+            url={link.target}
+            icon={Globe}
+            external
+          />
+        ))}
       </>
     );
 
@@ -153,7 +160,9 @@ export const CardBlocks = ({
   const chatHref = useChatHref();
   const blocks = design.blocks.filter(
     (b) =>
-      b.kind !== 'posts' && (!kinds || kinds.includes(b.kind)) && blockHasContent(b, data, chatHref)
+      b.kind !== 'posts' &&
+      (!kinds || kinds.includes(b.kind)) &&
+      hasBlockContent(b.kind, data, chatHref)
   );
   if (!blocks.length) return null;
   return (
