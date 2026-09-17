@@ -52,6 +52,7 @@ export interface ThemeCardSettings extends DefaultTemplateSettings {
   tagLine?: string;
   headerImageKey?: string;
 }
+
 export interface ThemeDisabledSettings extends DefaultTemplateSettings {
   themeId: '0';
 }

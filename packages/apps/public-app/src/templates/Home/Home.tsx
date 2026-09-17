@@ -24,7 +24,13 @@ const Home = () => {
     return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
   }, [home, themeId]);
 
-  if (!home) return null;
+  if (!home)
+    return (
+      <>
+        <Header />
+        <Footer className="mt-auto" />
+      </>
+    );
 
   return (
     <>
