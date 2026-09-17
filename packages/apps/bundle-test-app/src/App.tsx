@@ -450,28 +450,69 @@ export const App = () => {
                 ))}
               </select>
             </label>
-            <div style={{ marginTop: '0.5rem' }}>
-              <button disabled={busy} onClick={loadContext}>
-                GET /api/v2/auth/context
-              </button>
-              <button disabled={busy} onClick={() => listAppDrives(actingApp.appId)}>
-                List /apps/{actingApp.appSlug}/drives
-              </button>
-              <button disabled={busy} onClick={() => queryDrive(actingApp.appId)}>
-                Query /apps/{actingApp.appSlug}/drives/{actingApp.drive.driveSlug}
-              </button>
-              <button disabled={busy} onClick={logout}>
-                Log out
-              </button>
-            </div>
-            <div style={{ marginTop: '0.5rem' }}>
-              <span className="muted">Still acting as {actingApp.name}, query another app&apos;s drive: </span>
-              {SAMPLE_APPS.filter((app) => app.appId !== actingApp.appId).map((app) => (
-                <button disabled={busy} onClick={() => queryDrive(app.appId)} key={app.appId}>
-                  /apps/{app.appSlug}/drives/{app.drive.driveSlug}
-                </button>
-              ))}
-            </div>
+            <table style={{ marginTop: '0.5rem' }}>
+              <tbody>
+                <tr>
+                  <td>
+                    <button disabled={busy} onClick={loadContext}>
+                      GET /api/v2/auth/context
+                    </button>
+                  </td>
+                  <td>
+                    What this token can do while acting as <strong>{actingApp.name}</strong>: the caller, and every
+                    permission group with its drive grants. There is one group per app in the token, because access
+                    is the union of all of them.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <button disabled={busy} onClick={() => listAppDrives(actingApp.appId)}>
+                      List /apps/{actingApp.appSlug}/drives
+                    </button>
+                  </td>
+                  <td>
+                    Lists the drives <strong>{actingApp.name}</strong> owns, found by its app slug. Each entry has the
+                    drive slug, type slug and the drive id the file APIs take.
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <button disabled={busy} onClick={() => queryDrive(actingApp.appId)}>
+                      Query /apps/{actingApp.appSlug}/drives/{actingApp.drive.driveSlug}
+                    </button>
+                  </td>
+                  <td>
+                    Resolves <strong>{actingApp.name}</strong>&apos;s own drive by slug, then queries its files using the
+                    id that comes back. Should succeed: the app owns this drive.
+                  </td>
+                </tr>
+                {SAMPLE_APPS.filter((app) => app.appId !== actingApp.appId).map((app) => (
+                  <tr key={app.appId}>
+                    <td>
+                      <button disabled={busy} onClick={() => queryDrive(app.appId)}>
+                        Query /apps/{app.appSlug}/drives/{app.drive.driveSlug}
+                      </button>
+                    </td>
+                    <td>
+                      Queries <strong>{app.name}</strong>&apos;s drive while still acting as {actingApp.name}. Succeeds
+                      when {app.name} is in the token, since access is the union of every app in it; the acting app
+                      decides identity (ownership checks), not access. Refused if {app.name} was left out at consent.
+                    </td>
+                  </tr>
+                ))}
+                <tr>
+                  <td>
+                    <button disabled={busy} onClick={logout}>
+                      Log out
+                    </button>
+                  </td>
+                  <td>
+                    Deletes this token on the server (<code>DELETE /api/v2/bundle-tokens/current</code>) and removes it
+                    from this browser. Any later call with it gets 401.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             {context ? <ContextSummary context={context} /> : null}
           </>
         ) : (
