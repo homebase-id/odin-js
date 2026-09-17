@@ -25,6 +25,10 @@ export enum HomePageTheme {
   VerticalPosts = 222,
   HorizontalPosts = 333,
   Links = 444,
+  Poster = 555,
+  Board = 666,
+  Collage = 777,
+  Dossier = 888,
 }
 
 export class HomePageThemeFields {
