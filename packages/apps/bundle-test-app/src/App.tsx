@@ -235,20 +235,37 @@ export const App = () => {
       return ctx;
     });
 
+  // Drives are addressed by slug. File operations on your own identity have no slug routes yet
+  // (docs/slug-addressing-endpoint-map.csv: /apps/{appSlug}/drives/{driveSlug}/files/... is NOT BUILT),
+  // so the slug is resolved first and the file query goes to the drive it names.
+  const listAppDrives = (appId: string) => {
+    const app = SAMPLE_APPS.find((a) => a.appId === appId);
+    if (!client || !app) return;
+    return run(`GET /api/v2/apps/${app.appSlug}/drives (acting as ${actingName(actingAppId)})`, () =>
+      withV2Errors(client, async () => {
+        const response = await client.createAxiosClient().get(`/apps/${app.appSlug}/drives`);
+        return response.data;
+      })
+    );
+  };
+
   const queryDrive = (appId: string) => {
     const app = SAMPLE_APPS.find((a) => a.appId === appId);
     if (!client || !app) return;
-    return run(
-      `POST /api/v2/drives/${app.drive.alias}/files/query-batch (${app.name}'s drive, acting as ${actingName(actingAppId)})`,
-      () =>
-        withV2Errors(client, async () => {
-          const axios = client.createAxiosClient();
-          const response = await axios.post(`/drives/${app.drive.alias}/files/query-batch`, {
-            queryParams: {},
-            resultOptionsRequest: { maxRecords: 10, includeMetadataHeader: true },
-          });
-          return response.data;
-        })
+    const address = `/apps/${app.appSlug}/drives/${app.drive.driveSlug}`;
+    return run(`${address} → query-batch (acting as ${actingName(actingAppId)})`, () =>
+      withV2Errors(client, async () => {
+        const axios = client.createAxiosClient();
+        const drive = (await axios.get(address)).data as { targetDrive: { alias: string; type: string } };
+        const query = await axios.post(`/drives/${drive.targetDrive.alias}/files/query-batch`, {
+          queryParams: {},
+          resultOptionsRequest: { maxRecords: 10, includeMetadataHeader: true },
+        });
+        return {
+          [`GET /api/v2${address}`]: drive,
+          [`POST /api/v2/drives/${drive.targetDrive.alias}/files/query-batch`]: query.data,
+        };
+      })
     );
   };
 
@@ -385,9 +402,14 @@ export const App = () => {
                 GET /api/v2/auth/context
               </button>
               {SAMPLE_APPS.map((app) => (
-                <button disabled={busy} onClick={() => queryDrive(app.appId)} key={app.appId}>
-                  Query {app.name} drive
-                </button>
+                <span key={app.appId}>
+                  <button disabled={busy} onClick={() => listAppDrives(app.appId)}>
+                    List /apps/{app.appSlug}/drives
+                  </button>
+                  <button disabled={busy} onClick={() => queryDrive(app.appId)}>
+                    Query /apps/{app.appSlug}/drives/{app.drive.driveSlug}
+                  </button>
+                </span>
               ))}
               <button disabled={busy} onClick={logout}>
                 Log out
