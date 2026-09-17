@@ -73,7 +73,7 @@ const Item = ({
 
   // boxed
   return (
-    <a href={href} {...linkProps} className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(8,26,54,0.25)] ${focus}`}>
+    <a href={href} {...linkProps} className={`flex items-center gap-3 rounded-xl bg-[var(--card-surface)] px-3 py-2.5 font-semibold text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${focus}`}>
       <span
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
         style={{ backgroundColor: 'color-mix(in srgb, var(--card-surface-ink) 10%, transparent)' }}

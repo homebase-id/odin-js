@@ -39,7 +39,7 @@ export const CardSocials = ({
         href={first.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`flex items-center gap-3 rounded-2xl bg-[var(--card-surface)] px-4 py-3 text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] ${className ?? ''}`}
+        className={`flex items-center gap-3 rounded-2xl bg-[var(--card-surface)] px-4 py-3 text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)] ${className ?? ''}`}
       >
         <Icon className="h-7 w-7 text-[color:var(--card-accent)]" />
         <span className="leading-tight">
@@ -58,7 +58,7 @@ export const CardSocials = ({
         const Icon = s.icon;
         return (
           <li key={s.link}>
-            <a href={s.link} target="_blank" rel="noopener noreferrer" aria-label={hostName(s.link)} className="block opacity-80 hover:opacity-100">
+            <a href={s.link} target="_blank" rel="noopener noreferrer" aria-label={hostName(s.link)} className="block opacity-80 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-accent)]">
               <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />
             </a>
           </li>
