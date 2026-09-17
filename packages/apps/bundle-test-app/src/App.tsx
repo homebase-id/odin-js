@@ -22,6 +22,8 @@ const KEY = {
   privateKey: 'bundle-test:private-key',
   state: 'bundle-test:state',
   token: 'bundle-test:token',
+  // The device name sent with the sign-in request; kept across the redirect and stored with the token.
+  deviceName: 'bundle-test:device-name',
   // Demo only: the raw exchange response, kept so Step 2 can show it after the redirect.
   exchange: 'bundle-test:exchange-response',
 };
@@ -31,6 +33,8 @@ interface StoredToken {
   clientAuthToken: string;
   sharedSecret: string;
   obtainedAt: number;
+  /** The friendly name this client signed in with; the owner sees it as the device under Bundle tokens. */
+  deviceName?: string;
 }
 
 const readJson = <T,>(key: string, fallback: T): T => {
@@ -189,7 +193,13 @@ export const App = () => {
             salt,
             (response) => writeJson(KEY.exchange, response)
           );
-          const stored: StoredToken = { identity: tokenIdentity, ...credentials, obtainedAt: Date.now() };
+          const stored: StoredToken = {
+            identity: tokenIdentity,
+            ...credentials,
+            obtainedAt: Date.now(),
+            deviceName: localStorage.getItem(KEY.deviceName) ?? undefined,
+          };
+          localStorage.removeItem(KEY.deviceName);
           writeJson(KEY.token, stored);
           setToken(stored);
           setNotice({ ok: true, text: `Got a bundle token for ${tokenIdentity}.` });
@@ -241,6 +251,8 @@ export const App = () => {
     await savePrivateKey(pair.privateKey);
     const state = crypto.randomUUID();
     localStorage.setItem(KEY.state, state);
+    const deviceName = friendlyName || 'Bundle test app';
+    localStorage.setItem(KEY.deviceName, deviceName);
 
     window.location.href = getBundleAuthorizeUrl(cleanIdentity, {
       primaryAppId: PRIMARY_APP.appId,
@@ -249,7 +261,7 @@ export const App = () => {
         appId: a.appId,
         manifest: buildManifest(a, host),
       })),
-      friendlyName: friendlyName || 'Bundle test app',
+      friendlyName: deviceName,
       publicKey: await exportBundlePublicKey(pair.publicKey),
       redirectUri: `${origin}/finalize`,
       state,
@@ -404,6 +416,15 @@ export const App = () => {
         {token ? (
           <table>
             <tbody>
+              <tr>
+                <th>Device</th>
+                <td>
+                  <strong>{token.deviceName ?? '(unknown: signed in before the name was recorded)'}</strong>
+                  <div className="muted">
+                    The name the owner sees under Bundle tokens, where this device can be revoked.
+                  </div>
+                </td>
+              </tr>
               <tr>
                 <th>Identity</th>
                 <td>{token.identity}</td>
