@@ -34,6 +34,7 @@ const PostImageDetail = lazy(() => import('../templates/Posts/Detail/PostImageDe
 const LinksPage = lazy(() => import('../templates/LinksPage/LinksPage'));
 const PreviewPage = lazy(() => import('../templates/PreviewPage/PreviewPage'));
 const YouAuthFinalizer = lazy(() => import('../templates/YouAuthFinalizer/YouAuthFinalizer'));
+const CardEmbed = lazy(() => import('../cards/CardEmbed'));
 
 const Ping = lazy(() => import('../templates/Ping/Ping'));
 
@@ -59,26 +60,36 @@ function App() {
             path=""
             element={
               <PublicRoute>
-                <Header />
                 <Outlet />
-                <Footer className="mt-auto" />
               </PublicRoute>
             }
           >
+            {/* Home owns its chrome: card themes draw their own top bar */}
             <Route index={true} element={<Home />} />
             <Route path="about" element={<Home />} />
             <Route path="links" element={<Home />} />
             <Route path="posts" element={<Home />} />
             <Route path="connections" element={<Home />} />
 
-            <Route path="posts/:channelKey" element={<PostOverview />} />
-            <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />
-            <Route path="posts/:channelKey/:postKey/:attachmentKey" element={<PostImageDetail />} />
-
-            <Route path="linked" element={<LinksPage />} />
-
-            <Route path="ping" element={<Ping />} />
-            <Route path="*" element={<NotFound />} />
+            <Route
+              element={
+                <>
+                  <Header />
+                  <Outlet />
+                  <Footer className="mt-auto" />
+                </>
+              }
+            >
+              <Route path="posts/:channelKey" element={<PostOverview />} />
+              <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />
+              <Route
+                path="posts/:channelKey/:postKey/:attachmentKey"
+                element={<PostImageDetail />}
+              />
+              <Route path="linked" element={<LinksPage />} />
+              <Route path="ping" element={<Ping />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
           </Route>
         </Route>
         <Route
@@ -86,6 +97,18 @@ function App() {
           element={
             <NoLayout>
               <PreviewPage />
+            </NoLayout>
+          }
+        />
+        <Route
+          path="/card"
+          element={
+            <NoLayout>
+              <ErrorBoundary>
+                <Suspense fallback={<></>}>
+                  <CardEmbed />
+                </Suspense>
+              </ErrorBoundary>
             </NoLayout>
           }
         />

@@ -5,32 +5,47 @@ import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
 import { ThemeCoverSettings, useSiteData } from '@homebase-id/common-app';
 import HomeLinks from './Links/HomeLinks';
-import { useMemo } from 'react';
+import { lazy, useMemo } from 'react';
+import Header from '../../components/ui/Layout/Header/Header';
+import Footer from '../../components/ui/Layout/Footer/Footer';
+import { cardPresetForTheme } from '../../cards/presets';
+
+const CardHome = lazy(() => import('../../cards/CardHome'));
 
 const Home = () => {
   const { home, owner } = useSiteData().data ?? {};
+  const themeId = home?.templateSettings?.themeId;
+  const cardLayout = cardPresetForTheme(themeId);
 
   const body = useMemo(() => {
-    const themeId = home?.templateSettings?.themeId;
-    if (themeId === HomePageTheme.VerticalPosts.toString()) {
-      return <HomeClassic />;
-    } else if (themeId === HomePageTheme.HorizontalPosts.toString()) {
-      return <HomeContent />;
-    } else if (themeId === HomePageTheme.Links.toString()) {
-      return <HomeLinks />;
-    } else {
-      return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
-    }
-  }, [home]);
+    if (themeId === HomePageTheme.VerticalPosts.toString()) return <HomeClassic />;
+    if (themeId === HomePageTheme.HorizontalPosts.toString()) return <HomeContent />;
+    if (themeId === HomePageTheme.Links.toString()) return <HomeLinks />;
+    return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
+  }, [home, themeId]);
 
-  if (!home) return null;
+  if (!home)
+    return (
+      <>
+        <Header />
+        <Footer className="mt-auto" />
+      </>
+    );
 
   return (
     <>
       <Helmet>
         <title>{owner?.firstName ?? 'Home'} | Homebase</title>
       </Helmet>
-      {body}
+      {cardLayout ? (
+        <CardHome layout={cardLayout} />
+      ) : (
+        <>
+          <Header />
+          {body}
+          <Footer className="mt-auto" />
+        </>
+      )}
     </>
   );
 };

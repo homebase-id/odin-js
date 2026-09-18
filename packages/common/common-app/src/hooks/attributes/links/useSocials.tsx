@@ -31,6 +31,7 @@ import {
 import { GetFile } from '@homebase-id/js-lib/public';
 
 export type LinkType = {
+  type?: string;
   icon: FC<IconProps>;
   link: string;
   copyText?: string;
@@ -52,6 +53,7 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
       if (!socialData) return null;
       const link = getSocialLink(socialData.type, socialData.username);
       return {
+        type: socialData.type,
         icon: getLinkIcon(socialData.type),
         link: link || '',
         copyText: link ? undefined : socialData.username,
