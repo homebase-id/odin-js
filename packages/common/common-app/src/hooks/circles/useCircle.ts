@@ -45,6 +45,9 @@ export const useCircle = (props?: { circleId?: string }) => {
     if (circleDefinition.id) {
       return await updateCircleDefinition(dotYouClient, circleDefinition);
     } else {
+      // No appId is sent: every circle has an owning app, and for one created from the owner
+      // console the server assigns the System app. Naming an id here would only be this client
+      // guessing at the same answer, and a wrong guess is permanent.
       return await createCircleDefinition(dotYouClient, circleDefinition);
     }
   };

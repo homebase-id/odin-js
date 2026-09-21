@@ -15,7 +15,9 @@ const UpdateDriveDetailsFromApp = () => {
   const returnUrl = searchParams.get('return');
 
   const d = searchParams.get('d');
-  const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
+  // Empty array when the param is absent, undefined when it is malformed -- a grant missing its
+  // drive type slug, say. See drivesParamToDriveGrantRequest.
+  const driveGrants = drivesParamToDriveGrantRequest(d || undefined);
 
   const {
     fetch: { data: appRegistration },
@@ -53,6 +55,10 @@ const UpdateDriveDetailsFromApp = () => {
     // Redirect
     window.location.href = returnUrl || '/';
   };
+
+  // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
+  // one is its bug, but dropping a drive from the prompt would change less than was asked for.
+  if (!driveGrants) return <div>Bad request</div>;
 
   return (
     <>

@@ -48,7 +48,9 @@ const RegisterApp = () => {
 
   const appId = searchParams.get('appId');
   const name = searchParams.get('n');
-  const appSlug = searchParams.get('as') || undefined;
+  // The app names itself; we do not derive a slug from the display name. It is permanent and
+  // first-come, so an app that did not say what it wants to be called has not finished asking.
+  const appSlug = searchParams.get('as');
   const origin = searchParams.get('o') || undefined;
   const returnUrl = searchParams.get('return');
   const cancelUrl = searchParams.get('cancel');
@@ -56,18 +58,20 @@ const RegisterApp = () => {
   const p = searchParams.get('p');
   const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
   const d = searchParams.get('d');
-  const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
+  // Empty array when the param is absent, undefined when it is malformed -- see
+  // drivesParamToDriveGrantRequest.
+  const driveGrants = drivesParamToDriveGrantRequest(d || undefined);
 
   const c = searchParams.get('c');
   const circleSelection = c ? circleParamToCircleIds(c) : undefined;
   const cp = searchParams.get('cp');
   const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
   const cd = searchParams.get('cd');
-  const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
+  const circleDriveGrants = drivesParamToDriveGrantRequest(cd || undefined);
 
-  if (!appId || !name || !returnUrl) {
+  if (!appId || !name || !appSlug || !returnUrl || !driveGrants || !circleDriveGrants) {
     console.error(
-      'Any of the following required params was not found in the url: appId, name, returnUrl'
+      'Any of the following required params was not found or was malformed in the url: appId, n, as, return, d, cd'
     );
     return <div>Bad request</div>;
   }
@@ -132,7 +136,7 @@ const AppRegistration = ({
 }: {
   name: string;
   appId: string;
-  appSlug: string | undefined;
+  appSlug: string;
   origin: string | undefined;
   permissionSet?: PermissionSet;
   driveGrants?: DriveGrantRequest[];
@@ -152,8 +156,7 @@ const AppRegistration = ({
     await registerApp({
       appId: appId,
       name: name,
-      // Left undefined the server derives a slug from `name`. Either way it is permanent, so this
-      // is the app's one chance to name itself.
+      // Permanent once written, so this is the app's one chance to name itself.
       appSlug: appSlug,
       corsHostName: origin,
       permissionSet: permissionSet,
@@ -199,11 +202,9 @@ const AppRegistration = ({
         </small>
         {/* The slug is permanent and first-come, so the owner should be able to see the name being
             claimed -- but it is an address, not something they are being asked to weigh. */}
-        {appSlug ? (
-          <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">
-            /apps/{appSlug}
-          </small>
-        ) : null}
+        <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">
+          /apps/{appSlug}
+        </small>
       </h1>
       {!circleSelection ? (
         <>
