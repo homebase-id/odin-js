@@ -25,6 +25,8 @@ export type CardImage = {
   targetDrive: TargetDrive;
   probablyEncrypted?: boolean;
 };
+// The app's single-file embed has no drive access and hands its images over as data URLs
+export type CardPhoto = CardImage | { src: string };
 export type CardLink = { id: string; text: string; target: string };
 export type CardData = {
   odinId: string;
@@ -33,12 +35,16 @@ export type CardData = {
   displayName?: string;
   headline?: string;
   bio?: string;
-  photo?: CardImage;
-  header?: CardImage;
+  photo?: CardPhoto;
+  header?: CardPhoto;
   links: CardLink[];
   socials: LinkType[];
   posts: HomebaseFile<PostContent>[];
 };
+
+// the Homebase id social points at this very site, so a card has no use for it
+export const cardSocials = (socials: LinkType[]) =>
+  socials.filter((social) => social.link && social.type !== SocialFields.Homebase);
 
 export const ownerName = ({ firstName, surName, displayName, odinId }: CardData) =>
   [firstName, surName].filter(Boolean).join(' ') || displayName || odinId;
@@ -81,10 +87,7 @@ export const useCardData = (): CardData | undefined => {
         }
       : undefined,
     links: (links ?? []).map(({ id, text, target }) => ({ id, text, target })),
-    // the Homebase id social points at this very site, so a card has no use for it
-    socials: (socials ?? []).filter(
-      (social) => social.link && social.type !== SocialFields.Homebase
-    ),
+    socials: cardSocials(socials ?? []),
     posts: flattenInfinteData<HomebaseFile<PostContent>>(
       postPages,
       BLOG_POST_INFIITE_PAGE_SIZE

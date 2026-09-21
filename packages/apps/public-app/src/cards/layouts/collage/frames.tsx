@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react';
 import type { LayoutProps, Portrait } from '../../CardDesign';
-import { ownerName, type CardData, type CardImage } from '../../useCardData';
+import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 
-type Frame = { portrait: Portrait; image: CardImage | undefined; alt: string };
+type Frame = { portrait: Portrait; image: CardPhoto | undefined; alt: string };
 
 // The collage has two slots: a print (first portrait) and a cut-out (second).
 // Only the owner's photo is named; the header image is scenery.

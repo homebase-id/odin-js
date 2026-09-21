@@ -65,7 +65,7 @@ const ContactRow = ({
   </div>
 );
 
-// CHAT and CITY as term/value rows; the whole section drops out when neither applies
+// CHAT as a term/value row; the whole section drops out when it doesn't apply
 export const DossierContact = ({
   design,
   data,
@@ -73,9 +73,9 @@ export const DossierContact = ({
   className,
 }: LayoutProps & { size: ContactSize; className?: string }) => {
   const id = useId();
-  const chatHref = useChatHref();
+  const chatHref = useChatHref(data.odinId);
   const showChat = !!chatHref && design.blocks.some((block) => block.kind === 'chat');
-  if (!showChat && !data.headline) return null;
+  if (!showChat) return null;
 
   return (
     <section aria-labelledby={id} style={CONTACT_STYLE} className={className}>
@@ -83,21 +83,14 @@ export const DossierContact = ({
         {t('Contact')}
       </SectionLabel>
       <dl className={`border-b ${hairline}`}>
-        {showChat ? (
-          <ContactRow term={t('Chat')} size={size}>
-            <a
-              href={chatHref}
-              className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${CARD_FOCUS}`}
-            >
-              {t('open a chat')} <span aria-hidden>&#8594;</span>
-            </a>
-          </ContactRow>
-        ) : null}
-        {data.headline ? (
-          <ContactRow term={t('City')} size={size}>
-            {data.headline}
-          </ContactRow>
-        ) : null}
+        <ContactRow term={t('Chat')} size={size}>
+          <a
+            href={chatHref}
+            className={`text-[color:var(--card-accent)] underline-offset-4 hover:underline ${CARD_FOCUS}`}
+          >
+            {t('open a chat')} <span aria-hidden>&#8594;</span>
+          </a>
+        </ContactRow>
       </dl>
     </section>
   );

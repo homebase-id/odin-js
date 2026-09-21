@@ -9,8 +9,8 @@ import { CARD_FOCUS as FOCUS } from '../../CardDesign';
 import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
 
 // Round chat button: CardBlock's button always prints its label, which does not fit beside the wordmark
-const ChatButton = () => {
-  const href = useChatHref();
+const ChatButton = ({ odinId }: { odinId: string }) => {
+  const href = useChatHref(odinId);
   if (!href) return null;
   return (
     <a
@@ -73,7 +73,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
 
       <div className="mt-auto flex items-center gap-2.5 pt-6">
         <CardSocials variant={design.socials} data={data} className="min-w-0 flex-1" />
-        {hasChat ? <ChatButton /> : null}
+        {hasChat ? <ChatButton odinId={data.odinId} /> : null}
       </div>
     </div>
   );

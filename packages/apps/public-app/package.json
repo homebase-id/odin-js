@@ -7,6 +7,7 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
+    "build:card-embed": "vite build -c vite.card.config.ts && node scripts/inline-card.mjs",
     "serve": "vite preview",
     "type": "tsc",
     "lint": "eslint src"
@@ -20,6 +21,7 @@
     "@homebase-id/js-lib": "*",
     "@homebase-id/ui-lib": "*",
     "hls.js": "^1.6.10",
+    "html-to-image": "1.11.13",
     "axios": "1.8.2",
     "emoji-picker-element": "^1.24.0",
     "lodash-es": "^4.18.1",

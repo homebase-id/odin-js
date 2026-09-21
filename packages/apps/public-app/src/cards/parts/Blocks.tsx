@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
@@ -11,12 +11,12 @@ import {
 } from '../CardDesign';
 import type { CardData, CardImage, CardLink } from '../useCardData';
 import { POSTS_HREF, postImage } from './posts';
+import { DriveImage } from './DriveImage';
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useChatHref = () => {
+export const useChatHref = (owner: string) => {
   const client = useDotYouClientContext();
   if (client.isOwner()) return undefined;
-  const owner = window.location.hostname;
   const loggedOn = client.getLoggedInIdentity();
   return loggedOn
     ? `${new DotYouClient({ hostIdentity: loggedOn, api: ApiType.Guest }).getRoot()}/apps/chat/open/${owner}`
@@ -125,14 +125,11 @@ const Item = ({
       {thumbs?.length ? (
         <span className="flex gap-1">
           {thumbs.map((img) => (
-            <Image
+            <DriveImage
               key={`${img.fileId}:${img.fileKey}`}
-              {...img}
-              fileId={img.fileId}
-              fileKey={img.fileKey}
+              image={img}
               alt=""
               className="h-8 w-8 overflow-hidden rounded-md"
-              fit="cover"
             />
           ))}
         </span>
@@ -235,7 +232,7 @@ export const CardBlocks = ({
   className,
   label,
 }: LayoutProps & { kinds?: BlockKind[]; className?: string; label?: string }) => {
-  const chatHref = useChatHref();
+  const chatHref = useChatHref(data.odinId);
   const blocks = design.blocks.filter(
     (b) =>
       b.kind !== 'posts' &&

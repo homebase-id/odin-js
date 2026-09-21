@@ -10,6 +10,7 @@ import { CardLabel, CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
+import { CardImg } from '../../parts/CardImg';
 
 type Post = HomebaseFile<PostContent>;
 
@@ -90,14 +91,7 @@ const HeroGround = ({ design, data }: LayoutProps) => {
   if (!photo) return null;
   return (
     <div aria-hidden className="pointer-events-none absolute inset-y-0 left-[44%] right-0 -z-10">
-      <Image
-        {...photo}
-        fileId={photo.fileId}
-        fileKey={photo.fileKey}
-        alt=""
-        fit="cover"
-        className="h-full w-full [&_img]:object-[50%_30%]"
-      />
+      <CardImg image={photo} alt="" className="h-full w-full [&_img]:object-[50%_30%]" />
       <div className="absolute inset-0" style={{ background: HERO_SCRIM }} />
     </div>
   );

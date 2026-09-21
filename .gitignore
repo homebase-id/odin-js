@@ -11,6 +11,7 @@ node_modules
 # production
 build
 dist
+dist-card
 
 # misc
 .DS_Store

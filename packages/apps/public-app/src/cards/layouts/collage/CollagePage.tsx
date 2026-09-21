@@ -11,6 +11,7 @@ import { CardBlock, isUsableLink, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
+import { CardImg } from '../../parts/CardImg';
 import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
@@ -160,7 +161,7 @@ const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
 
 export const CollagePage = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
-  const chatHref = useChatHref();
+  const chatHref = useChatHref(data.odinId);
   const chatBlock = design.blocks.find((b) => b.kind === 'chat');
   const socials = data.socials;
   const hasCollage = !!(print || cutout);
@@ -230,14 +231,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 {/* The reference captions its map with an address; the headline already sits under the name */}
                 {data.header ? (
                   <div className="h-[170px] rotate-1 overflow-hidden rounded-2xl border-[5px] border-[color:var(--card-surface)] shadow-[0_3px_9px_rgba(0,0,0,0.18)]">
-                    <Image
-                      {...data.header}
-                      fileId={data.header.fileId}
-                      fileKey={data.header.fileKey}
-                      alt=""
-                      className="h-full w-full"
-                      fit="cover"
-                    />
+                    <CardImg image={data.header} alt="" className="h-full w-full" />
                   </div>
                 ) : null}
               </div>
