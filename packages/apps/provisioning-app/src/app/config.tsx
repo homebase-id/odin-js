@@ -32,7 +32,7 @@ const ravenHostingConfig = {
   // `createme.<region>` is deliberately a pointer, not a cluster name: repointing
   // the DNS record moves new sign-ups to another cluster without a release here.
   provisioningHosts: {
-    eu: 'createme.ravenhosting.cloud',
+    eu: 'createme.eu.ravenhosting.cloud',
     ca: 'createme.na.ravenhosting.cloud',
   } as ProvisioningHosts,
 };

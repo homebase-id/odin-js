@@ -67,8 +67,6 @@ const useUpgradeRequired = () => {
 const YouAuthConsent = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
-  const [name, setName] = useState<string | null>();
-  const [duration, setDuration] = useState<AuthDuration>('never');
   const upgradeRequired = useUpgradeRequired();
 
   useEffect(() => {
@@ -100,6 +98,14 @@ const YouAuthConsent = () => {
       </MinimalLayout>
     );
   }
+
+  // A separate component because hooks cannot follow the early returns above.
+  return <YouAuthConsentForm returnUrl={returnUrl} />;
+};
+
+const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
+  const [name, setName] = useState<string | null>();
+  const [duration, setDuration] = useState<AuthDuration>('never');
 
   const returnUrlParams = new URL(returnUrl).searchParams;
   const clientType = returnUrlParams.get(CLIENT_TYPE_PARAM);
