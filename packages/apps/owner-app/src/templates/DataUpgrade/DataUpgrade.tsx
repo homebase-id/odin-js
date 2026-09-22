@@ -7,7 +7,6 @@ import { Arrow, Chevron, Loader } from '@homebase-id/common-app/icons';
 import {
   forceVersionUpgrade,
   getDataVersionInfo,
-  getUpgradeStatus,
   VersionInfoResult,
 } from '../../provider/system/DataConversionProvider';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
@@ -87,17 +86,17 @@ const DataUpgrade = () => {
     setPhase('checking');
     setError(null);
     try {
-      const status = await getUpgradeStatus(dotYouClient);
-      void refreshVersionInfo();
+      const info = await getDataVersionInfo(dotYouClient);
+      setVersionInfo(info);
 
-      // (1) An upgrade is already running -> just show the spinner and poll.
-      if (status.upgradeRunning) {
+      // (1) Already running -> show the spinner and let the poll resolve it.
+      if (info.upgradeState === 'running') {
         setPhase('running');
         return;
       }
 
-      // (2) An upgrade is required -> trigger it, then poll.
-      if (status.requiresUpgrade) {
+      // (2) Needed, or last attempt fell short -> trigger it, then poll.
+      if (info.upgradeState === 'pending' || info.upgradeState === 'failed') {
         await beginUpgrade();
         return;
       }
@@ -126,12 +125,19 @@ const DataUpgrade = () => {
         const info = await getDataVersionInfo(dotYouClient);
         if (cancelled) return;
         setVersionInfo(info);
-        // Both signals, off the one response. The version lands before the run finishes and the
-        // server goes on refusing until the run is over, so declaring 'done' on the version alone
-        // would send an auto-returning caller (below) straight back into that refusal, which
-        // bounces it here again.
-        if (!info.requiresUpgrade && !info.upgradeRunning) {
+        // The state, not the version number: the version is written before the run ends, and the
+        // server goes on refusing until the run is over -- so finishing on the version alone would
+        // send an auto-returning caller (below) straight back into that refusal, which bounces it
+        // here again.
+        if (info.upgradeState === 'upToDate') {
           setPhase('done');
+          return;
+        }
+
+        // A run that ends without getting there used to leave this spinning for good.
+        if (info.upgradeState === 'failed') {
+          setError(t('The data upgrade did not complete'));
+          setPhase('error');
           return;
         }
       } catch (err) {
