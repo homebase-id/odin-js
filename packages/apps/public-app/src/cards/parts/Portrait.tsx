@@ -1,5 +1,5 @@
-import { Image } from '@homebase-id/common-app';
-import type { CardData, CardImage } from '../useCardData';
+import { CardImg } from './CardImg';
+import type { CardData, CardPhoto } from '../useCardData';
 import type { Portrait } from '../CardDesign';
 
 const SHAPES: Record<Portrait['shape'], string> = {
@@ -25,7 +25,7 @@ export const CardPortrait = ({
   className,
 }: {
   portrait: Portrait;
-  image: CardImage | undefined;
+  image: CardPhoto | undefined;
   alt: string;
   className?: string;
 }) => {
@@ -53,14 +53,7 @@ export const CardPortrait = ({
           portrait.ring ? { border: `${portrait.ring}px solid var(--card-surface)` } : undefined
         }
       >
-        <Image
-          {...image}
-          fileId={image.fileId}
-          fileKey={image.fileKey}
-          alt={alt}
-          className="h-full w-full"
-          fit="cover"
-        />
+        <CardImg image={image} alt={alt} className="h-full w-full" />
       </div>
     </div>
   );

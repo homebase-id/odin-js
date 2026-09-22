@@ -25,7 +25,7 @@ export const PosterCard = ({ design, data }: LayoutProps) => (
       <CardName
         design={design}
         data={data}
-        className="break-words text-[50px] font-light leading-none tracking-[-0.02em]"
+        className="text-[50px] font-light leading-none tracking-[-0.02em]"
       />
       {data.headline ? <CardLabel className="pt-3">{data.headline}</CardLabel> : null}
       <CardBlocks design={design} data={data} className={`mt-5 ${ROWS}`} />

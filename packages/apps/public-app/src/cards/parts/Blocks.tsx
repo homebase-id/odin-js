@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useDotYouClientContext, Image } from '@homebase-id/common-app';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
@@ -9,14 +9,14 @@ import {
   type LayoutProps,
   type Presentation,
 } from '../CardDesign';
-import type { CardData, CardImage, CardLink } from '../useCardData';
-import { POSTS_HREF, postImage } from './posts';
+import type { CardData, CardLink, CardPost } from '../useCardData';
+import { POSTS_HREF } from './posts';
+import { CardImg } from './CardImg';
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useChatHref = () => {
+export const useChatHref = (owner: string) => {
   const client = useDotYouClientContext();
   if (client.isOwner()) return undefined;
-  const owner = window.location.hostname;
   const loggedOn = client.getLoggedInIdentity();
   return loggedOn
     ? `${new DotYouClient({ hostIdentity: loggedOn, api: ApiType.Guest }).getRoot()}/apps/chat/open/${owner}`
@@ -46,7 +46,7 @@ const Item = ({
   label: ReactNode;
   icon: FC<IconProps>;
   url?: string;
-  thumbs?: CardImage[];
+  thumbs?: CardPost[];
   external?: boolean;
   internal?: boolean;
 }) => {
@@ -124,17 +124,16 @@ const Item = ({
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {thumbs?.length ? (
         <span className="flex gap-1">
-          {thumbs.map((img) => (
-            <Image
-              key={`${img.fileId}:${img.fileKey}`}
-              {...img}
-              fileId={img.fileId}
-              fileKey={img.fileKey}
-              alt=""
-              className="h-8 w-8 overflow-hidden rounded-md"
-              fit="cover"
-            />
-          ))}
+          {thumbs.map((post) =>
+            post.image ? (
+              <CardImg
+                key={post.id}
+                image={post.image}
+                alt=""
+                className="h-8 w-8 overflow-hidden rounded-md"
+              />
+            ) : null
+          )}
         </span>
       ) : (
         <Chevron aria-hidden className="h-3 w-3 opacity-60" />
@@ -191,10 +190,7 @@ export const CardBlock = ({
   if (block.kind === 'moments') {
     if (!data.posts.length) return null;
     // Zero thumbnails is fine: `boxed` falls back to a chevron, `row` never shows thumbs
-    const thumbs = data.posts
-      .map(postImage)
-      .filter((img): img is CardImage => !!img)
-      .slice(0, 3);
+    const thumbs = data.posts.filter((post) => post.image).slice(0, 3);
     return (
       <Item
         presentation={block.presentation}
@@ -235,7 +231,7 @@ export const CardBlocks = ({
   className,
   label,
 }: LayoutProps & { kinds?: BlockKind[]; className?: string; label?: string }) => {
-  const chatHref = useChatHref();
+  const chatHref = useChatHref(data.odinId);
   const blocks = design.blocks.filter(
     (b) =>
       b.kind !== 'posts' &&

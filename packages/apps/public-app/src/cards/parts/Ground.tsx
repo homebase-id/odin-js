@@ -1,4 +1,4 @@
-import { Image } from '@homebase-id/common-app';
+import { CardImg } from './CardImg';
 import type { LayoutProps } from '../CardDesign';
 
 const CirclesArt = () => (
@@ -43,14 +43,7 @@ export const CardGround = ({ design, data }: LayoutProps) => {
     >
       {ground.photo && data.photo ? (
         <>
-          <Image
-            {...data.photo}
-            fileId={data.photo.fileId}
-            fileKey={data.photo.fileKey}
-            alt=""
-            className="h-full w-full"
-            fit="cover"
-          />
+          <CardImg image={data.photo} alt="" className="h-full w-full" />
           <div
             className="absolute inset-0"
             style={{

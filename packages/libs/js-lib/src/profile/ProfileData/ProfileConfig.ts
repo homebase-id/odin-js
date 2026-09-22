@@ -94,6 +94,8 @@ export const UNLINKABLE_SOCIALS = [
 
 export const getSocialLink = (type: string, username: string): string | undefined => {
   if (UNLINKABLE_SOCIALS.includes(type)) return undefined;
+  if (type === SocialFields.Tiktok && !username.startsWith('@'))
+    return `https://tiktok.com/@${username}`;
 
   return type !== 'dotyouid'
     ? `https://${type}.com/${type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''

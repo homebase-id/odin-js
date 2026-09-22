@@ -1,8 +1,8 @@
 import { useChannels, useDotYouClientContext, HOME_ROOT_PATH } from '@homebase-id/common-app';
-import { BlogConfig, getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
+import { Article, BlogConfig, getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import type { CardImage } from '../useCardData';
+import type { CardImage, CardPost } from '../useCardData';
 
 type Post = HomebaseFile<PostContent>;
 
@@ -39,5 +39,19 @@ export const postImage = (post: Post): CardImage | undefined => {
   };
 };
 
-export const postDate = (post: Post) =>
-  new Date(post.fileMetadata.appData.userDate ?? post.fileMetadata.created);
+export const postDate = (post: CardPost) => new Date(post.date);
+
+export const cardPost = (post: Post, href: string): CardPost => {
+  const content = post.fileMetadata.appData.content;
+  // Only articles carry a summary and a reading time
+  const article = content.type === 'Article' ? (content as Article) : undefined;
+  return {
+    id: post.fileId,
+    href,
+    date: post.fileMetadata.appData.userDate ?? post.fileMetadata.created,
+    title: content.caption,
+    excerpt: article?.abstract,
+    minutes: article?.readingTimeStats?.minutes,
+    image: postImage(post),
+  };
+};

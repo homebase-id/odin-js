@@ -1,13 +1,10 @@
 import { useId } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, t } from '@homebase-id/common-app';
-import type { HomebaseFile } from '@homebase-id/js-lib/core';
-import type { Article, PostContent } from '@homebase-id/js-lib/public';
-import type { CardData } from '../../useCardData';
-import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
+import { t } from '@homebase-id/common-app';
+import type { CardData, CardPost } from '../../useCardData';
+import { POSTS_HREF, postDate } from '../../parts/posts';
+import { CardImg } from '../../parts/CardImg';
 import { CARD_FOCUS as FOCUS } from '../../CardDesign';
-
-type Post = HomebaseFile<PostContent>;
 
 const GRID_SIZE = 6;
 // useCardData keeps the first 12 posts, so a shorter list is the full count
@@ -22,32 +19,20 @@ const OTHER_YEAR = new Intl.DateTimeFormat(undefined, {
 const formatDate = (date: Date) =>
   (date.getFullYear() === new Date().getFullYear() ? THIS_YEAR : OTHER_YEAR).format(date);
 
-const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
-  const content = post.fileMetadata.appData.content;
-  const image = postImage(post);
+const BoardPostCard = ({ post }: { post: CardPost }) => {
+  const { image, minutes } = post;
   const date = postDate(post);
   // toISOString and Intl both throw on an invalid date
   const hasDate = !Number.isNaN(date.getTime());
-  const minutes =
-    content.type === 'Article' ? (content as Article).readingTimeStats?.minutes : undefined;
 
   return (
     <Link
-      to={href}
+      to={post.href}
       className={`block h-full overflow-hidden rounded-[10px] bg-[var(--card-surface)] text-[color:var(--card-surface-ink)] shadow-[0_4px_0_rgba(0,0,0,0.2)] active:translate-y-0.5 active:shadow-[0_2px_0_rgba(0,0,0,0.2)] ${FOCUS}`}
     >
       {/* the accent shows when a post has no picture, and while one loads */}
       <div className="relative aspect-[2/1] bg-[var(--card-accent)]">
-        {image ? (
-          <Image
-            {...image}
-            fileId={image.fileId}
-            fileKey={image.fileKey}
-            alt=""
-            fit="cover"
-            className="absolute inset-0 h-full w-full"
-          />
-        ) : null}
+        {image ? <CardImg image={image} alt="" className="absolute inset-0 h-full w-full" /> : null}
       </div>
       <div className="px-[15px] pb-4 pt-[13px]">
         <p className="text-[13px] font-medium text-[color:color-mix(in_srgb,var(--card-surface-ink)_70%,var(--card-surface))]">
@@ -55,9 +40,9 @@ const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
           {hasDate && minutes ? ' · ' : null}
           {minutes ? t('{0} min', Math.ceil(minutes)) : null}
         </p>
-        {content.caption ? (
+        {post.title ? (
           <h3 className="mt-[5px] line-clamp-3 text-pretty text-[17px] font-semibold leading-[22px]">
-            {content.caption}
+            {post.title}
           </h3>
         ) : (
           <span className="sr-only">{t('Untitled')}</span>
@@ -69,7 +54,6 @@ const BoardPostCard = ({ post, href }: { post: Post; href: string }) => {
 
 export const BoardPosts = ({ data }: { data: CardData }) => {
   const headingId = useId();
-  const postHref = usePostHref();
   const { posts } = data;
   if (!posts.length) return null;
 
@@ -101,8 +85,8 @@ export const BoardPosts = ({ data }: { data: CardData }) => {
       {/* three columns at the 1120px design width; two once a column would drop under 260px */}
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-5 lg:gap-6">
         {posts.slice(0, GRID_SIZE).map((post) => (
-          <li key={post.fileMetadata.appData.content.id}>
-            <BoardPostCard post={post} href={postHref(post)} />
+          <li key={post.id}>
+            <BoardPostCard post={post} />
           </li>
         ))}
       </ul>
