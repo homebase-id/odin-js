@@ -126,17 +126,13 @@ const DataUpgrade = () => {
         const info = await getDataVersionInfo(dotYouClient);
         if (cancelled) return;
         setVersionInfo(info);
-        if (!info.requiresUpgrade) {
-          // The version lands before the run finishes, and the server refuses nearly everything
-          // until the run itself is over. Declaring 'done' on the version alone would send an
-          // auto-returning caller (below) straight back into that refusal -- which bounces it
-          // here again. Keep polling until the run is over as well.
-          const status = await getUpgradeStatus(dotYouClient);
-          if (cancelled) return;
-          if (!status.upgradeRunning) {
-            setPhase('done');
-            return;
-          }
+        // Both signals, off the one response. The version lands before the run finishes and the
+        // server goes on refusing until the run is over, so declaring 'done' on the version alone
+        // would send an auto-returning caller (below) straight back into that refusal, which
+        // bounces it here again.
+        if (!info.requiresUpgrade && !info.upgradeRunning) {
+          setPhase('done');
+          return;
         }
       } catch (err) {
         if (cancelled) return;

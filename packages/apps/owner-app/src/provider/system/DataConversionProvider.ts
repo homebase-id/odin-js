@@ -25,11 +25,43 @@ export interface VersionInfoResult {
 //Handles management of the System
 const root = '/data-conversion';
 
+const isHeaderTrue = (value: string | undefined): boolean =>
+  typeof value === 'string' && value.toLowerCase() === 'true';
+
+// Reads a response header case-insensitively, supporting both the axios
+// `AxiosHeaders` object (with `.get()`) and a plain header record.
+const readHeader = (headers: unknown, name: string): string | undefined => {
+  if (!headers || typeof headers !== 'object') return undefined;
+
+  const getter = (headers as { get?: (headerName: string) => unknown }).get;
+  if (typeof getter === 'function') {
+    const value = getter.call(headers, name);
+    return value == null ? undefined : String(value);
+  }
+
+  const lowerName = name.toLowerCase();
+  const record = headers as Record<string, unknown>;
+  const match = Object.keys(record).find((key) => key.toLowerCase() === lowerName);
+  return match !== undefined ? String(record[match]) : undefined;
+};
+
+
+/**
+ * The version-info endpoint is exempt from the upgrade guard, but its response still carries
+ * `X-UPGRADE-RUNNING` -- the middleware appends that header before deciding what to exempt. So the
+ * one call answers both questions a caller has during an upgrade: how far the data has got
+ * (`requiresUpgrade`, a version comparison) and whether the server is still refusing everything
+ * else (`upgradeRunning`, the run flag the guard actually gates on). The two can disagree, which is
+ * why both are here rather than one standing in for the other.
+ */
 export const getDataVersionInfo = async (dotYouClient: DotYouClient) => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/data-version-info';
   return client.get<VersionInfoResult>(url, {}).then((response) => {
-    return response.data;
+    return {
+      ...response.data,
+      upgradeRunning: isHeaderTrue(readHeader(response.headers, 'X-UPGRADE-RUNNING')),
+    };
   });
 };
 
@@ -52,26 +84,6 @@ export interface UpgradeStatus {
   /** The `X-UPGRADE-RUNNING` response header is `True`: a data upgrade is in progress */
   upgradeRunning: boolean;
 }
-
-const isHeaderTrue = (value: string | undefined): boolean =>
-  typeof value === 'string' && value.toLowerCase() === 'true';
-
-// Reads a response header case-insensitively, supporting both the axios
-// `AxiosHeaders` object (with `.get()`) and a plain header record.
-const readHeader = (headers: unknown, name: string): string | undefined => {
-  if (!headers || typeof headers !== 'object') return undefined;
-
-  const getter = (headers as { get?: (headerName: string) => unknown }).get;
-  if (typeof getter === 'function') {
-    const value = getter.call(headers, name);
-    return value == null ? undefined : String(value);
-  }
-
-  const lowerName = name.toLowerCase();
-  const record = headers as Record<string, unknown>;
-  const match = Object.keys(record).find((key) => key.toLowerCase() === lowerName);
-  return match !== undefined ? String(record[match]) : undefined;
-};
 
 /**
  * Calls the owner verify-token endpoint and reads the data-upgrade signalling
