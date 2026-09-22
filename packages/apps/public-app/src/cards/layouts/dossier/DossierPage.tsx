@@ -110,7 +110,7 @@ const Identity = ({ design, data }: LayoutProps) => {
       <CardName
         design={design}
         data={data}
-        className={`break-words text-[length:clamp(44px,5.7vw,64px)] leading-[0.94] tracking-[-0.04em] ${ink}`}
+        className={`text-[length:clamp(44px,5.7vw,64px)] leading-[0.94] tracking-[-0.04em] ${ink}`}
       />
       <LocationLine data={data} className="pt-4 !text-[13px] !tracking-[0.16em]" />
       {data.bio ? (

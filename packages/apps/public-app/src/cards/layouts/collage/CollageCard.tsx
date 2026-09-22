@@ -55,7 +55,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
         <CardName
           design={design}
           data={firstNameOnly(data)}
-          className="text-[56px] font-bold leading-[0.86] [overflow-wrap:anywhere]"
+          className="text-[56px] font-bold leading-[0.86]"
         />
         {data.headline ? (
           <p className="mt-2 pl-1 font-[family-name:var(--card-label)] text-[22px] font-medium leading-6 text-[color:var(--card-muted)]">

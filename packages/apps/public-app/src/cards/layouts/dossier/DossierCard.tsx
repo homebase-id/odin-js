@@ -35,7 +35,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
           <CardName
             design={design}
             data={data}
-            className="break-words text-[22px] leading-[24px] tracking-[-0.03em] text-[color:var(--card-ink)]"
+            className="text-[22px] leading-[calc(24/22)] tracking-[-0.03em] text-[color:var(--card-ink)]"
           />
           <LocationLine data={data} className="pt-2 !tracking-[0.14em]" />
         </div>

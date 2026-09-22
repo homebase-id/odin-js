@@ -1,7 +1,7 @@
 import type { LayoutProps } from '../../CardDesign';
 import { ownerName } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { CardName } from '../../parts/Type';
+import { BreakAtDots, CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 
@@ -53,16 +53,14 @@ export const BoardProfile = ({
         design={design}
         data={data}
         inline
-        className={`max-w-full text-balance text-center font-semibold leading-tight [overflow-wrap:anywhere] ${
+        className={`max-w-full text-balance text-center font-semibold leading-tight ${
           sizes.name
         } ${portrait && image ? sizes.nameGap : ''}`}
       />
       {/* Without a name the heading already is the hostname */}
       {ownerName(data) !== data.odinId ? (
-        <p
-          className={`max-w-full text-center text-[color:var(--card-muted)] [overflow-wrap:anywhere] ${sizes.host}`}
-        >
-          {data.odinId}
+        <p className={`max-w-full text-center text-[color:var(--card-muted)] ${sizes.host}`}>
+          <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
       <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />

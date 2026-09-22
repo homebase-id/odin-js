@@ -178,7 +178,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
               <CardName
                 design={design}
                 data={firstNameOnly(data)}
-                className="origin-left -rotate-2 text-[length:clamp(56px,34cqw,124px)] font-bold leading-[0.84] [overflow-wrap:anywhere]"
+                className="origin-left -rotate-2 text-[length:clamp(56px,34cqw,124px)] font-bold leading-[0.84]"
               />
               {data.headline ? (
                 <p className="pl-2.5 pt-3 font-[family-name:var(--card-label)] text-[length:clamp(24px,11cqw,40px)] font-medium leading-none text-[color:var(--card-muted)]">

@@ -102,7 +102,7 @@ const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
       <CardName
         design={design}
         data={data}
-        className="break-words pt-3.5 text-[length:clamp(76px,10vw,118px)] font-light leading-[0.93] tracking-[-0.03em]"
+        className="pt-3.5 text-[length:clamp(76px,10vw,118px)] font-light leading-[0.93] tracking-[-0.03em]"
       />
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4 pt-[22px]">
         <CardBlocks design={design} data={data} className={ROW} />
