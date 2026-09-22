@@ -11,15 +11,31 @@ export const circleToCircleIds = (queryParamVal: string | undefined): string[] =
   return queryParamVal?.split(',') || [];
 };
 
+/**
+ * Parses the `d`/`cd` query param an app hands the owner console into drive grant requests.
+ *
+ * Returns `undefined` when the param is malformed, which the caller shows as a bad request. It is a
+ * URL an app built, so a bad one is a bug in that app and not something the owner can act on -- but
+ * quietly dropping a drive from a permission prompt would mean the owner approves less than the app
+ * asked for and neither side finds out.
+ *
+ * `ts` (the drive type slug) is required on every grant for the same reason: the app knows the type
+ * of the drive it is asking for, and a grant without one cannot name the drive it wants.
+ */
 export const drivesParamToDriveGrantRequest = (
   queryParamVal: string | undefined
-): DriveGrantRequest[] => {
+): DriveGrantRequest[] | undefined => {
   if (!queryParamVal) return [];
 
   try {
     const drivesParamObject = queryParamVal && tryJsonParse(queryParamVal);
     return (Array.isArray(drivesParamObject) ? drivesParamObject : [drivesParamObject]).map(
       (d: AppDriveAuthorizationParams) => {
+        if (!d.ts)
+          throw new Error(
+            `Drive grant for ${d.a}/${d.t} ("${d.n}") is missing its drive type slug (ts)`
+          );
+
         return {
           permissionedDrive: {
             drive: {
@@ -40,15 +56,16 @@ export const drivesParamToDriveGrantRequest = (
             allowAnonymousReads: d.r || false,
             allowSubscriptions: d.s || false,
             attributes: (d.at && tryJsonParse(d.at)) || undefined,
+            // Left undefined the server derives the slug; see TargetDriveAccessRequest.driveSlug.
             driveSlug: d.ds || undefined,
-            driveTypeSlug: d.ts || undefined,
+            driveTypeSlug: d.ts,
           },
         };
       }
     );
   } catch (ex) {
-    console.warn('Error parsing drives param', ex);
-    return [];
+    console.error('Error parsing drives param', ex);
+    return undefined;
   }
 };
 

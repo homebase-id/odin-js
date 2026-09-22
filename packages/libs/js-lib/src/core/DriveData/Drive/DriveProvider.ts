@@ -74,11 +74,17 @@ export const getDrivesByType = async (
 /**
  * Creates the drive if it does not already exist.
  *
- * `appId`, `driveSlug` and `driveTypeSlug` are the drive's address. Pass them whenever the owning app
- * is known: the server derives a slug from the drive name when one is omitted, and a slug is immutable
- * once written and is resolved against by other identities — so a derived one is a permanent address
- * nobody chose. `appId` and `driveSlug` belong together; a slug on a drive with no owning app is not
- * covered by the server's uniqueness constraint.
+ * `appId`, `driveSlug` and `driveTypeSlug` are the drive's address, and all three are required
+ * parameters: every drive is owned by an app and addressable as `/apps/{appSlug}/drives/{driveSlug}`,
+ * so there is no such thing as creating one without saying who owns it and what it is called.
+ *
+ * `driveSlug` may still be passed as `undefined`, and only for a *runtime instance* drive -- one per
+ * feed channel, community or profile. There the server derives the slug from `name`, because only it
+ * holds the set of slugs the owning app already uses and so only it can dedupe two channels that
+ * share a name. Stating `undefined` is the point: it is a decision, not an omission.
+ *
+ * A slug is immutable once written and is an address other identities resolve against, so whatever
+ * is passed here is permanent.
  */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
@@ -86,14 +92,16 @@ export const ensureDrive = async (
   name: string,
   metadata: string | undefined,
   allowAnonymousReads: boolean,
-  allowSubscriptions = false,
-  allowCdn = false,
-  appId?: string,
-  driveSlug?: string,
-  driveTypeSlug?: string
+  allowSubscriptions: boolean,
+  allowCdn: boolean,
+  appId: string,
+  driveSlug: string | undefined,
+  driveTypeSlug: string
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
+  assertIfDefined('appId', appId);
+  assertIfDefined('driveTypeSlug', driveTypeSlug);
 
   //create the drive if it does not exist
   const client = dotYouClient.createAxiosClient();

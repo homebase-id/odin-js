@@ -37,6 +37,12 @@ vi.mock('axios', () => ({
   default: mockAxios,
 }));
 
+vi.mock('../../../peer/peerData/ExternalPostsDataProvider', async () => {
+  return {
+    getPostBySlugOverPeer: () => null,
+  };
+});
+
 const dotYouClient = new DotYouClient({
   api: ApiType.Guest,
   hostIdentity: 'example.com',
@@ -315,12 +321,6 @@ describe('PostUploader for remote files', () => {
   test('SavePost with a new post should upload a new file', async () => {
     vi.clearAllMocks();
 
-    vi.mock('../../../peer/peerData/ExternalPostsDataProvider', async () => {
-      return {
-        getPostBySlugOverPeer: () => null,
-      };
-    });
-
     mockAxios.post.mockResolvedValueOnce({
       status: 200,
       data: {
@@ -344,12 +344,6 @@ describe('PostUploader for remote files', () => {
 
   test('SavePost with an existing post should update a file header', async () => {
     vi.clearAllMocks();
-
-    vi.mock('../../../peer/peerData/ExternalPostsDataProvider', async () => {
-      return {
-        getPostBySlugOverPeer: () => null,
-      };
-    });
 
     mockAxios.get.mockResolvedValueOnce({
       status: 200,

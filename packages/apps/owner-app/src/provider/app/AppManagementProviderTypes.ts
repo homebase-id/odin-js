@@ -47,12 +47,11 @@ export interface AppRegistrationRequest {
   name: string | null;
 
   /**
-   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Omit it and the server derives one from
-   * `name` — "Homebase - Location" becomes "homebase-locat" — and a slug is immutable once written,
-   * so the derived one is permanent. Registration is first-come: a slug another app already holds is
-   * refused rather than silently changed.
+   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Required: an app names itself, the server
+   * does not guess. A slug is immutable once written, and registration is first-come — a slug
+   * another app already holds is refused rather than silently changed.
    */
-  appSlug?: string;
+  appSlug: string;
 
   corsHostName?: string;
   permissionSet?: PermissionSet;
@@ -78,17 +77,20 @@ export interface DriveGrantRequest {
 
     /**
      * The drive half of `/apps/{appSlug}/drives/{driveSlug}`, declared by the app asking for the
-     * drive. Omit it and the server derives one from `name`, picking a suffix that does not collide
-     * with what this app already holds. Either way the slug is immutable once written, so a supplied
-     * one is permanent -- and a slug this app already uses is refused rather than silently changed.
+     * drive. Required to be stated, but `undefined` is legitimate for a runtime instance drive (one
+     * per channel, community or profile): there the server derives the slug from `name` against the
+     * set the owning app already holds, which is the only place that set is known. The slug is
+     * immutable once written, so a supplied one is permanent -- and a slug this app already uses is
+     * refused rather than silently changed.
      */
-    driveSlug?: string;
+    driveSlug: string | undefined;
 
     /**
-     * The readable form of the drive's type, shared by every drive of that type. Declared by the app;
-     * when it says nothing, the only type we can name from here is a channel drive.
+     * The readable form of the drive's type, shared by every drive of that type. Required: an app
+     * asking for a drive always knows what kind of drive it is asking for, and a missing one here is
+     * a malformed request rather than something to guess at.
      */
-    driveTypeSlug?: string;
+    driveTypeSlug: string;
   };
 }
 

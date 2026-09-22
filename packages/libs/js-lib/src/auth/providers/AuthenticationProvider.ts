@@ -23,8 +23,12 @@ export interface YouAuthorizationParams {
 export interface AppAuthorizationParams {
   n: string;
   appId: string;
-  /** appSlug -- the app half of `/apps/{appSlug}/drives/{driveSlug}` */
-  as?: string;
+  /**
+   * appSlug -- the app half of `/apps/{appSlug}/drives/{driveSlug}`. Required: an app names itself,
+   * the server does not guess. It is immutable once written and registration is first-come, so a
+   * derived slug would be a permanent address nobody chose.
+   */
+  as: string;
   fn: string;
   p: string | undefined;
   cp: string | undefined;
@@ -44,10 +48,13 @@ export interface AppDriveAuthorizationParams {
   r?: boolean;
   s?: boolean;
   at?: string;
-  /** driveSlug */
-  ds?: string;
-  /** driveTypeSlug */
-  ts?: string;
+  /**
+   * driveSlug. Required to be stated, but `undefined` is a legitimate value: see
+   * {@link TargetDriveAccessRequest.driveSlug}.
+   */
+  ds: string | undefined;
+  /** driveTypeSlug. Required -- every drive has a type, and the app always knows which. */
+  ts: string;
 }
 
 export interface TargetDriveAccessRequest extends TargetDrive {
@@ -61,16 +68,21 @@ export interface TargetDriveAccessRequest extends TargetDrive {
   /**
    * The drive half of `/apps/{appSlug}/drives/{driveSlug}`. Only meaningful when the owner does not
    * already have this drive -- an existing drive keeps the slug it was created with, since a slug is
-   * an address other identities resolve against. Omit it and the server derives one from `name`,
-   * picking a suffix that does not collide with what this app already holds.
+   * an address other identities resolve against.
+   *
+   * Required to be stated, but `undefined` is a legitimate value: for a *runtime instance* drive --
+   * one per feed channel, community or profile -- the server derives the slug from `name`, because
+   * only it holds the set of slugs the owning app already uses and so only it can dedupe two
+   * channels that happen to share a name. Every fixed drive names its own slug.
    */
-  driveSlug?: string;
+  driveSlug: string | undefined;
 
   /**
    * The readable form of this drive's type, shared by every drive of that type (`channel`,
-   * `profile`, ...). Same caveat as `driveSlug`: it applies at creation only.
+   * `profile`, ...). Required: unlike `driveSlug` it never needs deriving, since the app requesting
+   * a drive always knows what kind of drive it is asking for.
    */
-  driveTypeSlug?: string;
+  driveTypeSlug: string;
 }
 
 //checks if the authentication token (stored in a cookie) is valid
@@ -109,6 +121,13 @@ export const getRegistrationParams = async (
   returnUrl: string,
   appName: string,
   appId: string,
+  /**
+   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Required, and sits next to `appId` because
+   * the two together are how the app names itself: the slug is immutable once written and
+   * registration is first-come, so a slug another app already holds is refused rather than silently
+   * changed. Only meaningful on first registration; extending permissions cannot change it.
+   */
+  appSlug: string,
   permissionKeys: number[] | undefined,
   circlePermissionKeys: number[] | undefined,
   drives: TargetDriveAccessRequest[],
@@ -117,15 +136,7 @@ export const getRegistrationParams = async (
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
-  state?: string,
-  /**
-   * The app half of `/apps/{appSlug}/drives/{driveSlug}`. Omit it and the server derives one from
-   * `appName` -- "Homebase - Location" becomes "homebase-locat". Either way it is immutable once
-   * written, and registration is first-come: a slug another app already holds is refused rather
-   * than silently changed. Only meaningful on first registration; extending permissions cannot
-   * change it.
-   */
-  appSlug?: string
+  state?: string
 ): Promise<YouAuthorizationParams> => {
   const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
 
