@@ -7,10 +7,6 @@ import {
   VerticalPosts,
   Links,
   CoverPage,
-  PosterCard,
-  BoardCard,
-  CollageCard,
-  DossierCard,
   IconProps,
 } from '@homebase-id/common-app/icons';
 
@@ -77,23 +73,6 @@ const ThemeSelector = ({
         onChange={doChange}
         checked={defaultValue === HomePageTheme.Links + ''}
       />
-      {[
-        { value: HomePageTheme.Poster, icon: PosterCard, label: t('Poster card') },
-        { value: HomePageTheme.Board, icon: BoardCard, label: t('Board card') },
-        { value: HomePageTheme.Collage, icon: CollageCard, label: t('Collage card') },
-        { value: HomePageTheme.Dossier, icon: DossierCard, label: t('Dossier card') },
-      ].map(({ value, icon, label }) => (
-        <Theme
-          key={value}
-          id={id + value}
-          name={id + name}
-          icon={icon}
-          label={label}
-          value={value}
-          onChange={doChange}
-          checked={defaultValue === value + ''}
-        />
-      ))}
       <Theme
         id={id + '0'}
         name={id + name}

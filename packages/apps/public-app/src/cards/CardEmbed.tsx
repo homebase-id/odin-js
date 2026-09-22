@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import { useSiteData } from '@homebase-id/common-app';
-import { CARD_PRESETS, cardPresetForTheme, presetFromParam } from './presets';
+import { CARD_PRESETS, presetFromParam } from './presets';
 import { useCardData } from './useCardData';
 import { HomebaseCard } from './HomebaseCard';
 
@@ -15,7 +15,7 @@ const CardEmbed = () => {
   // "Disable public site" - the phone embed has nothing to show either
   if (!themeId || themeId === '0') return null;
 
-  const layout = presetFromParam(params.get('design')) ?? cardPresetForTheme(themeId) ?? 'board';
+  const layout = presetFromParam(params.get('design')) ?? 'board';
   return (
     <main className="min-h-dvh">
       <HomebaseCard design={CARD_PRESETS[layout]} data={data} className="min-h-dvh" />

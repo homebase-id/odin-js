@@ -165,7 +165,7 @@ const CompactCard = ({ card }: { card: Rendered }) => (
 );
 
 const CardApp = ({ host }: { host: CardHost }) => {
-  // the website's own breakpoint (CardHome): the full page on wide screens, the card on phones
+  // the full page on wide screens, the compact card on phones
   const wide = useMinWidth(768);
   const [card, setCard] = useState<Rendered>();
   const [exporting, setExporting] = useState(false);

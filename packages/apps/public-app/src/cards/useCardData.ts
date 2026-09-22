@@ -2,7 +2,8 @@ import {
   BLOG_POST_INFIITE_PAGE_SIZE,
   flattenInfinteData,
   LinkType,
-  ThemeCardSettings,
+  ThemeCoverSettings,
+  ThemeLinksSettings,
   useBiography,
   useLinks,
   usePostsInfinite,
@@ -69,7 +70,10 @@ export const useCardData = (): CardData | undefined => {
 
   if (!siteData) return undefined;
   const { owner, home } = siteData;
-  const settings = home?.templateSettings as ThemeCardSettings | undefined;
+  // tagLine only exists on the Cover theme, headerImageKey on the tabs and Links themes
+  const settings = home?.templateSettings as
+    | (ThemeLinksSettings & Pick<ThemeCoverSettings, 'tagLine'>)
+    | undefined;
   const odinId = window.location.hostname;
 
   return {

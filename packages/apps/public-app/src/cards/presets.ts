@@ -1,4 +1,3 @@
-import { HomePageTheme } from '@homebase-id/js-lib/public';
 import type { CardDesign, LayoutId } from './CardDesign';
 
 export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
@@ -109,16 +108,6 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
     socials: 'handles',
   },
 };
-
-const THEME_TO_LAYOUT: Record<string, LayoutId> = {
-  [HomePageTheme.Poster]: 'poster',
-  [HomePageTheme.Board]: 'board',
-  [HomePageTheme.Collage]: 'collage',
-  [HomePageTheme.Dossier]: 'dossier',
-};
-
-export const cardPresetForTheme = (themeId: unknown): LayoutId | undefined =>
-  THEME_TO_LAYOUT[String(themeId)];
 
 // Object.hasOwn, not `in`: `'toString' in CARD_PRESETS` is true
 export const presetFromParam = (value: string | null): LayoutId | undefined =>
