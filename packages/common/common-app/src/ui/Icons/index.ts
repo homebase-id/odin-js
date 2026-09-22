@@ -94,16 +94,7 @@ import {Stackoverflow} from './Stackoverflow';
 import {Steam} from './Steam';
 import {Sun} from './Sun';
 import {TemplateList, TemplateGrid, TemplateMasonry} from './Templates';
-import {
-    CoverPage,
-    HorizontalPosts,
-    VerticalPosts,
-    Links,
-    PosterCard,
-    BoardCard,
-    CollageCard,
-    DossierCard,
-} from './Theme';
+import {CoverPage, HorizontalPosts, VerticalPosts, Links} from './Theme';
 import {Tiktok} from './Tiktok';
 import {Times} from './Times';
 import {Trash} from './Trash';
@@ -130,7 +121,6 @@ export {
     Bars,
     Bell,
     Block,
-    BoardCard,
     Bold,
     Bubble,
     Bullhorn,
@@ -145,7 +135,6 @@ export {
     ChevronDown,
     ChevronLeft,
     Circles,
-    CollageCard,
     Clipboard,
     Clock,
     Cloud,
@@ -158,7 +147,6 @@ export {
     CoverPage,
     Crop,
     Discord,
-    DossierCard,
     Download,
     Ellipsis,
     Envelope,
@@ -213,7 +201,6 @@ export {
     Phone,
     Pin,
     Plus,
-    PosterCard,
     Question,
     Quote,
     RadioTower,

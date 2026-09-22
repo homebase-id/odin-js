@@ -46,13 +46,6 @@ export interface ThemeLinksSettings extends DefaultTemplateSettings {
   themeId: '444';
   headerImageKey?: string;
 }
-
-export interface ThemeCardSettings extends DefaultTemplateSettings {
-  themeId: '555' | '666' | '777' | '888';
-  tagLine?: string;
-  headerImageKey?: string;
-}
-
 export interface ThemeDisabledSettings extends DefaultTemplateSettings {
   themeId: '0';
 }
@@ -61,7 +54,6 @@ export type TemplateSettings =
   | ThemeCoverSettings
   | ThemeLinksSettings
   | ThemeWithTabsSettings
-  | ThemeCardSettings
   | ThemeDisabledSettings
   | undefined;
 

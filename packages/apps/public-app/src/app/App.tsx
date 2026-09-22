@@ -60,36 +60,26 @@ function App() {
             path=""
             element={
               <PublicRoute>
+                <Header />
                 <Outlet />
+                <Footer className="mt-auto" />
               </PublicRoute>
             }
           >
-            {/* Home owns its chrome: card themes draw their own top bar */}
             <Route index={true} element={<Home />} />
             <Route path="about" element={<Home />} />
             <Route path="links" element={<Home />} />
             <Route path="posts" element={<Home />} />
             <Route path="connections" element={<Home />} />
 
-            <Route
-              element={
-                <>
-                  <Header />
-                  <Outlet />
-                  <Footer className="mt-auto" />
-                </>
-              }
-            >
-              <Route path="posts/:channelKey" element={<PostOverview />} />
-              <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />
-              <Route
-                path="posts/:channelKey/:postKey/:attachmentKey"
-                element={<PostImageDetail />}
-              />
-              <Route path="linked" element={<LinksPage />} />
-              <Route path="ping" element={<Ping />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
+            <Route path="posts/:channelKey" element={<PostOverview />} />
+            <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />
+            <Route path="posts/:channelKey/:postKey/:attachmentKey" element={<PostImageDetail />} />
+
+            <Route path="linked" element={<LinksPage />} />
+
+            <Route path="ping" element={<Ping />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Route>
         <Route
