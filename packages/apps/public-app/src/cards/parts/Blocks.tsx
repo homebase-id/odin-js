@@ -9,9 +9,9 @@ import {
   type LayoutProps,
   type Presentation,
 } from '../CardDesign';
-import type { CardData, CardImage, CardLink } from '../useCardData';
-import { POSTS_HREF, postImage } from './posts';
-import { DriveImage } from './DriveImage';
+import type { CardData, CardLink, CardPost } from '../useCardData';
+import { POSTS_HREF } from './posts';
+import { CardImg } from './CardImg';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useChatHref = (owner: string) => {
@@ -46,7 +46,7 @@ const Item = ({
   label: ReactNode;
   icon: FC<IconProps>;
   url?: string;
-  thumbs?: CardImage[];
+  thumbs?: CardPost[];
   external?: boolean;
   internal?: boolean;
 }) => {
@@ -124,14 +124,16 @@ const Item = ({
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {thumbs?.length ? (
         <span className="flex gap-1">
-          {thumbs.map((img) => (
-            <DriveImage
-              key={`${img.fileId}:${img.fileKey}`}
-              image={img}
-              alt=""
-              className="h-8 w-8 overflow-hidden rounded-md"
-            />
-          ))}
+          {thumbs.map((post) =>
+            post.image ? (
+              <CardImg
+                key={post.id}
+                image={post.image}
+                alt=""
+                className="h-8 w-8 overflow-hidden rounded-md"
+              />
+            ) : null
+          )}
         </span>
       ) : (
         <Chevron aria-hidden className="h-3 w-3 opacity-60" />
@@ -188,10 +190,7 @@ export const CardBlock = ({
   if (block.kind === 'moments') {
     if (!data.posts.length) return null;
     // Zero thumbnails is fine: `boxed` falls back to a chevron, `row` never shows thumbs
-    const thumbs = data.posts
-      .map(postImage)
-      .filter((img): img is CardImage => !!img)
-      .slice(0, 3);
+    const thumbs = data.posts.filter((post) => post.image).slice(0, 3);
     return (
       <Item
         presentation={block.presentation}

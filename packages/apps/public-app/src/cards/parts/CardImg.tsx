@@ -1,5 +1,5 @@
+import { Image } from '@homebase-id/common-app';
 import type { CardPhoto } from '../useCardData';
-import { DriveImage } from './DriveImage';
 
 // Same wrapper + cover <img> that Image draws, so `className` means the same thing for both kinds
 export const CardImg = ({
@@ -12,9 +12,18 @@ export const CardImg = ({
   className?: string;
 }) =>
   'src' in image ? (
-    <div className={`relative overflow-hidden ${className ?? ''}`}>
+    <div
+      className={`${className?.includes('absolute') ? '' : 'relative'} overflow-hidden ${className ?? ''}`}
+    >
       <img src={image.src} alt={alt} className="h-full w-full object-cover" />
     </div>
   ) : (
-    <DriveImage image={image} alt={alt} className={className} />
+    <Image
+      {...image}
+      fileId={image.fileId}
+      fileKey={image.fileKey}
+      alt={alt}
+      className={className}
+      fit="cover"
+    />
   );

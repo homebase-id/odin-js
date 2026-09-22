@@ -1,18 +1,14 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, t, useDotYouClientContext } from '@homebase-id/common-app';
-import type { HomebaseFile } from '@homebase-id/js-lib/core';
-import type { Article, PostContent } from '@homebase-id/js-lib/public';
+import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
-import type { CardData } from '../../useCardData';
+import type { CardData, CardPost } from '../../useCardData';
 import { CardBlocks, isUsableLink } from '../../parts/Blocks';
 import { CardLabel, CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
-import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-
-type Post = HomebaseFile<PostContent>;
 
 const FOCUS_ON_PAPER =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-ground)]';
@@ -44,16 +40,11 @@ const DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 });
 
-const postText = (post: Post) => {
-  const content = post.fileMetadata.appData.content;
-  const article = content.type === 'Article' ? (content as Article) : undefined;
-  return {
-    title: content.caption || t('Untitled'),
-    // Only articles carry a summary; for other posts the caption already is the title
-    summary: article?.abstract || undefined,
-    minutes: Math.ceil(article?.readingTimeStats?.minutes ?? 0),
-  };
-};
+const postText = (post: CardPost) => ({
+  title: post.title || t('Untitled'),
+  summary: post.excerpt || undefined,
+  minutes: Math.ceil(post.minutes ?? 0),
+});
 
 const SignIn = () => (
   <CardSignIn className="rounded-full border border-[color:color-mix(in_srgb,var(--card-ink)_55%,transparent)] px-4 py-1.5 text-sm font-medium text-[color:var(--card-ink)] hover:bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)]" />
@@ -121,7 +112,7 @@ const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
   </section>
 );
 
-const PostDate = ({ post, minutes }: { post: Post; minutes?: number }) => {
+const PostDate = ({ post, minutes }: { post: CardPost; minutes?: number }) => {
   const date = postDate(post);
   if (Number.isNaN(date.getTime())) return null;
   return (
@@ -132,8 +123,8 @@ const PostDate = ({ post, minutes }: { post: Post; minutes?: number }) => {
   );
 };
 
-const FeaturedPost = ({ post, href }: { post: Post; href: string }) => {
-  const image = postImage(post);
+const FeaturedPost = ({ post }: { post: CardPost }) => {
+  const { image } = post;
   const { title, summary, minutes } = postText(post);
   return (
     <article
@@ -145,14 +136,7 @@ const FeaturedPost = ({ post, href }: { post: Post; href: string }) => {
     >
       {image ? (
         <div className="aspect-[44/25] overflow-hidden bg-[var(--paper-rule)]">
-          <Image
-            {...image}
-            fileId={image.fileId}
-            fileKey={image.fileKey}
-            alt=""
-            fit="cover"
-            className="h-full w-full"
-          />
+          <CardImg image={image} alt="" className="h-full w-full" />
         </div>
       ) : null}
       <div className="pt-1.5">
@@ -167,7 +151,7 @@ const FeaturedPost = ({ post, href }: { post: Post; href: string }) => {
         ) : null}
         {/* The whole article is the hit area; this link is its one tab stop */}
         <Link
-          to={href}
+          to={post.href}
           className={`mt-4 inline-block font-sans text-sm font-medium after:absolute after:inset-0 ${FOCUS_ON_PAPER}`}
         >
           {t('Read')}
@@ -179,7 +163,7 @@ const FeaturedPost = ({ post, href }: { post: Post; href: string }) => {
   );
 };
 
-const PostRow = ({ post, href }: { post: Post; href: string }) => {
+const PostRow = ({ post }: { post: CardPost }) => {
   const { title, summary } = postText(post);
   return (
     <li className="group relative grid grid-cols-[180px_minmax(0,1fr)] gap-8 border-t border-[color:var(--paper-rule)] py-[22px] last:border-b">
@@ -189,7 +173,7 @@ const PostRow = ({ post, href }: { post: Post; href: string }) => {
       <div>
         <h3 className="font-[family-name:var(--card-display)] text-[27px] font-normal leading-8 tracking-[-0.01em]">
           <Link
-            to={href}
+            to={post.href}
             className={`line-clamp-2 transition-colors after:absolute after:inset-0 group-hover:text-[color:var(--paper-body)] ${FOCUS_ON_PAPER}`}
           >
             {title}
@@ -205,8 +189,7 @@ const PostRow = ({ post, href }: { post: Post; href: string }) => {
   );
 };
 
-const Writing = ({ posts }: { posts: Post[] }) => {
-  const hrefOf = usePostHref();
+const Writing = ({ posts }: { posts: CardPost[] }) => {
   const [featured, ...rest] = posts;
   const rows = rest.slice(0, 4);
   return (
@@ -221,11 +204,11 @@ const Writing = ({ posts }: { posts: Post[] }) => {
           </h2>
           <span aria-hidden className="h-px flex-1 bg-[var(--card-ground)] opacity-25" />
         </div>
-        <FeaturedPost post={featured} href={hrefOf(featured)} />
+        <FeaturedPost post={featured} />
         {rows.length ? (
           <ul className="pt-10">
             {rows.map((post) => (
-              <PostRow key={post.fileId} post={post} href={hrefOf(post)} />
+              <PostRow key={post.id} post={post} />
             ))}
           </ul>
         ) : null}

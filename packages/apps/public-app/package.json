@@ -7,7 +7,6 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "build:card-embed": "vite build -c vite.card.config.ts && node scripts/inline-card.mjs",
     "serve": "vite preview",
     "type": "tsc",
     "lint": "eslint src"

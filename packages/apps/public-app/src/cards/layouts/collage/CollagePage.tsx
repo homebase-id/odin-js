@@ -1,15 +1,13 @@
 import { useId } from 'react';
 import { Link } from 'react-router-dom';
-import { Image, t } from '@homebase-id/common-app';
-import type { HomebaseFile } from '@homebase-id/js-lib/core';
-import type { PostContent } from '@homebase-id/js-lib/public';
+import { t } from '@homebase-id/common-app';
 import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
-import type { CardData } from '../../useCardData';
+import type { CardData, CardPost } from '../../useCardData';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlock, isUsableLink, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
 import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
@@ -70,34 +68,18 @@ const TopBar = ({ data }: { data: CardData }) => {
   );
 };
 
-const Note = ({
-  post,
-  href,
-  tilt,
-}: {
-  post: HomebaseFile<PostContent>;
-  href: string;
-  tilt: number;
-}) => {
-  const image = postImage(post);
+const Note = ({ post, tilt }: { post: CardPost; tilt: number }) => {
+  const { image, title } = post;
   const date = postDate(post);
-  const { caption } = post.fileMetadata.appData.content;
   return (
     <li className="relative" style={{ transform: `rotate(${tilt}deg)` }}>
       <Tape className="-top-[9px] left-1/2 h-5 w-[70px] -translate-x-1/2" />
       <Link
-        to={href}
+        to={post.href}
         className={`block h-full bg-[var(--card-surface)] p-3 pb-6 text-[color:var(--card-surface-ink)] shadow-[0_3px_9px_rgba(0,0,0,0.18)] ${FOCUS}`}
       >
         {image ? (
-          <Image
-            {...image}
-            fileId={image.fileId}
-            fileKey={image.fileKey}
-            alt=""
-            className="aspect-[260/118] w-full"
-            fit="cover"
-          />
+          <CardImg image={image} alt="" className="aspect-[260/118] w-full" />
         ) : (
           <div
             aria-hidden
@@ -107,9 +89,9 @@ const Note = ({
             }}
           />
         )}
-        {caption ? (
+        {title ? (
           <p className="line-clamp-3 pt-2.5 font-[family-name:var(--card-display)] text-[26px] font-bold leading-[26px]">
-            {caption}
+            {title}
           </p>
         ) : (
           <span className="sr-only">{t('Untitled')}</span>
@@ -125,9 +107,8 @@ const Note = ({
   );
 };
 
-const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
+const Notes = ({ posts }: { posts: CardPost[] }) => {
   const headingId = useId();
-  const postHref = usePostHref();
   return (
     <section aria-labelledby={headingId} className="px-[5.7%] pt-[18px]">
       <div className="flex items-end gap-5">
@@ -147,12 +128,7 @@ const Notes = ({ posts }: { posts: HomebaseFile<PostContent>[] }) => {
       </div>
       <ul className="grid grid-cols-3 gap-x-[46px] gap-y-10 px-3 pt-[34px]">
         {posts.map((post, index) => (
-          <Note
-            key={post.fileId ?? post.fileMetadata.appData.content.id}
-            post={post}
-            href={postHref(post)}
-            tilt={NOTE_TILTS[index % NOTE_TILTS.length]}
-          />
+          <Note key={post.id} post={post} tilt={NOTE_TILTS[index % NOTE_TILTS.length]} />
         ))}
       </ul>
     </section>

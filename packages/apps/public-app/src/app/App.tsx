@@ -35,6 +35,7 @@ const LinksPage = lazy(() => import('../templates/LinksPage/LinksPage'));
 const PreviewPage = lazy(() => import('../templates/PreviewPage/PreviewPage'));
 const YouAuthFinalizer = lazy(() => import('../templates/YouAuthFinalizer/YouAuthFinalizer'));
 const CardEmbed = lazy(() => import('../cards/CardEmbed'));
+const CardApp = lazy(() => import('../cards/CardApp'));
 
 const Ping = lazy(() => import('../templates/Ping/Ping'));
 
@@ -100,18 +101,7 @@ function App() {
             </NoLayout>
           }
         />
-        <Route
-          path="/card"
-          element={
-            <NoLayout>
-              <ErrorBoundary>
-                <Suspense fallback={<></>}>
-                  <CardEmbed />
-                </Suspense>
-              </ErrorBoundary>
-            </NoLayout>
-          }
-        />
+        <Route path="/card" element={<CardRoute />} />
       </>
     ),
     {
@@ -208,6 +198,28 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
     window.history.replaceState(null, '', window.location.pathname);
 
   return <>{children}</>;
+};
+
+const CardRoute = () => {
+  const [searchParams] = useSearchParams();
+  const host = searchParams.get('host');
+  // App mode renders only what the app sends; NoLayout would fetch the site data
+  if (host === 'app' || host === 'frame')
+    return (
+      <Suspense fallback={<></>}>
+        <CardApp host={host} />
+      </Suspense>
+    );
+
+  return (
+    <NoLayout>
+      <ErrorBoundary>
+        <Suspense fallback={<></>}>
+          <CardEmbed />
+        </Suspense>
+      </ErrorBoundary>
+    </NoLayout>
+  );
 };
 
 const ActionRedirect = () => {

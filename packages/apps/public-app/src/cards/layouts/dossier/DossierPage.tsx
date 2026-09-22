@@ -2,21 +2,17 @@ import { useId, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { Globe, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
-import type { HomebaseFile } from '@homebase-id/js-lib/core';
-import type { Article, PostContent } from '@homebase-id/js-lib/public';
 import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
-import { ownerName, type CardData } from '../../useCardData';
+import { ownerName, type CardData, type CardPost } from '../../useCardData';
 import { displayUrl, isUsableLink } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { POSTS_HREF, postDate, postImage, usePostHref } from '../../parts/posts';
+import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
-
-type Post = HomebaseFile<PostContent>;
 
 const INDEX_ROWS = 7;
 
@@ -133,7 +129,7 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
   // Same blocks, same order as the card's ELSEWHERE rows
   const items = design.blocks.flatMap((block): ElsewhereItem[] => {
     if (block.kind === 'moments')
-      return data.posts.some((post) => !!postImage(post))
+      return data.posts.some((post) => !!post.image)
         ? [
             {
               id: 'moments',
@@ -218,7 +214,6 @@ const headCell = `py-2.5 align-baseline text-[11px] font-normal ${tracked} ${mut
 
 const PostIndex = ({ data }: { data: CardData }) => {
   const id = useId();
-  const postHref = usePostHref();
   const total = data.posts.length;
   if (!total) return null;
   const shown = data.posts.slice(0, INDEX_ROWS);
@@ -260,7 +255,7 @@ const PostIndex = ({ data }: { data: CardData }) => {
         </thead>
         <tbody>
           {shown.map((post, index) => (
-            <PostRow key={post.fileId} post={post} number={index + 1} href={postHref(post)} />
+            <PostRow key={post.id} post={post} number={index + 1} />
           ))}
         </tbody>
       </table>
@@ -268,13 +263,11 @@ const PostIndex = ({ data }: { data: CardData }) => {
   );
 };
 
-const PostRow = ({ post, number, href }: { post: Post; number: number; href: string }) => {
-  const content = post.fileMetadata.appData.content;
+const PostRow = ({ post, number }: { post: CardPost; number: number }) => {
   const date = isoDate(postDate(post));
   // Only articles carry a reading time; other posts leave the READ cell empty rather than
   // printing their internal type ("tweet", "media")
-  const minutes =
-    content.type === 'Article' ? (content as Article).readingTimeStats?.minutes : undefined;
+  const { minutes } = post;
 
   return (
     <tr className={`border-t ${hairline} last:border-b`}>
@@ -284,10 +277,10 @@ const PostRow = ({ post, number, href }: { post: Post; number: number; href: str
       </td>
       <td className={`${cell} pr-5 text-[17px] leading-[23px]`}>
         <Link
-          to={href}
+          to={post.href}
           className={`line-clamp-2 ${ink} hover:text-[color:var(--card-accent)] ${CARD_FOCUS}`}
         >
-          {content.caption?.trim() || t('Untitled')}
+          {post.title?.trim() || t('Untitled')}
         </Link>
       </td>
       <td className={`${cell} text-right text-[12px] ${muted}`}>
