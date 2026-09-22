@@ -126,7 +126,11 @@ const DataUpgrade = () => {
         const info = await getDataVersionInfo(dotYouClient);
         if (cancelled) return;
         setVersionInfo(info);
-        if (!info.requiresUpgrade) {
+        // Both signals, off the one response. The version lands before the run finishes and the
+        // server goes on refusing until the run is over, so declaring 'done' on the version alone
+        // would send an auto-returning caller (below) straight back into that refusal, which
+        // bounces it here again.
+        if (!info.requiresUpgrade && !info.upgradeRunning) {
           setPhase('done');
           return;
         }
@@ -154,6 +158,18 @@ const DataUpgrade = () => {
     window.location.href = returnUrl;
     setReturned(true);
   };
+
+  // Go back on our own once the upgrade is over. Most people arrive here mid-task -- signing in to
+  // an app, or authorizing a YouAuth login, where the server sends the browser here rather than
+  // refusing the sign-in with a bodiless 503 (VersionUpgradeMiddleware) -- so the upgrade finishing
+  // means their original task can carry on, and making them press a button to resume it is a step
+  // with nothing in it. The button stays for anyone the navigation does not carry, and for the
+  // no-returnUrl case where 'back' means the owner console.
+  useEffect(() => {
+    if (phase !== 'done' || !returnUrl || returned) return;
+
+    doReturn();
+  }, [phase, returnUrl, returned]);
 
   const isBusy = phase === 'checking' || phase === 'running';
 
