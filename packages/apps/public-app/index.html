@@ -22,6 +22,9 @@
     <script>
       (function () {
         if (window.location.pathname === '/preview') return;
+        // The card's app mode renders only what the app sends
+        const host = new URLSearchParams(window.location.search).get('host');
+        if (window.location.pathname === '/card' && (host === 'app' || host === 'frame')) return;
         const apiDomain = `https://${window.location.hostname}`;
         fetch(`${apiDomain}/cdn/sitedata.json`, { cache: 'no-cache' });
       })();

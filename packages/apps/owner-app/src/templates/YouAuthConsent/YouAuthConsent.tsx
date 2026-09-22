@@ -37,10 +37,10 @@ const CLIENT_ID_PARAM = 'client_id';
  * with a 503 by VersionUpgradeMiddleware. Waiting here turns a failure into a few seconds of
  * spinner, and /owner/data-upgrade already polls to completion and follows returnUrl afterwards.
  *
- * Gated on requiresUpgrade -- the durable version comparison -- and NOT on "an upgrade is running".
- * The run flag is only set once the background job starts, so between the owner authenticating and
- * the job being picked up it reads false while an upgrade is certainly coming. That gap is exactly
- * what let the failing sign-in through.
+ * Gated on anything other than upToDate, which includes the state this screen exists for: an
+ * upgrade is scheduled when the owner authenticates and does not start until a job picks it up, so
+ * between the two there is nothing running while an upgrade is certainly coming. That gap is
+ * exactly what let the failing sign-in through, and `pending` is now its name.
  */
 const useUpgradeRequired = () => {
   const { getDotYouClient } = useDotYouClient();
@@ -50,7 +50,7 @@ const useUpgradeRequired = () => {
     let cancelled = false;
 
     getDataVersionInfo(getDotYouClient())
-      .then((info) => !cancelled && setRequired(!!info?.requiresUpgrade))
+      .then((info) => !cancelled && setRequired(!!info && info.upgradeState !== 'upToDate'))
       // Fail open. This is an infrastructure probe standing in front of login, so a probe that
       // cannot answer must not be the reason somebody cannot sign in; the worst case is the
       // pre-existing behaviour.
@@ -67,8 +67,6 @@ const useUpgradeRequired = () => {
 const YouAuthConsent = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
-  const [name, setName] = useState<string | null>();
-  const [duration, setDuration] = useState<AuthDuration>('never');
   const upgradeRequired = useUpgradeRequired();
 
   useEffect(() => {
@@ -100,6 +98,14 @@ const YouAuthConsent = () => {
       </MinimalLayout>
     );
   }
+
+  // A separate component because hooks cannot follow the early returns above.
+  return <YouAuthConsentForm returnUrl={returnUrl} />;
+};
+
+const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
+  const [name, setName] = useState<string | null>();
+  const [duration, setDuration] = useState<AuthDuration>('never');
 
   const returnUrlParams = new URL(returnUrl).searchParams;
   const clientType = returnUrlParams.get(CLIENT_TYPE_PARAM);

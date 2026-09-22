@@ -127,6 +127,7 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
+      appSlug,
       permissions,
       undefined,
       drives,
@@ -135,8 +136,7 @@ export const useYouAuthAuthorization = () => {
       eccKey.publicKey,
       CHAT_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
-      returnUrl,
-      appSlug
+      returnUrl
     );
   };
 

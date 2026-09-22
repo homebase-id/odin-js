@@ -7,10 +7,9 @@ import { Arrow, Chevron, Loader } from '@homebase-id/common-app/icons';
 import {
   forceVersionUpgrade,
   getDataVersionInfo,
-  getUpgradeStatus,
   VersionInfoResult,
 } from '../../provider/system/DataConversionProvider';
-import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { TimeAgoUtc } from '../../components/ui/Date/TimeAgoUtc';
 
 // How often to re-check the data version while an upgrade is running.
@@ -50,6 +49,7 @@ const DataUpgrade = () => {
   const [phase, setPhase] = useState<UpgradePhase>('checking');
   const [versionInfo, setVersionInfo] = useState<VersionInfoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [returned, setReturned] = useState(false);
 
   // The app that sent the user here; we redirect back to it once the upgrade succeeds.
   // The caller may be a web app, or a native mobile/desktop app passing a deep link.
@@ -86,17 +86,17 @@ const DataUpgrade = () => {
     setPhase('checking');
     setError(null);
     try {
-      const status = await getUpgradeStatus(dotYouClient);
-      void refreshVersionInfo();
+      const info = await getDataVersionInfo(dotYouClient);
+      setVersionInfo(info);
 
-      // (1) An upgrade is already running -> just show the spinner and poll.
-      if (status.upgradeRunning) {
+      // (1) Already running -> show the spinner and let the poll resolve it.
+      if (info.upgradeState === 'running') {
         setPhase('running');
         return;
       }
 
-      // (2) An upgrade is required -> trigger it, then poll.
-      if (status.requiresUpgrade) {
+      // (2) Needed, or last attempt fell short -> trigger it, then poll.
+      if (info.upgradeState === 'pending' || info.upgradeState === 'failed') {
         await beginUpgrade();
         return;
       }
@@ -125,8 +125,19 @@ const DataUpgrade = () => {
         const info = await getDataVersionInfo(dotYouClient);
         if (cancelled) return;
         setVersionInfo(info);
-        if (!info.requiresUpgrade) {
+        // The state, not the version number: the version is written before the run ends, and the
+        // server goes on refusing until the run is over -- so finishing on the version alone would
+        // send an auto-returning caller (below) straight back into that refusal, which bounces it
+        // here again.
+        if (info.upgradeState === 'upToDate') {
           setPhase('done');
+          return;
+        }
+
+        // A run that ends without getting there used to leave this spinning for good.
+        if (info.upgradeState === 'failed') {
+          setError(t('The data upgrade did not complete'));
+          setPhase('error');
           return;
         }
       } catch (err) {
@@ -143,9 +154,28 @@ const DataUpgrade = () => {
     };
   }, [phase]);
 
-  const doReturn = () => {
-    window.location.href = returnUrl ?? '/owner';
+  const goHome = () => {
+    window.location.href = HOME_PATH;
   };
+
+  const doReturn = () => {
+    if (!returnUrl) return goHome();
+
+    window.location.href = returnUrl;
+    setReturned(true);
+  };
+
+  // Go back on our own once the upgrade is over. Most people arrive here mid-task -- signing in to
+  // an app, or authorizing a YouAuth login, where the server sends the browser here rather than
+  // refusing the sign-in with a bodiless 503 (VersionUpgradeMiddleware) -- so the upgrade finishing
+  // means their original task can carry on, and making them press a button to resume it is a step
+  // with nothing in it. The button stays for anyone the navigation does not carry, and for the
+  // no-returnUrl case where 'back' means the owner console.
+  useEffect(() => {
+    if (phase !== 'done' || !returnUrl || returned) return;
+
+    doReturn();
+  }, [phase, returnUrl, returned]);
 
   const isBusy = phase === 'checking' || phase === 'running';
 
@@ -182,7 +212,11 @@ const DataUpgrade = () => {
                 <CheckCircle className="h-16 w-16 text-green-500" aria-hidden={true} />
                 <p className="text-lg dark:text-white">{t('Your data is up to date')}</p>
                 {returnUrl ? (
-                  <p className="text-sm text-slate-400">{t('You can now return to the app.')}</p>
+                  <p className="text-sm text-slate-400" role="status">
+                    {returned
+                      ? t('You can now close this window and go back to the app.')
+                      : t('You can now return to the app.')}
+                  </p>
                 ) : null}
               </div>
             ) : null}
@@ -201,6 +235,12 @@ const DataUpgrade = () => {
                 {phase === 'done' ? (
                   <ActionButton type="primary" icon={Arrow} onClick={doReturn} autoFocus>
                     {returnUrl ? t('Return to App') : t('Continue to Homebase')}
+                  </ActionButton>
+                ) : null}
+
+                {returned ? (
+                  <ActionButton type="secondary" icon={Arrow} onClick={goHome}>
+                    {t('Continue to Homebase')}
                   </ActionButton>
                 ) : null}
 

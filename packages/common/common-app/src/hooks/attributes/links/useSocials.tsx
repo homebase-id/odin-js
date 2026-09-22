@@ -31,6 +31,7 @@ import {
 import { GetFile } from '@homebase-id/js-lib/public';
 
 export type LinkType = {
+  type?: string;
   icon: FC<IconProps>;
   link: string;
   copyText?: string;
@@ -48,23 +49,7 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
   const fetchData: (odinId?: string) => Promise<LinkType[] | undefined> = async () => {
     const parseSocialData = (
       socialData: { type: string; username: string; priority: number } | null
-    ) => {
-      if (!socialData) return null;
-      const link = getSocialLink(socialData.type, socialData.username);
-      return {
-        icon: getLinkIcon(socialData.type),
-        link: link || '',
-        copyText: link ? undefined : socialData.username,
-        priority: socialData.priority,
-        children: link ? (
-          socialData.username
-        ) : (
-          <>
-            @{socialData.username} <small className="my-auto ml-1">({socialData.type})</small>
-          </>
-        ),
-      };
-    };
+    ) => (socialData ? toSocialLink(socialData) : null);
 
     const fetchStaticData = async () => {
       if (odinId) return null;
@@ -143,6 +128,32 @@ export const useSocials = (props?: { odinId: string } | undefined) => {
     queryFn: () => fetchData(odinId),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
+};
+
+export const toSocialLink = ({
+  type,
+  username,
+  priority,
+}: {
+  type: string;
+  username: string;
+  priority: number;
+}): LinkType => {
+  const link = getSocialLink(type, username);
+  return {
+    type,
+    icon: getLinkIcon(type),
+    link: link || '',
+    copyText: link ? undefined : username,
+    priority,
+    children: link ? (
+      username
+    ) : (
+      <>
+        @{username} <small className="my-auto ml-1">({type})</small>
+      </>
+    ),
+  };
 };
 
 export const getLinkIcon = (type: string): React.FC<IconProps> => {
