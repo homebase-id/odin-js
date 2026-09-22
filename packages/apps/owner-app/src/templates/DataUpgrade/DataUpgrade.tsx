@@ -10,7 +10,7 @@ import {
   getUpgradeStatus,
   VersionInfoResult,
 } from '../../provider/system/DataConversionProvider';
-import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { TimeAgoUtc } from '../../components/ui/Date/TimeAgoUtc';
 
 // How often to re-check the data version while an upgrade is running.
@@ -50,6 +50,7 @@ const DataUpgrade = () => {
   const [phase, setPhase] = useState<UpgradePhase>('checking');
   const [versionInfo, setVersionInfo] = useState<VersionInfoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [returned, setReturned] = useState(false);
 
   // The app that sent the user here; we redirect back to it once the upgrade succeeds.
   // The caller may be a web app, or a native mobile/desktop app passing a deep link.
@@ -143,8 +144,15 @@ const DataUpgrade = () => {
     };
   }, [phase]);
 
+  const goHome = () => {
+    window.location.href = HOME_PATH;
+  };
+
   const doReturn = () => {
-    window.location.href = returnUrl ?? '/owner';
+    if (!returnUrl) return goHome();
+
+    window.location.href = returnUrl;
+    setReturned(true);
   };
 
   const isBusy = phase === 'checking' || phase === 'running';
@@ -182,7 +190,11 @@ const DataUpgrade = () => {
                 <CheckCircle className="h-16 w-16 text-green-500" aria-hidden={true} />
                 <p className="text-lg dark:text-white">{t('Your data is up to date')}</p>
                 {returnUrl ? (
-                  <p className="text-sm text-slate-400">{t('You can now return to the app.')}</p>
+                  <p className="text-sm text-slate-400" role="status">
+                    {returned
+                      ? t('You can now close this window and go back to the app.')
+                      : t('You can now return to the app.')}
+                  </p>
                 ) : null}
               </div>
             ) : null}
@@ -201,6 +213,12 @@ const DataUpgrade = () => {
                 {phase === 'done' ? (
                   <ActionButton type="primary" icon={Arrow} onClick={doReturn} autoFocus>
                     {returnUrl ? t('Return to App') : t('Continue to Homebase')}
+                  </ActionButton>
+                ) : null}
+
+                {returned ? (
+                  <ActionButton type="secondary" icon={Arrow} onClick={goHome}>
+                    {t('Continue to Homebase')}
                   </ActionButton>
                 ) : null}
 
