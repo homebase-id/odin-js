@@ -18,7 +18,7 @@ const CardEmbed = () => {
 
   const layout =
     presetFromParam(params.get('design')) ??
-    presetFromParam(templateSettings?.cardDesign ?? null) ??
+    presetFromParam(templateSettings?.cardDesign) ??
     'board';
   return (
     <main className="min-h-dvh">

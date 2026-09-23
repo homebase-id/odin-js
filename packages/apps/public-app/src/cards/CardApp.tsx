@@ -197,7 +197,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       const started = performance.now();
       const id = ++renders;
       try {
-        const layout = presetFromParam(request?.design ?? null);
+        const layout = presetFromParam(request?.design);
         if (!layout) throw new Error(`unknown design "${request?.design}"`);
         const data = toCardData(request.data, postError);
         owner = data.odinId;
