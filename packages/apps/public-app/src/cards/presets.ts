@@ -110,5 +110,5 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
 };
 
 // Object.hasOwn, not `in`: `'toString' in CARD_PRESETS` is true
-export const presetFromParam = (value: string | null): LayoutId | undefined =>
+export const presetFromParam = (value: string | null | undefined): LayoutId | undefined =>
   value && Object.hasOwn(CARD_PRESETS, value) ? (value as LayoutId) : undefined;

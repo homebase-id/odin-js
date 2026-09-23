@@ -15,11 +15,15 @@ const CardEmbed = () => {
   const isOwner = useDotYouClientContext().isOwner();
   if (!data || !siteData) return null;
 
-  const themeId = siteData.home?.templateSettings?.themeId;
+  const templateSettings = siteData.home?.templateSettings;
+  const themeId = templateSettings?.themeId;
   // "Disable public site" - the phone embed has nothing to show either
   if (!themeId || themeId === '0') return null;
 
-  const layout = presetFromParam(params.get('design')) ?? 'board';
+  const layout =
+    presetFromParam(params.get('design')) ??
+    presetFromParam(templateSettings?.cardDesign) ??
+    'board';
   const design = CARD_PRESETS[layout];
   return (
     <main className="min-h-dvh">
