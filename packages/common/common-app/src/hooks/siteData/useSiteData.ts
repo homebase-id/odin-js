@@ -27,6 +27,7 @@ interface DefaultTemplateSettings {
     dark: Record<string, string>;
   };
   favicon: { fileKey: string } | { emoji: string } | undefined;
+  cardDesign?: string;
 }
 
 export interface ThemeCoverSettings extends DefaultTemplateSettings {
