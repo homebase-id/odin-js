@@ -16,6 +16,8 @@ import {
   t,
   CircleSelector,
   DomainHighlighter,
+  getCancelRedirectUrl,
+  getStateParam,
 } from '@homebase-id/common-app';
 import { PermissionSet } from '@homebase-id/js-lib/core';
 import { Arrow } from '@homebase-id/common-app/icons';
@@ -88,7 +90,9 @@ const RegisterApp = () => {
   };
 
   const doCancel = () =>
-    (window.location.href = cancelUrl ? `${cancelUrl}?error=cancelled-by-user` : '/owner');
+    (window.location.href = cancelUrl
+      ? getCancelRedirectUrl(cancelUrl, getStateParam(returnUrl))
+      : '/owner');
 
   return (
     <>
