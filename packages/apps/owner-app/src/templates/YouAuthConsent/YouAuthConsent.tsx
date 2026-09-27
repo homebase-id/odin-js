@@ -16,6 +16,7 @@ import {
   ActionButton,
   DomainHighlighter,
   useDotYouClient,
+  getCancelRedirectUrl,
 } from '@homebase-id/common-app';
 import { Arrow, Loader } from '@homebase-id/common-app/icons';
 import { getDataVersionInfo } from '../../provider/system/DataConversionProvider';
@@ -26,6 +27,11 @@ type AuthDuration = 'always' | 'for-1-year' | 'for-1-month' | 'for-1-week' | 'fo
 const REDIRECT_URI_PARAM = 'redirect_uri';
 const CLIENT_TYPE_PARAM = 'client_type';
 const CLIENT_ID_PARAM = 'client_id';
+// For a domain client, the name the redirect domain publishes for itself in
+// /.well-known/youauth-client.json; the identity puts it here and discards whatever the original
+// link carried. It is the domain's claim about itself, so it is only ever shown under the domain.
+const CLIENT_INFO_PARAM = 'client_info';
+const STATE_PARAM = 'state';
 
 /**
  * Sends the owner to the upgrade screen when their identity's data is behind, rather than letting
@@ -104,7 +110,6 @@ const YouAuthConsent = () => {
 };
 
 const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
-  const [name, setName] = useState<string | null>();
   const [duration, setDuration] = useState<AuthDuration>('never');
 
   const returnUrlParams = new URL(returnUrl).searchParams;
@@ -112,10 +117,11 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
   const clientId = returnUrlParams.get(CLIENT_ID_PARAM);
   const targetReturnUrl = returnUrlParams.get(REDIRECT_URI_PARAM);
   const targetDomain = getDomainFromUrl(targetReturnUrl || undefined) || '';
+  const clientName = returnUrlParams.get(CLIENT_INFO_PARAM)?.trim() || undefined;
 
   const doCancel = () =>
     (window.location.href = targetReturnUrl
-      ? `${targetReturnUrl.split('?')[0]}?error=cancelled-by-user`
+      ? getCancelRedirectUrl(targetReturnUrl, returnUrlParams.get(STATE_PARAM))
       : '/owner');
 
   const consentRequirements = useMemo(() => {
@@ -162,19 +168,15 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
           <div className="container mx-auto p-5">
             <div className="max-w-[35rem] dark:text-white">
               {clientType === 'app' ? (
-                <AppDetails
-                  appId={clientId || undefined}
-                  targetDomain={targetDomain}
-                  setName={setName}
-                />
+                <AppDetails appId={clientId || undefined} targetDomain={targetDomain} />
               ) : (
-                <ServiceDetails targetDomain={targetDomain} />
+                <ServiceDetails targetDomain={targetDomain} clientName={clientName} />
               )}
 
               {clientType !== 'app' ? (
                 <div className="my-auto mt-5 flex flex-col font-normal text-gray-600 dark:text-gray-300">
                   <Label htmlFor="duration">
-                    {t('Auto-approve login requests from')} {name || targetDomain}
+                    {t('Auto-approve login requests from')} {targetDomain}
                   </Label>
                   <Select
                     name="duration"
@@ -219,7 +221,13 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
   );
 };
 
-const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
+const ServiceDetails = ({
+  targetDomain,
+  clientName,
+}: {
+  targetDomain: string;
+  clientName: string | undefined;
+}) => {
   return (
     <>
       <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
@@ -231,6 +239,11 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
         <h1 className="text-3xl md:text-4xl">
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
+          {clientName ? (
+            <small className="block text-sm dark:text-white dark:text-opacity-80">
+              {t('Calling itself')} &quot;{clientName}&quot;
+            </small>
+          ) : null}
           <small className="block text-sm dark:text-white dark:text-opacity-80">
             &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
             {t('is requesting to verify your identity.')}
@@ -255,21 +268,9 @@ const dateFormat: Intl.DateTimeFormatOptions = {
   year: 'numeric',
 };
 
-const AppDetails = ({
-  appId,
-  targetDomain,
-  setName,
-}: {
-  appId?: string;
-  targetDomain: string;
-  setName: (name: string) => void;
-}) => {
+const AppDetails = ({ appId, targetDomain }: { appId?: string; targetDomain: string }) => {
   const [isDetails, setIsDetails] = useState(false);
   const { data: appRegistration } = useApp({ appId }).fetch;
-
-  useEffect(() => {
-    if (appRegistration?.name) setName(appRegistration?.name);
-  }, [appRegistration]);
 
   return (
     <>
