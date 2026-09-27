@@ -45,7 +45,7 @@ const YouAuthFinalizer = () => {
   const eccInfo = urlParams.get('ecc');
 
   const parsed = eccInfo
-    ? tryJsonParse<{ pk: string; salt: string; iv: string }>(eccInfo)
+    ? tryJsonParse<{ pk: string; salt: string; iv: string; cipher?: string }>(eccInfo)
     : undefined;
 
   const canFinalize = !error && !!result && !!parsed?.pk && !!parsed?.salt && !!parsed?.iv;
@@ -54,7 +54,7 @@ const YouAuthFinalizer = () => {
   // sit above this one meant the effect below was ordered differently depending on the URL.
   useEffect(() => {
     if (!canFinalize) return;
-    finalizeAuthorization(result as string, parsed!.pk, parsed!.salt, parsed!.iv);
+    finalizeAuthorization(result as string, parsed!.pk, parsed!.salt, parsed!.iv, parsed!.cipher);
   }, [canFinalize]);
 
   if (error) return <SignInProblem code={error} />;

@@ -1,7 +1,7 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { DrivePermissionType } from '../../core/DriveData/Drive/DriveTypes';
 import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
-import { cbcDecrypt } from '../../helpers/AesEncrypt';
+import { cbcDecrypt, gcmDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import {
   AUTO_CONNECTIONS_CIRCLE_ID,
@@ -9,6 +9,13 @@ import {
 } from '../../network/circle/CircleProvider';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
 import { exportEccPublicKey, getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
+
+/**
+ * Which cipher the identity server seals the token response with. `aes-gcm` is what this library
+ * asks for; `aes-cbc`, or asking nothing, is the padded, unauthenticated bytes clients got before
+ * the choice existed, and what an older identity server still sends.
+ */
+export type YouAuthCipher = 'aes-cbc' | 'aes-gcm';
 
 export interface YouAuthorizationParams {
   client_id: string;
@@ -18,6 +25,7 @@ export interface YouAuthorizationParams {
   permission_request: string;
   state: string;
   redirect_uri: string;
+  cipher?: YouAuthCipher;
 }
 
 export interface AppAuthorizationParams {
@@ -166,6 +174,7 @@ export const getRegistrationParams = async (
     permission_request: JSON.stringify(permissionRequest),
     state: state || '',
     redirect_uri: returnUrl,
+    cipher: 'aes-gcm',
   };
 };
 
@@ -214,6 +223,8 @@ export const exchangeDigestForToken = async (
   base64ClientAuthTokenIv: string;
   base64SharedSecretCipher: string;
   base64SharedSecretIv: string;
+  /** What sealed the two ciphers. Absent from an identity server that predates the field: CBC. */
+  cipher?: YouAuthCipher;
 }> => {
   const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const tokenResponse = await axiosClient
@@ -252,16 +263,17 @@ export const finalizeAuthentication = async (
   });
 
   const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);
+  const open = openTokenFieldWith(token.cipher);
 
-  const sharedSecretCipher = base64ToUint8Array(token.base64SharedSecretCipher);
-  const sharedSecretIv = base64ToUint8Array(token.base64SharedSecretIv);
-  const sharedSecret = await cbcDecrypt(sharedSecretCipher, sharedSecretIv, exchangedSecret);
+  const sharedSecret = await open(
+    base64ToUint8Array(token.base64SharedSecretCipher),
+    base64ToUint8Array(token.base64SharedSecretIv),
+    exchangedSecret
+  );
 
-  const clientAuthTokenCipher = base64ToUint8Array(token.base64ClientAuthTokenCipher);
-  const clientAuthTokenIv = base64ToUint8Array(token.base64ClientAuthTokenIv);
-  const clientAuthToken = await cbcDecrypt(
-    clientAuthTokenCipher,
-    clientAuthTokenIv,
+  const clientAuthToken = await open(
+    base64ToUint8Array(token.base64ClientAuthTokenCipher),
+    base64ToUint8Array(token.base64ClientAuthTokenIv),
     exchangedSecret
   );
 
@@ -269,6 +281,17 @@ export const finalizeAuthentication = async (
     clientAuthToken: uint8ArrayToBase64(clientAuthToken),
     sharedSecret: uint8ArrayToBase64(sharedSecret),
   };
+};
+
+/**
+ * The decrypt for what the identity server says sealed a token field: the cipher it echoes, which
+ * is what we asked for, or CBC when an older server echoes nothing. Anything else is refused: a
+ * value we did not ask for is not a downgrade to accept quietly.
+ */
+export const openTokenFieldWith = (cipher: string | undefined | null) => {
+  if (cipher === 'aes-gcm') return gcmDecrypt;
+  if (!cipher || cipher === 'aes-cbc') return cbcDecrypt;
+  throw new Error(`Token sealed with a cipher this client does not know: '${cipher}'`);
 };
 
 export const logout = async (dotYouClient: DotYouClient) => {

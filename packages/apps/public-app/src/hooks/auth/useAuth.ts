@@ -4,6 +4,7 @@ import { getEccPublicKey, logoutOwnerAndAllApps, logoutPublic } from '@homebase-
 import { HOME_SHARED_SECRET, STORAGE_IDENTITY_KEY, useDotYouClient } from '@homebase-id/common-app';
 import {
   YouAuthorizationParams,
+  openTokenFieldWith,
   createEccPair,
   exportEccPublicKey,
   getEccSharedSecret,
@@ -14,7 +15,6 @@ import {
 import {
   uint8ArrayToBase64,
   stringToUint8Array,
-  cbcDecrypt,
   base64ToUint8Array,
   byteArrayToString,
   tryJsonParse,
@@ -74,7 +74,10 @@ export const useYouAuthAuthorization = () => {
     const eccPk64 = uint8ArrayToBase64(stringToUint8Array(rawEccKey));
 
     const finalUrl = `/authorization-code-callback`;
-    const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl };
+    // `cipher` in the state is for our own identity server: it seals the sign-in result for this
+    // page with it (YouAuth [400]). `cipher` on the params is for the other identity: it seals the
+    // token our server fetches from it with that (YouAuth [140]). Both open GCM here and there.
+    const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl, cipher: 'aes-gcm' };
     const pk = await getEccPublicKey();
 
     return {
@@ -85,6 +88,7 @@ export const useYouAuthAuthorization = () => {
       permission_request: '',
       state: JSON.stringify(state),
       redirect_uri: `https://${window.location.host}/api/guest/v1/builtin/home/auth/auth-code-callback`,
+      cipher: 'aes-gcm',
     };
   };
 
@@ -92,7 +96,9 @@ export const useYouAuthAuthorization = () => {
     encryptedData: string,
     remotePublicKey: string,
     salt: string,
-    iv: string
+    iv: string,
+    /** What the server says sealed `encryptedData`; a server that predates the field says nothing: CBC. */
+    cipher?: string
   ) => {
     try {
       const privateKey = await retrieveEccKey();
@@ -103,7 +109,7 @@ export const useYouAuthAuthorization = () => {
         await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
       );
 
-      const data = await cbcDecrypt(
+      const data = await openTokenFieldWith(cipher)(
         base64ToUint8Array(encryptedData),
         base64ToUint8Array(iv),
         exchangedSecret
@@ -130,6 +136,7 @@ export const useYouAuthAuthorization = () => {
           remotePublicKey,
           salt,
           iv,
+          cipher,
         },
         e
       );

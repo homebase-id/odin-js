@@ -56,6 +56,29 @@ export const cbcDecrypt = async (
   return await innerDecrypt(iv, importedKey, cipher);
 };
 
+/**
+ * Opens what the identity server sealed with `aes-gcm`: the same 16-byte key as CBC, a 16-byte
+ * IV of which the first 12 bytes are the nonce, and the 16-byte tag appended to the ciphertext.
+ * The layout of odin-core's `AesGcm.Encrypt`, which is also what `aesGcmEncryptWithEccSharedSecret`
+ * in EccKeyProvider produces. A wrong key or a changed byte throws rather than yielding garbage.
+ */
+export const gcmDecrypt = async (
+  cipher: Uint8Array,
+  iv: Uint8Array,
+  key: Uint8Array
+): Promise<Uint8Array> => {
+  const importedKey = await crypto.subtle.importKey('raw', key, { name: 'AES-GCM' }, false, [
+    'decrypt',
+  ]);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv.slice(0, 12) },
+    importedKey,
+    cipher
+  );
+
+  return new Uint8Array(decrypted);
+};
+
 export const streamEncryptWithCbc = async (
   dataStream: ReadableStream<Uint8Array>,
   key: Uint8Array,
