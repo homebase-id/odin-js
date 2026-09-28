@@ -50,8 +50,10 @@ export const getLinkPreview = async (
         url: response.data.url,
       };
     })
-    .catch((e) => {
-      console.error(e);
+    .catch((error) => {
+      // 404 is the server's "nothing to preview" (it used to be an empty 204), not a failure
+      if (error.response?.status === 404) return null;
+      console.error('[odin-js:getLinkPreview]', error);
       return null;
     });
 
