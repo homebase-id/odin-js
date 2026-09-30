@@ -30,8 +30,6 @@ const CardEmbed = () => {
     presetFromParam(templateSettings?.cardDesign) ??
     'board';
   const design = CARD_PRESETS[layout];
-  const hostParam = params.get('host');
-  const isAppMode = hostParam === 'app' || hostParam === 'frame';
 
   return (
     <main className="min-h-dvh">
@@ -39,7 +37,7 @@ const CardEmbed = () => {
         <meta name="apple-itunes-app" content={`app-id=${HOMEBASE_IOS_APP_ID}`} />
       </Helmet>
       <HomebaseCard design={design} data={data} className="min-h-dvh" />
-      {!isAppMode && !isOwner ? (
+      {!isOwner ? (
         <aside
           style={cardVars(design)}
           className="border-t border-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] px-4 py-4 text-center"
