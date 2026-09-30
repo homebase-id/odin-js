@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BuiltInAttributes } from '@homebase-id/js-lib/profile';
 import { applyOverrides } from './overrides';
+import { resolveRequestDesign } from './resolveDesign';
 import { pickCard } from './pickCard';
 import { CARD_PRESETS, presetFromParam } from './presets';
 import saveCircleRaw from './__fixtures__/save-circle-card.json?raw';
@@ -48,6 +49,19 @@ describe('render payload chat-kmp sends', () => {
     expect(renderPayload.data.odinId).toBeTruthy();
     for (const key of Object.keys(renderPayload.data)) expect(APP_DATA_KEYS).toContain(key);
     expect(Object.keys(renderPayload).sort()).toEqual(['data', 'design']);
+  });
+});
+
+describe('render request validation on the exact chat-kmp payload', () => {
+  it('resolves to the board preset untouched, as the payload carries no overrides', () => {
+    expect(resolveRequestDesign(renderPayload)).toEqual(CARD_PRESETS.board);
+  });
+
+  it('keeps every stored override when the same request also carries them', () => {
+    const design = resolveRequestDesign({ ...renderPayload, overrides: savePublic.data.overrides });
+    expect(design.palette).toEqual(savePublic.data.overrides.palette);
+    expect(design.blocks).toEqual(savePublic.data.overrides.blocks);
+    expect(design.socials).toBe('handles');
   });
 });
 
