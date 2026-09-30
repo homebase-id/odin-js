@@ -44,7 +44,10 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             className="text-[22px] leading-[calc(24/22)] tracking-[-0.03em] text-[color:var(--card-ink)]"
           />
           <LocationLine data={data} className="pt-2 !tracking-[0.14em]" />
-          <DossierAudience data={data} stamp className="mt-2.5 max-w-full text-[10px]" />
+          {/* No wider than the role line above it: a long circle name ends where that text ends */}
+          <div className={`mt-2.5 ${data.headline ? 'w-0 min-w-full' : ''}`}>
+            <DossierAudience data={data} stamp className="max-w-full text-[10px]" />
+          </div>
         </div>
       </header>
 

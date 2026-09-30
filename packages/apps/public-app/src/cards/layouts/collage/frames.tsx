@@ -43,7 +43,8 @@ export const Tape = ({ className }: { className: string }) => (
   />
 );
 
-// A torn strip of the same tape, written on by hand
+// A torn strip of the same tape, written on by hand. The caller caps it short of its column's edge:
+// tilted, a full-width strip crowds whatever sits beside the column
 export const AudienceTape = ({
   audience,
   className,
@@ -53,12 +54,14 @@ export const AudienceTape = ({
 }) => (
   <div
     style={{ backgroundColor: TAPE_STYLE.backgroundColor }}
-    className={`w-fit max-w-[min(100%,15rem)] -rotate-2 empty:hidden ${className}`}
+    className={`w-fit -rotate-2 empty:hidden ${className}`}
   >
+    {/* The sans face is wider and blacker than the handwriting: smaller, and two lines before it is cut */}
     <AudienceChip
       audience={audience}
       className="max-w-full gap-2 px-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
       glyphClassName="h-[0.72em] w-[0.72em] [&_svg]:stroke-[2.5]"
+      joinedClassName="line-clamp-2 !whitespace-normal py-1 text-[0.7em] leading-[1.35]"
     />
   </div>
 );

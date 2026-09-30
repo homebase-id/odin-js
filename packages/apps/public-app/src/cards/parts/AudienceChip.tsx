@@ -13,11 +13,14 @@ export const AudienceChip = ({
   className,
   glyphClassName,
   textClassName,
+  joinedClassName,
 }: {
   audience?: CardAudience;
   className: string;
   glyphClassName: string;
   textClassName?: string;
+  // The sans face runs larger or smaller than the design's label face: each design evens it out
+  joinedClassName?: string;
 }) => {
   if (!audience) return null;
   const isPublic = audience.kind === 'public';
@@ -43,7 +46,9 @@ export const AudienceChip = ({
       {/* dir: a circle name in another script keeps its own direction and truncates at its own end */}
       <span
         dir="auto"
-        className={`min-w-0 truncate ${textClassName ?? ''} ${JOINED.test(text) ? JOINED_TEXT : ''}`}
+        className={`min-w-0 truncate ${textClassName ?? ''} ${
+          JOINED.test(text) ? `${JOINED_TEXT} ${joinedClassName ?? ''}` : ''
+        }`}
       >
         {text}
       </span>

@@ -16,7 +16,7 @@ const SIZES = {
     name: 'text-[24px]',
     nameGap: 'mt-4',
     host: 'mt-1 text-[13px]',
-    audience: 'mt-3 text-[11px]',
+    audience: 'mt-3 max-w-[min(100%,15rem)] text-[11px]',
     blocks: 'mt-[22px] !gap-[10px]',
     socials: 'mt-6',
   },
@@ -26,7 +26,8 @@ const SIZES = {
     name: 'text-[32px]',
     nameGap: 'mt-5',
     host: 'mt-1.5 text-[15px]',
-    audience: 'mt-3.5 text-[12px]',
+    // the page has the width of its link rows to spend
+    audience: 'mt-3.5 max-w-full text-[12px]',
     // rows grow to the reference's 58px / 14px radius; the primitive draws 52px / 12px
     blocks: 'mt-7 !gap-3.5 [&>a]:min-h-[58px] [&>a]:rounded-[14px]',
     socials: 'mt-[26px]',
@@ -66,11 +67,11 @@ export const BoardProfile = ({
           <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
-      {/* A link row in miniature: its radius, icon tile and hard shadow, in the ground art's tint */}
+      {/* A link row in miniature: the rows' corner, icon tile and pressed shadow, in the ground art's tint */}
       <AudienceChip
         audience={data.audience}
-        className={`max-w-[min(100%,15rem)] flex-shrink-0 gap-1.5 rounded-[9px] bg-[color:color-mix(in_srgb,var(--card-ink)_14%,transparent)] py-1 pe-2.5 ps-1 font-semibold leading-5 tracking-[0.04em] shadow-[0_2px_0_rgba(0,0,0,0.2)] ${sizes.audience}`}
-        glyphClassName="h-5 w-5 rounded-md bg-[color:color-mix(in_srgb,var(--card-ink)_18%,transparent)] p-1"
+        className={`flex-shrink-0 gap-2 rounded-xl bg-[color:color-mix(in_srgb,var(--card-ink)_14%,transparent)] py-1 pe-3 ps-1 font-semibold leading-5 tracking-[0.04em] shadow-[0_4px_0_rgba(0,0,0,0.2)] ${sizes.audience}`}
+        glyphClassName="h-6 w-6 rounded-lg bg-[color:color-mix(in_srgb,var(--card-ink)_14%,transparent)] p-[5px]"
       />
       <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />
       <CardSocials variant={design.socials} data={data} className={sizes.socials} />

@@ -68,18 +68,15 @@ const TopBar = ({ data }: { data: CardData }) => {
     <header className={`border-b ${hairline}`}>
       <div className={`${gutter} flex h-14 items-center justify-between gap-8`}>
         {/* The file line is the design's slot for metadata: S.G. / FILE 001 / FRIENDS.
-            It holds its width, so the label is capped and the nav link gives way */}
-        <div className={`flex flex-shrink-0 items-center text-[12px] ${tracked} ${muted}`}>
-          <span aria-hidden className="whitespace-nowrap">
+            It takes the bar's free width, so the label is only cut where it would reach the nav */}
+        <div className={`flex min-w-0 flex-1 items-center text-[12px] ${tracked} ${muted}`}>
+          <span aria-hidden className="flex-shrink-0 whitespace-nowrap">
             {initials(data)} / {t('File')} 001
           </span>
-          <DossierAudience
-            data={data}
-            className={`max-w-[min(16rem,22vw)] ${SLASH} before:content-['/']`}
-          />
+          <DossierAudience data={data} className={`${SLASH} before:content-['/']`} />
         </div>
-        <div className="flex min-w-0 items-center gap-8">
-          <nav aria-label={t('Sections')} className="min-w-0">
+        <div className="flex flex-shrink-0 items-center gap-8">
+          <nav aria-label={t('Sections')}>
             <ul className="flex items-center gap-8">
               {data.posts.length ? (
                 <li>

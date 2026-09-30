@@ -187,7 +187,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
               ) : null}
               <AudienceTape
                 audience={data.audience}
-                className="ml-2.5 mt-4 text-[22px] leading-[30px]"
+                className="ml-2.5 mt-4 max-w-[min(100%-1.5rem,26rem)] text-[22px] leading-[30px]"
               />
               <CardSocials
                 variant="glyphs"
