@@ -88,7 +88,13 @@ describe('overrides chat-kmp stores, applied by the page', () => {
   });
 
   it('keeps every key of the stored overrides object', () => {
-    expect(Object.keys(overrides).sort()).toEqual(['blocks', 'palette', 'portraits', 'socials', 'type']);
+    expect(Object.keys(overrides).sort()).toEqual([
+      'blocks',
+      'palette',
+      'portraits',
+      'socials',
+      'type',
+    ]);
   });
 
   it('applies the circle card overrides the same way', () => {
@@ -134,6 +140,9 @@ describe('stored set chat-kmp writes, read by the card picker', () => {
 
   it('reads the label even when the circle ACL is hidden from the viewer', () => {
     const hidden = { ...attribute(storedSet[2]), serverMetadata: undefined };
-    expect(pickCard([attribute(storedSet[0]), hidden])).toMatchObject({ kind: 'circle', label: 'Friends' });
+    expect(pickCard([attribute(storedSet[0]), hidden])).toMatchObject({
+      kind: 'circle',
+      label: 'Friends',
+    });
   });
 });

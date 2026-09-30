@@ -224,7 +224,11 @@ const CardApp = ({ host }: { host: CardHost }) => {
         painted = whenPainted(element, postError).then(() => {
           // a newer render() owns the next ready
           if (id === renders)
-            post({ type: 'ready', layout: design.layout, ms: Math.round(performance.now() - started) });
+            post({
+              type: 'ready',
+              layout: design.layout,
+              ms: Math.round(performance.now() - started),
+            });
         });
       } catch (error) {
         postError(error);
