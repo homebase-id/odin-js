@@ -35,10 +35,12 @@ export const LocationLine = ({ data, className }: { data: CardData; className?: 
 export const DossierAudience = ({
   data,
   stamp,
+  lines,
   className,
 }: {
   data: CardData;
   stamp?: boolean;
+  lines?: string;
   className?: string;
 }) => (
   <AudienceChip
@@ -48,8 +50,9 @@ export const DossierAudience = ({
         ? 'gap-2 border border-[color:color-mix(in_srgb,var(--card-muted)_60%,transparent)] px-2 py-[3px]'
         : ''
     } ${className ?? ''}`}
+    hug
     glyphClassName="h-4 w-[1.1em]"
-    textClassName="-me-[0.16em] tracking-[0.16em]"
+    textClassName={`-me-[0.16em] tracking-[0.16em] ${lines ?? ''}`}
     joinedClassName="text-[1.05em]"
   />
 );

@@ -1,5 +1,5 @@
-/* Generated from Google Fonts (OFL), latin subset, self-hosted. The two Arabic faces are the arabic
-   subset: a label face and a handwriting face for the designs whose own faces have no Arabic. */
+/* Generated from Google Fonts (OFL), latin subset, self-hosted. The three Arabic faces are the
+   arabic subset: a sans, a hand and a kufi for the designs whose own faces have no Arabic. */
 @font-face {
   font-family: 'Archivo Black';
   font-style: normal;
@@ -91,11 +91,20 @@
     U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
 }
 @font-face {
-  font-family: 'Playpen Sans Arabic';
+  font-family: 'Aref Ruqaa';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/playpen-sans-arabic-normal-400.woff2') format('woff2');
+  src: url('/fonts/aref-ruqaa-normal-400.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
+    U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+@font-face {
+  font-family: 'Reem Kufi';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/reem-kufi-normal-400.woff2') format('woff2');
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF,
     U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
 }

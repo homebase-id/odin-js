@@ -16,6 +16,8 @@ const FOCUS_ON_PAPER =
 const GUTTER = 'px-[clamp(32px,5.72vw,64px)]'; // 64px at 1120
 const GUTTER_START = 'ps-[clamp(32px,5.72vw,64px)]';
 const INNER = 'mx-auto w-full max-w-[1312px]'; // stops stretching past 1440
+// The caption ends where the photo starts (44% across), also once INNER is centred past 1440
+const CAPTION_MAX = 'max-w-[min(44vw-clamp(32px,5.72vw,64px),656px-6vw)]';
 
 // The writing section is paper. Its greys are the ground mixed into the paper (4.5:1 or better)
 const PAPER = {
@@ -107,8 +109,7 @@ const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
   >
     <HeroGround design={design} data={data} />
     <div className={INNER}>
-      {/* Capped to the ground column, clear of the photo */}
-      <PosterCaption data={data} size="page" className="max-w-[50%]" />
+      <PosterCaption data={data} size="page" className={CAPTION_MAX} />
       <CardName
         design={design}
         data={data}

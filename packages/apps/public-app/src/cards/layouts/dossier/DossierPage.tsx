@@ -66,18 +66,24 @@ const TopBar = ({ data }: { data: CardData }) => {
 
   return (
     <header className={`border-b ${hairline}`}>
-      <div className={`${gutter} flex h-14 items-center justify-between gap-12`}>
+      <div className={`${gutter} flex min-h-14 items-start justify-between gap-12 py-5`}>
         {/* The file line is the design's slot for metadata: S.G. / FILE 001 / FRIENDS.
-            It takes the bar's free width and stops a clear gap short of the nav */}
+            It takes the bar's free width and stops a clear gap short of the nav. A long name wraps
+            and the bar grows under it; the tablet bar is short of room, so it may take a third line */}
         <div
           className={`flex min-w-0 flex-1 items-start text-[12px] leading-4 ${tracked} ${muted}`}
         >
           <span aria-hidden className="flex-shrink-0 whitespace-nowrap">
             {initials(data)} / {t('File')} 001
           </span>
-          <DossierAudience data={data} className={`${SLASH} before:content-['/']`} />
+          <DossierAudience
+            data={data}
+            lines="max-lg:!line-clamp-3"
+            className={`${SLASH} before:content-['/']`}
+          />
         </div>
-        <div className="flex flex-shrink-0 items-center gap-8">
+        {/* One file line tall, so the nav stays centred on the first line when the file line wraps */}
+        <div className="flex h-4 flex-shrink-0 items-center gap-8">
           <nav aria-label={t('Sections')}>
             <ul className="flex items-center gap-8">
               {data.posts.length ? (

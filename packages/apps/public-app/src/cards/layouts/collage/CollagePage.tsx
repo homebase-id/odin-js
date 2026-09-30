@@ -185,9 +185,11 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   {data.headline}
                 </p>
               ) : null}
-              {/* The column is ~215px between the photos at 768: the tape takes all of it, in a smaller hand */}
+              {/* The column is ~215px between the photos at 768: the tape takes all of it, in a smaller
+                  hand and with a third line */}
               <AudienceTape
                 audience={data.audience}
+                lines="[@container(max-width:280px)]:!line-clamp-3"
                 className="ml-2.5 mt-4 max-w-[min(100%-0.625rem,19rem)] text-[length:clamp(19px,9cqw,22px)]"
               />
               <CardSocials
