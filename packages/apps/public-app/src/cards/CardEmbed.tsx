@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useDotYouClientContext, useSiteData } from '@homebase-id/common-app';
 import { CARD_PRESETS, presetFromParam } from './presets';
 import { useCardData } from './useCardData';
+import { useProfileCard } from './useProfileCard';
 import { HomebaseCard } from './HomebaseCard';
 import { HOMEBASE_IOS_APP_ID, HomebaseCta } from './parts/HomebaseCta';
 
@@ -12,6 +13,7 @@ const CardEmbed = () => {
   const [params] = useSearchParams();
   const { data: siteData } = useSiteData();
   const data = useCardData();
+  const { data: profileCard } = useProfileCard();
   const isOwner = useDotYouClientContext().isOwner();
   if (!data || !siteData) return null;
 
@@ -22,6 +24,7 @@ const CardEmbed = () => {
 
   const layout =
     presetFromParam(params.get('design')) ??
+    presetFromParam(profileCard?.design) ??
     presetFromParam(templateSettings?.cardDesign) ??
     'board';
   const design = CARD_PRESETS[layout];

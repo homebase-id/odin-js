@@ -9,6 +9,7 @@ import { CARD_PRESETS, presetFromParam } from './presets';
 import { useMinWidth } from './useMinWidth';
 import {
   cardSocials,
+  type CardAudience,
   type CardData,
   type CardLink,
   type CardPhoto,
@@ -38,7 +39,7 @@ type AppData = {
   socials?: { type: string; username: string }[];
   posts?: (Omit<CardPost, 'image'> & { image?: AppImage })[];
 };
-type RenderRequest = { design: string; data: AppData };
+type RenderRequest = { design: string; data: AppData; audience?: CardAudience };
 
 declare global {
   interface Window {
@@ -59,7 +60,16 @@ const ownerClient = (odinId: string) =>
     getLoggedInIdentity: () => odinId,
   }) as unknown as DotYouClient;
 
-const toCardData = (data: AppData, dropped: (reason: string) => void): CardData => {
+const toAudience = (audience: CardAudience | undefined): CardAudience | undefined =>
+  audience?.kind === 'public' || audience?.kind === 'circle'
+    ? { kind: audience.kind, label: audience.label }
+    : undefined;
+
+const toCardData = (
+  data: AppData,
+  dropped: (reason: string) => void,
+  audience?: CardAudience
+): CardData => {
   if (!data?.odinId) throw new Error('data.odinId is required');
   const image = (value: AppImage | undefined, field: string): CardPhoto | undefined => {
     if (!value?.src) return undefined;
@@ -83,6 +93,7 @@ const toCardData = (data: AppData, dropped: (reason: string) => void): CardData 
     posts: (data.posts ?? [])
       .slice(0, 12)
       .map((post, index) => ({ ...post, image: image(post.image, `posts[${index}].image`) })),
+    audience: toAudience(audience),
   };
 };
 
@@ -199,7 +210,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       try {
         const layout = presetFromParam(request?.design);
         if (!layout) throw new Error(`unknown design "${request?.design}"`);
-        const data = toCardData(request.data, postError);
+        const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
         flushSync(() => setCard({ id, layout, data }));

@@ -9,7 +9,8 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tanstack/query-sync-storage-persister": "5.51.1",
@@ -42,7 +43,8 @@
     "autoprefixer": "10.4.20",
     "postcss": "8.5.23",
     "prettier-plugin-tailwindcss": "0.6.6",
-    "tailwindcss": "3.4.10"
+    "tailwindcss": "3.4.10",
+    "vitest": "^4.1.8"
   },
   "browserslist": {
     "production": [

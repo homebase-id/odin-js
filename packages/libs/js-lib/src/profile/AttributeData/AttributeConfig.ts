@@ -17,6 +17,7 @@ export class BuiltInAttributes {
   static readonly Birthday = toGuidId('birthday');
   static readonly PhoneNumber = toGuidId('phonenumber');
   static readonly Email = toGuidId('email');
+  static readonly ProfileCard = toGuidId('profile_card');
 
   static readonly HomebaseIdentity = toGuidId('dot_you_identity');
   static readonly FacebookUsername = toGuidId('facebook_username');

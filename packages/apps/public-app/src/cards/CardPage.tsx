@@ -5,6 +5,7 @@ import { PosterPage } from './layouts/poster/PosterPage';
 import { BoardPage } from './layouts/board/BoardPage';
 import { CollagePage } from './layouts/collage/CollagePage';
 import { DossierPage } from './layouts/dossier/DossierPage';
+import { AudienceChip } from './parts/AudienceChip';
 
 const PAGES: Record<LayoutId, FC<LayoutProps>> = {
   poster: PosterPage,
@@ -17,6 +18,7 @@ export const CardPage = ({ design, data }: LayoutProps) => {
   const Layout = PAGES[design.layout];
   return (
     <div style={cardVars(design)} className="relative isolate min-h-screen overflow-hidden">
+      <AudienceChip audience={data.audience} />
       <Layout design={design} data={data} />
     </div>
   );
