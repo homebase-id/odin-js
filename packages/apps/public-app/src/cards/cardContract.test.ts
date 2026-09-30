@@ -16,13 +16,18 @@ import storedSetRaw from './__fixtures__/stored-card-set.json?raw';
  * checked in beside the chat-kmp and odin-core tests.
  */
 
-type Json = Record<string, any>;
-const savePublic: Json = JSON.parse(savePublicRaw);
-const saveCircle: Json = JSON.parse(saveCircleRaw);
-const renderPayload: Json = JSON.parse(renderPayloadRaw);
-const renderPublic: Json = JSON.parse(renderPublicRaw);
-const renderCircle: Json = JSON.parse(renderCircleRaw);
-const storedSet: Json[] = JSON.parse(storedSetRaw);
+type StoredEntry = {
+  visibility: string;
+  priority: number;
+  circleIds?: string[];
+  data: { label?: string; overrides?: unknown };
+};
+const savePublic = JSON.parse(savePublicRaw);
+const saveCircle = JSON.parse(saveCircleRaw);
+const renderPayload = JSON.parse(renderPayloadRaw);
+const renderPublic = JSON.parse(renderPublicRaw);
+const renderCircle = JSON.parse(renderCircleRaw);
+const storedSet: StoredEntry[] = JSON.parse(storedSetRaw);
 
 // AppData in CardApp.tsx (not exported)
 const APP_DATA_KEYS = [
@@ -109,7 +114,7 @@ describe('overrides chat-kmp stores, applied by the page', () => {
 });
 
 describe('stored set chat-kmp writes, read by the card picker', () => {
-  const attribute = (entry: Json) => ({
+  const attribute = (entry: StoredEntry) => ({
     fileMetadata: { appData: { content: { priority: entry.priority, data: entry.data } } },
     serverMetadata: { accessControlList: { circleIdList: entry.circleIds } },
   });
@@ -153,10 +158,9 @@ describe('stored set chat-kmp writes, read by the card picker', () => {
 
 describe('render requests built by chat-kmp with overrides and audience', () => {
   it.each([
-    ['public', () => renderPublic, 'board'],
-    ['circle', () => renderCircle, 'dossier'],
-  ])('%s: validates and applies every override, drops none', (_name, get, layout) => {
-    const request = get();
+    ['public', renderPublic, 'board'],
+    ['circle', renderCircle, 'dossier'],
+  ])('%s: validates and applies every override, drops none', (_name, request, layout) => {
     expect(Object.keys(request).sort()).toEqual(['audience', 'data', 'design', 'overrides']);
     for (const key of Object.keys(request.data)) expect(APP_DATA_KEYS).toContain(key);
     const design = resolveRequestDesign(request);
@@ -172,8 +176,6 @@ describe('render requests built by chat-kmp with overrides and audience', () => 
   it('carries an audience the page keeps (kind and label only)', () => {
     expect(renderPublic.audience).toEqual({ kind: 'public' });
     expect(renderCircle.audience).toEqual({ kind: 'circle', label: 'Friends' });
-    for (const a of [renderPublic.audience, renderCircle.audience])
-      expect(Object.keys(a).every((k) => k === 'kind' || k === 'label')).toBe(true);
   });
 
   it('shares its overrides byte for byte with the stored card', () => {
