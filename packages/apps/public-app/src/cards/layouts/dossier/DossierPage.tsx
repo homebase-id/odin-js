@@ -26,6 +26,8 @@ const gutter = 'mx-auto w-full max-w-[1120px] px-10 lg:px-16';
 const ink = 'text-[color:var(--card-ink)]';
 const muted = 'text-[color:var(--card-muted)]';
 const tracked = 'uppercase tracking-[0.18em]';
+// One tracked space of the label face either side of the slash
+const SLASH = 'ms-[1ch] gap-[calc(1ch+0.18em)]';
 
 const initials = ({ firstName, surName, odinId }: CardData) => {
   const letters = [firstName, surName]
@@ -65,9 +67,17 @@ const TopBar = ({ data }: { data: CardData }) => {
   return (
     <header className={`border-b ${hairline}`}>
       <div className={`${gutter} flex h-14 items-center justify-between gap-8`}>
-        <span aria-hidden className={`whitespace-nowrap text-[12px] ${tracked} ${muted}`}>
-          {initials(data)} / {t('File')} 001
-        </span>
+        {/* The file line is the design's slot for metadata: S.G. / FILE 001 / FRIENDS.
+            It holds its width, so the label is capped and the nav link gives way */}
+        <div className={`flex flex-shrink-0 items-center text-[12px] ${tracked} ${muted}`}>
+          <span aria-hidden className="whitespace-nowrap">
+            {initials(data)} / {t('File')} 001
+          </span>
+          <DossierAudience
+            data={data}
+            className={`max-w-[min(16rem,22vw)] ${SLASH} before:content-['/']`}
+          />
+        </div>
         <div className="flex min-w-0 items-center gap-8">
           <nav aria-label={t('Sections')} className="min-w-0">
             <ul className="flex items-center gap-8">
@@ -119,7 +129,6 @@ const Identity = ({ design, data }: LayoutProps) => {
         className={`text-[length:clamp(44px,5.7vw,64px)] leading-[0.94] tracking-[-0.04em] ${ink}`}
       />
       <LocationLine data={data} className="pt-4 !text-[13px] !tracking-[0.16em]" />
-      <DossierAudience data={data} className="mt-4 text-[11px]" />
       {data.bio ? (
         <p className={`max-w-[380px] text-pretty pt-[22px] text-[14px] leading-[23px] ${muted}`}>
           {data.bio}

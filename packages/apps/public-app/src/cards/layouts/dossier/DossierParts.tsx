@@ -30,11 +30,26 @@ export const LocationLine = ({ data, className }: { data: CardData; className?: 
   </CardLabel>
 );
 
-// A file stamp: square, ruled, set in the label face
-export const DossierAudience = ({ data, className }: { data: CardData; className?: string }) => (
+// File metadata in the label face, with the accent glyph the ELSEWHERE rows use. `stamp` rules it off
+// where it has no header line to sit on
+export const DossierAudience = ({
+  data,
+  stamp,
+  className,
+}: {
+  data: CardData;
+  stamp?: boolean;
+  className?: string;
+}) => (
   <AudienceChip
     audience={data.audience}
-    className={`max-w-[min(100%,16rem)] border border-[color:color-mix(in_srgb,var(--card-muted)_60%,transparent)] px-2 py-[3px] font-[family-name:var(--card-label)] uppercase leading-4 tracking-[0.16em] text-[color:var(--card-muted)] ${className ?? ''}`}
+    className={`font-[family-name:var(--card-label)] uppercase leading-4 text-[color:var(--card-muted)] ${
+      stamp
+        ? 'gap-2 border border-[color:color-mix(in_srgb,var(--card-muted)_60%,transparent)] px-2 py-[3px]'
+        : ''
+    } ${className ?? ''}`}
+    glyphClassName="h-[1.1em] w-[1.1em] text-[color:var(--card-accent)]"
+    textClassName="-me-[0.16em] tracking-[0.16em]"
   />
 );
 

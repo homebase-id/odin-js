@@ -35,9 +35,12 @@ export const PosterCard = ({ design, data }: LayoutProps) => (
         <CardSocials
           variant={design.socials}
           data={data}
-          className="min-w-0 flex-1 !gap-4 [&_svg]:h-[18px] [&_svg]:w-[18px]"
+          className="flex-shrink-0 !gap-4 [&_svg]:h-[18px] [&_svg]:w-[18px]"
         />
-        <PosterAudience audience={data.audience} className="ms-auto max-w-[55%]" />
+        <PosterAudience
+          audience={data.audience}
+          className="ms-auto flex-shrink justify-end text-[11px]"
+        />
       </div>
     </div>
   </div>

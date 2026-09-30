@@ -1,7 +1,8 @@
 import type { CardAudience } from '../../useCardData';
 import { AudienceChip } from '../../parts/AudienceChip';
 
-// An eyebrow in the label face, led by a short rule like the poster's hairlines
+// An eyebrow in the label face. The negative margin takes back the tracking after the last letter,
+// so the line ends on the column edge
 export const PosterAudience = ({
   audience,
   className,
@@ -11,6 +12,8 @@ export const PosterAudience = ({
 }) => (
   <AudienceChip
     audience={audience}
-    className={`min-w-0 font-[family-name:var(--card-label)] text-[11px] uppercase leading-5 tracking-[0.2em] text-[color:var(--card-muted)] before:me-2.5 before:inline-block before:h-px before:w-5 before:bg-current before:align-middle before:content-[''] ${className ?? ''}`}
+    className={`gap-2.5 font-[family-name:var(--card-label)] uppercase leading-5 text-[color:var(--card-muted)] ${className ?? ''}`}
+    glyphClassName="h-[1.1em] w-[1.1em] [&_svg]:stroke-[1.5]"
+    textClassName="-me-[0.2em] tracking-[0.2em]"
   />
 );

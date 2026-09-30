@@ -25,8 +25,9 @@ const PAPER = {
   '--paper-rule': 'color-mix(in srgb, var(--card-ground) 18%, transparent)',
 } as CSSProperties;
 
+// --hero-to is the side the photo is on: the name column stays on the ground in either direction
 const HERO_SCRIM = [
-  'linear-gradient(to right, var(--card-ground), color-mix(in srgb, var(--card-ground) 45%, transparent) 30%, transparent 60%)',
+  'linear-gradient(to var(--hero-to), var(--card-ground), color-mix(in srgb, var(--card-ground) 45%, transparent) 30%, transparent 60%)',
   // top keeps the nav legible on bright photos; bottom carries the socials
   'linear-gradient(to bottom, color-mix(in srgb, var(--card-ground) 80%, transparent), transparent 30%, transparent 55%, color-mix(in srgb, var(--card-ground) 72%, transparent))',
 ].join(', ');
@@ -60,7 +61,8 @@ const TopBar = ({ data }: { data: CardData }) => {
     <header
       className={`absolute inset-x-0 top-6 z-10 flex items-center gap-8 pe-8 font-sans ${GUTTER_START}`}
     >
-      <PosterAudience audience={data.audience} className="max-w-[min(45%,22rem)]" />
+      {/* Capped to the ground column, clear of the photo */}
+      <PosterAudience audience={data.audience} className="max-w-[min(38%,22rem)] text-[12px]" />
       <nav
         aria-label={t('Sections')}
         className="ms-auto flex flex-shrink-0 items-center gap-[26px]"
@@ -89,7 +91,10 @@ const HeroGround = ({ design, data }: LayoutProps) => {
   const photo = design.ground.photo ? data.photo : undefined;
   if (!photo) return null;
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-y-0 left-[44%] right-0 -z-10">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-y-0 end-0 start-[44%] -z-10 [--hero-to:right] rtl:[--hero-to:left]"
+    >
       <CardImg image={photo} alt="" className="h-full w-full [&_img]:object-[50%_30%]" />
       <div className="absolute inset-0" style={{ background: HERO_SCRIM }} />
     </div>

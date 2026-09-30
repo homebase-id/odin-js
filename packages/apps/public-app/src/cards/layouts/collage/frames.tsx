@@ -57,7 +57,8 @@ export const AudienceTape = ({
   >
     <AudienceChip
       audience={audience}
-      className="max-w-full px-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
+      className="max-w-full gap-2 px-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
+      glyphClassName="h-[0.72em] w-[0.72em] [&_svg]:stroke-[2.5]"
     />
   </div>
 );

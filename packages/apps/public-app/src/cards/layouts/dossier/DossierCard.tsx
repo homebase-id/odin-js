@@ -44,7 +44,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             className="text-[22px] leading-[calc(24/22)] tracking-[-0.03em] text-[color:var(--card-ink)]"
           />
           <LocationLine data={data} className="pt-2 !tracking-[0.14em]" />
-          <DossierAudience data={data} className="mt-2.5 text-[10px]" />
+          <DossierAudience data={data} stamp className="mt-2.5 max-w-full text-[10px]" />
         </div>
       </header>
 
