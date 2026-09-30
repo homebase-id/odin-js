@@ -2,7 +2,8 @@ import { Component, useEffect, useRef, useState, type CSSProperties, type ReactN
 import { flushSync } from 'react-dom';
 import { DotYouClientContext, toSocialLink } from '@homebase-id/common-app';
 import type { DotYouClient } from '@homebase-id/js-lib/core';
-import type { LayoutId } from './CardDesign';
+import type { CardDesign, LayoutId } from './CardDesign';
+import { applyOverrides, type CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
 import { CARD_PRESETS, presetFromParam } from './presets';
@@ -39,7 +40,12 @@ type AppData = {
   socials?: { type: string; username: string }[];
   posts?: (Omit<CardPost, 'image'> & { image?: AppImage })[];
 };
-type RenderRequest = { design: string; data: AppData; audience?: CardAudience };
+type RenderRequest = {
+  design: string;
+  data: AppData;
+  audience?: CardAudience;
+  overrides?: CardOverrides;
+};
 
 declare global {
   interface Window {
@@ -165,11 +171,11 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { id: number; layout: LayoutId; data: CardData };
+type Rendered = { id: number; layout: LayoutId; design: CardDesign; data: CardData };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
-    design={CARD_PRESETS[card.layout]}
+    design={card.design}
     data={card.data}
     className="flex min-h-full flex-col [&>*]:flex-grow"
   />
@@ -213,7 +219,8 @@ const CardApp = ({ host }: { host: CardHost }) => {
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ id, layout, data }));
+        const design = applyOverrides(CARD_PRESETS[layout], request.overrides);
+        flushSync(() => setCard({ id, layout, design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
@@ -307,7 +314,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
             <CardBoundary key={card.id} onError={onCardError}>
               {wide ? (
-                <CardPage design={CARD_PRESETS[card.layout]} data={card.data} />
+                <CardPage design={card.design} data={card.data} />
               ) : (
                 <CompactCard card={card} />
               )}

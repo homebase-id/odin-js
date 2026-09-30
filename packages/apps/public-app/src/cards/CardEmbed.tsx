@@ -8,6 +8,7 @@ import { HomebaseCard } from './HomebaseCard';
 import { HOMEBASE_IOS_APP_ID, HomebaseCta } from './parts/HomebaseCta';
 import { CardSignIn } from './parts/SignIn';
 import { cardVars } from './CardDesign';
+import { applyOverrides } from './overrides';
 
 // The standalone public page anyone opens directly (a shared link, an NFC tap): no
 // host param, so this is never what chat-kmp's WebView or an iframe embed renders.
@@ -24,12 +25,17 @@ const CardEmbed = () => {
   // "Disable public site" - the phone embed has nothing to show either
   if (!themeId || themeId === '0') return null;
 
+  const paramLayout = presetFromParam(params.get('design'));
   const layout =
-    presetFromParam(params.get('design')) ??
+    paramLayout ??
     presetFromParam(profileCard?.design) ??
     presetFromParam(templateSettings?.cardDesign) ??
     'board';
-  const design = CARD_PRESETS[layout];
+  // ?design= is a preview of a bare preset: the card's own overrides do not apply to it
+  const design = applyOverrides(
+    CARD_PRESETS[layout],
+    paramLayout ? undefined : profileCard?.overrides
+  );
 
   return (
     <main className="min-h-dvh">

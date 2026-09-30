@@ -2,6 +2,7 @@ export type PickedCard = {
   kind: 'public' | 'circle';
   design?: string;
   label?: string;
+  overrides?: unknown;
   priority: number;
 };
 
@@ -21,6 +22,7 @@ const toCard = (file: CardAttribute): PickedCard => {
     kind: isCircle ? 'circle' : 'public',
     design,
     label,
+    overrides: data.overrides,
     priority: content.priority ?? 0,
   };
 };
