@@ -66,10 +66,12 @@ const TopBar = ({ data }: { data: CardData }) => {
 
   return (
     <header className={`border-b ${hairline}`}>
-      <div className={`${gutter} flex h-14 items-center justify-between gap-8`}>
+      <div className={`${gutter} flex h-14 items-center justify-between gap-12`}>
         {/* The file line is the design's slot for metadata: S.G. / FILE 001 / FRIENDS.
-            It takes the bar's free width, so the label is only cut where it would reach the nav */}
-        <div className={`flex min-w-0 flex-1 items-center text-[12px] ${tracked} ${muted}`}>
+            It takes the bar's free width and stops a clear gap short of the nav */}
+        <div
+          className={`flex min-w-0 flex-1 items-start text-[12px] leading-4 ${tracked} ${muted}`}
+        >
           <span aria-hidden className="flex-shrink-0 whitespace-nowrap">
             {initials(data)} / {t('File')} 001
           </span>

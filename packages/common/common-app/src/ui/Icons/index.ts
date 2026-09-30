@@ -35,7 +35,7 @@ import {Expand} from './Expand';
 import {Contract} from './Contract';
 import {ExternalLink} from './ExternalLink';
 import {Envelope, EnvelopeOpen} from './Envelope';
-import {Eye, CloseEye} from './Eye';
+import {Eye, EyeOutline, CloseEye} from './Eye';
 import {Facebook} from './Facebook';
 import {Feed} from './Feed';
 import {File} from './File';
@@ -156,6 +156,7 @@ export {
     Expand,
     ExternalLink,
     Eye,
+    EyeOutline,
     CloseEye,
     Facebook,
     Feed,

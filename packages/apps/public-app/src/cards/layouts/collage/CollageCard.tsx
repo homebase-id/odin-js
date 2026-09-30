@@ -64,7 +64,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
         ) : null}
         <AudienceTape
           audience={data.audience}
-          className="ml-1 mt-3 max-w-[min(100%-1.5rem,15rem)] text-[19px] leading-[26px]"
+          className="ml-1 mt-3 max-w-[min(100%-1.5rem,15rem)] text-[19px]"
         />
       </div>
 

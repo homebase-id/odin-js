@@ -66,11 +66,12 @@ export const BoardProfile = ({
           <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
-      {/* A flat tag in the ground art's tint: no ledge and no icon tile, so it is not one more link row */}
+      {/* A flat tag in the ground art's tint: no ledge and no icon tile, so it is not one more link row.
+          The radius is half of one line, so it is a pill until the name needs its second line */}
       <AudienceChip
         audience={data.audience}
-        className={`max-w-[min(100%,16.25rem)] flex-shrink-0 gap-1.5 rounded-full bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] px-2.5 py-0.5 font-medium leading-5 tracking-[0.02em] text-[color:var(--card-muted)] ${sizes.audience}`}
-        glyphClassName="h-[1.15em] w-[1.15em]"
+        className={`max-w-full flex-shrink-0 gap-1.5 rounded-xl bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] px-2.5 py-0.5 font-medium leading-5 tracking-[0.02em] text-[color:var(--card-muted)] ${sizes.audience}`}
+        glyphClassName="h-5 w-[1.15em]"
       />
       <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />
       <CardSocials variant={design.socials} data={data} className={sizes.socials} />

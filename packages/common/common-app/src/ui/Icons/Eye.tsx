@@ -16,6 +16,24 @@ export const Eye: FC<IconProps> = ({ className }) => {
   );
 };
 
+// Drawn like Persons: the same box, stroke and caps, for the places the two stand side by side
+export const EyeOutline: FC<IconProps> = ({ className }) => {
+  return (
+    <svg
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      className={className}
+      viewBox="0 0 24 24"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  );
+};
+
 export const CloseEye: FC<IconProps> = ({ className }) => {
   return (
     <svg

@@ -34,7 +34,7 @@ const HERO_SCRIM = [
 
 // CardBlocks laid out as one row: a shared top hairline, vertical hairlines between
 const ROW =
-  '!flex-row flex-wrap !gap-0 [&>a]:border-r [&>a]:px-7 [&>a]:pb-0 [&>a]:pt-[13px] [&>a]:text-[21px] [&>a]:leading-7 [&>a:first-child]:pl-0 [&>a:last-child]:border-r-0 [&>a:last-child]:pr-0';
+  '!flex-row flex-wrap !gap-0 [&>a]:border-e [&>a]:px-7 [&>a]:pb-0 [&>a]:pt-[13px] [&>a]:text-[21px] [&>a]:leading-7 [&>a:first-child]:ps-0 [&>a:last-child]:border-e-0 [&>a:last-child]:pe-0';
 const GLYPHS = '!gap-[18px] pb-[3px] [&_svg]:h-5 [&_svg]:w-5';
 
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, {

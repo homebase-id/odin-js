@@ -31,7 +31,7 @@ export const LocationLine = ({ data, className }: { data: CardData; className?: 
 );
 
 // File metadata in the label face and its grey; the accent stays with the ELSEWHERE rows, which are
-// links. `stamp` rules it off where it has no header line to sit on, and lets it run to a second line
+// links. `stamp` rules it off where it has no header line to sit on
 export const DossierAudience = ({
   data,
   stamp,
@@ -43,7 +43,6 @@ export const DossierAudience = ({
 }) => (
   <AudienceChip
     audience={data.audience}
-    lines={stamp ? 2 : 1}
     className={`font-[family-name:var(--card-label)] uppercase leading-4 text-[color:var(--card-muted)] ${
       stamp
         ? 'gap-2 border border-[color:color-mix(in_srgb,var(--card-muted)_60%,transparent)] px-2 py-[3px]'
@@ -51,7 +50,7 @@ export const DossierAudience = ({
     } ${className ?? ''}`}
     glyphClassName="h-4 w-[1.1em]"
     textClassName="-me-[0.16em] tracking-[0.16em]"
-    joinedClassName="text-[1.2em]"
+    joinedClassName="text-[1.05em]"
   />
 );
 

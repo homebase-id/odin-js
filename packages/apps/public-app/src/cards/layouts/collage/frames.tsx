@@ -29,9 +29,10 @@ const FRAME_SHADOWS = {
   hard: 'shadow-[6px_6px_0_rgba(0,0,0,0.3)]',
 };
 
+// See-through, so it takes the tone of whatever it is stuck on
 const TAPE_STYLE: CSSProperties = {
-  backgroundColor: 'color-mix(in srgb, var(--card-muted) 28%, var(--card-ground))',
-  opacity: 0.8,
+  backgroundColor:
+    'color-mix(in srgb, color-mix(in srgb, var(--card-muted) 28%, var(--card-ground)) 80%, transparent)',
 };
 
 // A strip of masking tape; the caller positions and sizes it
@@ -43,30 +44,24 @@ export const Tape = ({ className }: { className: string }) => (
   />
 );
 
-// A torn strip of the same tape, written on by hand. The caller caps it short of its column's edge:
-// tilted, a full-width strip crowds whatever sits beside the column
+// A torn strip of the same tape, written on by hand in the role line's weight
 export const AudienceTape = ({
   audience,
   className,
-  lines = 2,
 }: {
   audience: CardData['audience'];
   className: string;
-  lines?: 2 | 3;
 }) => (
-  <div
-    style={{ backgroundColor: TAPE_STYLE.backgroundColor }}
-    className={`w-fit -rotate-2 empty:hidden ${className}`}
-  >
+  <div style={TAPE_STYLE} className={`w-fit -rotate-2 leading-[1.3] empty:hidden ${className}`}>
     {/* The glyph box is one line tall. The end pad is inside the text's clip: the hand's last stroke
-        overhangs its letter. The Arabic hand is wider and blacker than the Latin one */}
+        overhangs its letter. Two lines are evened out, so the strip is not left half bare.
+        The Arabic hand is wider than the Latin one */}
     <AudienceChip
       audience={audience}
-      lines={lines}
-      className="max-w-full gap-2 pe-2 ps-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
-      glyphClassName="h-[1.365em] w-[0.72em] [&_svg]:stroke-[2.5]"
-      textClassName="pe-1"
-      joinedClassName="text-[0.78em]"
+      className="max-w-full gap-1.5 pe-1.5 ps-2.5 font-[family-name:var(--card-label)] font-medium text-[color:var(--card-ink)]"
+      glyphClassName="h-[1.3em] w-[0.72em] [&_svg]:stroke-[2.5]"
+      textClassName="pe-1 ![text-wrap:balance]"
+      joinedClassName="text-[0.74em] leading-[calc(1.3/0.74)]"
     />
   </div>
 );

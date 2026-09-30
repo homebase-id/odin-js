@@ -18,7 +18,7 @@ const SIZES = {
 
 // One caption in the label face: GARDENER, HOBBITON · FRIENDS. Each item carries its dot in its
 // leading pad and the row is pulled back by that pad, so whichever item starts a line (the label,
-// once it wraps) has its dot clipped away. The label is a step brighter than the role it follows
+// once it wraps) has its dot clipped away. The label takes the role's tone; only its glyph is lifted
 export const PosterCaption = ({
   data,
   size,
@@ -41,11 +41,10 @@ export const PosterCaption = ({
             line of the label face tall (1.48em), and its stroke is in a 24-unit box: 2.6 draws ~1.5px */}
         <AudienceChip
           audience={data.audience}
-          lines={2}
-          className={`relative max-w-full gap-[0.7em] ps-[2.4em] font-[family-name:var(--card-label)] uppercase text-[color:color-mix(in_srgb,var(--card-ink)_88%,transparent)] before:absolute before:start-0 before:w-[2.4em] before:-translate-x-[0.12em] before:text-center before:text-[color:var(--card-muted)] before:content-['·'] rtl:before:translate-x-[0.12em]`}
-          glyphClassName="h-[1.48em] w-[1.2em] [&_svg]:stroke-[2.6]"
+          className={`relative max-w-full gap-[0.7em] ps-[2.4em] font-[family-name:var(--card-label)] uppercase text-[color:var(--card-muted)] before:absolute before:start-0 before:w-[2.4em] before:-translate-x-[0.12em] before:text-center before:content-['·'] rtl:before:translate-x-[0.12em]`}
+          glyphClassName="h-[1.48em] w-[1.2em] text-[color:color-mix(in_srgb,var(--card-ink)_88%,transparent)] [&_svg]:stroke-[2.6]"
           textClassName={sizes.text}
-          joinedClassName="text-[1.2em] leading-[1.234]"
+          joinedClassName="leading-[1.48]"
         />
       </div>
     </div>
