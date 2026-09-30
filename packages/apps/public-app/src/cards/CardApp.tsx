@@ -3,10 +3,10 @@ import { flushSync } from 'react-dom';
 import { DotYouClientContext, toSocialLink } from '@homebase-id/common-app';
 import type { DotYouClient } from '@homebase-id/js-lib/core';
 import type { CardDesign, LayoutId } from './CardDesign';
-import { applyOverrides, type CardOverrides } from './overrides';
+import type { CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
-import { CARD_PRESETS, presetFromParam } from './presets';
+import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
 import {
   cardSocials,
@@ -214,12 +214,10 @@ const CardApp = ({ host }: { host: CardHost }) => {
       const started = performance.now();
       const id = ++renders;
       try {
-        const layout = presetFromParam(request?.design);
-        if (!layout) throw new Error(`unknown design "${request?.design}"`);
+        const { layout, design } = resolveRequestDesign(request);
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        const design = applyOverrides(CARD_PRESETS[layout], request.overrides);
         flushSync(() => setCard({ id, design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');

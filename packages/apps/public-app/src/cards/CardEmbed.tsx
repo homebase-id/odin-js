@@ -1,14 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useDotYouClientContext, useSiteData } from '@homebase-id/common-app';
-import { CARD_PRESETS, presetFromParam } from './presets';
 import { useCardData } from './useCardData';
 import { useProfileCard } from './useProfileCard';
 import { HomebaseCard } from './HomebaseCard';
 import { HOMEBASE_IOS_APP_ID, HomebaseCta } from './parts/HomebaseCta';
 import { CardSignIn } from './parts/SignIn';
 import { cardVars } from './CardDesign';
-import { applyOverrides } from './overrides';
+import { resolveEmbedDesign } from './resolveDesign';
 
 // The standalone public page anyone opens directly (a shared link, an NFC tap): no
 // host param, so this is never what chat-kmp's WebView or an iframe embed renders.
@@ -25,17 +24,11 @@ const CardEmbed = () => {
   // "Disable public site" - the phone embed has nothing to show either
   if (!themeId || themeId === '0') return null;
 
-  const paramLayout = presetFromParam(params.get('design'));
-  const layout =
-    paramLayout ??
-    presetFromParam(profileCard?.design) ??
-    presetFromParam(templateSettings?.cardDesign) ??
-    'board';
-  // ?design= is a preview of a bare preset: the card's own overrides do not apply to it
-  const design = applyOverrides(
-    CARD_PRESETS[layout],
-    paramLayout ? undefined : profileCard?.overrides
-  );
+  const { design } = resolveEmbedDesign({
+    param: params.get('design'),
+    card: profileCard,
+    themeDesign: templateSettings?.cardDesign,
+  });
 
   return (
     <main className="min-h-dvh">

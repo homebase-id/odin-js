@@ -3,6 +3,7 @@ import { cardVars } from './CardDesign';
 import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { pickCard } from './pickCard';
+import { resolveEmbedDesign, resolveRequestDesign } from './resolveDesign';
 
 const board = CARD_PRESETS.board;
 const collage = CARD_PRESETS.collage;
@@ -61,6 +62,25 @@ describe('applyOverrides', () => {
     expect(design.socials).toBe(board.socials);
   });
 
+  it('drops invalid portrait fields at any index and keeps the preset portrait', () => {
+    const bad = { ring: 99, tilt: 'a', shadow: 'x', tape: 1, mono: 'y' };
+    const preset = { source: 'photo', shape: 'circle', ring: 4, shadow: 'hard' };
+    expect(board.portraits[0]).toEqual(preset);
+    for (const portraits of [
+      [bad],
+      [{ ring: -1 }],
+      [{ tilt: 16 }],
+      [{ tilt: -16, ring: 13 }],
+      [{ ring: Infinity, tilt: NaN }],
+      [bad, bad],
+    ]) {
+      expect(applyOverrides(board, { portraits }).portraits[0]).toEqual(preset);
+    }
+    expect(
+      applyOverrides(board, { portraits: [{ ring: 12, tilt: -15, tape: true }] }).portraits[0]
+    ).toEqual({ ...preset, ring: 12, tilt: -15, tape: true });
+  });
+
   it('keeps the preset blocks and portraits when nothing valid remains', () => {
     const design = applyOverrides(board, { blocks: [{ kind: 'x' }], portraits: [1, 2] });
     expect(design.blocks).toEqual(board.blocks);
@@ -99,5 +119,46 @@ describe('applyOverrides', () => {
     };
     const picked = pickCard([file]);
     expect(applyOverrides(board, picked?.overrides).palette.ink).toBe('#000000');
+  });
+});
+
+describe('design resolution', () => {
+  const overrides = { palette: { ground: '#000000' } };
+  const ground = (d: { design: Parameters<typeof cardVars>[0] }) =>
+    (cardVars(d.design) as Record<string, string>)['--card-ground'];
+
+  it('app mode: overrides in the request reach the design that is rendered', () => {
+    expect(resolveRequestDesign({ design: 'board' }).design).toEqual(board);
+    const r = resolveRequestDesign({ design: 'board', overrides });
+    expect(r.layout).toBe('board');
+    expect(ground(r)).toBe('#000000');
+    expect(() => resolveRequestDesign({ design: 'nope', overrides })).toThrow();
+  });
+
+  it('web mode: card overrides apply when the card attribute chose the layout', () => {
+    const r = resolveEmbedDesign({ card: { design: 'collage', overrides }, themeDesign: 'board' });
+    expect(r.layout).toBe('collage');
+    expect(ground(r)).toBe('#000000');
+  });
+
+  it('web mode: ?design= is the bare preset', () => {
+    const r = resolveEmbedDesign({ param: 'poster', card: { design: 'poster', overrides } });
+    expect(r.design).toEqual(CARD_PRESETS.poster);
+  });
+
+  it('web mode: no card attribute leaves the legacy preset untouched', () => {
+    expect(resolveEmbedDesign({ card: null, themeDesign: 'dossier' }).design).toEqual(
+      CARD_PRESETS.dossier
+    );
+    expect(resolveEmbedDesign({}).design).toEqual(board);
+  });
+
+  it('web mode: overrides are not painted on a layout the card did not choose', () => {
+    for (const design of [undefined, 'bogus']) {
+      const r = resolveEmbedDesign({ card: { design, overrides }, themeDesign: 'dossier' });
+      expect(r.layout).toBe('dossier');
+      expect(r.design).toEqual(CARD_PRESETS.dossier);
+    }
+    expect(resolveEmbedDesign({ card: { overrides } }).design).toEqual(board);
   });
 });
