@@ -4,12 +4,12 @@ import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData, CardPost } from '../../useCardData';
 import { CardBlocks, isUsableLink } from '../../parts/Blocks';
-import { CardLabel, CardName } from '../../parts/Type';
+import { CardName } from '../../parts/Type';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-import { PosterAudience } from './PosterAudience';
+import { PosterCaption } from './PosterCaption';
 
 const FOCUS_ON_PAPER =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-ground)]';
@@ -99,26 +99,6 @@ const HeroGround = ({ design, data }: LayoutProps) => {
   );
 };
 
-// One caption line over the name: GARDENER, HOBBITON · FRIENDS. Capped to the ground column, clear
-// of the photo. Each item carries its dot in its leading pad and the row is pulled back by that pad,
-// so whichever item starts a line (the label, once it wraps) has its dot clipped away
-const Caption = ({ data }: { data: CardData }) => (
-  <div className="max-w-[50%] overflow-hidden empty:hidden">
-    <div className="-ms-[2.4em] flex flex-wrap items-center gap-y-1 text-[12px]">
-      {data.headline ? (
-        <CardLabel className="ps-[2.4em] !text-[12px] !tracking-[0.24em]">
-          {data.headline}
-        </CardLabel>
-      ) : null}
-      <PosterAudience
-        audience={data.audience}
-        className={`relative max-w-full ps-[2.4em] before:absolute before:start-0 before:w-[2.4em] before:-translate-x-[0.12em] before:text-center before:content-['·'] rtl:before:translate-x-[0.12em]`}
-        textClassName="-me-[0.24em] tracking-[0.24em]"
-      />
-    </div>
-  </div>
-);
-
 const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
   <section
     className={`relative isolate flex min-h-[clamp(480px,50vw,600px)] flex-col justify-end overflow-hidden pb-10 pt-24 ${GUTTER} ${
@@ -127,7 +107,8 @@ const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
   >
     <HeroGround design={design} data={data} />
     <div className={INNER}>
-      <Caption data={data} />
+      {/* Capped to the ground column, clear of the photo */}
+      <PosterCaption data={data} size="page" className="max-w-[50%]" />
       <CardName
         design={design}
         data={data}

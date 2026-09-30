@@ -9,13 +9,16 @@ export type FontId =
   | 'archivo-black'
   | 'space-mono';
 
+// The Arabic faces only cover Arabic (unicode-range), so they sit behind the face they stand in for
 export const FONT_STACKS: Record<FontId, string> = {
-  montserrat: "'Montserrat', 'Avenir Next', 'Segoe UI', system-ui, sans-serif",
-  'montserrat-alt': "'Montserrat Alternates', 'Avenir Next', 'Segoe UI', system-ui, sans-serif",
+  montserrat:
+    "'Montserrat', 'IBM Plex Sans Arabic', 'Avenir Next', 'Segoe UI', system-ui, sans-serif",
+  'montserrat-alt':
+    "'Montserrat Alternates', 'IBM Plex Sans Arabic', 'Avenir Next', 'Segoe UI', system-ui, sans-serif",
   newsreader: "'Newsreader', 'Iowan Old Style', Georgia, serif",
-  caveat: "'Caveat', 'Bradley Hand', 'Segoe Script', cursive",
+  caveat: "'Caveat', 'Playpen Sans Arabic', 'Bradley Hand', 'Segoe Script', cursive",
   'archivo-black': "'Archivo Black', 'Helvetica Neue', Impact, system-ui, sans-serif",
-  'space-mono': "'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace",
+  'space-mono': "'Space Mono', 'IBM Plex Sans Arabic', ui-monospace, 'SF Mono', Menlo, monospace",
 };
 
 export type LayoutId = 'poster' | 'board' | 'collage' | 'dossier';

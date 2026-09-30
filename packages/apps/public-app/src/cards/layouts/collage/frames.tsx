@@ -48,20 +48,25 @@ export const Tape = ({ className }: { className: string }) => (
 export const AudienceTape = ({
   audience,
   className,
+  lines = 2,
 }: {
   audience: CardData['audience'];
   className: string;
+  lines?: 2 | 3;
 }) => (
   <div
     style={{ backgroundColor: TAPE_STYLE.backgroundColor }}
     className={`w-fit -rotate-2 empty:hidden ${className}`}
   >
-    {/* The sans face is wider and blacker than the handwriting: smaller, and two lines before it is cut */}
+    {/* The glyph box is one line tall. The end pad is inside the text's clip: the hand's last stroke
+        overhangs its letter. The Arabic hand is wider and blacker than the Latin one */}
     <AudienceChip
       audience={audience}
-      className="max-w-full gap-2 px-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
-      glyphClassName="h-[0.72em] w-[0.72em] [&_svg]:stroke-[2.5]"
-      joinedClassName="line-clamp-2 !whitespace-normal py-1 text-[0.7em] leading-[1.35]"
+      lines={lines}
+      className="max-w-full gap-2 pe-2 ps-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
+      glyphClassName="h-[1.365em] w-[0.72em] [&_svg]:stroke-[2.5]"
+      textClassName="pe-1"
+      joinedClassName="text-[0.78em]"
     />
   </div>
 );
