@@ -7,6 +7,8 @@ import { CARD_PRESETS, presetFromParam } from './presets';
 import saveCircleRaw from './__fixtures__/save-circle-card.json?raw';
 import savePublicRaw from './__fixtures__/save-public-card.json?raw';
 import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
+import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
+import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
 import storedSetRaw from './__fixtures__/stored-card-set.json?raw';
 
 /*
@@ -18,6 +20,8 @@ type Json = Record<string, any>;
 const savePublic: Json = JSON.parse(savePublicRaw);
 const saveCircle: Json = JSON.parse(saveCircleRaw);
 const renderPayload: Json = JSON.parse(renderPayloadRaw);
+const renderPublic: Json = JSON.parse(renderPublicRaw);
+const renderCircle: Json = JSON.parse(renderCircleRaw);
 const storedSet: Json[] = JSON.parse(storedSetRaw);
 
 // AppData in CardApp.tsx (not exported)
@@ -144,5 +148,36 @@ describe('stored set chat-kmp writes, read by the card picker', () => {
       kind: 'circle',
       label: 'Friends',
     });
+  });
+});
+
+describe('render requests built by chat-kmp with overrides and audience', () => {
+  it.each([
+    ['public', () => renderPublic, 'board'],
+    ['circle', () => renderCircle, 'dossier'],
+  ])('%s: validates and applies every override, drops none', (_name, get, layout) => {
+    const request = get();
+    expect(Object.keys(request).sort()).toEqual(['audience', 'data', 'design', 'overrides']);
+    for (const key of Object.keys(request.data)) expect(APP_DATA_KEYS).toContain(key);
+    const design = resolveRequestDesign(request);
+    expect(design.layout).toBe(layout);
+    const o = request.overrides;
+    expect(design.palette).toEqual(o.palette);
+    expect(design.type).toEqual(o.type);
+    expect(design.blocks).toEqual(o.blocks);
+    expect(design.socials).toBe(o.socials);
+    expect(design.portraits[0]).toEqual(o.portraits[0]);
+  });
+
+  it('carries an audience the page keeps (kind and label only)', () => {
+    expect(renderPublic.audience).toEqual({ kind: 'public' });
+    expect(renderCircle.audience).toEqual({ kind: 'circle', label: 'Friends' });
+    for (const a of [renderPublic.audience, renderCircle.audience])
+      expect(Object.keys(a).every((k) => k === 'kind' || k === 'label')).toBe(true);
+  });
+
+  it('shares its overrides byte for byte with the stored card', () => {
+    expect(renderPublic.overrides).toEqual(savePublic.data.overrides);
+    expect(renderCircle.overrides).toEqual(saveCircle.data.overrides);
   });
 });
