@@ -34,4 +34,17 @@ describe('pickCard', () => {
     ]);
     expect(picked).toMatchObject({ design: 'collage', label: 'Friends' });
   });
+
+  it('prefers a circle card even when its priority number is higher than the public card', () => {
+    const picked = pickCard([
+      card(0, { design: 'poster' }),
+      card(5, { design: 'dossier', label: 'Friends' }, ['c1']),
+    ]);
+    expect(picked).toMatchObject({ kind: 'circle', design: 'dossier', label: 'Friends' });
+  });
+
+  it('treats a card with a label but no ACL as a circle card', () => {
+    const picked = pickCard([card(0, { design: 'poster' }), card(7, { label: 'Team' })]);
+    expect(picked).toMatchObject({ kind: 'circle', label: 'Team' });
+  });
 });

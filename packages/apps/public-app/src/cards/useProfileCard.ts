@@ -7,6 +7,9 @@ import {
 } from '@homebase-id/js-lib/profile';
 import { pickCard, type PickedCard } from './pickCard';
 
+// the public card plus every circle card the viewer can see
+const PROFILE_CARD_PAGE_SIZE = 100;
+
 export const useProfileCard = () => {
   const dotYouClient = useDotYouClientContext();
 
@@ -18,7 +21,8 @@ export const useProfileCard = () => {
           dotYouClient,
           BuiltInProfiles.StandardProfileId,
           undefined,
-          [BuiltInAttributes.ProfileCard]
+          [BuiltInAttributes.ProfileCard],
+          PROFILE_CARD_PAGE_SIZE
         );
         return pickCard(files);
       } catch (e) {

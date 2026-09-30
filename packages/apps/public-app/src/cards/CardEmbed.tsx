@@ -13,9 +13,9 @@ const CardEmbed = () => {
   const [params] = useSearchParams();
   const { data: siteData } = useSiteData();
   const data = useCardData();
-  const { data: profileCard } = useProfileCard();
+  const { data: profileCard, isFetched: isProfileCardFetched } = useProfileCard();
   const isOwner = useDotYouClientContext().isOwner();
-  if (!data || !siteData) return null;
+  if (!data || !siteData || !isProfileCardFetched) return null;
 
   const templateSettings = siteData.home?.templateSettings;
   const themeId = templateSettings?.themeId;
