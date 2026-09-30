@@ -27,6 +27,14 @@ describe('pickCard', () => {
     expect(picked).toMatchObject({ kind: 'circle', design: 'dossier', label: 'Friends' });
   });
 
+  it('treats a card with circles in its ACL and no label as a circle card', () => {
+    const picked = pickCard([
+      card(1000, { design: 'poster' }),
+      card(3, { design: 'dossier' }, ['c1']),
+    ]);
+    expect(picked).toMatchObject({ kind: 'circle', design: 'dossier' });
+  });
+
   it('picks the lowest priority among circle cards', () => {
     const picked = pickCard([
       card(5, { design: 'board', label: 'Family' }, ['c2']),
