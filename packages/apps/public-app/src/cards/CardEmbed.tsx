@@ -24,7 +24,7 @@ const CardEmbed = () => {
   // "Disable public site" - the phone embed has nothing to show either
   if (!themeId || themeId === '0') return null;
 
-  const { design } = resolveEmbedDesign({
+  const design = resolveEmbedDesign({
     param: params.get('design'),
     card: profileCard,
     themeDesign: templateSettings?.cardDesign,

@@ -124,11 +124,11 @@ describe('applyOverrides', () => {
 
 describe('design resolution', () => {
   const overrides = { palette: { ground: '#000000' } };
-  const ground = (d: { design: Parameters<typeof cardVars>[0] }) =>
-    (cardVars(d.design) as Record<string, string>)['--card-ground'];
+  const ground = (d: Parameters<typeof cardVars>[0]) =>
+    (cardVars(d) as Record<string, string>)['--card-ground'];
 
   it('app mode: overrides in the request reach the design that is rendered', () => {
-    expect(resolveRequestDesign({ design: 'board' }).design).toEqual(board);
+    expect(resolveRequestDesign({ design: 'board' })).toEqual(board);
     const r = resolveRequestDesign({ design: 'board', overrides });
     expect(r.layout).toBe('board');
     expect(ground(r)).toBe('#000000');
@@ -143,22 +143,22 @@ describe('design resolution', () => {
 
   it('web mode: ?design= is the bare preset', () => {
     const r = resolveEmbedDesign({ param: 'poster', card: { design: 'poster', overrides } });
-    expect(r.design).toEqual(CARD_PRESETS.poster);
+    expect(r).toEqual(CARD_PRESETS.poster);
   });
 
   it('web mode: no card attribute leaves the legacy preset untouched', () => {
-    expect(resolveEmbedDesign({ card: null, themeDesign: 'dossier' }).design).toEqual(
+    expect(resolveEmbedDesign({ card: null, themeDesign: 'dossier' })).toEqual(
       CARD_PRESETS.dossier
     );
-    expect(resolveEmbedDesign({}).design).toEqual(board);
+    expect(resolveEmbedDesign({})).toEqual(board);
   });
 
   it('web mode: overrides are not painted on a layout the card did not choose', () => {
     for (const design of [undefined, 'bogus']) {
       const r = resolveEmbedDesign({ card: { design, overrides }, themeDesign: 'dossier' });
       expect(r.layout).toBe('dossier');
-      expect(r.design).toEqual(CARD_PRESETS.dossier);
+      expect(r).toEqual(CARD_PRESETS.dossier);
     }
-    expect(resolveEmbedDesign({ card: { overrides } }).design).toEqual(board);
+    expect(resolveEmbedDesign({ card: { overrides } })).toEqual(board);
   });
 });

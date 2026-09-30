@@ -214,7 +214,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       const started = performance.now();
       const id = ++renders;
       try {
-        const { layout, design } = resolveRequestDesign(request);
+        const design = resolveRequestDesign(request);
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
@@ -224,7 +224,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         painted = whenPainted(element, postError).then(() => {
           // a newer render() owns the next ready
           if (id === renders)
-            post({ type: 'ready', layout, ms: Math.round(performance.now() - started) });
+            post({ type: 'ready', layout: design.layout, ms: Math.round(performance.now() - started) });
         });
       } catch (error) {
         postError(error);
