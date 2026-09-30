@@ -1,14 +1,26 @@
 import { t } from '@homebase-id/common-app';
 import type { CardAudience } from '../useCardData';
 
-export const AudienceChip = ({ audience }: { audience?: CardAudience }) => {
+// Letter-spacing pulls a joined script apart
+const JOINED = /\p{Script=Arabic}|\p{Script=Syriac}|\p{Script=Nko}|\p{Script=Mongolian}/u;
+
+// Who the card is for. Each layout places it in its own flow, gives it its own shape and caps its width
+export const AudienceChip = ({
+  audience,
+  className,
+}: {
+  audience?: CardAudience;
+  className: string;
+}) => {
   if (!audience) return null;
-  const text = audience.kind === 'public' ? t('Public') : audience.label;
+  const text = audience.kind === 'public' ? t('Public') : audience.label?.trim();
   if (!text) return null;
   return (
+    // dir: a circle name in another script keeps its own direction and truncates at its own end
     <span
-      className="pointer-events-none absolute start-3 top-3 z-10 max-w-[50%] truncate rounded-full border px-2 py-0.5 text-[11px] leading-4"
-      style={{ color: 'var(--card-muted)', borderColor: 'var(--card-muted)' }}
+      dir="auto"
+      title={text}
+      className={`block w-fit truncate ${className} ${JOINED.test(text) ? '!tracking-normal' : ''}`}
     >
       {text}
     </span>

@@ -10,7 +10,7 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
+import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -185,6 +185,10 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   {data.headline}
                 </p>
               ) : null}
+              <AudienceTape
+                audience={data.audience}
+                className="ml-2.5 mt-4 text-[22px] leading-[30px]"
+              />
               <CardSocials
                 variant="glyphs"
                 data={restData}

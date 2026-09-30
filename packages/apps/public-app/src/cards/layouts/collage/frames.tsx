@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { LayoutProps, Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
+import { AudienceChip } from '../../parts/AudienceChip';
 
 type Frame = { portrait: Portrait; image: CardPhoto | undefined; alt: string };
 
@@ -40,6 +41,25 @@ export const Tape = ({ className }: { className: string }) => (
     className={`pointer-events-none absolute z-10 ${className}`}
     style={TAPE_STYLE}
   />
+);
+
+// A torn strip of the same tape, written on by hand
+export const AudienceTape = ({
+  audience,
+  className,
+}: {
+  audience: CardData['audience'];
+  className: string;
+}) => (
+  <div
+    style={{ backgroundColor: TAPE_STYLE.backgroundColor }}
+    className={`w-fit max-w-[min(100%,15rem)] -rotate-2 empty:hidden ${className}`}
+  >
+    <AudienceChip
+      audience={audience}
+      className="max-w-full px-3 font-[family-name:var(--card-label)] font-semibold text-[color:var(--card-ink)]"
+    />
+  </div>
 );
 
 const tilt = (deg?: number): CSSProperties | undefined =>

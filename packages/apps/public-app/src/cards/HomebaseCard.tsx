@@ -5,7 +5,6 @@ import { PosterCard } from './layouts/poster/PosterCard';
 import { BoardCard } from './layouts/board/BoardCard';
 import { CollageCard } from './layouts/collage/CollageCard';
 import { DossierCard } from './layouts/dossier/DossierCard';
-import { AudienceChip } from './parts/AudienceChip';
 
 const CARDS: Record<LayoutId, FC<LayoutProps>> = {
   poster: PosterCard,
@@ -21,7 +20,6 @@ export const HomebaseCard = ({ design, data, className }: LayoutProps & { classN
       style={cardVars(design)}
       className={`relative isolate overflow-hidden ${className ?? ''}`}
     >
-      <AudienceChip audience={data.audience} />
       <Layout design={design} data={data} />
     </article>
   );

@@ -10,7 +10,13 @@ import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
+import {
+  DossierAudience,
+  DossierContact,
+  hairline,
+  LocationLine,
+  SectionLabel,
+} from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -113,6 +119,7 @@ const Identity = ({ design, data }: LayoutProps) => {
         className={`text-[length:clamp(44px,5.7vw,64px)] leading-[0.94] tracking-[-0.04em] ${ink}`}
       />
       <LocationLine data={data} className="pt-4 !text-[13px] !tracking-[0.16em]" />
+      <DossierAudience data={data} className="mt-4 text-[11px]" />
       {data.bio ? (
         <p className={`max-w-[380px] text-pretty pt-[22px] text-[14px] leading-[23px] ${muted}`}>
           {data.bio}

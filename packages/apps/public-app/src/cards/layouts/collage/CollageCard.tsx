@@ -6,7 +6,7 @@ import { CardName } from '../../parts/Type';
 import { CardBlocks, useChatHref } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 import { CARD_FOCUS as FOCUS } from '../../CardDesign';
-import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
+import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print } from './frames';
 
 // Round chat button: CardBlock's button always prints its label, which does not fit beside the wordmark
 const ChatButton = ({ odinId }: { odinId: string }) => {
@@ -62,6 +62,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
             {data.headline}
           </p>
         ) : null}
+        <AudienceTape audience={data.audience} className="ml-1 mt-3 text-[19px] leading-[26px]" />
       </div>
 
       <CardBlocks

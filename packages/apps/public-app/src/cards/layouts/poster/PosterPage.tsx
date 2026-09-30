@@ -9,10 +9,12 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
+import { PosterAudience } from './PosterAudience';
 
 const FOCUS_ON_PAPER =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--card-ground)]';
 const GUTTER = 'px-[clamp(32px,5.72vw,64px)]'; // 64px at 1120
+const GUTTER_START = 'ps-[clamp(32px,5.72vw,64px)]';
 const INNER = 'mx-auto w-full max-w-[1312px]'; // stops stretching past 1440
 
 // The writing section is paper. Its greys are the ground mixed into the paper (4.5:1 or better)
@@ -55,8 +57,14 @@ const TopBar = ({ data }: { data: CardData }) => {
   // Full ink rather than the reference's 85%: the nav sits on the photo
   const link = `text-sm text-[color:var(--card-ink)] underline-offset-4 hover:underline ${FOCUS}`;
   return (
-    <header className="absolute right-8 top-6 z-10 font-sans">
-      <nav aria-label={t('Sections')} className="flex items-center gap-[26px]">
+    <header
+      className={`absolute inset-x-0 top-6 z-10 flex items-center gap-8 pe-8 font-sans ${GUTTER_START}`}
+    >
+      <PosterAudience audience={data.audience} className="max-w-[min(45%,22rem)]" />
+      <nav
+        aria-label={t('Sections')}
+        className="ms-auto flex flex-shrink-0 items-center gap-[26px]"
+      >
         <Link to={POSTS_HREF} className={link}>
           {t('Writing')}
         </Link>

@@ -4,6 +4,7 @@ import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData } from '../../useCardData';
 import { useChatHref } from '../../parts/Blocks';
 import { CardLabel } from '../../parts/Type';
+import { AudienceChip } from '../../parts/AudienceChip';
 
 export const hairline = 'border-[color:var(--card-surface)]';
 
@@ -27,6 +28,14 @@ export const LocationLine = ({ data, className }: { data: CardData; className?: 
   <CardLabel className={className}>
     Homebase{data.headline ? ` / ${data.headline}` : null}
   </CardLabel>
+);
+
+// A file stamp: square, ruled, set in the label face
+export const DossierAudience = ({ data, className }: { data: CardData; className?: string }) => (
+  <AudienceChip
+    audience={data.audience}
+    className={`max-w-[min(100%,16rem)] border border-[color:color-mix(in_srgb,var(--card-muted)_60%,transparent)] px-2 py-[3px] font-[family-name:var(--card-label)] uppercase leading-4 tracking-[0.16em] text-[color:var(--card-muted)] ${className ?? ''}`}
+  />
 );
 
 // The reference's body grey (#C7CEDA) sits between ink and muted
