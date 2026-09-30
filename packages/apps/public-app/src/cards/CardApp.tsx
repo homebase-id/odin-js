@@ -171,7 +171,7 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { id: number; layout: LayoutId; design: CardDesign; data: CardData };
+type Rendered = { id: number; design: CardDesign; data: CardData };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
@@ -220,7 +220,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         owner = data.odinId;
         failure.current = undefined;
         const design = applyOverrides(CARD_PRESETS[layout], request.overrides);
-        flushSync(() => setCard({ id, layout, design, data }));
+        flushSync(() => setCard({ id, design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {

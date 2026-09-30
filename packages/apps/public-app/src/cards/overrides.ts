@@ -118,16 +118,15 @@ export const applyOverrides = (preset: CardDesign, overrides: unknown): CardDesi
     const seen = new Set<BlockKind>();
     const list: CardDesign['blocks'] = [];
     for (const raw of overrides.blocks) {
-      const kind = isRecord(raw) ? oneOf(BLOCK_KINDS, raw.kind) : undefined;
+      if (!isRecord(raw)) continue;
+      const kind = oneOf(BLOCK_KINDS, raw.kind);
       if (!kind || seen.has(kind)) continue;
       const existing = preset.blocks.find((block) => block.kind === kind);
       if (!existing) continue;
       seen.add(kind);
       list.push({
         kind,
-        presentation:
-          oneOf(PRESENTATIONS, (raw as Record<string, unknown>).presentation) ??
-          existing.presentation,
+        presentation: oneOf(PRESENTATIONS, raw.presentation) ?? existing.presentation,
       });
     }
     if (list.length) design.blocks = list;
