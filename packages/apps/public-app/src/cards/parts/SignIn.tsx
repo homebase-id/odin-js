@@ -32,7 +32,7 @@ export const CardSignIn = ({ className }: { className: string }) => {
         title={t('Sign in')}
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
-        returnPath={window.location.pathname}
+        returnPath={window.location.pathname + window.location.search}
       />
     </>
   );

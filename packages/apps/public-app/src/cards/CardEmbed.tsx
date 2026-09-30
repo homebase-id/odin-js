@@ -6,6 +6,8 @@ import { useCardData } from './useCardData';
 import { useProfileCard } from './useProfileCard';
 import { HomebaseCard } from './HomebaseCard';
 import { HOMEBASE_IOS_APP_ID, HomebaseCta } from './parts/HomebaseCta';
+import { CardSignIn } from './parts/SignIn';
+import { cardVars } from './CardDesign';
 
 // The standalone public page anyone opens directly (a shared link, an NFC tap): no
 // host param, so this is never what chat-kmp's WebView or an iframe embed renders.
@@ -28,12 +30,23 @@ const CardEmbed = () => {
     presetFromParam(templateSettings?.cardDesign) ??
     'board';
   const design = CARD_PRESETS[layout];
+  const hostParam = params.get('host');
+  const isAppMode = hostParam === 'app' || hostParam === 'frame';
+
   return (
     <main className="min-h-dvh">
       <Helmet>
         <meta name="apple-itunes-app" content={`app-id=${HOMEBASE_IOS_APP_ID}`} />
       </Helmet>
       <HomebaseCard design={design} data={data} className="min-h-dvh" />
+      {!isAppMode && !isOwner ? (
+        <aside
+          style={cardVars(design)}
+          className="border-t border-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] px-4 py-4 text-center"
+        >
+          <CardSignIn className="rounded-full bg-[color:var(--card-ink)] px-6 py-2.5 text-sm font-semibold text-[color:var(--card-ground)] hover:bg-[color:color-mix(in_srgb,var(--card-ink)_85%,black)]" />
+        </aside>
+      ) : null}
       {!isOwner ? <HomebaseCta design={design} /> : null}
     </main>
   );
