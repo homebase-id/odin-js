@@ -15,9 +15,9 @@ import {
 import { useState, FC, useRef, lazy, useMemo, useCallback, useEffect, Suspense, memo } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { ChatComposerProps } from '@homebase-id/chat-app/src/components/Chat/Composer/ChatComposer';
+import { ChatComposerProps } from '../../../../chat/components/Chat/Composer/ChatComposer';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
-import { useChatMessage } from '@homebase-id/chat-app/src/hooks/chat/useChatMessage';
+import { useChatMessage } from '../../../../chat/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 
@@ -26,8 +26,8 @@ const RichTextEditor = lazy(() =>
     default: rootExport.RichTextEditor,
   }))
 );
-import { EmbeddedMessage } from '@homebase-id/chat-app/src/components/Chat/Detail/EmbeddedMessage';
-import { ChatMessage, ReplyPreview } from '@homebase-id/chat-app/src/providers/ChatProvider';
+import { EmbeddedMessage } from '../../../../chat/components/Chat/Detail/EmbeddedMessage';
+import { ChatMessage, ReplyPreview } from '../../../../chat/providers/ChatProvider';
 import { useParams } from 'react-router-dom';
 // import { DraftSaver } from './DraftSaver';
 // import { useMessageDraft } from './useMessageDraft';

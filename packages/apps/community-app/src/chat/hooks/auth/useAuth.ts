@@ -13,19 +13,23 @@ import {
   throwAwayTheECCKey,
   TargetDriveAccessRequest,
 } from '@homebase-id/js-lib/auth';
-import { AppPermissionType, ContactConfig } from '@homebase-id/js-lib/network';
+import {
+  AppPermissionType,
+  AUTO_CONNECTIONS_CIRCLE_ID,
+  CONFIRMED_CONNECTIONS_CIRCLE_ID,
+  ContactConfig,
+} from '@homebase-id/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
-  COMMUNITY_APP_ID,
-  COMMUNITY_ROOT_PATH,
+  CHAT_APP_ID,
+  CHAT_ROOT_PATH,
   logoutOwnerAndAllApps,
   OWNER_APPS_ROOT,
   useDotYouClient,
 } from '@homebase-id/common-app';
-import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
+import { ChatDrive } from '../../providers/ConversationProvider';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChatDrive } from '../../chat/providers/ConversationProvider';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();
@@ -50,7 +54,17 @@ export const useAuth = () => {
   };
 };
 
+export const websocketDrives = [ChatDrive];
+
 export const drives: TargetDriveAccessRequest[] = [
+  {
+    ...ChatDrive,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
+    driveSlug: 'chat',
+    driveTypeSlug: 'chat',
+  },
   {
     // Standard profile Info
     alias: '8f12d8c4933813d378488d91ed23b64c',
@@ -63,50 +77,42 @@ export const drives: TargetDriveAccessRequest[] = [
   },
   {
     // Contacts
-    alias: ContactConfig.ContactTargetDrive.alias,
-    type: ContactConfig.ContactTargetDrive.type,
+    ...ContactConfig.ContactTargetDrive,
     name: 'Contact Drive',
     description: '',
     permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
     driveSlug: 'contacts',
     driveTypeSlug: 'contact',
   },
-  {
-    // Chat Drive
-    alias: ChatDrive.alias,
-    type: ChatDrive.type,
-    name: 'Chat Drive',
-    description: '',
-    permissions: [DrivePermissionType.Read, DrivePermissionType.Write, DrivePermissionType.React],
-    driveSlug: 'chat',
-    driveTypeSlug: 'chat',
-  },
-  {
-    alias: LOCAL_COMMUNITY_APP_DRIVE.alias,
-    type: LOCAL_COMMUNITY_APP_DRIVE.type,
-    name: 'Community Drive',
-    description: '',
-    permissions: [DrivePermissionType.Read, DrivePermissionType.Write],
-    driveSlug: 'community',
-    driveTypeSlug: 'community',
-  },
 ];
 
 export const permissions = [
   AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
   AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
-  AppPermissionType.ReadCircleMembers,
+  AppPermissionType.SendIntroductions,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
 ];
 
-export const appName = 'Homebase - Community';
-export const appId = COMMUNITY_APP_ID;
+export const circleDrives: TargetDriveAccessRequest[] = [
+  {
+    alias: ChatDrive.alias,
+    type: ChatDrive.type,
+    name: 'Chat Drive',
+    description: '',
+    permissions: [DrivePermissionType.Write, DrivePermissionType.React],
+    driveSlug: 'chat',
+    driveTypeSlug: 'chat',
+  },
+];
+
+export const appName = 'Homebase - Chat';
+export const appId = CHAT_APP_ID;
 
 // The app half of `/apps/{appSlug}/drives/{driveSlug}`, and it must match what the server's
 // BuiltinApps tree assigns -- registration is first-come and the slug is immutable once written.
-export const appSlug = 'community';
+export const appSlug = 'chat';
 
 export const useYouAuthAuthorization = () => {
   const queryClient = useQueryClient();
@@ -116,7 +122,7 @@ export const useYouAuthAuthorization = () => {
     // Persist key for usage on finalize
     await saveEccKey(eccKey);
 
-    const finalizeUrl = `${window.location.origin}${COMMUNITY_ROOT_PATH}/auth/finalize`;
+    const finalizeUrl = `${window.location.origin}${CHAT_ROOT_PATH}/auth/finalize`;
     return getRegistrationParams(
       finalizeUrl,
       appName,
@@ -125,10 +131,10 @@ export const useYouAuthAuthorization = () => {
       permissions,
       undefined,
       drives,
-      undefined,
-      undefined,
+      circleDrives,
+      [CONFIRMED_CONNECTIONS_CIRCLE_ID, AUTO_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
-      COMMUNITY_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
+      CHAT_ROOT_PATH.startsWith(OWNER_APPS_ROOT) ? undefined : window.location.host,
       undefined,
       returnUrl
     );
