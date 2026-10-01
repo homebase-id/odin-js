@@ -13,7 +13,6 @@ import {
   useUnreadPushNotificationsCount,
   OWNER_APP_ID,
   CHAT_APP_ID,
-  MAIL_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
   COMMUNITY_APP_ID,
@@ -52,7 +51,6 @@ const Dashboard = () => {
         <SystemApp />
         <FeedApp />
         <ChatApp />
-        <MailApp />
         <CommunityApp />
         <PhotoApp />
         <SocialSyncApp />
@@ -163,26 +161,6 @@ const ChatApp = () => {
                 },
               ]
             : []),
-      ]}
-    />
-  );
-};
-
-const MailApp = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-
-  return (
-    <AppWrapper
-      appId={MAIL_APP_ID}
-      name={'Mail'}
-      href={`/apps/mail`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
-        },
       ]}
     />
   );

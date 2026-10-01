@@ -5,10 +5,8 @@ import {isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
   CHAT_APP_ID,
-  MAIL_APP_ID,
   FEED_ROOT_PATH,
   CHAT_ROOT_PATH,
-  MAIL_ROOT_PATH,
   HOME_ROOT_PATH,
   COMMUNITY_APP_ID,
   OWNER_ROOT,
@@ -32,7 +30,6 @@ import {Circles} from '../Icons';
 import {Cloud} from '../Icons';
 import {Cog} from '../Icons';
 import {Ellipsis} from '../Icons';
-import {Envelope} from '../Icons';
 import {Feed} from '../Icons';
 import {Grid} from '../Icons';
 import {HardDrive} from '../Icons';
@@ -158,7 +155,6 @@ export const Sidenav = ({
             <div className="py-3">
               <FeedNavItem/>
               <ChatNavItem/>
-              <MailNavItem/>
               <CommunityNavItem/>
             </div>
 
@@ -521,11 +517,6 @@ const FeedNavItem = () => {
 const ChatNavItem = () => {
   const {data: unreadCount} = useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
   return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount}/>;
-};
-
-const MailNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: MAIL_APP_ID});
-  return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount}/>;
 };
 
 const CommunityNavItem = () => {

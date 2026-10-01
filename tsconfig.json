@@ -23,9 +23,6 @@
       "path": "./packages/apps/login-app"
     },
     {
-      "path": "./packages/apps/mail-app"
-    },
-    {
       "path": "./packages/apps/owner-app"
     },
     {
