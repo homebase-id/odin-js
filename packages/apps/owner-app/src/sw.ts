@@ -179,24 +179,8 @@ self.addEventListener('notificationclick', (event) => {
 
   const {pathToOpen, postMessageData}: { pathToOpen: string; postMessageData?: unknown } =
     (() => {
-        if (
-          event.notification?.data?.options?.appId === CHAT_APP_ID &&
-          event.notification?.data?.options?.typeId
-        ) {
-          return {
-            pathToOpen: `/apps/chat/${event.notification?.data?.options?.typeId}`,
-          };
-        }
-
-        if (
-          event.notification?.data?.options?.appId === MAIL_APP_ID &&
-          event.notification?.data?.options?.typeId
-        ) {
-          return {
-            pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
-          };
-        }
-
+        // Chat and mail have no web app any more; their notifications open the notifications list
+        // like everything else without a destination of its own.
         if (event.notification?.data?.options?.appId === FEED_APP_ID) {
           return {pathToOpen: `/apps/feed`};
         }
