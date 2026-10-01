@@ -1,8 +1,7 @@
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import { t } from '../../../../../helpers';
 import { useDotYouClientContext } from '../../../../../hooks';
 import { AuthorName } from '../../../Author/AuthorName';
-import { Block, Pencil, Times } from '../../../../../ui/Icons';
+import { Pencil, Times } from '../../../../../ui/Icons';
 import { ActionGroup } from '../../../../../ui';
 
 export const CommentHead = ({
@@ -24,15 +23,6 @@ export const CommentHead = ({
   if (loggedOnIdentity && isAuthor && setIsEdit && onRemove) {
     actionOptions.push({ label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil });
     actionOptions.push({ label: t('Remove'), onClick: onRemove, icon: Times });
-  }
-
-  // idenity && to make sure the user is logged in
-  if (loggedOnIdentity && !isAuthor) {
-    actionOptions.push({
-      icon: Block,
-      label: `${t('Block this user')}`,
-      href: `${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${authorOdinId}/block`,
-    });
   }
 
   return (
