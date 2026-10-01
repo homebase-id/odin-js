@@ -8,9 +8,6 @@
       "path": "./packages/libs/ui-lib"
     },
     {
-      "path": "./packages/apps/chat-app"
-    },
-    {
       "path": "./packages/apps/community-app"
     },
     {

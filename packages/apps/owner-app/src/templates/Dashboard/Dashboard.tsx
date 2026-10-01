@@ -12,7 +12,6 @@ import {
   ActionGroup,
   useUnreadPushNotificationsCount,
   OWNER_APP_ID,
-  CHAT_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
   COMMUNITY_APP_ID,
@@ -50,7 +49,6 @@ const Dashboard = () => {
       <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
         <SystemApp />
         <FeedApp />
-        <ChatApp />
         <CommunityApp />
         <PhotoApp />
         <SocialSyncApp />
@@ -121,47 +119,6 @@ const SystemApp = () => {
       appId={OWNER_APP_ID}
       href={'/owner/notifications'}
       unreadCount={unreadCount || 0}
-    />
-  );
-};
-
-const ChatApp = () => {
-  // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
-  const os = getOperatingSystem();
-  const isAndroid = os.name === 'Android';
-  const isIos = os.name === 'iOS';
-
-  return (
-    <AppWrapper
-      appId={CHAT_APP_ID}
-      name={'Chat'}
-      href={`/apps/chat`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/third-parties/apps/${CHAT_APP_ID}`,
-        },
-        ...(isAndroid
-          ? [
-              {
-                label: t('Install on Android'),
-                icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
-              },
-            ]
-          : isIos
-            ? [
-                {
-                  label: t('Install on iOS'),
-                  icon: Download,
-                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
-                },
-              ]
-            : []),
-      ]}
     />
   );
 };

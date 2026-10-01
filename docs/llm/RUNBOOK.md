@@ -89,7 +89,6 @@ odin-js/
 │   ├── apps/
 │   │   ├── owner-app/       # Owner dashboard
 │   │   ├── feed-app/        # Social feed
-│   │   ├── chat-app/        # Messaging
 │   │   ├── community-app/   # Community features
 │   │   └── ...
 │   └── common/

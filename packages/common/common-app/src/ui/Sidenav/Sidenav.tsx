@@ -4,9 +4,7 @@ import {BuiltInProfiles} from '@homebase-id/js-lib/profile';
 import {isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
-  CHAT_APP_ID,
   FEED_ROOT_PATH,
-  CHAT_ROOT_PATH,
   HOME_ROOT_PATH,
   COMMUNITY_APP_ID,
   OWNER_ROOT,
@@ -25,7 +23,6 @@ import {AddressBook} from '../Icons';
 import {ArrowDown} from '../Icons';
 import {Bars} from '../Icons';
 import {Bell} from '../Icons';
-import {ChatBubble} from '../Icons';
 import {Circles} from '../Icons';
 import {Cloud} from '../Icons';
 import {Cog} from '../Icons';
@@ -154,7 +151,6 @@ export const Sidenav = ({
 
             <div className="py-3">
               <FeedNavItem/>
-              <ChatNavItem/>
               <CommunityNavItem/>
             </div>
 
@@ -514,11 +510,6 @@ const FeedNavItem = () => {
   return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount}/>;
 };
 
-const ChatNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
-  return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount}/>;
-};
-
 const CommunityNavItem = () => {
   const {data: unreadCount} = useUnreadPushNotificationsCount({appId: COMMUNITY_APP_ID});
   return (
@@ -534,7 +525,6 @@ const MobileDrawer = ({setIsOpen}: { setIsOpen: (isOpen: boolean) => void }) => 
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner/'} end={true}/>
         <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true}/>
-        <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH}/>
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName}/>
