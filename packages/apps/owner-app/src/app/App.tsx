@@ -41,8 +41,6 @@ const NotificationProblems = lazy(() => import('../templates/Notifications/Notif
 
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
-const Connections = lazy(() => import('../templates/Connections/Connections'));
-const ConnectionDetails = lazy(() => import('../templates/Connections/Details/ConnectionDetails'));
 const Domains = lazy(() => import('../templates/Connections/Domains'));
 const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails'));
 
@@ -194,16 +192,6 @@ function App() {
                 path="profile/:profileKey/:sectionKey/:typeKey"
                 element={<ProfileDetails />}
               ></Route>
-              <Route path="connections" element={<Connections />}></Route>
-              <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
-              <Route path="connections/:odinId/about" element={<ConnectionDetails />}></Route>
-              <Route path="connections/:odinId/links" element={<ConnectionDetails />}></Route>
-              <Route path="connections/:odinId/settings" element={<ConnectionDetails />}></Route>
-              <Route
-                path="connections/:odinId/settings/:action"
-                element={<ConnectionDetails />}
-              ></Route>
-              <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
               <Route path="circles" element={<Circles />}></Route>
               <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
 

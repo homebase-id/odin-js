@@ -1,6 +1,5 @@
 import {
   ActionGroup,
-  ActionLink,
   CHAT_ROOT_PATH,
   ErrorBoundary,
   ErrorNotification,
@@ -301,8 +300,6 @@ const GroupChatConnectedState = ({
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
   const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
-  const host = useDotYouClientContext().getRoot();
-
   if (!isConnected && isFetchedConnected) {
     return (
       <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
@@ -315,9 +312,6 @@ const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
             {recipient}
           </a>
         </p>
-        <ActionLink href={`${host}/owner/connections/${recipient}/connect`}>
-          {t('Connect')}
-        </ActionLink>
       </div>
     );
   }

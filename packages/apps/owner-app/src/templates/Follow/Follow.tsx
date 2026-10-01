@@ -21,7 +21,7 @@ import {
   useIdentityIFollow,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { Persons, AddressBook, House, Block, Times } from '@homebase-id/common-app/icons';
+import { Persons, House, Block, Times } from '@homebase-id/common-app/icons';
 import { useFocusedEditing } from '../../hooks/focusedEditing/useFocusedEditing';
 
 const Follow = () => {
@@ -190,11 +190,6 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
           size="square"
           options={[
             {
-              icon: AddressBook,
-              label: t('Open contact'),
-              href: `/owner/connections/${odinId}`,
-            },
-            {
               icon: House,
               label: t('Open homepage'),
               onClick: () => {
@@ -250,11 +245,6 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
           type="mute"
           size="square"
           options={[
-            {
-              icon: AddressBook,
-              label: t('Open contact'),
-              href: `/owner/connections/${odinId}`,
-            },
             {
               icon: House,
               label: t('Open homepage'),

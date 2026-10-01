@@ -19,7 +19,6 @@ import {
 } from '../../hooks';
 import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
-import {AddressBook} from '../Icons';
 import {ArrowDown} from '../Icons';
 import {Bars} from '../Icons';
 import {Bell} from '../Icons';
@@ -155,7 +154,6 @@ export const Sidenav = ({
             </div>
 
             <div className={`py-3`}>
-              <NavItem icon={AddressBook} label={'Connections'} to={`${OWNER_ROOT}/connections`}/>
               {isTightHeight ? null : (
                 <NavItem
                   icon={Persons}

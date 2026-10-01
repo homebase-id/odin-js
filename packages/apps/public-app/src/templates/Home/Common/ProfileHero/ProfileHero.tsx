@@ -2,7 +2,6 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@homebase-id/js-li
 import { HomePageConfig } from '@homebase-id/js-lib/public';
 import Links from '../../../../components/ui/Layout/Links/Links';
 import Socials from '../../../../components/ui/Layout/Socials/Socials';
-import ConnectLink from '../../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import FollowLink from '../../../../components/ConnectionActions/FollowLink/FollowLink';
 import {
   OwnerName,
@@ -76,7 +75,6 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                   } -my-1 justify-center md:ml-4 md:mt-3`}
                 >
                   <FollowLink className="my-1 mr-3 flex-grow" />
-                  <ConnectLink className="my-1 flex-grow" />
                   {!hideLinks && (
                     <div className="my-1">
                       <Links className="ml-1" direction="row" />

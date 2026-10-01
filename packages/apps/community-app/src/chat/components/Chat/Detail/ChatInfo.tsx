@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
   ActionLink,
   CHAT_ROOT_PATH,
@@ -11,7 +11,7 @@ import {
   usePortal,
 } from '@homebase-id/common-app';
 import { ConversationMetadata, UnifiedConversation } from '../../../providers/ConversationProvider';
-import { Pencil, Arrow } from '@homebase-id/common-app/icons';
+import { Pencil } from '@homebase-id/common-app/icons';
 import { Link } from 'react-router-dom';
 import { ConversationAvatar } from '../Conversations/Item/ConversationAvatar';
 import { ConversationTitle } from '../Conversations/Item/ConversationTitle';
@@ -66,24 +66,17 @@ export const ChatInfo = ({
           </div>
           <div className="flex flex-col gap-4">
             {recipients.map((recipient) => (
-              <a
-                href={`${new DotYouClient({ hostIdentity: loggedOnIdentity, api: ApiType.Guest }).getRoot()}/owner/connections/${recipient}`}
-                rel="noreferrer noopener"
-                target="_blank"
-                className="group flex flex-row items-center gap-3"
-                key={recipient}
-              >
+              <div className="flex flex-row items-center gap-3" key={recipient}>
                 <ConnectionImage
                   odinId={recipient}
                   className="border border-neutral-200 dark:border-neutral-800"
                   size="sm"
                 />
-                <div className="flex flex-col group-hover:underline">
+                <div className="flex flex-col">
                   <ConnectionName odinId={recipient} />
                   <p>{recipient}</p>
                 </div>
-                <Arrow className="ml-auto h-5 w-5" />
-              </a>
+              </div>
             ))}
           </div>
         </div>

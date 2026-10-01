@@ -31,10 +31,6 @@ const Dashboard = () => {
         <Link className="underline" to="/owner/profile">
           profile
         </Link>
-        , manage your{' '}
-        <Link className="underline" to="/owner/connections">
-          connections
-        </Link>
         , manage permissions within{' '}
         <Link className="underline" to="/owner/circles">
           circles
