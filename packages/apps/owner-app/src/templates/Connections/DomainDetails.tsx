@@ -150,7 +150,7 @@ const DomainDetails = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/third-parties/services', title: 'Third-Parties' },
+          { href: '/owner/third-parties/services', title: "Sites you've signed in to" },
           { title: domain },
         ]}
         browserTitle={domain}

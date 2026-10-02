@@ -1,5 +1,4 @@
 import { PageMeta } from '@homebase-id/common-app';
-import Submenu from '../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { DomainMembership, useDomain } from '@homebase-id/common-app';
@@ -14,7 +13,7 @@ import {
   HybridLink,
   ActionButton,
 } from '@homebase-id/common-app';
-import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
+import { Globe, Shield, Eye, Times } from '@homebase-id/common-app/icons';
 import { useManageDomain } from '../../hooks/connections/useManageDomain';
 
 const Domains = () => {
@@ -44,30 +43,17 @@ const Domains = () => {
 
   return (
     <>
-      <PageMeta icon={Grid} title={'Third party apps & services'} />
+      <PageMeta icon={Globe} title={t("Sites you've signed in to")} />
 
-      <Submenu
-        items={[
-          {
-            title: `Apps`,
-            path: `/owner/third-parties/apps`,
-          },
-          {
-            title: `Services`,
-            path: `/owner/third-parties/services`,
-          },
-        ]}
-        className="mb-6"
-      />
       <p className="mb-6 max-w-2xl text-slate-400">
-        Services are third-parties that have authorized you with your Homebase identity. By default
-        they are only given access to your publicly available data. However, they can also be a
-        member of one or more circles and receive extra access that way.
+        {t(
+          "These are sites you've signed in to with your Homebase identity. Each one can read your public data, and more if you add it to one or more circles."
+        )}
       </p>
 
       {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (
         <SubtleMessage className="flex flex-row items-center">
-          <span>{t('There are no third-parties with access to your identity')}</span>
+          <span>{t("You haven't signed in to any sites with your Homebase identity")}</span>
         </SubtleMessage>
       ) : (
         <>

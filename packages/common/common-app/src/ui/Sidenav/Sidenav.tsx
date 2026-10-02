@@ -33,6 +33,7 @@ import {Cog} from '../Icons';
 import {Ellipsis} from '../Icons';
 import {Envelope} from '../Icons';
 import {Feed} from '../Icons';
+import {Globe} from '../Icons';
 import {Grid} from '../Icons';
 import {Heart} from '../Icons';
 import {House} from '../Icons';
@@ -279,11 +280,7 @@ const MoreItems = ({
 
         <hr className="border-b dark:border-slate-500"/>
 
-        <NavItem
-          icon={Grid}
-          label={'Third party apps & services'}
-          to={`${OWNER_ROOT}/third-parties`}
-        />
+        <NavItem icon={Globe} label={'Signed-in sites'} to={`${OWNER_ROOT}/third-parties/services`}/>
         <hr className="border-b dark:border-slate-500"/>
         <WalletLink/>
         <hr className="border-b dark:border-slate-500"/>
