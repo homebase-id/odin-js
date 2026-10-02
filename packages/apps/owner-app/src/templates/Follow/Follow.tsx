@@ -3,7 +3,6 @@ import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-
 
 import { PageMeta } from '@homebase-id/common-app';
 import Submenu from '../../components/SubMenu/SubMenu';
-import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 import IdentityIFollowEditDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import IdentityThatFollowsDialog from '../../components/Followers/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
@@ -21,7 +20,7 @@ import {
   useIdentityIFollow,
   useDotYouClientContext,
 } from '@homebase-id/common-app';
-import { Persons, House, Block, Times } from '@homebase-id/common-app/icons';
+import { Persons, House, Times } from '@homebase-id/common-app/icons';
 import { useFocusedEditing } from '../../hooks/focusedEditing/useFocusedEditing';
 
 const Follow = () => {
@@ -168,8 +167,6 @@ const Followers = () => {
 };
 
 const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
-  const { mutate: block } = useConnectionActions().block;
-
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const { data: isConnected } = useIsConnected(odinId);
 
@@ -198,20 +195,6 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
                   '_blank'
                 );
               },
-            },
-            {
-              onClick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                block(odinId);
-              },
-              confirmOptions: {
-                title: t('Block'),
-                body: `${t('Are you sure you want to stop "{0}" from following you by blocking them?', odinId)}`,
-                buttonText: t('Block'),
-              },
-              icon: Block,
-              label: t('Block'),
             },
           ]}
           className="text-sm"
