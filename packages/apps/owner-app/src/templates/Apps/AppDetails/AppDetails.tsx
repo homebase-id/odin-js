@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '../../../hooks/apps/useApp';
+import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -114,7 +115,7 @@ const AppDetails = () => {
     return acc;
   }, [] as DriveGrant[]);
 
-  if (appLoading) <>Loading</>;
+  if (appLoading) return <LoadingDetailPage />;
   if (!app || !decodedAppKey) return <>{t('No matching app found')}</>;
 
   return (
