@@ -13,7 +13,7 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
       <div className="mb-4 flex flex-row items-center justify-between">
         <p className="text-2xl">{t('What has everyone been up to?')}</p>
       </div>
-      <FakeAnchor className="w-full" href={hasPosts ? `/apps/feed` : `/owner/connections`}>
+      <FakeAnchor className="w-full" href={`/apps/feed`}>
         <div className="pointer-events-none flex w-full flex-col gap-4">
           {hasPosts ? (
             latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (

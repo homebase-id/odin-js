@@ -5,21 +5,6 @@ const connectionsRoot = '/circles/connections/circles';
 const membershipRoot = '/circles/membership';
 
 //Handles management of Circles
-export const addMemberToCircle = async (
-  dotYouClient: DotYouClient,
-  membershipGrant: { odinId: string; circleId: string }
-) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = connectionsRoot + '/add';
-
-  return client
-    .post(url, membershipGrant)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};
-
 export const removeMemberFromCircle = async (
   dotYouClient: DotYouClient,
   membershipGrant: { odinId: string; circleId: string }

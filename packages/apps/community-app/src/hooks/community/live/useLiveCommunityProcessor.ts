@@ -1,5 +1,5 @@
 import { useCommunityInboxProcessor } from './useCommunityInboxProcessor';
-import { useChatInboxProcessor } from '@homebase-id/chat-app/src/hooks/chat/live/useChatInboxProcessor';
+import { useChatInboxProcessor } from '../../../chat/hooks/chat/live/useChatInboxProcessor';
 
 import { useCommunityPeerWebsocket } from './useCommunityPeerWebsocket';
 import { useCommunityWebsocket } from './useCommunityWebsocket';

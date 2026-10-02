@@ -8,7 +8,7 @@ import {
   fetchMembersOfCircle,
   updateCircleDefinition,
   createCircleDefinition,
-  addMemberToCircle,
+  grantCircleToMany,
   removeMemberFromCircle,
   addDomainToCircle,
   removeDomainFromCircle,
@@ -60,14 +60,10 @@ export const useCircle = (props?: { circleId?: string }) => {
     return await enableCircle(dotYouClient, circleId);
   };
 
-  const provideGrants = async ({ circleId, odinIds }: { circleId: string; odinIds: string[] }) => {
-    return await Promise.all(
-      odinIds.map(
-        async (odinId) =>
-          await addMemberToCircle(dotYouClient, { circleId: circleId, odinId: odinId })
-      )
-    );
-  };
+  // Through enrolment (add-many): one call for everyone, and it skips anyone the circle cannot
+  // take -- not connected, or not reviewed for a circle granted on review -- instead of failing.
+  const provideGrants = async ({ circleId, odinIds }: { circleId: string; odinIds: string[] }) =>
+    await grantCircleToMany(dotYouClient, circleId, odinIds);
 
   const revokeDomainGrants = async ({
     circleId,
@@ -97,9 +93,6 @@ export const useCircle = (props?: { circleId?: string }) => {
       )
     );
   };
-
-  const provideGrant = async ({ circleId, odinId }: { circleId: string; odinId: string }) =>
-    await addMemberToCircle(dotYouClient, { circleId: circleId, odinId: odinId });
 
   const revokeGrant = async ({ circleId, odinId }: { circleId: string; odinId: string }) =>
     await removeMemberFromCircle(dotYouClient, { circleId: circleId, odinId: odinId });
@@ -241,19 +234,6 @@ export const useCircle = (props?: { circleId?: string }) => {
       },
     }),
 
-    provideGrant: useMutation({
-      mutationFn: provideGrant,
-      onSuccess: async (data, param) => {
-        invalidateCircles(queryClient);
-        circleId && invalidateCircle(queryClient, circleId);
-        circleId && invalidateCircleMembers(queryClient, circleId);
-        invalidateConnectionInfo(queryClient, param.odinId);
-        invalidateConnectionGrantStatus(queryClient, param.odinId);
-      },
-      onError: (ex) => {
-        console.error(ex);
-      },
-    }),
 
     revokeGrant: useMutation({
       mutationFn: revokeGrant,

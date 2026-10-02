@@ -524,7 +524,6 @@ const CircleMemberCard = ({
       <ConnectionCard
         className={`${className ?? ''} group relative`}
         odinId={odinId}
-        href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
         canSave={true}
       >
         {isEditable ? (

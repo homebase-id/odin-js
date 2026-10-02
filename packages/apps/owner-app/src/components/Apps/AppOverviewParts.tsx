@@ -242,16 +242,16 @@ export const CircleMemberIdentitiesDialog = ({
         <ul className="flex flex-col gap-1">
           {members.map(({ member, viaCircles }) => (
             <li key={member.domain} className="flex flex-row flex-wrap items-baseline gap-x-2">
-              <HybridLink
-                href={
-                  member.domainType === 'youAuth'
-                    ? `/owner/sign-ins/${encodeURIComponent(member.domain)}`
-                    : `/owner/connections/${encodeURIComponent(member.domain)}`
-                }
-                className="break-all hover:underline"
-              >
-                {member.domain}
-              </HybridLink>
+              {member.domainType === 'youAuth' ? (
+                <HybridLink
+                  href={`/owner/sign-ins/${encodeURIComponent(member.domain)}`}
+                  className="break-all hover:underline"
+                >
+                  {member.domain}
+                </HybridLink>
+              ) : (
+                <span className="break-all">{member.domain}</span>
+              )}
               {/* Only worth naming the route in when there is more than one it could have been. */}
               {circles.length > 1 ? (
                 <span className="text-sm text-slate-400">{`${t('via')} ${viaCircles.join(', ')}`}</span>

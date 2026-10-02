@@ -1,8 +1,7 @@
 import type { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useDotYouClientContext } from '@homebase-id/common-app';
+import { t } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
-import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 import {
   CARD_FOCUS as focus,
   type BlockKind,
@@ -13,15 +12,10 @@ import type { CardData, CardLink, CardPost } from '../useCardData';
 import { POSTS_HREF } from './posts';
 import { CardImg } from './CardImg';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useChatHref = (owner: string) => {
-  const client = useDotYouClientContext();
-  if (client.isOwner()) return undefined;
-  const loggedOn = client.getLoggedInIdentity();
-  return loggedOn
-    ? `${new DotYouClient({ hostIdentity: loggedOn, api: ApiType.Guest }).getRoot()}/apps/chat/open/${owner}`
-    : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/redirect/apps/chat/open/${owner}`;
-};
+// The chat web app is retired, so there is nowhere on the web to open a chat; callers hide the
+// chat action when this is undefined, as they always did for the owner.
+// eslint-disable-next-line react-refresh/only-export-components, @typescript-eslint/no-unused-vars
+export const useChatHref = (owner: string): string | undefined => undefined;
 
 // "https://www.github.com/homebase-id/" -> "github.com/homebase-id", as the dossier rows print it
 // eslint-disable-next-line react-refresh/only-export-components
