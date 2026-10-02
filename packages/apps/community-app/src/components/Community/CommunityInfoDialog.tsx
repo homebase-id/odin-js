@@ -15,8 +15,9 @@ import {
   useDotYouClientContext,
   COMMUNITY_ROOT_PATH,
   useCircle,
-  OWNER_ROOT,
   useRawImage,
+  getOwnerCirclePath,
+  COMMUNITY_APP_ID,
 } from '@homebase-id/common-app';
 import { Circles, Clipboard } from '@homebase-id/common-app/icons';
 import { useMemo, useState, type ChangeEvent } from 'react';
@@ -296,7 +297,7 @@ const CircleLink = ({
   return (
     <ActionLink
       className={`${className || ''}`}
-      href={`${OWNER_ROOT}/circles/${communityCircleId}`}
+      href={getOwnerCirclePath(COMMUNITY_APP_ID, communityCircleId)}
       type="mute"
       size="none"
       icon={Circles}

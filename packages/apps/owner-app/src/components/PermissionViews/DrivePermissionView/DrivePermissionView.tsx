@@ -1,6 +1,6 @@
 import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { Link } from 'react-router-dom';
-import { t } from '@homebase-id/common-app';
+import { getOwnerDrivePath, t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
@@ -48,7 +48,7 @@ const DrivePermissionView = ({
       title={permissionTree}
     >
       <Link
-        to={`/owner/drives/${drive?.targetDriveInfo?.alias}_${drive?.targetDriveInfo?.type}`}
+        to={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
         className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
       >
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
@@ -87,7 +87,7 @@ export const DriveView = ({ drive, className }: { drive: DriveDefinition; classN
       className={`flex flex-row ${className}`}
     >
       <Link
-        to={`/owner/drives/${drive?.targetDriveInfo?.alias}_${drive?.targetDriveInfo?.type}`}
+        to={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
         className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
       >
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />

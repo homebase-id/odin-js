@@ -46,16 +46,13 @@ const ConnectionDetails = lazy(() => import('../templates/Connections/Details/Co
 const Domains = lazy(() => import('../templates/Connections/Domains'));
 const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails'));
 
-const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
-const Apps = lazy(() => import('../templates/Apps/Apps/Apps'));
-const AppDetails = lazy(() => import('../templates/Apps/AppDetails/AppDetails'));
+const AppPage = lazy(() => import('../templates/Apps/AppDetails/AppPage'));
 
 const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
 
 const AppsDashboard = lazy(() => import('../templates/Apps/AppsDashboard/AppsDashboard'));
-const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
@@ -204,15 +201,26 @@ function App() {
                 element={<ConnectionDetails />}
               ></Route>
               <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
-              <Route path="circles" element={<Circles />}></Route>
-              <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
 
               {/* Third parties */}
-              <Route path="third-parties/services" element={<Domains />}></Route>
-              <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
-              <Route path="third-parties" element={<Apps />}></Route>
-              <Route path="third-parties/apps/" element={<Apps />}></Route>
-              <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
+              <Route path="sign-ins" element={<Domains />}></Route>
+              <Route path="sign-ins/:domain" element={<DomainDetails />}></Route>
+              <Route path="apps/:appKey" element={<AppPage />}></Route>
+              {/* Drives and circles live under the app that owns them; the owner console's own,
+                  and those no app owns, under the owner console's id. */}
+              <Route path="apps/:appKey/drives/:driveKey" element={<DriveDetails />}></Route>
+              <Route
+                path="apps/:appKey/drives/:driveKey/:fileKey"
+                element={<FileDetails />}
+              ></Route>
+              <Route
+                path="apps/:appKey/drives/:driveKey/:systemFileType/:fileKey"
+                element={<FileDetails />}
+              ></Route>
+              <Route
+                path="apps/:appKey/circles/:circleKey"
+                element={<CircleDetails />}
+              ></Route>
 
               <Route path="follow" element={<Following />}></Route>
               <Route path="follow/followers" element={<Following />}></Route>
@@ -222,13 +230,6 @@ function App() {
 
               <Route path="apps" element={<AppsDashboard />}></Route>
 
-              <Route path="drives" element={<Drives />}></Route>
-              <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
-              <Route path="drives/:driveKey/:fileKey" element={<FileDetails />}></Route>
-              <Route
-                path="drives/:driveKey/:systemFileType/:fileKey"
-                element={<FileDetails />}
-              ></Route>
               <Route path="settings" element={<Settings />}></Route>
               <Route path="settings/:sectionId" element={<Settings />}></Route>
 

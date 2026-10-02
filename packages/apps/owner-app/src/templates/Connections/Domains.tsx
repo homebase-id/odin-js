@@ -1,5 +1,4 @@
 import { PageMeta } from '@homebase-id/common-app';
-import Submenu from '../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { DomainMembership, useDomain } from '@homebase-id/common-app';
@@ -14,7 +13,7 @@ import {
   HybridLink,
   ActionButton,
 } from '@homebase-id/common-app';
-import { Grid, Shield, Eye, Times } from '@homebase-id/common-app/icons';
+import { Globe, Shield, Eye, Times } from '@homebase-id/common-app/icons';
 import { useManageDomain } from '../../hooks/connections/useManageDomain';
 
 const Domains = () => {
@@ -44,30 +43,26 @@ const Domains = () => {
 
   return (
     <>
-      <PageMeta icon={Grid} title={'Third party apps & services'} />
+      <PageMeta icon={Globe} title={t("Sites you've signed in to")} />
 
-      <Submenu
-        items={[
-          {
-            title: `Apps`,
-            path: `/owner/third-parties/apps`,
-          },
-          {
-            title: `Services`,
-            path: `/owner/third-parties/services`,
-          },
-        ]}
-        className="mb-6"
-      />
-      <p className="mb-6 max-w-2xl text-slate-400">
-        Services are third-parties that have authorized you with your Homebase identity. By default
-        they are only given access to your publicly available data. However, they can also be a
-        member of one or more circles and receive extra access that way.
-      </p>
+      <div className="mb-6 flex max-w-2xl flex-col gap-2 text-slate-400">
+        <p>
+          {t(
+            "These are sites you've signed in to with your Homebase identity. When you sign in, the site gets a key to your identity: by default it can read only what's public, and it can read more if you add it to one or more circles."
+          )}
+        </p>
+        <p>
+          {t('Open a site to see what it can access and which browsers or devices are signed in.')}{' '}
+          <strong>{t('Remove')}</strong>{' '}
+          {t(
+            'deletes it: it loses all access, and will have to ask you again the next time you sign in there.'
+          )}
+        </p>
+      </div>
 
       {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (
         <SubtleMessage className="flex flex-row items-center">
-          <span>{t('There are no third-parties with access to your identity')}</span>
+          <span>{t("You haven't signed in to any sites with your Homebase identity")}</span>
         </SubtleMessage>
       ) : (
         <>
@@ -117,7 +112,7 @@ const DomainListItem = ({
     <>
       <ErrorNotification error={actionError} />
       <HybridLink
-        href={(domain.domain && `/owner/third-parties/services/${domain.domain}`) ?? undefined}
+        href={(domain.domain && `/owner/sign-ins/${domain.domain}`) ?? undefined}
         className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
       >
         <div
@@ -132,7 +127,7 @@ const DomainListItem = ({
               <span className="break-words">{domain.domain}</span>
               <small className="block text-sm text-slate-400">
                 {t('First used')}:{' '}
-                {new Date(domain.modified).toLocaleString(undefined, {
+                {new Date(domain.created).toLocaleString(undefined, {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
@@ -163,7 +158,7 @@ const DomainListItem = ({
           </div>
           <ActionButton
             type="secondary"
-            className="ml-auto hidden opacity-0 transition-opacity group-hover:opacity-100 md:block"
+            className="ml-auto transition-opacity md:opacity-0 md:group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -175,8 +170,8 @@ const DomainListItem = ({
               type: 'critical',
               title: `${t('Remove')} ${domain.domain}`,
               buttonText: t('Remove'),
-              body: `${t('Are you sure you want to remove')} ${domain.domain} ${t(
-                'from your connections. They will lose all existing access.'
+              body: `${t('Are you sure you want to remove')} ${domain.domain}? ${t(
+                'It loses all access, and will have to ask you again the next time you sign in there.'
               )}`,
             }}
             icon={Times}

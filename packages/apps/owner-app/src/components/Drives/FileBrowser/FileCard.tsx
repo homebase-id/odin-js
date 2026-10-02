@@ -26,7 +26,8 @@ import {
 } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
-import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
+import { formatDateExludingYearIfCurrent, getOwnerDrivePath } from '@homebase-id/common-app';
+import { useParams } from 'react-router-dom';
 import { useFile } from '../../../hooks/files/useFiles';
 import { drivesEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
@@ -58,7 +59,9 @@ export const FileCard = ({
     'image/gif',
     'image/heic',
   ].includes(contentType);
-  const driveRoot = `/owner/drives/${targetDrive.alias}_${targetDrive.type}`;
+  // Only rendered on a drive's page, whose route names the app that owns the drive.
+  const { appKey } = useParams();
+  const driveRoot = getOwnerDrivePath(appKey ? decodeURIComponent(appKey) : undefined, targetDrive);
 
   return (
     <div
