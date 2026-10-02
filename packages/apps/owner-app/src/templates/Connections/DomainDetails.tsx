@@ -72,7 +72,7 @@ const DomainDetails = () => {
       onClick: () => {
         disconnect({ domain: domain });
 
-        navigate('/owner/third-parties/services');
+        navigate('/owner/sign-ins');
       },
       confirmOptions: {
         title: `${t('Remove')} ${domain}`,
@@ -150,7 +150,7 @@ const DomainDetails = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/third-parties/services', title: "Sites you've signed in to" },
+          { href: '/owner/sign-ins', title: 'Sign-ins' },
           { title: domain },
         ]}
         browserTitle={domain}

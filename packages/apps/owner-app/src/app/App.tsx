@@ -203,8 +203,8 @@ function App() {
               <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
 
               {/* Third parties */}
-              <Route path="third-parties/services" element={<Domains />}></Route>
-              <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
+              <Route path="sign-ins" element={<Domains />}></Route>
+              <Route path="sign-ins/:domain" element={<DomainDetails />}></Route>
               <Route path="apps/:appKey" element={<AppPage />}></Route>
               {/* Drives and circles live under the app that owns them; the owner console's own,
                   and those no app owns, under the owner console's id. */}

@@ -103,7 +103,7 @@ const DomainListItem = ({
     <>
       <ErrorNotification error={actionError} />
       <HybridLink
-        href={(domain.domain && `/owner/third-parties/services/${domain.domain}`) ?? undefined}
+        href={(domain.domain && `/owner/sign-ins/${domain.domain}`) ?? undefined}
         className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
       >
         <div

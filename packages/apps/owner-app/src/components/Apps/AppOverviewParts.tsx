@@ -245,7 +245,7 @@ export const CircleMemberIdentitiesDialog = ({
               <HybridLink
                 href={
                   member.domainType === 'youAuth'
-                    ? `/owner/third-parties/services/${encodeURIComponent(member.domain)}`
+                    ? `/owner/sign-ins/${encodeURIComponent(member.domain)}`
                     : `/owner/connections/${encodeURIComponent(member.domain)}`
                 }
                 className="break-all hover:underline"

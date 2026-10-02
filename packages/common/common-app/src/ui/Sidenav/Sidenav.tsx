@@ -280,7 +280,7 @@ const MoreItems = ({
 
         <hr className="border-b dark:border-slate-500"/>
 
-        <NavItem icon={Globe} label={'Signed-in sites'} to={`${OWNER_ROOT}/third-parties/services`}/>
+        <NavItem icon={Globe} label={'Sign-ins'} to={`${OWNER_ROOT}/sign-ins`}/>
         <hr className="border-b dark:border-slate-500"/>
         <WalletLink/>
         <hr className="border-b dark:border-slate-500"/>
