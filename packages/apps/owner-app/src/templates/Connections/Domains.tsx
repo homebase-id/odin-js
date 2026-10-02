@@ -45,11 +45,20 @@ const Domains = () => {
     <>
       <PageMeta icon={Globe} title={t("Sites you've signed in to")} />
 
-      <p className="mb-6 max-w-2xl text-slate-400">
-        {t(
-          "These are sites you've signed in to with your Homebase identity. Each one can read your public data, and more if you add it to one or more circles."
-        )}
-      </p>
+      <div className="mb-6 flex max-w-2xl flex-col gap-2 text-slate-400">
+        <p>
+          {t(
+            "These are sites you've signed in to with your Homebase identity. When you sign in, the site gets a key to your identity: by default it can read only what's public, and it can read more if you add it to one or more circles."
+          )}
+        </p>
+        <p>
+          {t('Open a site to see and change what it can access.')}{' '}
+          <strong>{t('Revoke')}</strong>{' '}
+          {t('cuts off its access but keeps it in this list, so you can restore it later.')}{' '}
+          <strong>{t('Remove')}</strong>{' '}
+          {t('deletes it entirely; it will have to ask you again the next time you sign in there.')}
+        </p>
+      </div>
 
       {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (
         <SubtleMessage className="flex flex-row items-center">
@@ -118,7 +127,7 @@ const DomainListItem = ({
               <span className="break-words">{domain.domain}</span>
               <small className="block text-sm text-slate-400">
                 {t('First used')}:{' '}
-                {new Date(domain.modified).toLocaleString(undefined, {
+                {new Date(domain.created).toLocaleString(undefined, {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',
@@ -149,7 +158,7 @@ const DomainListItem = ({
           </div>
           <ActionButton
             type="secondary"
-            className="ml-auto hidden opacity-0 transition-opacity group-hover:opacity-100 md:block"
+            className="ml-auto transition-opacity md:opacity-0 md:group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -161,8 +170,8 @@ const DomainListItem = ({
               type: 'critical',
               title: `${t('Remove')} ${domain.domain}`,
               buttonText: t('Remove'),
-              body: `${t('Are you sure you want to remove')} ${domain.domain} ${t(
-                'from your connections. They will lose all existing access.'
+              body: `${t('Are you sure you want to remove')} ${domain.domain}? ${t(
+                'It loses all access, and will have to ask you again the next time you sign in there.'
               )}`,
             }}
             icon={Times}

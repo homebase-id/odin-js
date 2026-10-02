@@ -77,8 +77,8 @@ const DomainDetails = () => {
       confirmOptions: {
         title: `${t('Remove')} ${domain}`,
         buttonText: t('Remove'),
-        body: `${t('Are you sure you want to remove')} ${domain} ${t(
-          'from your domains. They will lose all existing access.'
+        body: `${t('Are you sure you want to remove')} ${domain}? ${t(
+          'It loses all access, and will have to ask you again the next time you sign in there.'
         )}`,
       },
     });
@@ -92,8 +92,8 @@ const DomainDetails = () => {
       confirmOptions: {
         title: `${t('Restore')} ${domain}`,
         buttonText: t('Restore'),
-        body: `${t('Are you sure you want to restore')} ${domain} ${t(
-          'to your domains. They will regain access.'
+        body: `${t('Are you sure you want to restore')} ${domain}? ${t(
+          'It gets back the access it had.'
         )}`,
       },
     });
@@ -107,8 +107,8 @@ const DomainDetails = () => {
       confirmOptions: {
         title: `${t('Revoke')} ${domain}`,
         buttonText: t('Revoke'),
-        body: `${t('Are you sure you want to revoke')} ${domain} ${t(
-          'from your domains. They will lose all existing access.'
+        body: `${t('Are you sure you want to revoke')} ${domain}? ${t(
+          'It loses all access, but stays in your sign-ins so you can restore it later.'
         )}`,
       },
     });
@@ -135,7 +135,7 @@ const DomainDetails = () => {
                 state={restoreDomainStatus}
                 icon={Refresh}
               >
-                {t('Restore Domain')}
+                {t('Restore')}
               </ActionButton>
             ) : (
               <ActionButton
@@ -157,8 +157,8 @@ const DomainDetails = () => {
       />
 
       {domainInfo?.isRevoked && (
-        <Alert type="critical" title={t('Domain is revoked')} className="mb-5">
-          {t('This domain is revoked, it no longer has the access provided')}
+        <Alert type="critical" title={t('Access revoked')} className="mb-5">
+          {t('This site no longer has the access it was given. Restore it to give that access back.')}
         </Alert>
       )}
 
@@ -231,7 +231,7 @@ const DomainPermissionViewer = ({
         </Section>
       ) : (
         <Alert type="info" className="bg-background">
-          {t('This service has no additional access, apart from your publicly available data')}
+          {t('This site can read only your public data')}
         </Alert>
       )}
 
