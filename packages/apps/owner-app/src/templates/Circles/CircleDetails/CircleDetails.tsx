@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useOwnerAppName } from '../../../hooks/apps/useOwnerAppName';
 import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
@@ -43,6 +44,7 @@ import {
   Alert,
   SubtleMessage,
   mergeStates,
+  getOwnerAppPath,
 } from '@homebase-id/common-app';
 import {
   Circles,
@@ -75,6 +77,7 @@ const CircleDetails = () => {
     setOwningApp: { mutateAsync: setOwningApp, error: setOwningAppError },
     reassignOwningApp: { mutateAsync: reassignOwningApp, error: reassignOwningAppError },
   } = useCircle({ circleId: decodedCircleKey });
+  const appName = useOwnerAppName(circle?.appId);
 
   const { data: apps } = useApps().fetchRegistered;
 
@@ -173,7 +176,8 @@ const CircleDetails = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/circles', title: 'My Circles' },
+          { href: '/owner/apps', title: 'My apps' },
+          { href: getOwnerAppPath(circle.appId), title: appName ?? '' },
           { title: circle.name ?? '' },
         ]}
       />
@@ -202,7 +206,7 @@ const CircleDetails = () => {
               owningApp ? (
                 <>
                   <Link
-                    to={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                    to={`/owner/apps/${encodeURIComponent(owningApp.appId)}`}
                     className="hover:underline"
                   >
                     {owningApp.name}
@@ -482,7 +486,7 @@ const CircleMemberCard = ({
         <DomainCard
           domain={member.domain}
           className={`${className ?? ''} group relative`}
-          href={(member.domain && `/owner/third-parties/services/${member.domain}`) ?? undefined}
+          href={(member.domain && `/owner/sign-ins/${member.domain}`) ?? undefined}
         >
           {isEditable ? (
             <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">

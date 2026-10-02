@@ -5,11 +5,12 @@ import {
   AuthorImage,
   AuthorName,
   DialogWrapper,
-  OWNER_ROOT,
   t,
   useDotYouClientContext,
   usePortal,
   useTransferHistory,
+  getOwnerDrivePath,
+  CHAT_APP_ID,
 } from '@homebase-id/common-app';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
@@ -77,7 +78,7 @@ export const ChatMessageInfo = ({
           ) : null}
 
           <a
-            href={`${OWNER_ROOT}/drives/${ChatDrive.alias}_${ChatDrive.type}/${msg.fileId}`}
+            href={`${getOwnerDrivePath(CHAT_APP_ID, ChatDrive)}/${msg.fileId}`}
             className="text-primary hover:underline"
             target="_blank"
             rel="noreferrer"

@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { JsonViewer, t } from '@homebase-id/common-app';
+import { getOwnerAppPath, getOwnerDrivePath, JsonViewer, t } from '@homebase-id/common-app';
+import { useOwnerAppName } from '../../../hooks/apps/useOwnerAppName';
 import { File } from '@homebase-id/common-app/icons';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -19,6 +20,7 @@ const FileDetails = () => {
   } = useDrive({
     targetDrive,
   });
+  const appName = useOwnerAppName(driveDef?.appId ?? undefined);
 
   const { data: file, isLoading: fileLoading } = useFileQuery({
     targetDrive,
@@ -37,9 +39,10 @@ const FileDetails = () => {
         icon={File}
         title={`File on ${driveDef.name}`}
         breadCrumbs={[
-          { href: '/owner/drives', title: 'My Drives' },
+          { href: '/owner/apps', title: 'My apps' },
+          { href: getOwnerAppPath(driveDef.appId), title: appName ?? '' },
           {
-            href: `/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`,
+            href: getOwnerDrivePath(driveDef.appId, driveDef.targetDriveInfo),
             title: driveDef.name ?? '',
           },
           { title: fileKey ?? '' },

@@ -22,13 +22,12 @@ import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
 import {ArrowDown} from '../Icons';
 import {Bars} from '../Icons';
 import {Bell} from '../Icons';
-import {Circles} from '../Icons';
 import {Cloud} from '../Icons';
 import {Cog} from '../Icons';
 import {Ellipsis} from '../Icons';
 import {Feed} from '../Icons';
+import {Globe} from '../Icons';
 import {Grid} from '../Icons';
-import {HardDrive} from '../Icons';
 import {Heart} from '../Icons';
 import {House} from '../Icons';
 import {Person} from '../Icons';
@@ -271,13 +270,7 @@ const MoreItems = ({
 
         <hr className="border-b dark:border-slate-500"/>
 
-        <NavItem
-          icon={Grid}
-          label={'Third party apps & services'}
-          to={`${OWNER_ROOT}/third-parties`}
-        />
-        <NavItem icon={HardDrive} label={'Drives'} to={`${OWNER_ROOT}/drives`}/>
-        <NavItem icon={Circles} label={'Circles'} to={`${OWNER_ROOT}/circles`}/>
+        <NavItem icon={Globe} label={'Sign-ins'} to={`${OWNER_ROOT}/sign-ins`}/>
         <hr className="border-b dark:border-slate-500"/>
         <WalletLink/>
         <hr className="border-b dark:border-slate-500"/>

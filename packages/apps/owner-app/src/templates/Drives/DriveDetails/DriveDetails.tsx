@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
+import {useOwnerAppName} from '../../../hooks/apps/useOwnerAppName';
 import {useDrive} from '../../../hooks/drives/useDrive';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -26,6 +27,7 @@ import {
     CirclePermissionView,
     t,
     useCircles,
+  getOwnerAppPath,
 } from '@homebase-id/common-app';
 import {HardDrive, Download, HeartBeat, Pencil} from '@homebase-id/common-app/icons';
 
@@ -39,6 +41,7 @@ const DriveDetails = () => {
             ? {alias: splittedDriveKey[0], type: splittedDriveKey[1]}
             : undefined,
     });
+    const appName = useOwnerAppName(driveDef?.appId ?? undefined);
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
     const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
     const {mutateAsync: reassignOwningApp} = useDrive().reassignOwningApp;
@@ -118,7 +121,8 @@ const DriveDetails = () => {
                     </>
                 }
                 breadCrumbs={[
-                    {href: '/owner/drives', title: 'My Drives'},
+                    {href: '/owner/apps', title: 'My apps'},
+                    {href: getOwnerAppPath(driveDef.appId), title: appName ?? ''},
                     {title: driveDef.name ?? ''},
                 ]}
             />
@@ -159,7 +163,7 @@ const DriveDetails = () => {
                             owningApp ? (
                                 <>
                                     <Link
-                                        to={`/owner/third-parties/apps/${encodeURIComponent(driveDef.appId)}`}
+                                        to={`/owner/apps/${encodeURIComponent(driveDef.appId)}`}
                                         className="hover:underline"
                                     >
                                         {owningApp.name}
