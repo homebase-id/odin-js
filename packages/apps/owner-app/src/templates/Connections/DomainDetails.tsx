@@ -1,3 +1,4 @@
+import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '@homebase-id/common-app';
 
@@ -56,17 +57,17 @@ const DomainDetails = () => {
 
   if (!domain) return null;
 
+  // Remove (and signing out a single client, below) is what an owner needs. Revoke, restore and
+  // editing a site's circle membership are kept behind the debug flag.
+  const isDebug = hasDebugFlag();
+
   const actionGroupOptions: ActionGroupOptionProps[] = [
     {
       icon: House,
       label: t('Open homepage'),
       href: `https://${domain}`,
     },
-  ];
-  if (domainInfoLoading) return <LoadingDetailPage />;
-
-  if (domainInfo?.isRevoked) {
-    actionGroupOptions.push({
+    {
       icon: Trash,
       label: t('Remove'),
       onClick: () => {
@@ -81,37 +82,42 @@ const DomainDetails = () => {
           'It loses all access, and will have to ask you again the next time you sign in there.'
         )}`,
       },
-    });
+    },
+  ];
+  if (domainInfoLoading) return <LoadingDetailPage />;
 
-    actionGroupOptions.push({
-      icon: Refresh,
-      label: t('Restore'),
-      onClick: () => {
-        restoreDomain({ domain: domain });
-      },
-      confirmOptions: {
-        title: `${t('Restore')} ${domain}`,
-        buttonText: t('Restore'),
-        body: `${t('Are you sure you want to restore')} ${domain}? ${t(
-          'It gets back the access it had.'
-        )}`,
-      },
-    });
-  } else {
-    actionGroupOptions.push({
-      icon: Block,
-      label: t('Revoke'),
-      onClick: () => {
-        revokeDomain({ domain: domain });
-      },
-      confirmOptions: {
-        title: `${t('Revoke')} ${domain}`,
-        buttonText: t('Revoke'),
-        body: `${t('Are you sure you want to revoke')} ${domain}? ${t(
-          'It loses all access, but stays in your sign-ins so you can restore it later.'
-        )}`,
-      },
-    });
+  if (isDebug) {
+    actionGroupOptions.push(
+      domainInfo?.isRevoked
+        ? {
+            icon: Refresh,
+            label: t('Restore'),
+            onClick: () => {
+              restoreDomain({ domain: domain });
+            },
+            confirmOptions: {
+              title: `${t('Restore')} ${domain}`,
+              buttonText: t('Restore'),
+              body: `${t('Are you sure you want to restore')} ${domain}? ${t(
+                'It gets back the access it had.'
+              )}`,
+            },
+          }
+        : {
+            icon: Block,
+            label: t('Revoke'),
+            onClick: () => {
+              revokeDomain({ domain: domain });
+            },
+            confirmOptions: {
+              title: `${t('Revoke')} ${domain}`,
+              buttonText: t('Revoke'),
+              body: `${t('Are you sure you want to revoke')} ${domain}? ${t(
+                'It loses all access, but stays in your sign-ins so you can restore it later.'
+              )}`,
+            },
+          }
+    );
   }
 
   return (
@@ -128,7 +134,7 @@ const DomainDetails = () => {
         }
         actions={
           <>
-            {domainInfo?.isRevoked ? (
+            {!isDebug ? null : domainInfo?.isRevoked ? (
               <ActionButton
                 type="primary"
                 onClick={() => restoreDomain({ domain })}
@@ -149,36 +155,36 @@ const DomainDetails = () => {
             <ActionGroup options={actionGroupOptions} type="mute" size="square" />
           </>
         }
-        breadCrumbs={[
-          { href: '/owner/sign-ins', title: 'Sign-ins' },
-          { title: domain },
-        ]}
+        breadCrumbs={[{ href: '/owner/sign-ins', title: 'Sign-ins' }, { title: domain }]}
         browserTitle={domain}
       />
 
       {domainInfo?.isRevoked && (
         <Alert type="critical" title={t('Access revoked')} className="mb-5">
-          {t('This site no longer has the access it was given. Restore it to give that access back.')}
+          {t('This site no longer has the access it was given.')}
+          {isDebug ? ` ${t('Restore it to give that access back.')}` : null}
         </Alert>
       )}
 
       <DomainPermissionViewer
         circleGrants={domainInfo?.circleGrants || []}
-        openEditCircleMembership={() => setIsEditPermissionActive(true)}
+        openEditCircleMembership={isDebug ? () => setIsEditPermissionActive(true) : undefined}
       />
 
-      <CircleDomainMembershipDialog
-        title={`${t('Edit Circle Membership for')} ${domain}`}
-        isOpen={isEditPermissionActive}
-        domain={domain}
-        currentCircleGrants={domainInfo?.circleGrants || []}
-        onCancel={() => {
-          setIsEditPermissionActive(false);
-        }}
-        onConfirm={() => {
-          setIsEditPermissionActive(false);
-        }}
-      />
+      {isDebug ? (
+        <CircleDomainMembershipDialog
+          title={`${t('Edit Circle Membership for')} ${domain}`}
+          isOpen={isEditPermissionActive}
+          domain={domain}
+          currentCircleGrants={domainInfo?.circleGrants || []}
+          onCancel={() => {
+            setIsEditPermissionActive(false);
+          }}
+          onConfirm={() => {
+            setIsEditPermissionActive(false);
+          }}
+        />
+      ) : null}
 
       <DomainClients domain={domain} />
     </>
@@ -207,7 +213,11 @@ const DomainPermissionViewer = ({
       {grantedCircles?.length || circlesLoading ? (
         <Section
           title={t('Member of the following circles')}
-          actions={<ActionButton onClick={openEditCircleMembership} type="mute" icon={Pencil} />}
+          actions={
+            openEditCircleMembership ? (
+              <ActionButton onClick={openEditCircleMembership} type="mute" icon={Pencil} />
+            ) : undefined
+          }
         >
           {circlesLoading ? (
             <>

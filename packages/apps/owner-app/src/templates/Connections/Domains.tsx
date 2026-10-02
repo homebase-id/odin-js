@@ -52,11 +52,11 @@ const Domains = () => {
           )}
         </p>
         <p>
-          {t('Open a site to see and change what it can access.')}{' '}
-          <strong>{t('Revoke')}</strong>{' '}
-          {t('cuts off its access but keeps it in this list, so you can restore it later.')}{' '}
+          {t('Open a site to see what it can access and which browsers or devices are signed in.')}{' '}
           <strong>{t('Remove')}</strong>{' '}
-          {t('deletes it entirely; it will have to ask you again the next time you sign in there.')}
+          {t(
+            'deletes it: it loses all access, and will have to ask you again the next time you sign in there.'
+          )}
         </p>
       </div>
 
