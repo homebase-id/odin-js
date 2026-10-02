@@ -8,7 +8,7 @@ import { OWNER_APP_ID, OWNER_ROOT } from '../constants';
  * console itself -- lives under the owner console's own page.
  */
 export const getOwnerAppPath = (appId?: string | null) =>
-  `${OWNER_ROOT}/third-parties/apps/${encodeURIComponent(appId || OWNER_APP_ID)}`;
+  `${OWNER_ROOT}/apps/${encodeURIComponent(appId || OWNER_APP_ID)}`;
 
 export const getOwnerDrivePath = (appId: string | null | undefined, targetDrive: TargetDrive) =>
   `${getOwnerAppPath(appId)}/drives/${targetDrive.alias}_${targetDrive.type}`;

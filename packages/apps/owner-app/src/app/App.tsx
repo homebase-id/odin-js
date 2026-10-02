@@ -47,7 +47,6 @@ const Domains = lazy(() => import('../templates/Connections/Domains'));
 const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails'));
 
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
-const Apps = lazy(() => import('../templates/Apps/Apps/Apps'));
 const AppPage = lazy(() => import('../templates/Apps/AppDetails/AppPage'));
 
 const Website = lazy(() => import('../templates/Website/Website'));
@@ -206,22 +205,20 @@ function App() {
               {/* Third parties */}
               <Route path="third-parties/services" element={<Domains />}></Route>
               <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
-              <Route path="third-parties" element={<Apps />}></Route>
-              <Route path="third-parties/apps/" element={<Apps />}></Route>
-              <Route path="third-parties/apps/:appKey" element={<AppPage />}></Route>
+              <Route path="apps/:appKey" element={<AppPage />}></Route>
               {/* Drives and circles live under the app that owns them; the owner console's own,
                   and those no app owns, under the owner console's id. */}
-              <Route path="third-parties/apps/:appKey/drives/:driveKey" element={<DriveDetails />}></Route>
+              <Route path="apps/:appKey/drives/:driveKey" element={<DriveDetails />}></Route>
               <Route
-                path="third-parties/apps/:appKey/drives/:driveKey/:fileKey"
+                path="apps/:appKey/drives/:driveKey/:fileKey"
                 element={<FileDetails />}
               ></Route>
               <Route
-                path="third-parties/apps/:appKey/drives/:driveKey/:systemFileType/:fileKey"
+                path="apps/:appKey/drives/:driveKey/:systemFileType/:fileKey"
                 element={<FileDetails />}
               ></Route>
               <Route
-                path="third-parties/apps/:appKey/circles/:circleKey"
+                path="apps/:appKey/circles/:circleKey"
                 element={<CircleDetails />}
               ></Route>
 

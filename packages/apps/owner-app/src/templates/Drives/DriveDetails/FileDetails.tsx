@@ -39,7 +39,7 @@ const FileDetails = () => {
         icon={File}
         title={`File on ${driveDef.name}`}
         breadCrumbs={[
-          { href: '/owner/third-parties/apps', title: 'My apps' },
+          { href: '/owner/apps', title: 'My apps' },
           { href: getOwnerAppPath(driveDef.appId), title: appName ?? '' },
           {
             href: getOwnerDrivePath(driveDef.appId, driveDef.targetDriveInfo),

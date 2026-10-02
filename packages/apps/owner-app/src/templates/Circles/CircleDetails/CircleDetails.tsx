@@ -176,7 +176,7 @@ const CircleDetails = () => {
           </>
         }
         breadCrumbs={[
-          { href: '/owner/third-parties/apps', title: 'My apps' },
+          { href: '/owner/apps', title: 'My apps' },
           { href: getOwnerAppPath(circle.appId), title: appName ?? '' },
           { title: circle.name ?? '' },
         ]}
@@ -206,7 +206,7 @@ const CircleDetails = () => {
               owningApp ? (
                 <>
                   <Link
-                    to={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                    to={`/owner/apps/${encodeURIComponent(owningApp.appId)}`}
                     className="hover:underline"
                   >
                     {owningApp.name}

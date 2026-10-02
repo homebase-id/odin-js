@@ -28,7 +28,7 @@ const OwnerConsoleAppDetails = () => {
         icon={Grid}
         title={t('Owner console')}
         breadCrumbs={[
-          { href: '/owner/third-parties/apps', title: 'My apps' },
+          { href: '/owner/apps', title: 'My apps' },
           { title: t('Owner console') },
         ]}
       />

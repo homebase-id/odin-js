@@ -331,7 +331,7 @@ export const CircleOverview = ({
               owningApp ? (
                 <>
                   <HybridLink
-                    href={`/owner/third-parties/apps/${encodeURIComponent(owningApp.appId)}`}
+                    href={`/owner/apps/${encodeURIComponent(owningApp.appId)}`}
                     className="hover:underline"
                   >
                     {owningApp.name}

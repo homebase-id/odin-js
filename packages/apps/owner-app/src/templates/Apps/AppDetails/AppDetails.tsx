@@ -131,7 +131,7 @@ const AppDetails = () => {
           </span>
         }
         breadCrumbs={[
-          { href: '/owner/third-parties/apps', title: 'My apps' },
+          { href: '/owner/apps', title: 'My apps' },
           { title: app.name ?? '' },
         ]}
         actions={
@@ -160,7 +160,7 @@ const AppDetails = () => {
                   className="my-auto"
                   onClick={async () => {
                     await removeApp({ appId: decodedAppKey });
-                    navigate('/owner/third-parties/apps');
+                    navigate('/owner/apps');
                   }}
                   state={removeAppStatus}
                   icon={Trash}

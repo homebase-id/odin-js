@@ -38,8 +38,8 @@ const Dashboard = () => {
           connections
         </Link>
         {' '}and{' '}
-        <Link className="underline" to="/owner/third-parties">
-          third-parties
+        <Link className="underline" to="/owner/apps">
+          apps
         </Link>
         .
       </p>
@@ -140,7 +140,7 @@ const ChatApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${CHAT_APP_ID}`,
+          href: `/owner/apps/${CHAT_APP_ID}`,
         },
         ...(isAndroid
           ? [
@@ -177,7 +177,7 @@ const MailApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
+          href: `/owner/apps/${MAIL_APP_ID}`,
         },
       ]}
     />
@@ -196,7 +196,7 @@ const CommunityApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${COMMUNITY_APP_ID}`,
+          href: `/owner/apps/${COMMUNITY_APP_ID}`,
         },
       ]}
     />
@@ -220,7 +220,7 @@ const FeedApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${FEED_APP_ID}`,
+          href: `/owner/apps/${FEED_APP_ID}`,
         },
         ...(isAndroid
           ? [
@@ -261,7 +261,7 @@ const PhotoApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${PHOTO_APP_ID}`,
+          href: `/owner/apps/${PHOTO_APP_ID}`,
         },
         ...(isAndroid
           ? [
@@ -291,7 +291,7 @@ const SocialSyncApp = () => {
         {
           label: t('Settings'),
           icon: Cog,
-          href: `/owner/third-parties/apps/${SOCIAL_SYNC_APP_ID}`,
+          href: `/owner/apps/${SOCIAL_SYNC_APP_ID}`,
         },
       ]}
     />

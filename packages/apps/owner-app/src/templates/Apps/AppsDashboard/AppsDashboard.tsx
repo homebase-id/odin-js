@@ -84,7 +84,7 @@ const AppCard = ({
 }) => (
   <CardLink
     title={app.name}
-    href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
+    href={`/owner/apps/${encodeURIComponent(app.appId)}`}
     icon={Arrow}
     isDisabled={app.isRevoked}
   >

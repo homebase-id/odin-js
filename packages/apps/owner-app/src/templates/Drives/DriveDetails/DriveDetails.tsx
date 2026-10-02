@@ -121,7 +121,7 @@ const DriveDetails = () => {
                     </>
                 }
                 breadCrumbs={[
-                    {href: '/owner/third-parties/apps', title: 'My apps'},
+                    {href: '/owner/apps', title: 'My apps'},
                     {href: getOwnerAppPath(driveDef.appId), title: appName ?? ''},
                     {title: driveDef.name ?? ''},
                 ]}
@@ -163,7 +163,7 @@ const DriveDetails = () => {
                             owningApp ? (
                                 <>
                                     <Link
-                                        to={`/owner/third-parties/apps/${encodeURIComponent(driveDef.appId)}`}
+                                        to={`/owner/apps/${encodeURIComponent(driveDef.appId)}`}
                                         className="hover:underline"
                                     >
                                         {owningApp.name}
