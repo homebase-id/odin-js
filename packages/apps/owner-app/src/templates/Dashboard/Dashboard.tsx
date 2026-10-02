@@ -37,11 +37,7 @@ const Dashboard = () => {
         <Link className="underline" to="/owner/connections">
           connections
         </Link>
-        , manage permissions within{' '}
-        <Link className="underline" to="/owner/circles">
-          circles
-        </Link>{' '}
-        and{' '}
+        {' '}and{' '}
         <Link className="underline" to="/owner/third-parties">
           third-parties
         </Link>

@@ -7,8 +7,9 @@ import {
   t,
   usePortal,
   formatDateExludingYearIfCurrent,
-  OWNER_ROOT,
   useTransferHistory,
+  getOwnerDrivePath,
+  MAIL_APP_ID,
 } from '@homebase-id/common-app';
 import {
   MailConversation,
@@ -57,7 +58,7 @@ export const MailConversationInfo = ({
             </p>
           ) : null}
           <a
-            href={`${OWNER_ROOT}/drives/${MailDrive.alias}_${MailDrive.type}/${mailConversation.fileId}`}
+            href={`${getOwnerDrivePath(MAIL_APP_ID, MailDrive)}/${mailConversation.fileId}`}
             className="text-primary hover:underline"
             target="_blank"
             rel="noreferrer"

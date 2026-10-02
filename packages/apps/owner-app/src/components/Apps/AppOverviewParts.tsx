@@ -7,6 +7,8 @@ import {
   SubtleMessage,
   useDotYouClientContext,
   usePortal,
+  getOwnerCirclePath,
+  getOwnerDrivePath,
 } from '@homebase-id/common-app';
 import {
   Arrow,
@@ -212,7 +214,7 @@ export const CircleMemberIdentitiesDialog = ({
           <div className="flex flex-row flex-wrap items-center gap-2 text-sm font-normal">
             {circles.map((circle) => (
               <HybridLink
-                href={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+                href={getOwnerCirclePath(circle.appId, circle.id ?? '')}
                 className="flex flex-row items-center gap-1 rounded bg-slate-200 px-2 py-0.5 hover:underline dark:bg-slate-800"
                 key={circle.id}
               >
@@ -300,7 +302,7 @@ export const CircleOverview = ({
       }`}
     >
       <HybridLink
-        href={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+        href={getOwnerCirclePath(circle.appId, circle.id ?? '')}
         className="flex flex-row items-center hover:underline"
       >
         <CirclesIcon className="mr-3 h-6 w-6 flex-shrink-0" />
@@ -522,7 +524,7 @@ export const DriveGrantRow = ({
       <HardDrive className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400" />
       {drive ? (
         <HybridLink
-          href={`/owner/drives/${drive.targetDriveInfo.alias}_${drive.targetDriveInfo.type}`}
+          href={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
           className="hover:underline"
         >
           <DriveLabel drive={drive} permission={permission} extra={storageKeyLabel} />

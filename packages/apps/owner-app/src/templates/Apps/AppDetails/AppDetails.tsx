@@ -10,7 +10,7 @@ import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandid
 import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { PageMeta } from '@homebase-id/common-app';
+import { PageMeta, getOwnerCirclePath } from '@homebase-id/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Apps/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Apps/PermissionSelectorDialog/PermissionSelectorDialog';
 import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
@@ -336,7 +336,7 @@ const AppDetails = () => {
                 <div key={circle.id} className="my-4 flex flex-col">
                   <div className="flex flex-row">
                     <Link
-                      to={`/owner/circles/${encodeURIComponent(circle.id ?? '')}`}
+                      to={getOwnerCirclePath(circle.appId, circle.id ?? '')}
                       className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
                     >
                       <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />

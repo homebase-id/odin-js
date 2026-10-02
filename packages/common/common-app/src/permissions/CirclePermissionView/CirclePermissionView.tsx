@@ -6,6 +6,7 @@ import {
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useCircle } from '../../hooks/circles/useCircle';
+import { getOwnerCirclePath } from '../../helpers/ownerPaths';
 import { Circles } from '../../ui/Icons/Circles';
 import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
 import { Arrow } from '../../ui/Icons/Arrow';
@@ -47,7 +48,7 @@ export const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
+        to={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}${getOwnerCirclePath(circleDef.appId, circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}
