@@ -18,6 +18,7 @@ import {
 import { HomePageConfig, PostContent } from '@homebase-id/js-lib/public';
 import { EmbeddedThumb, HomebaseFile, TargetDrive } from '@homebase-id/js-lib/core';
 import { cardPost, usePostHref } from './parts/posts';
+import { useProfileCard } from './useProfileCard';
 
 export type CardImage = {
   fileId?: string;
@@ -39,6 +40,7 @@ export type CardPost = {
   minutes?: number;
   image?: CardPhoto;
 };
+export type CardAudience = { kind: 'public' | 'circle'; label?: string };
 export type CardData = {
   odinId: string;
   firstName?: string;
@@ -51,6 +53,7 @@ export type CardData = {
   links: CardLink[];
   socials: LinkType[];
   posts: CardPost[];
+  audience?: CardAudience;
 };
 
 // the Homebase id social points at this very site, so a card has no use for it
@@ -67,6 +70,7 @@ export const useCardData = (): CardData | undefined => {
   const { data: biography } = useBiography();
   const { data: postPages } = usePostsInfinite({});
   const postHref = usePostHref();
+  const { data: profileCard } = useProfileCard();
 
   if (!siteData) return undefined;
   const { owner, home } = siteData;
@@ -75,6 +79,9 @@ export const useCardData = (): CardData | undefined => {
     | (ThemeLinksSettings & Pick<ThemeCoverSettings, 'tagLine'>)
     | undefined;
   const odinId = window.location.hostname;
+  const audience: CardAudience = profileCard
+    ? { kind: profileCard.kind, label: profileCard.label }
+    : { kind: 'public' };
 
   return {
     odinId,
@@ -106,5 +113,6 @@ export const useCardData = (): CardData | undefined => {
     posts: flattenInfinteData<HomebaseFile<PostContent>>(postPages, BLOG_POST_INFIITE_PAGE_SIZE)
       .slice(0, 12)
       .map((post) => cardPost(post, postHref(post))),
+    audience,
   };
 };

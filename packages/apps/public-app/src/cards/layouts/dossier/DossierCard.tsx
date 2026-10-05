@@ -6,7 +6,14 @@ import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import { ownerName } from '../../useCardData';
-import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
+import {
+  DossierAudience,
+  DossierContact,
+  hairline,
+  LocationLine,
+  SectionLabel,
+} from './DossierParts';
+import { contactFirst } from './contactFirst';
 
 // Reference: the fourth card in Anatomy.dc.html (262px wide), scaled ~1.3x for a 390px phone
 
@@ -19,6 +26,9 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
   const showElsewhere =
     (hasBlock('links') && hasBlockContent('links', data)) ||
     (hasBlock('moments') && hasBlockContent('moments', data));
+
+  const first = contactFirst(design);
+  const contact = <DossierContact design={design} data={data} size="card" className="pt-7" />;
 
   return (
     <div className="flex min-h-[inherit] flex-col px-5 pb-5 pt-6 text-[13px]">
@@ -38,10 +48,14 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             className="text-[22px] leading-[calc(24/22)] tracking-[-0.03em] text-[color:var(--card-ink)]"
           />
           <LocationLine data={data} className="pt-2 !tracking-[0.14em]" />
+          {/* No wider than the role line above it: a long circle name ends where that text ends */}
+          <div className={`mt-2.5 ${data.headline ? 'w-0 min-w-full' : ''}`}>
+            <DossierAudience data={data} stamp className="max-w-full text-[10px]" />
+          </div>
         </div>
       </header>
 
-      <DossierContact design={design} data={data} size="card" className="pt-7" />
+      {first && contact}
 
       {showElsewhere ? (
         <section aria-labelledby={elsewhereId} className="pt-7">
@@ -57,6 +71,8 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
           />
         </section>
       ) : null}
+
+      {!first && contact}
 
       <div className="min-h-8 flex-1" />
       <CardSocials

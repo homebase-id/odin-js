@@ -1,8 +1,9 @@
 import type { LayoutProps } from '../../CardDesign';
 import { CardGround } from '../../parts/Ground';
-import { CardLabel, CardName } from '../../parts/Type';
+import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
+import { PosterCaption } from './PosterCaption';
 
 // The reference card is 260px wide; this is it at ~1.3x, the scale the dossier card uses.
 // Bare rows touch: a hairline above each and under the last, 19px labels, 49px tall
@@ -27,7 +28,7 @@ export const PosterCard = ({ design, data }: LayoutProps) => (
         data={data}
         className="text-[50px] font-light leading-none tracking-[-0.02em]"
       />
-      {data.headline ? <CardLabel className="pt-3">{data.headline}</CardLabel> : null}
+      <PosterCaption data={data} size="card" className="pt-3" />
       <CardBlocks design={design} data={data} className={`mt-5 ${ROWS}`} />
       <CardSocials
         variant={design.socials}

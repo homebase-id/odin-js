@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import type { LayoutProps, Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
+import { AudienceChip } from '../../parts/AudienceChip';
 
 type Frame = { portrait: Portrait; image: CardPhoto | undefined; alt: string };
 
@@ -28,9 +29,10 @@ const FRAME_SHADOWS = {
   hard: 'shadow-[6px_6px_0_rgba(0,0,0,0.3)]',
 };
 
+// See-through, so it takes the tone of whatever it is stuck on
 const TAPE_STYLE: CSSProperties = {
-  backgroundColor: 'color-mix(in srgb, var(--card-muted) 28%, var(--card-ground))',
-  opacity: 0.8,
+  backgroundColor:
+    'color-mix(in srgb, color-mix(in srgb, var(--card-muted) 28%, var(--card-ground)) 80%, transparent)',
 };
 
 // A strip of masking tape; the caller positions and sizes it
@@ -40,6 +42,31 @@ export const Tape = ({ className }: { className: string }) => (
     className={`pointer-events-none absolute z-10 ${className}`}
     style={TAPE_STYLE}
   />
+);
+
+// A torn strip of the same tape, written on by hand in the role line's weight
+export const AudienceTape = ({
+  audience,
+  lines,
+  className,
+}: {
+  audience: CardData['audience'];
+  lines?: string;
+  className: string;
+}) => (
+  <div style={TAPE_STYLE} className={`w-fit -rotate-2 leading-[1.3] empty:hidden ${className}`}>
+    {/* The glyph box is one line tall. The end pad is inside the text's clip: the hand's last stroke
+        overhangs its letter. Each line fills before the next starts, so the strip ends just past
+        the writing. The Arabic hand is set smaller, so it always has room for a third line */}
+    <AudienceChip
+      audience={audience}
+      className="max-w-full gap-1.5 pe-1.5 ps-2.5 font-[family-name:var(--card-label)] font-medium text-[color:var(--card-ink)]"
+      hug
+      glyphClassName="h-[1.3em] w-[0.72em] [&_svg]:stroke-[2.5]"
+      textClassName={`pe-1 ${lines ?? ''}`}
+      joinedClassName="!line-clamp-3 text-[0.92em] leading-[1.25]"
+    />
+  </div>
 );
 
 const tilt = (deg?: number): CSSProperties | undefined =>
