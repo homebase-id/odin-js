@@ -145,6 +145,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
   const grid =
     HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
   // The wordmark box shows the first social; the glyphs under the name carry the rest
+  const firstData = { ...data, socials: socials.slice(0, 1) };
   const restData = { ...data, socials: socials.slice(1) };
 
   return (
@@ -208,7 +209,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 ) : null}
                 <CardSocials
                   variant="wordmark"
-                  data={data}
+                  data={firstData}
                   className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10"
                 />
                 {/* The reference captions its map with an address; the headline already sits under the name */}

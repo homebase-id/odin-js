@@ -12,6 +12,7 @@ import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import {
   DossierAudience,
+  contactFirst,
   DossierContact,
   hairline,
   LocationLine,
@@ -51,8 +52,9 @@ export const DossierPage = ({ design, data }: LayoutProps) => (
       >
         <Identity design={design} data={data} />
         <div className="flex flex-col gap-[34px] pt-1">
-          <DossierContact design={design} data={data} size="page" />
+          {contactFirst(design) ? <DossierContact design={design} data={data} size="page" /> : null}
           <Elsewhere design={design} data={data} />
+          {contactFirst(design) ? null : <DossierContact design={design} data={data} size="page" />}
         </div>
       </div>
       <PostIndex data={data} />

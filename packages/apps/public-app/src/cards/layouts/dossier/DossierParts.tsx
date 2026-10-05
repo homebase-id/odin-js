@@ -52,10 +52,20 @@ export const DossierAudience = ({
     } ${className ?? ''}`}
     hug
     glyphClassName="h-4 w-[1.1em]"
-    textClassName={`-me-[0.16em] tracking-[0.16em] ${lines ?? ''}`}
+    textClassName={`-me-[0.16em] tracking-[0.16em] ${
+      stamp ? '!block truncate ![overflow-wrap:normal]' : (lines ?? '')
+    }`}
     joinedClassName="text-[1.05em]"
   />
 );
+
+// CONTACT (the chat row) sits above ELSEWHERE (links, moments) unless the order puts chat after both
+// eslint-disable-next-line react-refresh/only-export-components
+export const contactFirst = (design: LayoutProps['design']) => {
+  const index = (kind: string) => design.blocks.findIndex((block) => block.kind === kind);
+  const elsewhere = [index('links'), index('moments')].filter((i) => i >= 0);
+  return !elsewhere.length || index('chat') < Math.min(...elsewhere);
+};
 
 // The reference's body grey (#C7CEDA) sits between ink and muted
 const CONTACT_STYLE = {

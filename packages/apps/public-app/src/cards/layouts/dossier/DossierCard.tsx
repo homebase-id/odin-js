@@ -8,6 +8,7 @@ import { CardName } from '../../parts/Type';
 import { ownerName } from '../../useCardData';
 import {
   DossierAudience,
+  contactFirst,
   DossierContact,
   hairline,
   LocationLine,
@@ -25,6 +26,8 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
   const showElsewhere =
     (hasBlock('links') && hasBlockContent('links', data)) ||
     (hasBlock('moments') && hasBlockContent('moments', data));
+
+  const contact = <DossierContact design={design} data={data} size="card" className="pt-7" />;
 
   return (
     <div className="flex min-h-[inherit] flex-col px-5 pb-5 pt-6 text-[13px]">
@@ -51,7 +54,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
         </div>
       </header>
 
-      <DossierContact design={design} data={data} size="card" className="pt-7" />
+      {contactFirst(design) ? contact : null}
 
       {showElsewhere ? (
         <section aria-labelledby={elsewhereId} className="pt-7">
@@ -67,6 +70,8 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
           />
         </section>
       ) : null}
+
+      {contactFirst(design) ? null : contact}
 
       <div className="min-h-8 flex-1" />
       <CardSocials
