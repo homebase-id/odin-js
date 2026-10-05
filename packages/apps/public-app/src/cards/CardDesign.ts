@@ -23,13 +23,17 @@ export const FONT_STACKS: Record<FontId, string> = {
 };
 
 export type LayoutId = 'poster' | 'board' | 'collage' | 'dossier';
-export type BlockKind = 'chat' | 'links' | 'moments' | 'posts';
-export type Presentation = 'bare' | 'boxed' | 'row' | 'button';
-export type SocialsVariant = 'glyphs' | 'bar' | 'wordmark' | 'handles';
+export const BLOCK_KINDS = ['chat', 'links', 'moments', 'posts'] as const;
+export const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
+export const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
+export const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;
+export type BlockKind = (typeof BLOCK_KINDS)[number];
+export type Presentation = (typeof PRESENTATIONS)[number];
+export type SocialsVariant = (typeof SOCIALS)[number];
 
 export type Portrait = {
   source: 'photo' | 'header';
-  shape: 'circle' | 'square' | 'rounded' | 'ellipse';
+  shape: (typeof SHAPES)[number];
   ring?: number;
   shadow?: 'soft' | 'hard';
   tilt?: number;

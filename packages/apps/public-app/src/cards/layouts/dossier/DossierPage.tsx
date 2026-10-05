@@ -12,12 +12,12 @@ import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
 import {
   DossierAudience,
-  contactFirst,
   DossierContact,
   hairline,
   LocationLine,
   SectionLabel,
 } from './DossierParts';
+import { contactFirst } from './contactFirst';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -43,24 +43,28 @@ const pad = (value: number, length = 2) => String(value).padStart(length, '0');
 const isoDate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-export const DossierPage = ({ design, data }: LayoutProps) => (
-  <div className="flex min-h-[inherit] flex-col">
-    <TopBar data={data} />
-    <main className="pb-24">
-      <div
-        className={`${gutter} grid grid-cols-[minmax(0,43fr)_minmax(0,49fr)] gap-x-10 pt-[52px] lg:gap-x-[72px]`}
-      >
-        <Identity design={design} data={data} />
-        <div className="flex flex-col gap-[34px] pt-1">
-          {contactFirst(design) ? <DossierContact design={design} data={data} size="page" /> : null}
-          <Elsewhere design={design} data={data} />
-          {contactFirst(design) ? null : <DossierContact design={design} data={data} size="page" />}
+export const DossierPage = ({ design, data }: LayoutProps) => {
+  const first = contactFirst(design);
+  const contact = <DossierContact design={design} data={data} size="page" />;
+  return (
+    <div className="flex min-h-[inherit] flex-col">
+      <TopBar data={data} />
+      <main className="pb-24">
+        <div
+          className={`${gutter} grid grid-cols-[minmax(0,43fr)_minmax(0,49fr)] gap-x-10 pt-[52px] lg:gap-x-[72px]`}
+        >
+          <Identity design={design} data={data} />
+          <div className="flex flex-col gap-[34px] pt-1">
+            {first && contact}
+            <Elsewhere design={design} data={data} />
+            {!first && contact}
+          </div>
         </div>
-      </div>
-      <PostIndex data={data} />
-    </main>
-  </div>
-);
+        <PostIndex data={data} />
+      </main>
+    </div>
+  );
+};
 
 const TopBar = ({ data }: { data: CardData }) => {
   const firstLink = data.links.find(isUsableLink);

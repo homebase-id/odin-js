@@ -29,14 +29,9 @@ const toCard = (file: CardAttribute): PickedCard => {
 
 // A circle card beats the public card; among circle cards the lowest priority wins
 export const pickCard = (files: CardAttribute[] | undefined | null): PickedCard | null => {
-  const cards = (files ?? []).map(toCard);
-  const lowest = (list: PickedCard[]) =>
-    list.reduce<PickedCard | null>(
-      (best, card) => (!best || card.priority < best.priority ? card : best),
-      null
-    );
-  return (
-    lowest(cards.filter((card) => card.kind === 'circle')) ??
-    lowest(cards.filter((card) => card.kind === 'public'))
-  );
+  return (files ?? []).map(toCard).reduce<PickedCard | null>((best, card) => {
+    if (!best) return card;
+    if (card.kind !== best.kind) return card.kind === 'circle' ? card : best;
+    return card.priority < best.priority ? card : best;
+  }, null);
 };

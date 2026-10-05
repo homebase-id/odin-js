@@ -1,5 +1,9 @@
 import {
+  BLOCK_KINDS,
   FONT_STACKS,
+  PRESENTATIONS,
+  SHAPES,
+  SOCIALS,
   type BlockKind,
   type CardDesign,
   type FontId,
@@ -29,11 +33,7 @@ export type CardOverrides = {
 
 const DISPLAY_CASES = ['none', 'upper', 'italic-2nd-line'] as const;
 const SOURCES = ['photo', 'header'] as const;
-const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;
 const SHADOWS = ['soft', 'hard'] as const;
-const BLOCK_KINDS = ['chat', 'links', 'moments', 'posts'] as const;
-const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
-const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
 const MAX_PORTRAITS = 2;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>

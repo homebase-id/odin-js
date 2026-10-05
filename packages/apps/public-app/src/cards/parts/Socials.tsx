@@ -44,10 +44,13 @@ export const CardSocials = ({
   variant,
   data,
   className,
+  boxOnly,
 }: {
   variant: SocialsVariant;
   data: CardData;
   className?: string;
+  // wordmark: draw the box only; the caller lays out the rest
+  boxOnly?: boolean;
 }) => {
   const { socials } = data;
   if (!socials.length) return null;
@@ -65,7 +68,7 @@ export const CardSocials = ({
   if (variant === 'wordmark') {
     const [first] = socials;
     const Icon = first.icon;
-    const rest = socials.slice(1);
+    const rest = boxOnly ? [] : socials.slice(1);
     const box = (
       <a
         href={first.link}

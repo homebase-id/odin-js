@@ -8,12 +8,12 @@ import { CardName } from '../../parts/Type';
 import { ownerName } from '../../useCardData';
 import {
   DossierAudience,
-  contactFirst,
   DossierContact,
   hairline,
   LocationLine,
   SectionLabel,
 } from './DossierParts';
+import { contactFirst } from './contactFirst';
 
 // Reference: the fourth card in Anatomy.dc.html (262px wide), scaled ~1.3x for a 390px phone
 
@@ -27,6 +27,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
     (hasBlock('links') && hasBlockContent('links', data)) ||
     (hasBlock('moments') && hasBlockContent('moments', data));
 
+  const first = contactFirst(design);
   const contact = <DossierContact design={design} data={data} size="card" className="pt-7" />;
 
   return (
@@ -54,7 +55,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
         </div>
       </header>
 
-      {contactFirst(design) ? contact : null}
+      {first && contact}
 
       {showElsewhere ? (
         <section aria-labelledby={elsewhereId} className="pt-7">
@@ -71,7 +72,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
         </section>
       ) : null}
 
-      {contactFirst(design) ? null : contact}
+      {!first && contact}
 
       <div className="min-h-8 flex-1" />
       <CardSocials

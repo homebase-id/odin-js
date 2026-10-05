@@ -55,6 +55,8 @@ declare global {
   }
 }
 
+const ARABIC_FACES = /IBM Plex Sans Arabic|Aref Ruqaa|Reem Kufi/;
+
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 // The owner is looking at their own card: no chat block, and nothing here may reach the network
@@ -156,10 +158,14 @@ const EXPORT_FRAME: CSSProperties = {
 
 // The router's own boundary would unmount the whole page, and with it the host API
 class CardBoundary extends Component<
-  { children: ReactNode; onError: (error: unknown) => void },
+  { children: ReactNode; onError: (error: unknown) => void; resetKey: unknown },
   { failed: boolean }
 > {
   state = { failed: false };
+  componentDidUpdate(prev: { resetKey: unknown }) {
+    if (this.state.failed && prev.resetKey !== this.props.resetKey)
+      this.setState({ failed: false });
+  }
   static getDerivedStateFromError() {
     return { failed: true };
   }
@@ -171,7 +177,7 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { id: number; design: CardDesign; data: CardData };
+type Rendered = { design: CardDesign; data: CardData };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
@@ -218,7 +224,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ id, design, data }));
+        flushSync(() => setCard({ design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
@@ -292,8 +298,10 @@ const CardApp = ({ host }: { host: CardHost }) => {
     if (host === 'app') window.homebaseCard = { render, exportPng };
     else window.addEventListener('message', onMessage);
 
-    // Start fetching every card font now, so the first render() only waits for what is still in flight
+    // Start fetching every card font now, so the first render() only waits for what is still in flight.
+    // The Arabic faces are skipped: unicode-range fetches them only when a card shows Arabic text
     document.fonts.forEach((face) => {
+      if (ARABIC_FACES.test(face.family)) return;
       face.load().catch((error) => postError(`font ${face.family}: ${message(error)}`));
     });
 
@@ -314,7 +322,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       <main ref={main} className="h-full">
         {card ? (
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary key={card.id} onError={onCardError}>
+            <CardBoundary resetKey={card} onError={onCardError}>
               {wide ? (
                 <CardPage design={card.design} data={card.data} />
               ) : (
@@ -327,7 +335,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       {card && exporting ? (
         <div ref={snapshot} aria-hidden style={EXPORT_FRAME}>
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary onError={onCardError}>
+            <CardBoundary resetKey={card} onError={onCardError}>
               <CompactCard card={card} />
             </CardBoundary>
           </DotYouClientContext.Provider>
