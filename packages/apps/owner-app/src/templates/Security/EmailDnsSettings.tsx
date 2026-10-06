@@ -1,9 +1,10 @@
 import { t, ActionButton, Alert, LoadingBlock } from '@homebase-id/common-app';
-import { Check, Exclamation, Refresh } from '@homebase-id/common-app/icons';
+import { Exclamation, Refresh } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
-import { DnsHealthRecord } from '../../provider/dns/DnsHealthProvider';
+import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
+import { manualRecords as toManualRecords, zoneOrigin } from './dns/zoneFile';
 
 // Email DNS panel (Security tab). Read-only, like the DNS tab: fixing anything happens
 // at the user's registrar or DNS host, so this says exactly what is wrong and what the
@@ -23,6 +24,7 @@ export const EmailDnsSettings = () => {
   } = useDnsHealth();
 
   const records = health?.mailRecords ?? [];
+  const origin = zoneOrigin(health?.records ?? [], health?.dnssec.enclosingZone);
   const broken = records.filter((r) => r.status !== 'success');
 
   // The checks a record comparison cannot make: the DKIM pair proof, and public-key drift
@@ -32,11 +34,20 @@ export const EmailDnsSettings = () => {
   // expensive (signing plus outbound HTTPS).
   const {
     fetchMailHealth: { data: mailHealth },
-    publishDnsRecords: { mutateAsync: publishDnsRecords, status: publishStatus, data: publishResult },
+    publishDnsRecords: {
+      mutateAsync: publishDnsRecords,
+      status: publishStatus,
+      data: publishResult,
+    },
   } = useMailHealth({ enabled: records.length > 0 });
   const healthErrors = mailHealth?.errors ?? [];
   const healthWarnings = mailHealth?.warnings ?? [];
   const needsAttention = broken.length > 0 || healthErrors.length > 0;
+
+  // Publishing on third-party DNS writes nothing and returns the records to add by hand.
+  // They can include more than the health check covers (MTA-STS, TLS-RPT), so they replace
+  // the table; status comes from the check where it has one.
+  const manualRecords = toManualRecords(publishResult, records, origin);
 
   return (
     <>
@@ -48,24 +59,24 @@ export const EmailDnsSettings = () => {
 
       <Section
         title={
-          <div className="flex w-full flex-row items-center justify-between gap-6">
-            <div className="flex flex-col">
-              {t('Email')}
-              <small className="text-sm text-gray-400">
-                {t('The DNS records that make email work for your domain')}
-              </small>
-            </div>
-            <ActionButton
-              type="secondary"
-              size="none"
-              className="px-3 py-1 text-sm"
-              icon={Refresh}
-              onClick={() => refetch()}
-              state={isRefetching ? 'loading' : undefined}
-            >
-              {t('Refresh')}
-            </ActionButton>
+          <div className="flex flex-col">
+            {t('Email')}
+            <small className="text-sm text-gray-400">
+              {t('The DNS records that make email work for your domain')}
+            </small>
           </div>
+        }
+        actions={
+          <ActionButton
+            type="secondary"
+            size="none"
+            className="px-3 py-1 text-sm"
+            icon={Refresh}
+            onClick={() => refetch()}
+            state={isRefetching ? 'loading' : undefined}
+          >
+            {t('Refresh')}
+          </ActionButton>
         }
       >
         {isLoading ? (
@@ -77,9 +88,11 @@ export const EmailDnsSettings = () => {
         ) : records.length === 0 ? (
           // Two different situations, and telling them apart is the point: one is someone
           // else's to fix, the other is the owner's.
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className={MUTED}>
             {health?.tenantMailEnabled
-              ? t('Email is not set up for your identity yet, so there are no email DNS records to check.')
+              ? t(
+                  'Email is not set up for your identity yet, so there are no email DNS records to check.'
+                )
               : t('This server does not offer email, so there is nothing to set up here.')}
           </p>
         ) : (
@@ -88,7 +101,9 @@ export const EmailDnsSettings = () => {
               <Alert type="success">{t('Your email is correctly set up.')}</Alert>
             ) : (
               <Alert type="warning">
-                {t('Your email needs attention. Mail may not be delivered or may be treated as spam until this is fixed.')}
+                {t(
+                  'Your email needs attention. Mail may not be delivered or may be treated as spam until this is fixed.'
+                )}
               </Alert>
             )}
 
@@ -106,13 +121,11 @@ export const EmailDnsSettings = () => {
                     className="px-3 py-1 text-sm"
                     icon={Refresh}
                     state={publishStatus === 'pending' ? 'loading' : undefined}
-                    onClick={async () => {
-                      await publishDnsRecords();
-                    }}
+                    onClick={() => publishDnsRecords()}
                   >
                     {t('Publish missing records')}
                   </ActionButton>
-                  <small className="text-slate-500 dark:text-slate-400">
+                  <small className={MUTED}>
                     {t('Adds the email records for your domain. Safe to run more than once.')}
                   </small>
                 </div>
@@ -127,34 +140,35 @@ export const EmailDnsSettings = () => {
                     red a moment later read as the write having failed. */}
                 {publishResult?.dnsRecordsWritten ? (
                   <Alert type="success">
-                    {t('Records published. They can take a few minutes to appear - press Refresh to check again.')}
+                    {t(
+                      'Records published. They can take a few minutes to appear - press Refresh to check again.'
+                    )}
                   </Alert>
                 ) : null}
 
                 {/* Not ours to write: third-party DNS, or a host without DNS access. The
                     records are still returned, as instructions to enter by hand. */}
-                {publishResult && !publishResult.dnsRecordsWritten ? (
+                {manualRecords ? (
                   <Alert type="warning">
-                    <p className="mb-2">
-                      {t('Your DNS is managed elsewhere, so these records have to be added by hand:')}
-                    </p>
-                    <div className="flex flex-col gap-1 font-mono text-xs">
-                      {publishResult.records.map((record) => (
-                        <div key={`${record.type}-${record.domain}-${record.value}`}>
-                          {record.type} {record.domain || '@'} {record.value}
-                        </div>
-                      ))}
-                    </div>
+                    {t(
+                      'Your DNS is managed elsewhere, so add these records at your DNS host by hand:'
+                    )}
                   </Alert>
                 ) : null}
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-2">
-              {records.map((record) => (
-                <MailRecordRow key={`${record.type}-${record.domain}-${record.value}`} record={record} />
-              ))}
-            </div>
+            {needsAttention ? (
+              <DnsRecordsTable records={manualRecords ?? records} origin={origin} showDescription />
+            ) : (
+              // Working mail needs no record list in the way; it stays one click off
+              <details>
+                <summary className={`cursor-pointer text-sm ${MUTED}`}>{t('Show records')}</summary>
+                <div className="mt-3">
+                  <DnsRecordsTable records={records} origin={origin} showDescription />
+                </div>
+              </details>
+            )}
 
             {/* Errors first: these are the ones that also trigger the monthly report. */}
             {healthErrors.length > 0 ? (
@@ -190,7 +204,7 @@ const CheckList = ({
         className={`flex flex-row items-start gap-2 rounded-lg px-4 py-3 text-sm ${
           tone === 'bad'
             ? 'bg-orange-100 dark:bg-orange-900'
-            : 'bg-gray-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300'
+            : 'bg-gray-100 text-slate-600 dark:bg-gray-800 dark:text-slate-300'
         }`}
       >
         {tone === 'bad' ? <Exclamation className="mt-0.5 h-5 w-5 shrink-0" /> : null}
@@ -199,35 +213,5 @@ const CheckList = ({
     ))}
   </div>
 );
-
-// Status only. The owner does not fix DNS by copying values out of here - they fix it at
-// their DNS host - so the row answers one question: is this record right? The description
-// carries the meaning ("DKIM key (rsa)" rather than an unexplained TXT blob).
-const MailRecordRow = ({ record }: { record: DnsHealthRecord }) => {
-  const isGood = record.status === 'success';
-
-  return (
-    <div
-      className={`flex flex-row flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-4 py-3 text-sm ${
-        isGood ? 'bg-green-100 dark:bg-green-900' : 'bg-orange-100 dark:bg-orange-900'
-      }`}
-    >
-      <span>{record.description}</span>
-      <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
-        {record.domain}. {record.type}
-      </span>
-      <span className="ml-auto flex flex-row items-center gap-2">
-        {isGood ? (
-          <Check className="h-5 w-5" />
-        ) : (
-          <>
-            {record.status === 'incorrectValue' ? t('Incorrect value') : t('Not found')}
-            <Exclamation className="h-5 w-5" />
-          </>
-        )}
-      </span>
-    </div>
-  );
-};
 
 export default EmailDnsSettings;
