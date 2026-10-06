@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Question, Exclamation } from '../../ui/Icons';
+import { Check, Question, Exclamation } from '../../ui/Icons';
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
   title?: ReactNode;
@@ -46,6 +46,14 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
             }`}
           >
             <Exclamation />
+          </div>
+        ) : type === 'success' ? (
+          <div
+            className={`flex h-8 w-8 flex-shrink-0 text-green-500 ${
+              isCompact ? '' : 'sm:h-10 sm:w-10'
+            }`}
+          >
+            <Check />
           </div>
         ) : (
           <div
