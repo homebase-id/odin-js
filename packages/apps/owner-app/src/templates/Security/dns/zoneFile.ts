@@ -8,15 +8,22 @@ import { DnsHealthRecord } from '../../../provider/dns/DnsHealthProvider';
 export const zoneOrigin = (records: DnsHealthRecord[], enclosingZone?: string) =>
   enclosingZone || records.find((r) => r.type === 'A' || r.type === 'ALIAS')?.domain || '';
 
+export const isMissing = (r: DnsHealthRecord) => r.status !== 'success';
+
+// The domain points at Homebase nameservers, so Homebase writes every record
+export const isDelegated = (nsRecords: DnsHealthRecord[]) =>
+  nsRecords.length > 0 && !nsRecords.some(isMissing);
+
 // The records the owner must have, two ways. ALIAS is an either-or alternative to the apex
 // A record; showing both would always leave one "failing", so `shown` has ALIAS only when it
-// is the one in use. A zone file cannot express ALIAS, so `zone` takes the A record if any.
+// is the one in use. A zone file cannot express ALIAS, so `zone` takes the A record if any -
+// and no apex at all when a working ALIAS covers it.
 export const requiredRecords = (records: DnsHealthRecord[]) => {
   const a = records.find((r) => r.type === 'A');
   const alias = records.find((r) => r.type === 'ALIAS');
   const cnames = records.filter((r) => r.type === 'CNAME');
   const shownApex = a?.status !== 'success' && alias?.status === 'success' ? alias : a;
-  const zoneApex = a ?? alias;
+  const zoneApex = shownApex === alias ? undefined : (a ?? alias);
   return {
     shown: [...(shownApex ? [shownApex] : []), ...cnames],
     zone: [...(zoneApex ? [zoneApex] : []), ...cnames],
@@ -71,6 +78,16 @@ export const toZoneFile = (records: DnsHealthRecord[], origin: string) => {
     return `${relativeHost(r.domain, o)}\t3600\tIN\t${type}\t${data}`;
   });
   return [`$ORIGIN ${o}.`, '$TTL 3600', ...lines, ''].join('\n');
+};
+
+// Saves the records as <zone>.zone for the provider's import
+export const downloadZoneFile = (records: DnsHealthRecord[], origin: string) => {
+  const url = URL.createObjectURL(new Blob([toZoneFile(records, origin)], { type: 'text/plain' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${stripDot(origin)}.zone`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 // Records a publish returned for the owner to add by hand, matched to the health check so
