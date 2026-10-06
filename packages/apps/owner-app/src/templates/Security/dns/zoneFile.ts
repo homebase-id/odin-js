@@ -46,19 +46,6 @@ export const normalizeValue = (r: DnsHealthRecord) => {
   return { value: r.type === 'TXT' ? r.value : stripDot(r.value), priority: undefined };
 };
 
-// "Host<TAB>Type<TAB>Value" lines - pastes cleanly into notes or a spreadsheet
-export const toTsv = (records: DnsHealthRecord[], origin: string) =>
-  records
-    .map((r) => {
-      const { value, priority } = normalizeValue(r);
-      return [
-        relativeHost(r.domain, origin),
-        displayType(r),
-        priority ? `${priority} ${value}` : value,
-      ].join('\t');
-    })
-    .join('\n');
-
 // TXT strings are capped at 255 chars each; long values (DKIM) become several quoted strings
 const quoteTxt = (value: string) =>
   (value.match(/[\s\S]{1,255}/g) ?? [''])
@@ -85,3 +72,28 @@ export const toZoneFile = (records: DnsHealthRecord[], origin: string) => {
   });
   return [`$ORIGIN ${o}.`, '$TTL 3600', ...lines, ''].join('\n');
 };
+
+// Records a publish returned for the owner to add by hand, matched to the health check so
+// each keeps its status. They can include more than the check covers, so unmatched ones
+// count as not found.
+export const manualRecords = (
+  publishResult:
+    | { dnsRecordsWritten?: boolean; records: Omit<DnsHealthRecord, 'altValue' | 'status'>[] }
+    | undefined,
+  checked: DnsHealthRecord[],
+  origin: string
+): DnsHealthRecord[] | undefined =>
+  publishResult && !publishResult.dnsRecordsWritten
+    ? publishResult.records.map((r) => {
+        const domain = r.domain || origin;
+        const match = checked.find(
+          (h) => h.type === r.type && h.domain === domain && h.value === r.value
+        );
+        return {
+          ...r,
+          domain,
+          altValue: '',
+          status: match?.status ?? 'domainOrRecordNotFound',
+        };
+      })
+    : undefined;

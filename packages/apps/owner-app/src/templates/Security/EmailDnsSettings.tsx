@@ -1,12 +1,10 @@
 import { t, ActionButton, Alert, LoadingBlock } from '@homebase-id/common-app';
-import { Clipboard, Exclamation, Refresh } from '@homebase-id/common-app/icons';
+import { Exclamation, Refresh } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
-import { DnsRecordsTable } from './dns/DnsRecordRow';
-import { useCopy } from './dns/useCopy';
-import { toTsv, zoneOrigin } from './dns/zoneFile';
-import { DnsHealthRecord } from '../../provider/dns/DnsHealthProvider';
+import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
+import { manualRecords as toManualRecords, zoneOrigin } from './dns/zoneFile';
 
 // Email DNS panel (Security tab). Read-only, like the DNS tab: fixing anything happens
 // at the user's registrar or DNS host, so this says exactly what is wrong and what the
@@ -45,26 +43,11 @@ export const EmailDnsSettings = () => {
   const healthErrors = mailHealth?.errors ?? [];
   const healthWarnings = mailHealth?.warnings ?? [];
   const needsAttention = broken.length > 0 || healthErrors.length > 0;
-  const { copied, copy } = useCopy();
 
   // Publishing on third-party DNS writes nothing and returns the records to add by hand.
   // They can include more than the health check covers (MTA-STS, TLS-RPT), so they replace
   // the table; status comes from the check where it has one.
-  const manualRecords: DnsHealthRecord[] | undefined =
-    publishResult && !publishResult.dnsRecordsWritten
-      ? publishResult.records.map((r) => {
-          const domain = r.domain || origin;
-          const checked = records.find(
-            (h) => h.type === r.type && h.domain === domain && h.value === r.value
-          );
-          return {
-            ...r,
-            domain,
-            altValue: '',
-            status: checked?.status ?? 'domainOrRecordNotFound',
-          };
-        })
-      : undefined;
+  const manualRecords = toManualRecords(publishResult, records, origin);
 
   return (
     <>
@@ -105,7 +88,7 @@ export const EmailDnsSettings = () => {
         ) : records.length === 0 ? (
           // Two different situations, and telling them apart is the point: one is someone
           // else's to fix, the other is the owner's.
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className={MUTED}>
             {health?.tenantMailEnabled
               ? t(
                   'Email is not set up for your identity yet, so there are no email DNS records to check.'
@@ -138,13 +121,11 @@ export const EmailDnsSettings = () => {
                     className="px-3 py-1 text-sm"
                     icon={Refresh}
                     state={publishStatus === 'pending' ? 'loading' : undefined}
-                    onClick={async () => {
-                      await publishDnsRecords();
-                    }}
+                    onClick={() => publishDnsRecords()}
                   >
                     {t('Publish missing records')}
                   </ActionButton>
-                  <small className="text-slate-500 dark:text-slate-400">
+                  <small className={MUTED}>
                     {t('Adds the email records for your domain. Safe to run more than once.')}
                   </small>
                 </div>
@@ -178,30 +159,11 @@ export const EmailDnsSettings = () => {
             ) : null}
 
             {needsAttention ? (
-              <>
-                <DnsRecordsTable
-                  records={manualRecords ?? records}
-                  origin={origin}
-                  showDescription
-                />
-                <div>
-                  <ActionButton
-                    type="secondary"
-                    size="none"
-                    className="px-3 py-1 text-sm"
-                    icon={Clipboard}
-                    onClick={() => copy(toTsv(manualRecords ?? records, origin))}
-                  >
-                    {copied ? t('Copied') : t('Copy all')}
-                  </ActionButton>
-                </div>
-              </>
+              <DnsRecordsTable records={manualRecords ?? records} origin={origin} showDescription />
             ) : (
               // Working mail needs no record list in the way; it stays one click off
               <details>
-                <summary className="cursor-pointer text-sm text-slate-500 dark:text-slate-400">
-                  {t('Show records')}
-                </summary>
+                <summary className={`cursor-pointer text-sm ${MUTED}`}>{t('Show records')}</summary>
                 <div className="mt-3">
                   <DnsRecordsTable records={records} origin={origin} showDescription />
                 </div>

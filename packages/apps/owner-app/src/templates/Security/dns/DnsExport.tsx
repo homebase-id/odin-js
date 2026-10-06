@@ -1,15 +1,9 @@
 import { t, ActionButton, Select } from '@homebase-id/common-app';
-import { Clipboard, Download, ExternalLink } from '@homebase-id/common-app/icons';
+import { Download, ExternalLink } from '@homebase-id/common-app/icons';
 import { DnsHealthRecord } from '../../../provider/dns/DnsHealthProvider';
 import { DNS_PROVIDERS, DnsProvider } from './providers';
-import { CopyIconButton, DnsRecordsTable, TABLE_CARD } from './DnsRecordRow';
-import { stripDot, toTsv, toZoneFile } from './zoneFile';
-import { useCopy } from './useCopy';
-
-const MUTED = 'text-slate-500 dark:text-slate-400';
-const LINK =
-  'rounded text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
-const BTN = 'px-3 py-1.5 text-sm';
+import { BTN, CopyIconButton, DnsRecordsTable, LINK, MUTED, TABLE_CARD } from './DnsRecordRow';
+import { stripDot, toZoneFile } from './zoneFile';
 
 const ProviderSelect = ({
   label,
@@ -51,7 +45,6 @@ export const NameserverSetup = ({
   onSelectProvider: (id: string) => void;
   onUseRecords: () => void;
 }) => {
-  const { copied, copy } = useCopy();
   // NS at the zone itself = a registered domain, whose nameservers only the registrar can
   // change. Otherwise the NS records go into the parent zone.
   const isApex =
@@ -99,21 +92,10 @@ export const NameserverSetup = ({
             {t('zone:')}
           </p>
           <DnsRecordsTable records={nsRecords} origin={origin} />
-          <div>
-            <ActionButton
-              type="secondary"
-              size="none"
-              className={BTN}
-              icon={Clipboard}
-              onClick={() => copy(toTsv(nsRecords, origin))}
-            >
-              {copied ? t('Copied') : t('Copy all')}
-            </ActionButton>
-          </div>
         </>
       )}
       <div>
-        <button type="button" onClick={onUseRecords} className={LINK}>
+        <button type="button" onClick={onUseRecords} className={`text-sm ${LINK}`}>
           {t('Add records instead')}
         </button>
       </div>
@@ -137,7 +119,6 @@ export const RecordSetup = ({
   onSelectProvider: (id: string) => void;
   onUseNameservers?: () => void;
 }) => {
-  const { copied, copy } = useCopy();
   if (!records.length) return null;
 
   const download = () => {
@@ -156,7 +137,7 @@ export const RecordSetup = ({
       <div className="flex flex-row flex-wrap items-center justify-between gap-2">
         <h4 className="text-base font-medium">{t('Add these records at your DNS host')}</h4>
         {onUseNameservers ? (
-          <button type="button" onClick={onUseNameservers} className={LINK}>
+          <button type="button" onClick={onUseNameservers} className={`text-sm ${LINK}`}>
             {t('Use Homebase nameservers instead')}
           </button>
         ) : null}
@@ -188,21 +169,12 @@ export const RecordSetup = ({
             {t('Download zone file')}
           </ActionButton>
         ) : null}
-        <ActionButton
-          type="secondary"
-          size="none"
-          className={BTN}
-          icon={Clipboard}
-          onClick={() => copy(toTsv(records, origin))}
-        >
-          {copied ? t('Copied') : t('Copy all')}
-        </ActionButton>
         {provider.dnsUrl ? (
           <a
             href={provider.dnsUrl}
             target="_blank"
             rel="noreferrer noopener"
-            className={`${LINK} flex flex-row items-center gap-1 sm:ml-auto`}
+            className={`text-sm ${LINK} flex flex-row items-center gap-1 sm:ml-auto`}
           >
             <ExternalLink className="h-4 w-4" />
             {t('Open')} {provider.name} {t('DNS settings')}

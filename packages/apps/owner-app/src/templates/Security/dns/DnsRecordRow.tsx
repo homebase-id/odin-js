@@ -7,9 +7,14 @@ import { displayType, normalizeValue, relativeHost, stripDot } from './zoneFile'
 
 // Shared by every DNS table (records, DS records) so they read as one family
 export const TABLE_CARD = 'overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700';
-export const TABLE_HEAD =
-  'hidden bg-gray-50 px-4 py-2 text-xs font-medium text-slate-500 dark:bg-gray-900 dark:text-slate-400 sm:grid';
-const MUTED = 'text-slate-500 dark:text-slate-400';
+export const TABLE_HEAD_BASE =
+  'bg-gray-50 px-4 py-2 text-xs font-medium text-slate-500 dark:bg-gray-900 dark:text-slate-400';
+export const TABLE_HEAD = `hidden ${TABLE_HEAD_BASE} sm:grid`;
+export const MUTED = 'text-slate-500 dark:text-slate-400';
+// Text size is left to the caller
+export const LINK =
+  'rounded text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
+export const BTN = 'px-3 py-1.5 text-sm';
 
 // Named apart from common-app's CopyButton, which is a labelled text button
 export const CopyIconButton = ({
@@ -121,7 +126,7 @@ const DnsRecordRow = ({
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
                 aria-expanded={expanded}
-                className="mt-0.5 rounded text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className={`mt-0.5 text-xs ${LINK}`}
               >
                 {expanded ? t('Show less') : t('Show full value')}
               </button>

@@ -2,7 +2,13 @@ import { useState } from 'react';
 import { t, ActionButton, Alert, LoadingBlock } from '@homebase-id/common-app';
 import { Refresh } from '@homebase-id/common-app/icons';
 import { NameserverSetup, RecordSetup } from './dns/DnsExport';
-import { CopyIconButton, DnsRecordsTable, TABLE_CARD, TABLE_HEAD } from './dns/DnsRecordRow';
+import {
+  CopyIconButton,
+  DnsRecordsTable,
+  MUTED as MUTED_BASE,
+  TABLE_CARD,
+  TABLE_HEAD_BASE,
+} from './dns/DnsRecordRow';
 import { requiredRecords, zoneOrigin } from './dns/zoneFile';
 import { DnsProvider, useDnsProvider } from './dns/providers';
 import Section from '../../components/ui/Sections/Section';
@@ -16,7 +22,9 @@ import {
 
 type Mode = 'nameservers' | 'records';
 
-const MUTED = 'text-sm text-slate-500 dark:text-slate-400';
+type View = 'delegated' | 'good' | 'nameservers' | 'records';
+
+const MUTED = `text-sm ${MUTED_BASE}`;
 
 // DNS health panel (Security tab): required-record status, the optional www record and
 // the DNSSEC chain of trust. Read-only - fixing anything happens at the user's
@@ -26,23 +34,28 @@ export const DnsSecuritySettings = () => {
     fetchDnsHealth: { data: health, isLoading, isRefetching, error, refetch },
   } = useDnsHealth();
 
-  const verify = () => refetch();
   // One choice for the whole panel: the setup steps and the DNSSEC hint follow it
   const { provider, select } = useDnsProvider();
   // Nameservers is the default when Homebase can host the zone; data arrives async, so the
   // owner's choice is only stored once made
   const [chosen, setChosen] = useState<Mode>();
   const records = health?.records ?? [];
-  const hasNs = records.some((r) => r.type === 'NS');
+  const nsRecords = records.filter((r) => r.type === 'NS');
   // Without NS records there is no nameserver path, whatever was chosen before a Refresh
-  const mode: Mode = hasNs ? (chosen ?? 'nameservers') : 'records';
-  const delegated = isDelegated(records);
+  const mode: Mode = nsRecords.length ? (chosen ?? 'nameservers') : 'records';
+  const { shown, zone } = requiredRecords(records);
+  const origin = zoneOrigin(records, health?.dnssec.enclosingZone);
+  // Exactly one view, so the setup block is always first and the page does not jump
+  const view: View =
+    nsRecords.length && nsRecords.every((r) => r.status === 'success')
+      ? 'delegated'
+      : shown.every((r) => r.status === 'success')
+        ? 'good'
+        : mode === 'nameservers' && origin
+          ? 'nameservers'
+          : 'records';
   // Optional and DNSSEC stay out of the nameserver setup only; every other view shows them
-  const showingNameservers =
-    !delegated &&
-    mode === 'nameservers' &&
-    !!zoneOrigin(records, health?.dnssec.enclosingZone) &&
-    requiredRecords(records).shown.some((r) => r.status !== 'success');
+  const showingNameservers = view === 'nameservers';
 
   return (
     <>
@@ -68,7 +81,7 @@ export const DnsSecuritySettings = () => {
             size="none"
             className="px-3 py-1 text-sm"
             icon={Refresh}
-            onClick={verify}
+            onClick={() => refetch()}
             state={isRefetching ? 'loading' : undefined}
           >
             {t('Refresh')}
@@ -84,16 +97,18 @@ export const DnsSecuritySettings = () => {
         ) : health ? (
           <div className="flex flex-col gap-6">
             <RecordsBlock
-              records={health.records}
-              enclosingZone={health.dnssec.enclosingZone}
-              mode={mode}
+              view={view}
+              nsRecords={nsRecords}
+              shown={shown}
+              zone={zone}
+              origin={origin}
               onModeChange={setChosen}
               provider={provider}
               onSelectProvider={select}
             />
             <OptionalRecordsBlock
               optionalRecords={health.optionalRecords}
-              show={!delegated && !showingNameservers}
+              show={view !== 'delegated' && !showingNameservers}
             />
             <DnssecBlock dnssec={health.dnssec} provider={provider} hidden={showingNameservers} />
           </div>
@@ -103,38 +118,31 @@ export const DnsSecuritySettings = () => {
   );
 };
 
-const isDelegated = (records: DnsHealthRecord[]) => {
-  const ns = records.filter((r) => r.type === 'NS');
-  return ns.length > 0 && ns.every((r) => r.status === 'success');
-};
-
 const RecordsBlock = ({
-  records,
-  enclosingZone,
-  mode,
+  view,
+  nsRecords,
+  shown: visibleRecords,
+  zone: zoneRecords,
+  origin,
   onModeChange,
   provider,
   onSelectProvider,
 }: {
-  records: DnsHealthRecord[];
-  enclosingZone?: string;
-  mode: Mode;
+  view: View;
+  nsRecords: DnsHealthRecord[];
+  shown: DnsHealthRecord[];
+  zone: DnsHealthRecord[];
+  origin: string;
   onModeChange: (mode: Mode) => void;
   provider: DnsProvider;
   onSelectProvider: (id: string) => void;
 }) => {
-  const { shown: visibleRecords, zone: zoneRecords } = requiredRecords(records);
-  const nsRecords = records.filter((r) => r.type === 'NS');
-  const origin = zoneOrigin(records, enclosingZone);
-  const allGood = visibleRecords.every((r) => r.status === 'success');
-
-  // Exactly one branch, so the setup block is always first and the page does not jump
-  if (isDelegated(records)) {
+  if (view === 'delegated') {
     return (
       <Alert type="success">{t('Your domain uses Homebase nameservers. Nothing to do.')}</Alert>
     );
   }
-  if (allGood) {
+  if (view === 'good') {
     return (
       <div className="flex flex-col gap-3">
         <Alert type="success">{t('Your DNS records are set up correctly.')}</Alert>
@@ -147,7 +155,7 @@ const RecordsBlock = ({
       </div>
     );
   }
-  if (mode === 'nameservers' && origin) {
+  if (view === 'nameservers') {
     return (
       <NameserverSetup
         nsRecords={nsRecords}
@@ -273,7 +281,7 @@ const DsHint = ({ provider }: { provider: DnsProvider }) => (
 const DsTable = ({ dsRecords, copyable }: { dsRecords: DsRecord[]; copyable?: boolean }) => (
   <div className={`${TABLE_CARD} overflow-x-auto`}>
     <table className="w-full text-left text-sm">
-      <thead className={TABLE_HEAD.replace('hidden', '').replace('sm:grid', '')}>
+      <thead className={TABLE_HEAD_BASE}>
         <tr>
           <th className="px-4 py-2 font-medium">{t('Key tag')}</th>
           <th className="px-4 py-2 font-medium">{t('Algorithm')}</th>
