@@ -9,7 +9,7 @@ import {
   TABLE_CARD,
   TABLE_HEAD_BASE,
 } from './dns/DnsRecordRow';
-import { requiredRecords, zoneOrigin } from './dns/zoneFile';
+import { isDelegated, isMissing, requiredRecords, zoneOrigin } from './dns/zoneFile';
 import { DnsProvider, useDnsProvider } from './dns/providers';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
@@ -46,14 +46,13 @@ export const DnsSecuritySettings = () => {
   const { shown, zone } = requiredRecords(records);
   const origin = zoneOrigin(records, health?.dnssec.enclosingZone);
   // Exactly one view, so the setup block is always first and the page does not jump
-  const view: View =
-    nsRecords.length && nsRecords.every((r) => r.status === 'success')
-      ? 'delegated'
-      : shown.every((r) => r.status === 'success')
-        ? 'good'
-        : mode === 'nameservers' && origin
-          ? 'nameservers'
-          : 'records';
+  const view: View = isDelegated(nsRecords)
+    ? 'delegated'
+    : !shown.some(isMissing)
+      ? 'good'
+      : mode === 'nameservers' && origin
+        ? 'nameservers'
+        : 'records';
   // Optional and DNSSEC stay out of the nameserver setup only; every other view shows them
   const showingNameservers = view === 'nameservers';
 
@@ -170,8 +169,7 @@ const RecordsBlock = ({
     <div className="flex flex-col gap-4">
       {origin ? (
         <RecordSetup
-          records={visibleRecords}
-          zoneRecords={zoneRecords}
+          records={zoneRecords}
           origin={origin}
           provider={provider}
           onSelectProvider={onSelectProvider}

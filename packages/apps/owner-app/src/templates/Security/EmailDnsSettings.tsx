@@ -4,7 +4,14 @@ import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
 import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
-import { manualRecords as toManualRecords, zoneOrigin } from './dns/zoneFile';
+import { RecordSetup } from './dns/DnsExport';
+import { useDnsProvider } from './dns/providers';
+import {
+  isDelegated,
+  isMissing,
+  manualRecords as toManualRecords,
+  zoneOrigin,
+} from './dns/zoneFile';
 
 // Email DNS panel (Security tab). Read-only, like the DNS tab: fixing anything happens
 // at the user's registrar or DNS host, so this says exactly what is wrong and what the
@@ -25,7 +32,16 @@ export const EmailDnsSettings = () => {
 
   const records = health?.mailRecords ?? [];
   const origin = zoneOrigin(health?.records ?? [], health?.dnssec.enclosingZone);
-  const broken = records.filter((r) => r.status !== 'success');
+  const broken = records.filter(isMissing);
+  // Same picker as the DNS tab, remembered in the same place
+  const { provider, select } = useDnsProvider();
+
+  // Who writes the records. Homebase nameservers in use: Homebase, via Publish. NS records
+  // offered but not in use: the owner's DNS host, by hand - Publish would only write a zone
+  // nobody asks. No NS records: no telling, so Publish answers it (managed domains get them
+  // written, anyone else gets the records back to add by hand).
+  const nsRecords = (health?.records ?? []).filter((r) => r.type === 'NS');
+  const thirdPartyDns = nsRecords.length > 0 && !isDelegated(nsRecords);
 
   // The checks a record comparison cannot make: the DKIM pair proof, and public-key drift
   // across WKD/DID. Deliberately the same set the monthly security health report uses - the
@@ -44,10 +60,11 @@ export const EmailDnsSettings = () => {
   const healthWarnings = mailHealth?.warnings ?? [];
   const needsAttention = broken.length > 0 || healthErrors.length > 0;
 
-  // Publishing on third-party DNS writes nothing and returns the records to add by hand.
-  // They can include more than the health check covers (MTA-STS, TLS-RPT), so they replace
-  // the table; status comes from the check where it has one.
-  const manualRecords = toManualRecords(publishResult, records, origin);
+  // Publishing on third-party DNS writes nothing and returns the records to add by hand,
+  // matched to the check for status. Otherwise, on known third-party DNS, the check itself
+  // is the list: it covers the same set Publish writes (config records, DKIM, relay).
+  const manualRecords =
+    toManualRecords(publishResult, records, origin) ?? (thirdPartyDns ? records : undefined);
 
   return (
     <>
@@ -112,7 +129,7 @@ export const EmailDnsSettings = () => {
                 never received them. Publishing them is safe to repeat. Offered only for
                 missing/incorrect RECORDS - the other checks (key drift, DKIM pair proof) are
                 not fixed by writing DNS. */}
-            {broken.length > 0 ? (
+            {broken.length > 0 && !thirdPartyDns ? (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-row items-center gap-3">
                   <ActionButton
@@ -145,17 +162,19 @@ export const EmailDnsSettings = () => {
                     )}
                   </Alert>
                 ) : null}
-
-                {/* Not ours to write: third-party DNS, or a host without DNS access. The
-                    records are still returned, as instructions to enter by hand. */}
-                {manualRecords ? (
-                  <Alert type="warning">
-                    {t(
-                      'Your DNS is managed elsewhere, so add these records at your DNS host by hand:'
-                    )}
-                  </Alert>
-                ) : null}
               </div>
+            ) : null}
+
+            {/* Not ours to write: the provider's steps, and its zone import where it adds
+                to a zone - the domain's other records are already there. */}
+            {manualRecords && origin ? (
+              <RecordSetup
+                records={manualRecords}
+                existingZone
+                origin={origin}
+                provider={provider}
+                onSelectProvider={select}
+              />
             ) : null}
 
             {needsAttention ? (

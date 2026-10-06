@@ -3,7 +3,7 @@ import { Download, ExternalLink } from '@homebase-id/common-app/icons';
 import { DnsHealthRecord } from '../../../provider/dns/DnsHealthProvider';
 import { DNS_PROVIDERS, DnsProvider } from './providers';
 import { BTN, CopyIconButton, DnsRecordsTable, LINK, MUTED, TABLE_CARD } from './DnsRecordRow';
-import { stripDot, toZoneFile } from './zoneFile';
+import { downloadZoneFile, isMissing, stripDot } from './zoneFile';
 
 const ProviderSelect = ({
   label,
@@ -103,34 +103,33 @@ export const NameserverSetup = ({
   );
 };
 
-// The manual path: where the provider takes records, plus a zone file import or copy-all.
+// The manual path: where the provider takes records, plus a zone file import where it has one.
 export const RecordSetup = ({
   records,
-  zoneRecords,
+  existingZone,
   origin,
   provider,
   onSelectProvider,
   onUseNameservers,
 }: {
-  records: DnsHealthRecord[]; // what is copied
-  zoneRecords: DnsHealthRecord[]; // the zone file set (apex A, not ALIAS)
+  records: DnsHealthRecord[]; // the records the owner needs (apex A, not ALIAS)
+  existingZone?: boolean; // the zone is live, so an import has to add to it
   origin: string;
   provider: DnsProvider;
   onSelectProvider: (id: string) => void;
   onUseNameservers?: () => void;
 }) => {
-  if (!records.length) return null;
+  // Only what is missing: imports that add to a zone (Route 53, GoDaddy) reject the whole
+  // file when one record already exists
+  const missing = records.filter(isMissing);
+  if (!missing.length) return null;
 
-  const download = () => {
-    const url = URL.createObjectURL(
-      new Blob([toZoneFile(zoneRecords, origin)], { type: 'text/plain' })
-    );
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${stripDot(origin)}.zone`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const zoneImport =
+    provider.zoneImport && (provider.zoneImport.addsRecords || !existingZone)
+      ? provider.zoneImport
+      : undefined;
+  const [first, ...rest] = provider.steps;
+  const steps = zoneImport ? [first, zoneImport.step, ...rest] : provider.steps;
 
   return (
     <div className="flex flex-col gap-3">
@@ -148,7 +147,7 @@ export const RecordSetup = ({
         onSelectProvider={onSelectProvider}
       />
       <ol className="flex flex-col gap-2.5">
-        {provider.steps.map((step, i) => (
+        {steps.map((step, i) => (
           <li key={step} className="flex items-start gap-3 text-sm">
             <span className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-medium dark:bg-gray-700">
               {i + 1}
@@ -158,13 +157,13 @@ export const RecordSetup = ({
         ))}
       </ol>
       <div className="flex flex-row flex-wrap items-center gap-2">
-        {provider.supportsZoneImport ? (
+        {zoneImport ? (
           <ActionButton
             type="primary"
             size="none"
             className={BTN}
             icon={Download}
-            onClick={download}
+            onClick={() => downloadZoneFile(missing, origin)}
           >
             {t('Download zone file')}
           </ActionButton>

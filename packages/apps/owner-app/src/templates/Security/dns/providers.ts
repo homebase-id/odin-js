@@ -8,9 +8,13 @@ export interface DnsProvider {
   id: string;
   name: string;
   dnsUrl?: string;
-  // Can a BIND zone file be uploaded in the web UI? Decides whether the download is the
-  // primary action or the fallback.
-  supportsZoneImport: boolean;
+  // Can a BIND zone file be imported in the web UI? `addsRecords`: it imports into a zone
+  // that already has records, adding to them - so the file carries only what is missing,
+  // since Route 53 and GoDaddy reject the whole import if any record already exists.
+  // Without it the import only suits a new zone; an existing one gets the records by hand.
+  zoneImport?: { step: string; addsRecords: boolean };
+  // Adding the records by hand. The import step, when the download is offered, goes in
+  // after the first step.
   steps: string[];
   // Where the DS record goes, for the DNSSEC block
   dsHint: string;
@@ -23,11 +27,13 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'cloudflare',
     name: 'Cloudflare',
     dnsUrl: 'https://dash.cloudflare.com/?to=/:account/:zone/dns/records',
-    supportsZoneImport: true,
+    zoneImport: {
+      step: 'Fastest: Import and Export > Import DNS records, and upload the zone file below.',
+      addsRecords: true,
+    },
     steps: [
       'Open your domain, then DNS > Records.',
-      'Fastest: Import and Export > Import DNS records, and upload the zone file below.',
-      'Or click Add record for each record below.',
+      'Click Add record for each record below.',
       'Set Proxy status to "DNS only" (grey cloud) on every record.',
     ],
     dsHint:
@@ -39,7 +45,6 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'namecheap',
     name: 'Namecheap',
     dnsUrl: 'https://ap.www.namecheap.com/domains/list/',
-    supportsZoneImport: false,
     steps: [
       'Domain List > Manage next to your domain > Advanced DNS.',
       'Under Host Records, click Add New Record for each record below.',
@@ -53,11 +58,13 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'godaddy',
     name: 'GoDaddy',
     dnsUrl: 'https://dcc.godaddy.com/control/portfolio',
-    supportsZoneImport: true,
+    zoneImport: {
+      step: 'Fastest: Actions > Import Zone File, and upload the zone file below.',
+      addsRecords: true,
+    },
     steps: [
       'Open your domain, then DNS.',
-      'Fastest: Actions > Import Zone File, and upload the zone file below.',
-      'Or click Add New Record for each record below ("@" is the root domain).',
+      'Click Add New Record for each record below ("@" is the root domain).',
     ],
     dsHint: 'Domain > DNS > DNSSEC > DS Records (shown when not using GoDaddy nameservers).',
     nameserverHint:
@@ -67,7 +74,6 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'porkbun',
     name: 'Porkbun',
     dnsUrl: 'https://porkbun.com/account/domainsSpeedy',
-    supportsZoneImport: false,
     steps: [
       'Domain Management > DNS next to your domain.',
       'Add each record below. Leave Host empty for the root domain ("@").',
@@ -79,7 +85,6 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'squarespace',
     name: 'Squarespace',
     dnsUrl: 'https://account.squarespace.com/domains',
-    supportsZoneImport: false,
     steps: [
       'Domains > your domain > DNS > DNS Settings.',
       'Under Custom Records, click Add record for each record below ("@" is the root domain).',
@@ -91,11 +96,13 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'route53',
     name: 'Route 53',
     dnsUrl: 'https://console.aws.amazon.com/route53/v2/hostedzones',
-    supportsZoneImport: true,
+    zoneImport: {
+      step: 'Fastest: Import zone file, and paste the zone file below.',
+      addsRecords: true,
+    },
     steps: [
       'Hosted zones > open your zone.',
-      'Fastest: Import zone file, and paste the zone file below.',
-      'Or Create record for each record below. Leave the name empty for the root domain ("@").',
+      'Create record for each record below. Leave the name empty for the root domain ("@").',
     ],
     dsHint:
       'Registered domains > your domain > DNSSEC keys > Add. For a subdomain, add a DS record in the parent hosted zone.',
@@ -105,24 +112,25 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'hetzner',
     name: 'Hetzner',
     dnsUrl: 'https://console.hetzner.cloud/',
-    supportsZoneImport: true,
-    steps: [
-      'Cloud Console > DNS > Zones.',
-      'Fastest: import the zone file below when adding the zone.',
-      'Or open the zone and add each record below.',
-    ],
+    // ponytail: import documented only when creating a zone; switch addsRecords on if an
+    // existing-zone import that keeps current records turns up
+    zoneImport: {
+      step: 'Fastest: import the zone file below when adding the zone.',
+      addsRecords: false,
+    },
+    steps: ['Cloud Console > DNS > Zones.', 'Open the zone and add each record below.'],
     dsHint: 'Add the DS record at the registrar where your domain is registered.',
   },
   {
     id: 'ovh',
     name: 'OVHcloud',
     dnsUrl: 'https://www.ovh.com/manager/#/web/domain',
-    supportsZoneImport: true,
-    steps: [
-      'Domain names > your domain > DNS zone.',
-      'Fastest: Edit in text mode, and paste the zone file below.',
-      'Or Add an entry for each record below.',
-    ],
+    // Text mode is the whole zone: pasting over it would delete every other record
+    zoneImport: {
+      step: 'Fastest: Edit in text mode, add the record lines from the zone file below at the end (not the $ORIGIN and $TTL lines), and save.',
+      addsRecords: true,
+    },
+    steps: ['Domain names > your domain > DNS zone.', 'Add an entry for each record below.'],
     // ponytail: OVH asks for the DNSKEY public key, which the health check does not return
     dsHint:
       'Domain > DS records (with external nameservers). OVH asks for the public key rather than the digest - copy it from your DNS host.',
@@ -131,7 +139,6 @@ export const DNS_PROVIDERS: DnsProvider[] = [
     id: 'digitalocean',
     name: 'DigitalOcean',
     dnsUrl: 'https://cloud.digitalocean.com/networking/domains',
-    supportsZoneImport: false,
     steps: [
       'Networking > Domains > your domain.',
       'Add each record below. Use "@" for the root domain.',
@@ -141,10 +148,9 @@ export const DNS_PROVIDERS: DnsProvider[] = [
   {
     id: 'other',
     name: 'Other',
-    supportsZoneImport: false,
     steps: [
       'Open the DNS settings at your registrar or DNS host.',
-      'Add each record below. "@" means the root domain. If it offers a zone file import, use the zone file below.',
+      'Add each record below. "@" means the root domain.',
     ],
     dsHint: 'Registrars usually have a separate DNSSEC section where the DS record is entered.',
   },
