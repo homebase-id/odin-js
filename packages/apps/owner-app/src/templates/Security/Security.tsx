@@ -70,6 +70,7 @@ const Security = () => {
                 ) : null}
               </span>
             ),
+            text: dnsNeedsAttention ? 'DNS •' : 'DNS',
             path: `/owner/security/dns`,
           },
           {
@@ -81,6 +82,7 @@ const Security = () => {
                 ) : null}
               </span>
             ),
+            text: emailNeedsAttention ? 'Email •' : 'Email',
             path: `/owner/security/email`,
           },
         ]}
