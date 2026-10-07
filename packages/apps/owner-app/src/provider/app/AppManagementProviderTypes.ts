@@ -116,6 +116,8 @@ export interface RedactedAppRegistration {
 
   corsHostName?: string;
   isRevoked: boolean;
+  /** The owner console or a platform app: it can be revoked, not uninstalled. */
+  isBuiltIn?: boolean;
   grant: RedactedExchangeGrant;
   circleMemberPermissionSetGrantRequest: {
     permissionSet: PermissionSet;

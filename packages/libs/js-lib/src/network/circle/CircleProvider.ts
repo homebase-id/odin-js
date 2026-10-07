@@ -207,9 +207,17 @@ export const enableCircle = async (dotYouClient: DotYouClient, circleId: string)
     .catch(dotYouClient.handleErrorResponse);
 };
 
-export const removeCircle = async (dotYouClient: DotYouClient, circleId: string) => {
+/**
+ * Deletes a circle. The server refuses a circle that still has members unless `removeMembers` is
+ * set, in which case it first revokes the circle from every member (identities and domains).
+ */
+export const removeCircle = async (
+  dotYouClient: DotYouClient,
+  circleId: string,
+  options?: { removeMembers?: boolean }
+) => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/delete';
+  const url = root + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
 
   return client
     .post(url, circleId)

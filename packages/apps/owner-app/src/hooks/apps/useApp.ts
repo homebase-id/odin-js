@@ -1,4 +1,5 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { invalidateDriveRemoval } from '../drives/useDrive';
 import { DotYouClient, ensureDrive } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
@@ -8,7 +9,7 @@ import {
   AllowApp,
   GetAppRegistration,
   RegisterApp,
-  RemoveApp,
+  UninstallApp,
   RevokeApp,
   UpdateAuthorizedCircles,
   UpdatePermissions,
@@ -121,8 +122,14 @@ export const useApp = ({ appId }: { appId?: string }) => {
     return await AllowApp(dotYouClient, { appId: appId });
   };
 
-  const removeAppInternal = async ({ appId }: { appId: string }) => {
-    return await RemoveApp(dotYouClient, { appId: appId });
+  const uninstallAppInternal = async ({
+    appId,
+    deleteOwnedCirclesAndDrives,
+  }: {
+    appId: string;
+    deleteOwnedCirclesAndDrives: boolean;
+  }) => {
+    return await UninstallApp(dotYouClient, { appId, deleteOwnedCirclesAndDrives });
   };
 
   const updateAuthorizedCircles = async ({
@@ -200,11 +207,12 @@ export const useApp = ({ appId }: { appId?: string }) => {
         console.error(ex);
       },
     }),
-    removeApp: useMutation({
-      mutationFn: removeAppInternal,
+    // Its circles and drives may go with it, and other apps lose those circles from their grants.
+    uninstallApp: useMutation({
+      mutationFn: uninstallAppInternal,
       onSuccess: (data, param) => {
         invalidateApp(queryClient, param.appId);
-        invalidateApps(queryClient);
+        invalidateDriveRemoval(queryClient);
       },
       onError: (ex) => {
         console.error(ex);

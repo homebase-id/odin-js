@@ -17,6 +17,7 @@ import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { DriveDefinition } from '@homebase-id/js-lib/core';
 import { CircleDefinition } from '@homebase-id/js-lib/network';
 import CardLink from '../../../components/ui/Buttons/CardLink';
+import { DrivePurgeStatus } from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { isOwnerConsoleApp } from '../../../hooks/apps/useOwnerAppName';
@@ -54,6 +55,7 @@ const AppsDashboard = () => {
   return (
     <>
       <PageMeta icon={Grid} title={t('Apps')} />
+      <DrivePurgeStatus className="mb-5" />
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">

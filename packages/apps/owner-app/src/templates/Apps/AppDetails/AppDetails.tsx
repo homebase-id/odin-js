@@ -1,11 +1,12 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { DrivePurgeStatus } from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import { useApp } from '../../../hooks/apps/useApp';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { useEnrollmentCandidates } from '../../../hooks/apps/useEnrollmentCandidates';
 import { EnrollCandidatesDialog } from '../../../components/Circles/EnrollCandidatesDialog/EnrollCandidatesDialog';
@@ -56,7 +57,7 @@ const AppDetails = () => {
     fetch: { data: app, isLoading: appLoading },
     revokeApp: { mutate: revokeApp, status: revokeAppStatus, error: revokeAppError },
     allowApp: { mutate: allowApp, status: allowAppStatus, error: allowAppError },
-    removeApp: { mutateAsync: removeApp, status: removeAppStatus, error: removeAppError },
+    uninstallApp: { mutateAsync: uninstallApp, status: uninstallAppStatus, error: uninstallAppError },
     updateAuthorizedCircles: {
       mutate: updateCircles,
       status: updateCirclesState,
@@ -120,7 +121,8 @@ const AppDetails = () => {
 
   return (
     <>
-      <ErrorNotification error={allowAppError || revokeAppError || removeAppError} />
+      <ErrorNotification error={allowAppError || revokeAppError || uninstallAppError} />
+      <DrivePurgeStatus appId={decodedAppKey} className="mb-5" />
       <PageMeta
         icon={Grid}
         browserTitle={app.name}
@@ -135,73 +137,26 @@ const AppDetails = () => {
           { title: app.name ?? '' },
         ]}
         actions={
-          <>
-            {app.isRevoked ? (
-              <>
-                <ActionButton
-                  type="primary"
-                  className="my-auto"
-                  onClick={() => allowApp({ appId: decodedAppKey })}
-                  state={allowAppStatus}
-                  icon={Refresh}
-                  confirmOptions={{
-                    type: 'info',
-                    title: t('Restore App'),
-                    buttonText: t('Restore'),
-                    body: `${t('Are you sure you want to restore')} ${app.name} ${t(
-                      'and allow access to your identity'
-                    )}`,
-                  }}
-                >
-                  {t('Restore app')}
-                </ActionButton>
-                <ActionButton
-                  type="remove"
-                  className="my-auto"
-                  onClick={async () => {
-                    await removeApp({ appId: decodedAppKey });
-                    navigate('/owner/apps');
-                  }}
-                  state={removeAppStatus}
-                  icon={Trash}
-                  confirmOptions={{
-                    type: 'critical',
-                    title: t('Remove App'),
-                    buttonText: t('Remove'),
-                    body: `${t('Are you sure you want to remove')} ${app.name}? ${t(
-                      'It will no longer have access to your identity. The linked drives and data will remain.'
-                    )}`,
-                    trickQuestion: {
-                      question: `${t('Fill in the name of the app')} (${app.name}) ${t(
-                        'to confirm:'
-                      )}`,
-                      answer: app.name,
-                    },
-                  }}
-                >
-                  {t('Remove app')}
-                </ActionButton>
-              </>
-            ) : (
-              <ActionButton
-                type="remove"
-                className="my-auto"
-                onClick={() => revokeApp({ appId: decodedAppKey })}
-                state={revokeAppStatus}
-                icon={Times}
-                confirmOptions={{
-                  type: 'warning',
-                  title: t('Revoke App'),
-                  buttonText: t('Revoke'),
-                  body: `${t('Are you sure you want to revoke')} ${app.name} ${t(
-                    'from all access to your identity'
-                  )}`,
-                }}
-              >
-                {t('Revoke app')}
-              </ActionButton>
-            )}
-          </>
+          // Restoring is safe, so it stays up here; revoking and uninstalling are in the danger zone below.
+          app.isRevoked ? (
+            <ActionButton
+              type="primary"
+              className="my-auto"
+              onClick={() => allowApp({ appId: decodedAppKey })}
+              state={allowAppStatus}
+              icon={Refresh}
+              confirmOptions={{
+                type: 'info',
+                title: t('Restore App'),
+                buttonText: t('Restore'),
+                body: `${t('Are you sure you want to restore')} ${app.name} ${t(
+                  'and allow access to your identity'
+                )}`,
+              }}
+            >
+              {t('Restore app')}
+            </ActionButton>
+          ) : null
         }
       />
 
@@ -532,6 +487,83 @@ const AppDetails = () => {
         </Section>
       </div>
 
+      <Section
+        title={
+          <>
+            {t('Danger zone')}
+            <small className="block text-sm font-normal text-slate-400">
+              {t('Revoking can be undone. Uninstalling cannot.')}
+            </small>
+          </>
+        }
+        className="border-red-500/60 dark:border-red-500/60"
+      >
+        <div className="flex flex-col gap-5">
+          <DangerAction
+            title={t('Revoke app')}
+            description={t(
+              'Cuts the app and every device using it off from your identity. Nothing is deleted, and you can restore it at any time.'
+            )}
+            hint={app.isRevoked ? t('Already revoked; restore it at the top of this page.') : undefined}
+          >
+            <ActionButton
+              type="remove"
+              onClick={() => revokeApp({ appId: decodedAppKey })}
+              state={revokeAppStatus}
+              icon={Times}
+              disabled={app.isRevoked}
+              confirmOptions={{
+                type: 'warning',
+                title: t('Revoke App'),
+                buttonText: t('Revoke'),
+                body: `${t('Are you sure you want to revoke')} ${app.name} ${t(
+                  'from all access to your identity'
+                )}`,
+              }}
+            >
+              {t('Revoke app')}
+            </ActionButton>
+          </DangerAction>
+
+          <DangerAction
+            title={t('Uninstall app')}
+            description={t(
+              'Deletes the app from your identity, with the circles and drives it owns and everything on them. Your connections lose everything it granted them.'
+            )}
+            hint={
+              app.isBuiltIn
+                ? t("Built-in apps can't be uninstalled; revoke it instead.")
+                : !app.isRevoked
+                  ? t('Revoke the app first.')
+                  : undefined
+            }
+          >
+            <ActionButton
+              type="remove"
+              onClick={async () => {
+                await uninstallApp({ appId: decodedAppKey, deleteOwnedCirclesAndDrives: true });
+                navigate('/owner/apps');
+              }}
+              state={uninstallAppStatus}
+              icon={Trash}
+              disabled={!!app.isBuiltIn || !app.isRevoked}
+              confirmOptions={{
+                type: 'critical',
+                title: t('Uninstall App'),
+                buttonText: t('Uninstall'),
+                body: uninstallWarning(app.name, ownedDrives, ownedCircles),
+                trickQuestion: {
+                  question: `${t('To confirm, type')} "${t('uninstall')} ${app.name}":`,
+                  answer: `${t('uninstall')} ${app.name}`,
+                },
+              }}
+            >
+              {t('Uninstall app')}
+            </ActionButton>
+          </DangerAction>
+        </div>
+      </Section>
+
       <CirclePermissionSelectorDialog
         title={`${t('Edit circles within')} "${app.name}"`}
         circleIds={app.authorizedCircles}
@@ -693,6 +725,53 @@ const ClientView = ({
     </div>
   );
 };
+
+/** One row of the danger zone: what the action does, why it is unavailable (if it is), and its button. */
+const DangerAction = ({
+  title,
+  description,
+  hint,
+  children,
+}: {
+  title: string;
+  description: string;
+  hint?: string;
+  children: ReactNode;
+}) => (
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="flex-grow">
+      <p className="font-medium">{title}</p>
+      <p className="text-sm text-slate-500">{description}</p>
+      {hint ? <p className="text-sm text-slate-400">{hint}</p> : null}
+    </div>
+    <div className="flex-shrink-0">{children}</div>
+  </div>
+);
+
+/** Names everything an uninstall deletes, so the owner confirms the actual drives and circles, not a category. */
+const uninstallWarning = (
+  appName: string,
+  ownedDrives: { name?: string }[],
+  ownedCircles: { name?: string }[]
+) =>
+  [
+    `${t('Uninstalling')} ${appName} ${t(
+      'deletes it from your identity, and your connections lose everything it granted them.'
+    )}`,
+    ownedDrives.length
+      ? `${t('These drives are deleted, with every file on them')}:\n${ownedDrives
+          .map((drive) => `  • ${drive.name}`)
+          .join('\n')}\n${t('To keep any of their files, export the drive from its page first.')}`
+      : undefined,
+    ownedCircles.length
+      ? `${t('These circles are deleted, and their members lose what the circles granted')}:\n${ownedCircles
+          .map((circle) => `  • ${circle.name}`)
+          .join('\n')}`
+      : undefined,
+    t('Copies your connections already received stay with them. This cannot be undone.'),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 
 export default AppDetails;
 
