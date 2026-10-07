@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useOwnerAppName } from '../../../hooks/apps/useOwnerAppName';
 import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -60,6 +60,7 @@ import {
 
 const CircleDetails = () => {
   const { circleKey } = useParams();
+  const navigate = useNavigate();
   const decodedCircleKey = circleKey ? decodeURIComponent(circleKey) : undefined;
   const {
     fetch: { data: circle, isLoading: circleLoading },
@@ -139,60 +140,61 @@ const CircleDetails = () => {
                     label: t('Edit Members'),
                     icon: Persons,
                   },
-                  ...(circle.disabled
+                  circle.disabled
+                    ? {
+                        icon: Check,
+                        onClick: () => {
+                          enableCircle({ circleId });
+                        },
+                        label: t('Enable Circle'),
+                      }
+                    : {
+                        icon: Block,
+                        onClick: () => disableCircle({ circleId }),
+                        confirmOptions: {
+                          title: `${t('Disable Circle')} ${circle.name}`,
+                          buttonText: t('Disable'),
+                          body: `${t('Are you sure you want to disable this circle')}`,
+                        },
+                        label: t('Disable Circle'),
+                      },
+                  // Listed while enabled too, greyed out, so the way to delete is visible.
+                  ...(canDelete
                     ? [
-                        ...(canDelete
-                          ? [
-                              {
-                                icon: Trash,
-                                // A circle with members is only deleted once they are removed;
-                                // the confirm below says so, and confirming asks the server to
-                                // revoke the circle from every member first.
-                                onClick: () =>
-                                  removeCircle({ circleId, removeMembers: memberCount > 0 }),
-                                confirmOptions: {
-                                  title: `${t('Remove Circle')} ${circle.name}`,
-                                  buttonText:
-                                    memberCount > 0 ? t('Remove members and delete') : t('Remove'),
-                                  body:
-                                    memberCount > 0
-                                      ? `${t('This circle has')} ${memberCount} ${
-                                          memberCount === 1 ? t('member') : t('members')
-                                        }. ${t(
-                                          'Remove them all and delete the circle? They will lose the access provided by the permissions of this circle.'
-                                        )}`
-                                      : t(
-                                          'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
-                                        ),
-                                  trickQuestion: {
-                                    question: `${t('To confirm, type')} "${t('delete')} ${circle.name}":`,
-                                    answer: `${t('delete')} ${circle.name}`,
-                                  },
-                                },
-                                label: t('Delete'),
-                              },
-                            ]
-                          : []),
                         {
-                          icon: Check,
-                          onClick: () => {
-                            enableCircle({ circleId });
+                          icon: Trash,
+                          disabled: !circle.disabled,
+                          hint: t('Disable the circle first'),
+                          // A circle with members is only deleted once they are removed; the
+                          // confirm below says so, and confirming asks the server to revoke the
+                          // circle from every member first.
+                          onClick: async () => {
+                            await removeCircle({ circleId, removeMembers: memberCount > 0 });
+                            navigate(getOwnerAppPath(circle.appId));
                           },
-                          label: t('Enable Circle'),
+                          confirmOptions: {
+                            title: `${t('Remove Circle')} ${circle.name}`,
+                            buttonText:
+                              memberCount > 0 ? t('Remove members and delete') : t('Remove'),
+                            body:
+                              memberCount > 0
+                                ? `${t('This circle has')} ${memberCount} ${
+                                    memberCount === 1 ? t('member') : t('members')
+                                  }. ${t(
+                                    'Remove them all and delete the circle? They will lose the access provided by the permissions of this circle.'
+                                  )}`
+                                : t(
+                                    'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
+                                  ),
+                            trickQuestion: {
+                              question: `${t('To confirm, type')} "${t('delete')} ${circle.name}":`,
+                              answer: `${t('delete')} ${circle.name}`,
+                            },
+                          },
+                          label: t('Delete'),
                         },
                       ]
-                    : [
-                        {
-                          icon: Block,
-                          onClick: () => disableCircle({ circleId }),
-                          confirmOptions: {
-                            title: `${t('Disable Circle')} ${circle.name}`,
-                            buttonText: t('Disable'),
-                            body: `${t('Are you sure you want to disable this circle')}`,
-                          },
-                          label: t('Disable Circle'),
-                        },
-                      ]),
+                    : []),
                 ]}
               >
                 {t('More')}
