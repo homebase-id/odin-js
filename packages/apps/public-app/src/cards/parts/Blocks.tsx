@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
-import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
+import { Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
 import {
   CARD_FOCUS as focus,
   type BlockKind,
@@ -11,11 +11,6 @@ import {
 import type { CardData, CardLink, CardPost } from '../useCardData';
 import { POSTS_HREF } from './posts';
 import { CardImg } from './CardImg';
-
-// The chat web app is retired, so there is nowhere on the web to open a chat; callers hide the
-// chat action when this is undefined, as they always did for the owner.
-// eslint-disable-next-line react-refresh/only-export-components, @typescript-eslint/no-unused-vars
-export const useChatHref = (owner: string): string | undefined => undefined;
 
 // "https://www.github.com/homebase-id/" -> "github.com/homebase-id", as the dossier rows print it
 // eslint-disable-next-line react-refresh/only-export-components
@@ -154,33 +149,20 @@ export const isUsableLink = (link: CardLink) =>
 // Whether a block would render anything at all, so callers can drop it (and CardBlocks itself,
 // or a layout's own section heading) instead of showing an empty nav or an orphaned title.
 // eslint-disable-next-line react-refresh/only-export-components
-export const hasBlockContent = (kind: BlockKind, data: CardData, chatHref?: string) => {
-  if (kind === 'chat') return !!chatHref;
+export const hasBlockContent = (kind: BlockKind, data: CardData) => {
   // A phone visitor should be able to reach posts even before any post has an image
   if (kind === 'moments') return data.posts.length > 0;
   if (kind === 'links') return data.links.some(isUsableLink);
   return false; // posts are rendered by desktop pages
 };
 
-export const CardBlock = ({
+const CardBlock = ({
   block,
   data,
-  chatHref,
 }: {
   block: { kind: BlockKind; presentation: Presentation };
   data: CardData;
-  chatHref: string | undefined;
 }) => {
-  if (block.kind === 'chat')
-    return chatHref ? (
-      <Item
-        presentation={block.presentation}
-        href={chatHref}
-        label={t('Chat with me')}
-        icon={ChatBubble}
-      />
-    ) : null;
-
   if (block.kind === 'moments') {
     if (!data.posts.length) return null;
     // Zero thumbnails is fine: `boxed` falls back to a chevron, `row` never shows thumbs
@@ -225,18 +207,17 @@ export const CardBlocks = ({
   className,
   label,
 }: LayoutProps & { kinds?: BlockKind[]; className?: string; label?: string }) => {
-  const chatHref = useChatHref(data.odinId);
   const blocks = design.blocks.filter(
     (b) =>
       b.kind !== 'posts' &&
       (!kinds || kinds.includes(b.kind)) &&
-      hasBlockContent(b.kind, data, chatHref)
+      hasBlockContent(b.kind, data)
   );
   if (!blocks.length) return null;
   return (
     <nav aria-label={label ?? t('Links')} className={`flex flex-col gap-2 ${className ?? ''}`}>
       {blocks.map((block) => (
-        <CardBlock key={block.kind} block={block} data={data} chatHref={chatHref} />
+        <CardBlock key={block.kind} block={block} data={data} />
       ))}
     </nav>
   );

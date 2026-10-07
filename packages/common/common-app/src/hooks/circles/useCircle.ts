@@ -234,7 +234,6 @@ export const useCircle = (props?: { circleId?: string }) => {
       },
     }),
 
-
     revokeGrant: useMutation({
       mutationFn: revokeGrant,
       onSuccess: async (data, param) => {

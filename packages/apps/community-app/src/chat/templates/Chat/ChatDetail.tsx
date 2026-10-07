@@ -1,6 +1,5 @@
 import {
   ActionGroup,
-  CHAT_ROOT_PATH,
   ErrorBoundary,
   ErrorNotification,
   HybridLink,
@@ -16,16 +15,23 @@ import {
   ConversationWithYourselfId,
   UnifiedConversation,
 } from '../../providers/ConversationProvider';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
-import { ChatComposer, ChatComposerProps } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { ConversationAvatar } from '../../components/Chat/Conversations/Item/ConversationAvatar';
 import { ConversationTitle } from '../../components/Chat/Conversations/Item/ConversationTitle';
+
+export interface ChatComposerProps {
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
+  replyMsg: HomebaseFile<ChatMessage> | undefined;
+  clearReplyMsg: () => void;
+  onSend?: () => void;
+  tags?: string[];
+}
 
 export const ChatDetail = ({
   conversationId,
@@ -34,18 +40,17 @@ export const ChatDetail = ({
 }: {
   conversationId: string | undefined;
   communityTagId?: string;
-  options?: {
-    rootPath?: string;
-    composer?: FC<ChatComposerProps>;
+  options: {
+    rootPath: string;
+    composer: FC<ChatComposerProps>;
   };
 }) => {
-  const rootPath = options?.rootPath || CHAT_ROOT_PATH;
+  const { rootPath, composer: Composer } = options;
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
   const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
-  const Composer = useMemo(() => options?.composer || ChatComposer, [options]);
 
   if (!conversationId || isLoading || (!conversation && isFetched))
     return (

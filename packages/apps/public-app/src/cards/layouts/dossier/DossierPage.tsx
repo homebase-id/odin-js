@@ -10,14 +10,7 @@ import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import {
-  DossierAudience,
-  DossierContact,
-  hairline,
-  LocationLine,
-  SectionLabel,
-} from './DossierParts';
-import { contactFirst } from './contactFirst';
+import { DossierAudience, hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -44,8 +37,6 @@ const isoDate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 export const DossierPage = ({ design, data }: LayoutProps) => {
-  const first = contactFirst(design);
-  const contact = <DossierContact design={design} data={data} size="page" />;
   return (
     <div className="flex min-h-[inherit] flex-col">
       <TopBar data={data} />
@@ -55,9 +46,7 @@ export const DossierPage = ({ design, data }: LayoutProps) => {
         >
           <Identity design={design} data={data} />
           <div className="flex flex-col gap-[34px] pt-1">
-            {first && contact}
             <Elsewhere design={design} data={data} />
-            {!first && contact}
           </div>
         </div>
         <PostIndex data={data} />

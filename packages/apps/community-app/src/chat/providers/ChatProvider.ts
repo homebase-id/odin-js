@@ -57,7 +57,6 @@ import {
   stringGuidsEqual,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { appId } from '../hooks/auth/useAuth';
 import {
   createThumbnails,
   LinkPreview,
@@ -65,7 +64,7 @@ import {
   processVideoFile,
 } from '@homebase-id/js-lib/media';
 import { sendReadReceipt } from '@homebase-id/js-lib/peer';
-import { ellipsisAtMaxChar, getPlainTextFromRichText } from '@homebase-id/common-app';
+import { CHAT_APP_ID, ellipsisAtMaxChar, getPlainTextFromRichText } from '@homebase-id/common-app';
 import { STARRED_MSG_TAG } from '../hooks/chat/useChatToggleMessageStar';
 
 export const CHAT_MESSAGE_FILE_TYPE = 7878;
@@ -346,7 +345,7 @@ export const uploadChatMessage = async (
         sendContents: SendContents.All,
         useAppNotification: true,
         appNotificationOptions: {
-          appId: appId,
+          appId: CHAT_APP_ID,
           typeId: message.fileMetadata.appData.groupId || getNewId(),
           tagId: message.fileMetadata.appData.uniqueId || getNewId(),
           silent: false,

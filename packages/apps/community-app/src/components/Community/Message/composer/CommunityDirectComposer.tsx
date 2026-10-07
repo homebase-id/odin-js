@@ -15,7 +15,7 @@ import {
 import { useState, FC, useRef, lazy, useMemo, useCallback, useEffect, Suspense, memo } from 'react';
 
 import { getNewId, isTouchDevice } from '@homebase-id/js-lib/helpers';
-import { ChatComposerProps } from '../../../../chat/components/Chat/Composer/ChatComposer';
+import { ChatComposerProps } from '../../../../chat/templates/Chat/ChatDetail';
 import { HomebaseFile, NewMediaFile, RichText } from '@homebase-id/js-lib/core';
 import { useChatMessage } from '../../../../chat/hooks/chat/useChatMessage';
 import { Plus, PaperPlane, Times } from '@homebase-id/common-app/icons';

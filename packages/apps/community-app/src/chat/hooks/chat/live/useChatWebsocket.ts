@@ -2,7 +2,6 @@ import {
   useDotYouClientContext,
   insertNewNotification,
   incrementAppIdNotificationCount,
-  useWebsocketSubscriber,
 } from '@homebase-id/common-app';
 import {
   HomebaseFile,
@@ -21,7 +20,6 @@ import {
   CHAT_CONVERSATION_FILE_TYPE,
   dsrToConversation,
 } from '../../../providers/ConversationProvider';
-import { websocketDrives } from '../../auth/useAuth';
 import {
   insertNewMessage,
   insertNewMessagesForConversation,
@@ -32,29 +30,6 @@ import { getConversationQueryOptions, restoreChat, useConversation } from '../us
 import { insertNewConversation, invalidateConversations } from '../useConversations';
 
 const isDebug = hasDebugFlag();
-
-export const useChatWebsocket = (isEnabled: boolean) => {
-  const queryClient = useQueryClient();
-  const { chatHandler } = useChatSocketHandler();
-
-  return useWebsocketSubscriber(
-    isEnabled ? chatHandler : undefined,
-    undefined,
-    [
-      'fileAdded',
-      'fileModified',
-      'fileDeleted',
-      'reactionContentAdded',
-      'reactionContentDeleted',
-      'statisticsChanged',
-      'appNotificationAdded',
-    ],
-    websocketDrives,
-    () => queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] }),
-    () => queryClient.invalidateQueries({ queryKey: ['process-chat-inbox'] }),
-    'useLiveChatProcessor'
-  );
-};
 
 export const useChatSocketHandler = () => {
   const dotYouClient = useDotYouClientContext();

@@ -52,13 +52,19 @@ describe('applyOverrides', () => {
       },
       type: { display: 'comic-sans', text: 3, displayCase: 'shout' },
       portraits: [{ shape: 'star', source: 'x' }, 'nope', { shape: 'square', ring: 99, tilt: 'a' }],
-      blocks: [{ kind: 'video' }, { kind: 'chat', presentation: 'neon' }, { kind: 'chat' }, 7],
+      blocks: [
+        { kind: 'video' },
+        { kind: 'chat' }, // retired with the chat web app; stored designs may still name it
+        { kind: 'links', presentation: 'neon' },
+        { kind: 'links' },
+        7,
+      ],
       socials: 'rainbow',
     });
     expect(design.palette).toEqual(board.palette);
     expect(design.type).toEqual(board.type);
     expect(design.portraits).toEqual([{ ...board.portraits[0], shape: 'circle' }]);
-    expect(design.blocks).toEqual([{ kind: 'chat', presentation: 'boxed' }]);
+    expect(design.blocks).toEqual([{ kind: 'links', presentation: 'boxed' }]);
     expect(design.socials).toBe(board.socials);
   });
 

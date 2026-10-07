@@ -44,7 +44,7 @@ const order = (html: string) => ({
 });
 
 const LINKS_FIRST = {
-  blocks: [{ kind: 'posts' }, { kind: 'chat' }, { kind: 'links' }, { kind: 'moments' }],
+  blocks: [{ kind: 'posts' }, { kind: 'links' }, { kind: 'moments' }],
 };
 const MOMENTS_FIRST = {
   blocks: [{ kind: 'moments' }, { kind: 'links' }],
@@ -60,19 +60,6 @@ describe('section order override', () => {
       expect(linksFirst.moments).toBeGreaterThan(-1);
       expect(linksFirst.links).toBeLessThan(linksFirst.moments);
       expect(momentsFirst.moments).toBeLessThan(momentsFirst.links);
-    }
-  );
-});
-
-// The chat web app is retired, so a chat block has nowhere to link and every layout drops it
-describe('chat block', () => {
-  it.each(['poster', 'board', 'collage', 'dossier'] as const)(
-    '%s card offers no chat and still renders the other blocks',
-    (layout) => {
-      const html = render(layout, LINKS_FIRST);
-      expect(html).not.toContain('/apps/chat/');
-      expect(html).not.toContain('open a chat');
-      expect(html).toContain('Shire Weekly');
     }
   );
 });
