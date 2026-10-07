@@ -63,11 +63,25 @@ test('json is pretty-printed', () => {
   assert.equal(json.textContent, JSON.stringify({ a: [1, 2] }, null, 2));
 });
 
-test('unpreviewable files get the not-available card, not a link', () => {
+test('unpreviewable files get the not-available card under their name and size, not a link', () => {
   const card = renderPreviewBody(file('x.zip', 'application/zip', 'PK'));
   assert.match(card.textContent, /Preview not available/);
-  assert.match(card.textContent, /x\.zip/);
   assertNoDownload(card);
+  const item = renderPreviewList([file('x.zip', 'application/zip', 'PK')]);
+  assert.match(item.textContent, /x\.zip/);
+  assert.match(item.textContent, /2 B/);
+});
+
+test('markdown is formatted from tokens: raw html stays text and unsafe links are not links', async () => {
+  const md = renderPreviewBody(
+    file('n.md', 'text/markdown', `# Notes\n\nThe **key** is \`4417\` [x](javascript:alert(1))\n\n${HOSTILE}\n`)
+  );
+  await new Promise((r) => setTimeout(r, 100));
+  const nodes = walk(md);
+  assert.ok(nodes.some((e) => e.tagName === 'STRONG' && e.textContent === 'key'));
+  assert.ok(nodes.some((e) => e.tagName === 'CODE' && e.textContent === '4417'));
+  assert.equal(nodes.some((e) => e.tagName === 'IMG' || e.tagName === 'A'), false);
+  assert.ok(md.textContent.includes(HOSTILE));
 });
 
 test('oversized text is capped at 2 MB with a note', () => {

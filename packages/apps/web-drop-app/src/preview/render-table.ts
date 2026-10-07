@@ -1,4 +1,4 @@
-import { h, notice, scrollable, type PreviewFile } from './dom';
+import { h, metaPart, notice, scrollable, type PreviewFile, type PreviewSlots } from './dom';
 import { decodeCapped } from './render-text';
 import { PREVIEW_STRINGS as S } from './strings';
 
@@ -61,13 +61,27 @@ const numericColumns = (body: string[][]): Set<number> => {
 const isTsv = (file: PreviewFile) =>
   file.contentType.toLowerCase().includes('tab-separated') || file.name.toLowerCase().endsWith('.tsv');
 
-export function renderTable(file: PreviewFile): HTMLElement {
+/** Keeps the end-edge fade and the scroll hint in step with whether more columns are off-screen. */
+const trackOverflow = (scroller: HTMLElement, frame: HTMLElement, hint: HTMLElement | null) => {
+  const update = () => {
+    const room = scroller.scrollWidth - scroller.clientWidth;
+    const atEnd = room - Math.abs(scroller.scrollLeft) <= 2; // scrollLeft runs negative in RTL
+    frame.classList.toggle('more-end', room > 2 && !atEnd);
+    frame.classList.toggle('more-start', Math.abs(scroller.scrollLeft) > 2);
+    if (hint) hint.hidden = room <= 2;
+  };
+  scroller.addEventListener('scroll', update, { passive: true });
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(update).observe(scroller);
+};
+
+export function renderTable(file: PreviewFile, slots?: PreviewSlots): HTMLElement {
   const { text, truncated } = decodeCapped(file.bytes);
   const { rows, more } = parseCsv(text, isTsv(file) ? '\t' : ',', MAX_TABLE_ROWS);
+  const columns = Math.max(0, ...rows.map((r) => r.length));
 
   const wrap = h('div', 'preview-table-block');
+  const frame = h('div', 'preview-table-frame');
   const scroller = scrollable(h('div', 'preview-table-wrap'), S.scrollRegion(file.name));
-  scroller.setAttribute('dir', 'auto');
   const table = h('table', 'preview-table');
   const thead = h('thead');
   const tbody = h('tbody');
@@ -77,15 +91,28 @@ export function renderTable(file: PreviewFile): HTMLElement {
     cells.forEach((cell, c) => {
       // Short cells (dates, codes) stay on one line; only long prose wraps.
       const cls = numeric.has(c) ? 'num' : index > 0 && cell.length > WRAP_AFTER ? 'long' : undefined;
-      tr.appendChild(h(index === 0 ? 'th' : 'td', cls, cell));
+      const node = h(index === 0 ? 'th' : 'td', cls, cell);
+      node.setAttribute('dir', 'auto');
+      if (index === 0) node.setAttribute('scope', 'col');
+      tr.appendChild(node);
     });
     (index === 0 ? thead : tbody).appendChild(tr);
   });
   table.appendChild(thead);
   table.appendChild(tbody);
   scroller.appendChild(table);
-  wrap.appendChild(scroller);
+  frame.appendChild(scroller);
+  wrap.appendChild(frame);
   if (more) wrap.appendChild(notice(S.tableCapped(MAX_TABLE_ROWS)));
   else if (truncated) wrap.appendChild(notice(S.truncated));
+
+  let hint: HTMLElement | null = null;
+  if (slots) {
+    slots.meta.appendChild(metaPart(S.tableColumns(columns)));
+    hint = metaPart(S.tableScrollHint, 'preview-meta-part preview-scroll-hint');
+    hint.hidden = true;
+    slots.meta.appendChild(hint);
+  }
+  if (typeof scroller.classList !== 'undefined') trackOverflow(scroller, frame, hint);
   return wrap;
 }

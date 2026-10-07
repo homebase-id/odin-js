@@ -24,6 +24,9 @@ class El {
   setAttribute(k, v) {
     this.attributes[k] = String(v);
   }
+  removeAttribute(k) {
+    delete this.attributes[k];
+  }
   hasAttribute(k) {
     return k in this.attributes;
   }

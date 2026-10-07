@@ -7,9 +7,11 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "esbuild src/crypto.ts --format=esm --outfile=test/_build/crypto.mjs --log-level=silent && esbuild src/drop-source.ts src/preview/classify.ts src/preview/render.ts src/preview/render-table.ts src/screens/open.ts --bundle --format=esm --platform=node --outdir=test/_build/app --out-extension:.js=.mjs --external:pdfjs-dist --external:pdfjs-dist/* --log-level=silent && node --test test/crypto-vector.test.mjs test/classify.test.mjs test/drop-source.test.mjs test/preview.test.mjs"
+    "test": "esbuild src/crypto.ts --format=esm --outfile=test/_build/crypto.mjs --log-level=silent && esbuild src/drop-source.ts src/preview/classify.ts src/preview/render.ts src/preview/render-table.ts src/screens/open.ts --bundle --format=esm --platform=node --outdir=test/_build/app --out-extension:.js=.mjs --external:pdfjs-dist --external:pdfjs-dist/* --external:marked --external:heic-to --external:heic-to/* --log-level=silent && node --test test/crypto-vector.test.mjs test/classify.test.mjs test/drop-source.test.mjs test/preview.test.mjs"
   },
   "dependencies": {
+    "heic-to": "^1.6.5",
+    "marked": "^18.1.0",
     "pdfjs-dist": "^6.4.299"
   }
 }

@@ -1,7 +1,8 @@
 import { classify, type PreviewClass } from './classify';
-import { formatSize, h, type PreviewFile } from './dom';
+import { formatSize, h, metaPart, type PreviewFile, type PreviewSlots } from './dom';
 import { renderImage } from './render-image';
 import { renderJson } from './render-json';
+import { renderMarkdown } from './render-markdown';
 import { renderAudio, renderVideo } from './render-media';
 import { renderPdf } from './render-pdf';
 import { renderTable } from './render-table';
@@ -9,7 +10,10 @@ import { renderText } from './render-text';
 import { renderUnavailable } from './render-unavailable';
 import { PREVIEW_STRINGS as S } from './strings';
 
-export function renderPreviewBody(file: PreviewFile): HTMLElement {
+const isMarkdown = (file: PreviewFile) =>
+  /^text\/markdown\b/i.test(file.contentType) || /\.(md|markdown)$/i.test(file.name);
+
+export function renderPreviewBody(file: PreviewFile, slots?: PreviewSlots): HTMLElement {
   switch (classify(file.contentType, file.name)) {
     case 'image':
       return renderImage(file, false);
@@ -20,19 +24,17 @@ export function renderPreviewBody(file: PreviewFile): HTMLElement {
     case 'audio':
       return renderAudio(file);
     case 'pdf':
-      return renderPdf(file);
+      return renderPdf(file, slots);
     case 'text':
-      return renderText(file);
+      return isMarkdown(file) ? renderMarkdown(file, slots) : renderText(file);
     case 'json':
       return renderJson(file);
     case 'table':
-      return renderTable(file);
+      return renderTable(file, slots);
     default:
       return renderUnavailable(file);
   }
 }
-
-const SOURCE_MIMES = /^(text\/(markdown|html)|application\/(xhtml\+)?xml|text\/xml)/;
 
 /** "JPG image", "DOCX file": the extension the recipient recognises, not a raw mime string. */
 export function kindLabel(file: PreviewFile, kind: PreviewClass): string {
@@ -42,26 +44,55 @@ export function kindLabel(file: PreviewFile, kind: PreviewClass): string {
   return tag ? `${tag} ${S.kind[kind]}` : S.kind[kind].replace(/^./, (c) => c.toUpperCase());
 }
 
+/** Two lines at most; a clamped name becomes a toggle that shows the rest. */
+function fileName(file: PreviewFile): HTMLElement {
+  const name = h('p', 'preview-name');
+  name.setAttribute('title', file.name);
+  name.appendChild(h('bdi', undefined, file.name));
+  if (typeof ResizeObserver === 'undefined') return name;
+
+  const toggle = () => {
+    const open = name.classList.toggle('expanded');
+    name.setAttribute('aria-expanded', String(open));
+  };
+  const ro = new ResizeObserver(() => {
+    if (name.classList.contains('expanded') || name.scrollHeight <= name.clientHeight + 1) return;
+    ro.disconnect();
+    name.tabIndex = 0;
+    name.setAttribute('role', 'button');
+    name.setAttribute('aria-expanded', 'false');
+    name.setAttribute('aria-description', S.expandName);
+    name.addEventListener('click', toggle);
+    name.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+  ro.observe(name);
+  return name;
+}
+
 /** One inline preview per file. Nothing in here offers a download. */
 export function renderPreviewList(files: PreviewFile[]): HTMLElement {
   const list = h('ul', 'previews');
   for (const file of files) {
     const kind = classify(file.contentType, file.name);
-    const item = h('li', 'preview');
-    const caption = h('div', 'preview-caption');
-    const name = h('span', 'preview-name', file.name);
-    name.setAttribute('dir', 'auto');
-    caption.appendChild(name);
-    const meta = h('span', 'preview-meta', `${kindLabel(file, kind)} · ${formatSize(file.bytes.length)}`);
+    const item = h('li', `preview kind-${kind}`);
+    const head = h('div', 'preview-head');
+    head.appendChild(fileName(file));
+    const meta = h('p', 'preview-meta');
     meta.setAttribute('title', file.contentType);
-    caption.appendChild(meta);
-    item.appendChild(caption);
+    meta.appendChild(metaPart(kindLabel(file, kind)));
+    meta.appendChild(metaPart(formatSize(file.bytes.length)));
+    head.appendChild(meta);
+    item.appendChild(head);
 
-    item.appendChild(renderPreviewBody(file));
-
-    if (kind === 'text' && SOURCE_MIMES.test(file.contentType.toLowerCase())) {
-      item.appendChild(h('p', 'preview-note', S.shownAsSource));
-    }
+    const tools = h('div', 'preview-tools');
+    const body = renderPreviewBody(file, { meta, tools });
+    if (tools.children.length > 0) item.appendChild(tools);
+    item.appendChild(body);
     list.appendChild(item);
   }
   return list;

@@ -1,3 +1,4 @@
+import { codeBlock, grammarFor } from './code';
 import { h, notice, scrollable, type PreviewFile } from './dom';
 import { PREVIEW_STRINGS as S } from './strings';
 
@@ -10,8 +11,9 @@ export function decodeCapped(bytes: Uint8Array): { text: string; truncated: bool
   return { text, truncated };
 }
 
+/** Prose: wrapped, no gutter, direction from its own first strong character. */
 export const textBlock = (file: PreviewFile, text: string): HTMLElement => {
-  const pre = scrollable(h('pre', 'preview-text', text), S.scrollRegion(file.name));
+  const pre = scrollable(h('pre', 'preview-text preview-prose', text), S.scrollRegion(file.name));
   pre.setAttribute('dir', 'auto');
   return pre;
 };
@@ -24,8 +26,11 @@ export const withTruncationNote = (pre: HTMLElement, truncated: boolean): HTMLEl
   return wrap;
 };
 
-// Source is shown as source - html, xml and markdown are never rendered, only read as text.
+const PROSE = /^text\/plain\b/;
+
+// Source is shown as source - html and xml are never rendered, only read as text.
 export function renderText(file: PreviewFile): HTMLElement {
   const { text, truncated } = decodeCapped(file.bytes);
-  return withTruncationNote(textBlock(file, text), truncated);
+  const prose = PROSE.test(file.contentType.toLowerCase()) && grammarFor(file) === null;
+  return withTruncationNote(prose ? textBlock(file, text) : codeBlock(file, text, 'code'), truncated);
 }

@@ -18,14 +18,42 @@ export function h<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-export const notice = (text: string): HTMLElement => h('p', 'preview-note', text);
+/** Header slots a renderer may fill: extra meta text, and controls that sit above the body. */
+export interface PreviewSlots {
+  meta: HTMLElement;
+  tools: HTMLElement;
+}
+
+export const notice = (text: string): HTMLElement => {
+  const p = h('p', 'preview-note', text);
+  p.setAttribute('dir', 'auto');
+  return p;
+};
+
+export const metaPart = (text: string, className = 'preview-meta-part'): HTMLElement => {
+  // bdi keeps "38.1 KB" in order on a right-to-left page; the separator stays outside it
+  const part = h('span', className);
+  part.appendChild(h('bdi', undefined, text));
+  return part;
+};
+
+export const toolButton = (text: string, label?: string): HTMLButtonElement => {
+  const button = h('button', 'preview-tool', text);
+  button.type = 'button';
+  if (label) button.setAttribute('aria-label', label);
+  return button;
+};
+
+export const blockContextMenu = (node: HTMLElement) => node.addEventListener('contextmenu', (e) => e.preventDefault());
 
 /** The "could not show it" state: the file is fine, this browser is not. */
 export const fallback = ({ title, body }: { title: string; body: string }): HTMLElement => {
   const box = h('div', 'preview-fallback');
   box.setAttribute('role', 'status');
-  box.appendChild(h('p', 'preview-fallback-title', title));
-  box.appendChild(h('p', 'preview-note', body));
+  const head = h('p', 'preview-fallback-title', title);
+  head.setAttribute('dir', 'auto');
+  box.appendChild(head);
+  box.appendChild(notice(body));
   return box;
 };
 

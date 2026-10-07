@@ -18,15 +18,18 @@ const formatRemaining = (ms: number) => {
 };
 
 const VIEW_ONLY_BANNER = `
-  <section class="view-only-banner" role="note" aria-labelledby="view-only-title">
+  <section class="view-only-banner" role="note" aria-labelledby="view-only-title" aria-describedby="view-only-text">
     <p id="view-only-title" class="view-only-badge">
       <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
         <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
         <circle cx="12" cy="12" r="3" fill="currentColor"/>
       </svg>
-      View only
+      <span>View only</span>
     </p>
-    <p class="view-only-text">These files open here, in your browser. The sender asked that they not be downloaded or saved.</p>
+    <div id="view-only-text" class="view-only-text" dir="auto">
+      <p>These files open here, in your browser. The sender asked that they not be downloaded or saved.</p>
+      <p class="view-only-honest">This page discourages saving, but it can't stop screenshots or copies.</p>
+    </div>
   </section>`;
 
 /** The open screen markup. View-only drops get a #previews slot and never an `<a download>`. */
@@ -45,11 +48,11 @@ export function openScreenHtml(
       ${
         deadline > 0
           ? `<section class="countdown-block">
-               <p class="countdown-label">This drop will self-destruct in</p>
+               <p class="countdown-label" dir="auto">This drop will self-destruct in</p>
                <p id="countdown" class="countdown">--:--</p>
                <div class="fuse"><div id="fuse-burn" class="fuse-burn"></div></div>
              </section>`
-          : '<p class="countdown-label">This drop does not expire.</p>'
+          : '<p class="countdown-label" dir="auto">This drop does not expire.</p>'
       }
 
       ${
@@ -71,7 +74,7 @@ export function openScreenHtml(
 
       <button id="destroy" class="destroy-button">I'm done &mdash; destroy it now</button>
 
-      <footer class="fineprint">
+      <footer class="fineprint" dir="auto">
         ${
           viewOnly
             ? 'View only: downloading is discouraged, not prevented'

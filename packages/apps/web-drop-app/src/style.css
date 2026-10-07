@@ -887,14 +887,22 @@ body.theme-clean .destroy-button:hover {
   50% { opacity: 0; }
 }
 
+
 /* --- view-only previews --------------------------------------------------------------------- */
 
-/* on body, not :root, so the mixes resolve against each theme's own --ground and --ink */
+/* on body, not :root, so the mixes resolve against each theme's own --ground, --ink and accents */
 body {
   color-scheme: dark; /* native video/audio controls and scrollbars follow the theme */
   --radius: 0;
   --inset: color-mix(in srgb, var(--ground) 70%, var(--panel));
   --stripe: color-mix(in srgb, var(--ink) 4%, transparent);
+  /* accents lifted toward the text colour so small text clears 4.5:1 on every theme */
+  --signal-ink: color-mix(in srgb, var(--signal) 72%, var(--ink));
+  --tok-key: var(--signal-ink);
+  --tok-str: color-mix(in srgb, var(--ok) 80%, var(--ink));
+  --tok-num: color-mix(in srgb, var(--amber) 55%, var(--ink));
+  --tok-prop: var(--ink);
+  --tok-com: var(--dim);
 }
 
 body.theme-clean {
@@ -907,16 +915,35 @@ body.theme-clean {
   outline-offset: 3px;
 }
 
+/* the red-outlined button needs a ring that is not also red */
+.destroy-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.view-only [hidden] {
+  display: none !important;
+}
+
 .screen.view-only {
   max-width: 60rem;
+}
+
+.view-only .fineprint {
+  opacity: 1;
+}
+
+.view-only .homebase-cta {
+  color: var(--signal-ink);
+  border-bottom-color: currentColor;
 }
 
 .view-only-banner {
   width: min(52rem, 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   background: var(--panel);
   border: 1px solid var(--line);
   border-inline-start: 3px solid var(--signal);
@@ -930,7 +957,7 @@ body.theme-clean {
   gap: 0.45rem;
   flex: none;
   padding: 0.3rem 0.6rem;
-  color: var(--ink); /* the signal colour is under 4.5:1 for text this small; it marks the edge */
+  color: var(--ink);
   border: 1px solid var(--signal);
   border-radius: var(--radius);
   font-size: 0.72rem;
@@ -941,19 +968,26 @@ body.theme-clean {
 }
 
 .view-only-badge svg {
-  color: var(--signal);
+  color: var(--signal-ink);
 }
 
 .view-only-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   color: var(--ink);
   font-size: 0.8rem;
   line-height: 1.5;
 }
 
+.view-only-honest {
+  color: var(--dim);
+  font-size: 0.75rem;
+}
+
 @media (max-width: 30rem) {
   .view-only-banner {
     flex-direction: column;
-    align-items: flex-start;
   }
 }
 
@@ -967,8 +1001,9 @@ body.theme-clean {
 }
 
 .preview {
+  --card-pad: clamp(0.75rem, 3vw, 1.1rem);
   min-width: 0;
-  padding: 0.9rem clamp(0.75rem, 3vw, 1.1rem) 1.1rem;
+  padding: 0.9rem var(--card-pad) 1.1rem;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -978,29 +1013,160 @@ body.theme-clean {
   gap: 0.75rem;
 }
 
-.preview-caption {
+.preview-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.2rem 0.9rem;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
   min-width: 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 2px solid var(--signal);
 }
 
 .preview-name {
-  flex: 1 1 14rem;
+  flex: 1 1 16rem;
   min-width: 0;
+  text-align: start;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.4;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.preview-name.expanded {
+  display: block;
+}
+
+.preview-name[role='button'] {
+  cursor: pointer;
 }
 
 .preview-meta {
+  margin-inline-start: auto;
+  display: flex;
+  flex-wrap: wrap;
   color: var(--dim);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
+
+.preview-meta-part + .preview-meta-part::before {
+  content: '·';
+  margin-inline: 0.45em;
+}
+
+.preview-scroll-hint {
+  color: var(--signal-ink);
+}
+
+.preview-scroll-hint::after {
+  content: ' →';
+}
+
+.preview-scroll-hint:dir(rtl)::after {
+  content: ' ←';
+}
+
+/* --- card toolbar (markdown view switch, pdf page + zoom) --- */
+
+.preview-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.preview-tools:empty {
+  display: none;
+}
+
+.preview-tools-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin-inline: calc(-1 * var(--card-pad));
+  padding: 0.5rem var(--card-pad);
+  background: var(--panel);
+  border-block: 1px solid var(--line);
+}
+
+.preview-tools-spacer {
+  flex: 1;
+}
+
+.preview-chip {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.preview-segmented {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.preview-tool {
+  min-width: 2.5rem;
+  min-height: 2.25rem;
+  padding: 0 0.7rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.preview-tool + .preview-tool {
+  border-inline-start: 1px solid var(--line);
+}
+
+.preview-tool:hover:not(:disabled) {
+  background: var(--stripe);
+}
+
+.preview-tool[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--signal) 16%, transparent);
+  box-shadow: inset 0 -2px var(--signal);
+}
+
+.preview-tool:disabled {
+  color: var(--dim);
+  cursor: default;
+}
+
+.preview-tool:focus-visible {
+  outline-offset: -2px;
+}
+
+.preview-zoom-level {
+  min-width: 3.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-inline: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- images and media --- */
 
 .preview-image,
 .preview-video {
@@ -1029,15 +1195,55 @@ body.theme-clean {
   height: 2.75rem;
 }
 
-.preview-text,
-.preview-table-wrap,
-.preview-pdf {
+.preview-figure {
   margin: 0;
-  max-height: 60vh;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.preview-figure .preview-image {
+  width: auto;
+}
+
+.preview-converted::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline-end: 0.45rem;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
+.preview-converting {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  background: var(--inset);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  animation: pulse 1.6s infinite;
+}
+
+/* --- text, code, markdown, tables --- */
+
+.preview-text,
+.preview-md,
+.preview-table-frame,
+.preview-pdf {
   background: var(--inset);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.preview-text,
+.preview-md,
+.preview-table-wrap {
+  margin: 0;
+  max-height: 70vh;
+  overflow: auto;
 }
 
 .preview-text {
@@ -1051,12 +1257,192 @@ body.theme-clean {
   color: var(--ink);
 }
 
+.preview-code {
+  padding-inline: 0 1rem;
+  counter-reset: ln;
+  /* the gutter band; code is always left-to-right, so a physical gradient is right here */
+  background: linear-gradient(to right, var(--stripe) calc(var(--gutter) + 0.75ch), transparent 0) var(--inset);
+}
+
+/* wrapped lines hang under their own indentation plus two columns */
+.preview-code .ln {
+  display: block;
+  position: relative;
+  counter-increment: ln;
+  padding-inline-start: calc(var(--gutter) + 1.75ch + var(--indent, 0ch) + 2ch);
+  text-indent: calc(-1 * (var(--indent, 0ch) + 2ch));
+}
+
+.preview-code .ln::before {
+  content: counter(ln);
+  position: absolute;
+  inset-inline-start: 0;
+  width: var(--gutter);
+  text-align: end;
+  text-indent: 0;
+  color: var(--dim);
+  user-select: none;
+}
+
+.tok-key { color: var(--tok-key); }
+.tok-str { color: var(--tok-str); }
+.tok-num { color: var(--tok-num); }
+.tok-prop { color: var(--tok-prop); font-weight: 600; }
+.tok-com { color: var(--tok-com); font-style: italic; }
+
 .preview-text-wrap,
-.preview-table-block {
+.preview-table-block,
+.preview-md-frame {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   min-width: 0;
+}
+
+.preview-md {
+  padding: 1rem clamp(0.9rem, 3vw, 1.4rem);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--ink);
+  overflow-wrap: break-word;
+}
+
+.preview-md > * + *,
+.preview-md blockquote > * + *,
+.preview-md li > * + * {
+  margin-top: 0.7em;
+}
+
+.preview-md .md-h {
+  line-height: 1.3;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.preview-md .md-h1 {
+  font-size: 1.25rem;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--line);
+}
+
+.preview-md .md-h2 {
+  font-size: 1.05rem;
+}
+
+.preview-md .md-h3,
+.preview-md .md-h4,
+.preview-md .md-h5,
+.preview-md .md-h6 {
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.preview-md * + .md-h {
+  margin-top: 1.3em;
+}
+
+.preview-md strong {
+  font-weight: 700;
+  color: var(--ink);
+  box-shadow: inset 0 -0.35em color-mix(in srgb, var(--signal) 22%, transparent);
+}
+
+.preview-md ul,
+.preview-md ol {
+  padding-inline-start: 1.5rem;
+}
+
+.preview-md li + li {
+  margin-top: 0.3em;
+}
+
+.preview-md li::marker {
+  color: var(--signal-ink);
+}
+
+.preview-md li.md-task {
+  list-style: none;
+}
+
+.preview-md .md-check {
+  color: var(--tok-str);
+}
+
+.md-chip {
+  padding: 0.1em 0.4em;
+  font-family: var(--code);
+  font-size: 0.88em;
+  color: var(--tok-str);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ok) 28%, transparent);
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+}
+
+.preview-md blockquote {
+  margin-inline: 0;
+  padding: 0.5rem 0.9rem;
+  border-inline-start: 3px solid var(--signal);
+  background: color-mix(in srgb, var(--signal) 7%, transparent);
+  color: var(--ink);
+}
+
+.preview-md .md-code {
+  padding: 0.75rem 0.9rem;
+  font-family: var(--code);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.preview-md hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.preview-md .md-link {
+  color: var(--signal-ink);
+}
+
+.preview-md .md-image-alt {
+  font-style: italic;
+  color: var(--dim);
+}
+
+.md-table-wrap {
+  overflow-x: auto;
+}
+
+.preview-table-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+/* fades the inline-end edge while columns remain off-screen */
+.preview-table-frame::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 3.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms;
+  background: linear-gradient(to right, transparent, var(--inset) 85%);
+}
+
+.preview-table-frame:dir(rtl)::after {
+  background: linear-gradient(to left, transparent, var(--inset) 85%);
+}
+
+.preview-table-frame.more-end::after {
+  opacity: 1;
 }
 
 .preview-table {
@@ -1069,26 +1455,36 @@ body.theme-clean {
 
 .preview-table th,
 .preview-table td {
-  padding: 0.45rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   text-align: start;
   vertical-align: top;
   border-bottom: 1px solid var(--line);
+  background: var(--inset);
+  white-space: nowrap;
 }
 
 .preview-table th {
   position: sticky;
   top: 0;
+  z-index: 1;
   background: var(--panel);
   color: var(--dim);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
-.preview-table td {
-  white-space: nowrap;
+/* the first column (a date, a name) stays put while the rest scroll past it */
+.preview-table-wrap .preview-table :is(th, td):first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  border-inline-end: 1px solid var(--line);
+}
+
+.preview-table-wrap .preview-table th:first-child {
+  z-index: 2;
 }
 
 .preview-table td.long {
@@ -1103,27 +1499,69 @@ body.theme-clean {
 }
 
 .preview-table tbody tr:nth-child(even) td {
-  background: var(--stripe);
+  background: linear-gradient(var(--stripe), var(--stripe)) var(--inset);
 }
 
+/* --- pdf --- */
+
 .preview-pdf {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  max-height: 80vh;
   padding: 0.75rem;
 }
 
+.preview-pdf-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+
+/* auto margins centre a page that fits and collapse to zero for a zoomed one, so it scrolls */
 .preview-pdf-page {
-  max-width: 100%;
+  display: block;
+  flex: none;
+  margin-inline: auto;
+  width: calc(var(--zoom, 1) * 100%);
   height: auto;
   user-select: none;
   box-shadow: 0 1px 6px color-mix(in srgb, var(--ground) 60%, transparent);
 }
 
-.preview-note,
-.preview-unavailable-file {
+.preview-pdf.fit-page .preview-pdf-page {
+  width: calc(var(--zoom, 1) * min(100%, (100svh - 7rem) * var(--ratio, 0.7071)));
+}
+
+/* a phone page uses the card's full width: every pixel is text size */
+@media (max-width: 40rem) {
+  .preview-pdf {
+    margin-inline: calc(-1 * var(--card-pad));
+    margin-bottom: -1.1rem;
+    padding: 0.5rem 0;
+    border-inline: 0;
+    border-bottom: 0;
+    border-radius: 0;
+  }
+
+  .preview-pdf-pages {
+    gap: 0.5rem;
+  }
+
+  .preview-pdf-page {
+    box-shadow: none;
+  }
+
+  .preview-zoom-level {
+    display: none;
+  }
+
+  .preview-tools-sticky {
+    gap: 0.4rem;
+  }
+}
+
+/* --- can't-show states --- */
+
+.preview-note {
   margin: 0;
   color: var(--dim);
   font-size: 0.75rem;
@@ -1156,11 +1594,6 @@ body.theme-clean {
   font-weight: 600;
 }
 
-.preview-unavailable-file {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-
 /* a folded-corner document with the file's extension on it */
 .preview-unavailable-glyph {
   position: relative;
@@ -1174,7 +1607,7 @@ body.theme-clean {
   border: 1px solid var(--dim);
   border-radius: 2px;
   clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 0.8rem, 100% 100%, 0 100%);
-  color: var(--signal);
+  color: var(--signal-ink);
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.06em;
