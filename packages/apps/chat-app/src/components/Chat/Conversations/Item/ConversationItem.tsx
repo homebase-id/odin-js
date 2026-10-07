@@ -22,6 +22,7 @@ import {
 } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
+import { isRenderableMessage } from '../../../../utils/messageKinds';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 import {
@@ -212,6 +213,13 @@ const ConversationBody = ({
 };
 
 export const MessageContent = memo((message: HomebaseFile<ChatMessage>) => {
+  if (!isRenderableMessage(message)) {
+    return (
+      <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+        {t('This message can only be viewed in the Homebase app on your phone.')}
+      </p>
+    );
+  }
   const lastMessageContent = message.fileMetadata.appData.content;
   const plainLastMessageContent = getPlainTextFromRichText(lastMessageContent?.message);
 

@@ -19,6 +19,7 @@ import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { isRenderableMessage } from '../../../utils/messageKinds';
 import { useChatToggleMessageStar } from '../../../hooks/chat/useChatToggleMessageStar';
 
 export interface ChatActions {
@@ -51,8 +52,9 @@ export const ContextMenu = ({
     ConversationWithYourselfId
   );
 
+  const restricted = !isRenderableMessage(msg);
   const optionalOptions: ActionGroupOptionProps[] = [];
-  if (messageFromMe) {
+  if (messageFromMe && !restricted) {
     optionalOptions.push({
       label: t('Edit'),
       onClick: () => setEditMessage(true),
@@ -115,14 +117,18 @@ export const ContextMenu = ({
       ) : null}
       <ActionGroup
         options={[
-          {
-            label: t('Reply'),
-            onClick: () => chatActions.doReply(msg),
-          },
-          {
-            label: isStarred ? t('Unstar') : t('Star'),
-            onClick: () => chatActions.toggleStar(msg),
-          },
+          ...(restricted
+            ? []
+            : [
+                {
+                  label: t('Reply'),
+                  onClick: () => chatActions.doReply(msg),
+                },
+                {
+                  label: isStarred ? t('Unstar') : t('Star'),
+                  onClick: () => chatActions.toggleStar(msg),
+                },
+              ]),
           ...optionalOptions,
         ]}
         className="absolute right-[0.325rem] top-[0.4rem] z-10 flex-shrink-0 rounded-md bg-background p-1 opacity-0 transition-opacity group-hover:opacity-100"

@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
 import { ChatReactions } from './ChatReactions';
 import { Block } from '@homebase-id/common-app/icons';
+import { isRenderableMessage } from '../../../utils/messageKinds';
 
 export const ChatMessageItem = ({
   msg,
@@ -37,10 +38,13 @@ export const ChatMessageItem = ({
   const authorOdinId = msg.fileMetadata.senderOdinId || '';
 
   const messageFromMe = !authorOdinId || authorOdinId === loggedOnIdentity;
-  const hasMedia = !!msg.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
+  const renderable = isRenderableMessage(msg);
+  const hasMedia =
+    renderable && !!msg.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY).length;
 
   const { chatMessageKey, mediaKey } = useParams();
-  const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
+  const isDetail =
+    renderable && stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
   const isDeleted = msg.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
   const isGroupChat =
@@ -70,7 +74,16 @@ export const ChatMessageItem = ({
             size="sm"
           />
         ) : null}
-        {hasMedia && !isDeleted ? (
+        {!renderable ? (
+          <UnsupportedMessageBody
+            msg={msg}
+            conversation={conversation}
+            authorOdinId={authorOdinId}
+            isGroupChat={isGroupChat}
+            messageFromMe={messageFromMe}
+            chatActions={chatActions}
+          />
+        ) : hasMedia && !isDeleted ? (
           <ChatMediaMessageBody
             msg={msg}
             conversation={conversation}
@@ -90,13 +103,51 @@ export const ChatMessageItem = ({
             isDeleted={isDeleted}
           />
         )}
-        {conversation && !isDeleted ? (
+        {conversation && !isDeleted && renderable ? (
           <ChatReactionComposer msg={msg} conversation={conversation} />
         ) : null}
       </div>
     </>
   );
 };
+
+export const UNSUPPORTED_MESSAGE_TEXT = 'This message can only be viewed in the Homebase app on your phone.';
+
+const UnsupportedMessageBody = ({
+  msg,
+  conversation,
+  isGroupChat,
+  messageFromMe,
+  authorOdinId,
+  chatActions,
+}: {
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<UnifiedConversation, ConversationMetadata>;
+  isGroupChat?: boolean;
+  messageFromMe: boolean;
+  authorOdinId: string;
+  chatActions?: ChatActions;
+}) => (
+  <div
+    className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] shadow-sm md:max-w-xs lg:max-w-lg xl:max-w-[50vw] ${
+      messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
+    }`}
+  >
+    {isGroupChat && !messageFromMe ? (
+      <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
+        <ConnectionName odinId={authorOdinId} />
+      </p>
+    ) : null}
+    <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
+      <p className="select-none italic text-foreground/50">{t(UNSUPPORTED_MESSAGE_TEXT)}</p>
+      <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
+        <ChatDeliveryIndicator msg={msg} />
+        <ChatSentTimeIndicator msg={msg} />
+      </div>
+      <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
+    </div>
+  </div>
+);
 
 const ChatTextMessageBody = ({
   msg,

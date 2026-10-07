@@ -13,7 +13,8 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test": "esbuild src/utils/messageKinds.ts --format=esm --outfile=test/_build/messageKinds.mjs --log-level=silent && node --test test/messageKinds.test.mjs"
   },
   "dependencies": {
     "@ffmpeg/util": "^0.12.1",

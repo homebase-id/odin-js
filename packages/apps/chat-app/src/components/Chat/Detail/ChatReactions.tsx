@@ -13,6 +13,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useMemo, useState } from 'react';
 import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { isHiddenReactionCode } from '../../../utils/messageKinds';
 
 export const ChatReactions = ({
   msg,
@@ -27,10 +28,12 @@ export const ChatReactions = ({
     return null;
   }
 
-  const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions).map((reaction) => ({
-    emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
-    count: parseInt(reaction.count),
-  }));
+  const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions)
+    .map((reaction) => ({
+      emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+      count: parseInt(reaction.count),
+    }))
+    .filter((reaction) => !isHiddenReactionCode(reaction.emoji ?? ''));
   const uniqueEmojis = Array.from(new Set(reactions)).slice(0, 5);
   const count = reactions?.reduce((acc, curr) => {
     return acc + curr.count;
@@ -80,12 +83,17 @@ const ChatReactionsDetail = ({
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const filteredEmojis = useMemo(() => {
-    const pureEmojis = reactions?.map((reaction) => reaction.body.trim());
-    return Array.from(new Set(pureEmojis));
-  }, [reactions]);
+  const visibleReactions = useMemo(
+    () => reactions?.filter((reaction) => !isHiddenReactionCode(reaction.body.trim())),
+    [reactions]
+  );
 
-  if (!reactions?.length || !filteredEmojis?.length) return null;
+  const filteredEmojis = useMemo(() => {
+    const pureEmojis = visibleReactions?.map((reaction) => reaction.body.trim());
+    return Array.from(new Set(pureEmojis));
+  }, [visibleReactions]);
+
+  if (!visibleReactions?.length || !filteredEmojis?.length) return null;
 
   const dialog = (
     <DialogWrapper
@@ -104,12 +112,12 @@ const ChatReactionsDetail = ({
               }`}
               onClick={() => setActiveEmoji('all')}
             >
-              {t('All')} {reactions?.length}
+              {t('All')} {visibleReactions?.length}
             </ActionButton>
           </li>
         ) : null}
         {filteredEmojis.map((reaction) => {
-          const count = reactions?.filter((emoji) => emoji.body === reaction).length;
+          const count = visibleReactions?.filter((emoji) => emoji.body === reaction).length;
           return (
             <li className="" key={reaction}>
               <ActionButton
@@ -126,7 +134,7 @@ const ChatReactionsDetail = ({
         })}
       </ul>
       <div className="grid grid-flow-row gap-4 px-4 py-4 sm:px-8" key={activeEmoji}>
-        {reactions
+        {visibleReactions
           ?.filter((reaction) => reaction.body === activeEmoji || activeEmoji === 'all')
           .map((reaction) => {
             return (
