@@ -23,7 +23,11 @@ import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
 import { ChatReactions } from './ChatReactions';
 import { Block } from '@homebase-id/common-app/icons';
-import { isRenderableMessage } from '../../../utils/messageKinds';
+import {
+  isRenderableMessage,
+  hasVisibleReactions,
+  UNSUPPORTED_MESSAGE_TEXT,
+} from '../../../utils/messageKinds';
 
 export const ChatMessageItem = ({
   msg,
@@ -54,9 +58,7 @@ export const ChatMessageItem = ({
       ) || []
     )?.length > 1;
 
-  const hasReactions =
-    msg.fileMetadata.reactionPreview?.reactions &&
-    Object.keys(msg.fileMetadata.reactionPreview?.reactions).length;
+  const hasReactions = hasVisibleReactions(msg.fileMetadata.reactionPreview?.reactions);
 
   return (
     <>
@@ -110,8 +112,6 @@ export const ChatMessageItem = ({
     </>
   );
 };
-
-export const UNSUPPORTED_MESSAGE_TEXT = 'This message can only be viewed in the Homebase app on your phone.';
 
 const UnsupportedMessageBody = ({
   msg,

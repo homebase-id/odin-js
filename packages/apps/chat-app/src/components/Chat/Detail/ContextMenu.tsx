@@ -59,6 +59,8 @@ export const ContextMenu = ({
       label: t('Edit'),
       onClick: () => setEditMessage(true),
     });
+  }
+  if (messageFromMe) {
     optionalOptions.push({
       label: conversationWithYourself ? t('Delete') : t('Delete for everyone'),
       confirmOptions: {
@@ -90,6 +92,7 @@ export const ContextMenu = ({
 
   if (
     conversation &&
+    !restricted &&
     msg.fileMetadata.appData.content.deliveryStatus === ChatDeliveryStatus.Failed
   ) {
     optionalOptions.push({

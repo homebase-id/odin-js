@@ -26,3 +26,11 @@ test('hidden reaction codes', () => {
   assert.equal(isHiddenReactionCode('👍'), false);
   assert.equal(isHiddenReactionCode(''), false);
 });
+
+test('reactions with only hidden codes are not visible', async () => {
+  const { hasVisibleReactions } = await import('./_build/messageKinds.mjs');
+  const r = (e) => ({ reactionContent: JSON.stringify({ emoji: e }) });
+  assert.equal(hasVisibleReactions(undefined), false);
+  assert.equal(hasVisibleReactions({ a: r('_vo') }), false);
+  assert.equal(hasVisibleReactions({ a: r('_vo'), b: r('👍') }), true);
+});

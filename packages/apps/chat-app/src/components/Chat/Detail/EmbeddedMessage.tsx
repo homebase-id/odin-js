@@ -11,7 +11,7 @@ import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { OdinImage } from '@homebase-id/ui-lib';
 import { ChatDrive } from '../../../providers/ConversationProvider';
-import { isRenderableMessage } from '../../../utils/messageKinds';
+import { isRenderableMessage, UNSUPPORTED_MESSAGE_TEXT } from '../../../utils/messageKinds';
 
 export const EmbeddedMessageWithId = ({
   conversationId,
@@ -41,7 +41,7 @@ export const EmbeddedMessage = ({
     ? undefined
     : renderable
       ? getPlainTextFromRichText(msg.fileMetadata.appData.content.message)
-      : t('This message can only be viewed in the Homebase app on your phone.');
+      : t(UNSUPPORTED_MESSAGE_TEXT);
   return (
     <div className={`w-full flex-grow overflow-hidden rounded-lg bg-primary/10 ${className || ''}`}>
       <div className="flex flex-row items-center gap-2 border-l-4 border-l-primary p-1">

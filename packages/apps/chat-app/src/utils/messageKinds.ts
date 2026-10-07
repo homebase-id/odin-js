@@ -12,3 +12,20 @@ export const isRenderableMessage = (msg: MessageKindProbe): boolean =>
   RENDERABLE_DATA_TYPES.has(msg.fileMetadata.appData.dataType ?? 0);
 
 export const isHiddenReactionCode = (code: string): boolean => code.startsWith('_');
+
+export const UNSUPPORTED_MESSAGE_TEXT =
+  'This message can only be viewed in the Homebase app on your phone.';
+
+export const decodeReactionEmoji = (reactionContent: string): string | undefined => {
+  try {
+    return JSON.parse(reactionContent)?.emoji;
+  } catch {
+    return undefined;
+  }
+};
+
+export const hasVisibleReactions = (
+  reactions: Record<string, { reactionContent: string }> | undefined
+): boolean =>
+  !!reactions &&
+  Object.values(reactions).some((r) => !isHiddenReactionCode(decodeReactionEmoji(r.reactionContent) ?? ''));

@@ -12,8 +12,7 @@ import {
 } from '@homebase-id/common-app';
 import { createPortal } from 'react-dom';
 import { useMemo, useState } from 'react';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
-import { isHiddenReactionCode } from '../../../utils/messageKinds';
+import { isHiddenReactionCode, decodeReactionEmoji } from '../../../utils/messageKinds';
 
 export const ChatReactions = ({
   msg,
@@ -30,7 +29,7 @@ export const ChatReactions = ({
 
   const reactions = Object.values(msg.fileMetadata.reactionPreview?.reactions)
     .map((reaction) => ({
-      emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+      emoji: decodeReactionEmoji(reaction.reactionContent),
       count: parseInt(reaction.count),
     }))
     .filter((reaction) => !isHiddenReactionCode(reaction.emoji ?? ''));
