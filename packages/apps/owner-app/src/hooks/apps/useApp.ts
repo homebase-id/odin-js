@@ -1,4 +1,5 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { invalidateDriveRemoval } from '../drives/useDrive';
 import { DotYouClient, ensureDrive } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
@@ -211,11 +212,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       mutationFn: uninstallAppInternal,
       onSuccess: (data, param) => {
         invalidateApp(queryClient, param.appId);
-        invalidateApps(queryClient);
-        queryClient.invalidateQueries({ queryKey: ['drives'] });
-        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
-        queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
+        invalidateDriveRemoval(queryClient);
       },
       onError: (ex) => {
         console.error(ex);

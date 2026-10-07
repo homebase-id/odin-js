@@ -229,8 +229,15 @@ export const useFile = ({
 export const invalidateFiles = (
   queryClient: QueryClient,
   targetDrive: TargetDrive,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType | 'all'
 ) => {
+  if (systemFileType === 'all') {
+    queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === 'files' && query.queryKey[2] === targetDrive.alias,
+    });
+    return;
+  }
+
   queryClient.invalidateQueries({
     queryKey: ['files', systemFileType?.toLowerCase() || 'standard', targetDrive.alias],
   });

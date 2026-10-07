@@ -82,41 +82,6 @@ export const deleteFiles = async (
     });
 };
 
-/**
- * Owner only. Hard-deletes each file: gone without a tombstone, and not sent to recipients.
- */
-export const hardDeleteFiles = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileIds: string[],
-  systemFileType?: SystemFileType,
-  axiosConfig?: AxiosRequestConfig
-): Promise<boolean> => {
-  assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('FileIds', fileIds);
-
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
-
-  const request = {
-    requests: fileIds.map((fileId) => ({
-      file: {
-        targetDrive: targetDrive,
-        fileId: fileId,
-      },
-    })),
-  };
-
-  return client
-    .post('/drive/files/harddeletefileidbatch', request, axiosConfig)
-    .then((response) => response.status === 200)
-    .catch((error) => {
-      console.error('[odin-js:hardDeleteFiles]', error);
-      throw error;
-    });
-};
-
 export const deleteFilesByGroupId = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

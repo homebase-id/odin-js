@@ -121,9 +121,7 @@ const AppDetails = () => {
 
   return (
     <>
-      <ErrorNotification
-        error={allowAppError || revokeAppError || uninstallAppError}
-      />
+      <ErrorNotification error={allowAppError || revokeAppError || uninstallAppError} />
       <DrivePurgeStatus appId={decodedAppKey} className="mb-5" />
       <PageMeta
         icon={Grid}

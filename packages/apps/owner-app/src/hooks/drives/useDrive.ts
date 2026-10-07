@@ -16,7 +16,9 @@ import {
   deleteDrive,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { invalidateCircles, useDotYouClientContext } from '@homebase-id/common-app';
+import { invalidateFiles } from '../files/useFiles';
+import { invalidateApps } from '../apps/useApps';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
   const { targetDrive, fetchOutboxStatus } = props || {};
@@ -127,13 +129,6 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     driveTypeSlug?: string;
   }) => {
     return reassignDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
-  };
-
-  const invalidateFiles = (targetDrive: TargetDrive) => {
-    queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'files' && query.queryKey[2] === targetDrive.alias,
-    });
-    queryClient.invalidateQueries({ queryKey: ['drive-status'] });
   };
 
   return {
@@ -283,26 +278,37 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
 
     emptyDrive: useMutation({
       mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => emptyDrive(dotYouClient, targetDrive),
-      onSettled: (_data, _error, { targetDrive }) => {
-        invalidateFiles(targetDrive);
-        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
-      },
+      onSettled: (_data, _error, { targetDrive }) => invalidatePurgedDrive(queryClient, targetDrive),
     }),
 
-    // A deleted drive also drops out of every circle and app grant, so those are refetched too.
     deleteDrive: useMutation({
       mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => deleteDrive(dotYouClient, targetDrive),
       onSettled: (_data, _error, { targetDrive }) => {
-        invalidateFiles(targetDrive);
-        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
-        queryClient.invalidateQueries({ queryKey: ['drives'] });
-        queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['app'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['apps'], exact: false });
+        invalidatePurgedDrive(queryClient, targetDrive);
+        invalidateDriveRemoval(queryClient);
       },
     }),
   };
+};
+
+/** A drive being emptied or deleted: its files, its status, and the purge list that reports on it. */
+const invalidatePurgedDrive = (queryClient: QueryClient, targetDrive: TargetDrive) => {
+  invalidateFiles(queryClient, targetDrive, 'all');
+  queryClient.invalidateQueries({ queryKey: ['drive-status', `${targetDrive.alias}_${targetDrive.type}`] });
+  queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
+};
+
+/**
+ * Drives removed -- deleted, or with an uninstalled app: the drives and the purges reporting on them, and the
+ * circles and apps whose grants lost them.
+ */
+export const invalidateDriveRemoval = (queryClient: QueryClient) => {
+  queryClient.invalidateQueries({ queryKey: ['drives'] });
+  queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
+  invalidateCircles(queryClient);
+  queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
+  queryClient.invalidateQueries({ queryKey: ['app'], exact: false });
+  invalidateApps(queryClient);
 };
 
 // Helper to keep the ['drives'] list cache in sync with the individual drive cache

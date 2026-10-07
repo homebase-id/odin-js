@@ -45,10 +45,12 @@ const DriveDetails = () => {
     });
     const appName = useOwnerAppName(driveDef?.appId ?? undefined);
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
-    const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
-    const {mutateAsync: reassignOwningApp} = useDrive().reassignOwningApp;
-    const {mutateAsync: emptyDrive, status: emptyStatus, error: emptyError} = useDrive().emptyDrive;
-    const {mutateAsync: deleteDrive, status: deleteStatus, error: deleteError} = useDrive().deleteDrive;
+    const {
+        setOwningApp: {mutateAsync: setOwningApp},
+        reassignOwningApp: {mutateAsync: reassignOwningApp},
+        emptyDrive: {mutateAsync: emptyDrive, status: emptyStatus, error: emptyError},
+        deleteDrive: {mutateAsync: deleteDrive, status: deleteStatus, error: deleteError},
+    } = useDrive();
     const navigate = useNavigate();
 
     const {data: circles} = useCircles().fetch;
@@ -127,21 +129,10 @@ const DriveDetails = () => {
                                               label: t('Empty drive'),
                                               icon: Trash,
                                               onClick: () => emptyDrive({targetDrive: targetDriveInfo}),
-                                              confirmOptions: {
-                                                  type: 'critical' as const,
-                                                  title: t('Empty drive'),
-                                                  buttonText: t('Empty'),
-                                                  body: [
-                                                      `${t('Every file on')} ${driveDef.name} ${t('is deleted, with its payloads. The drive itself stays.')}`,
-                                                      t('This runs in the background: on a large drive, files disappear over the next minutes. Files you add after confirming are kept.'),
-                                                      t('To keep the files, cancel and use Export first.'),
-                                                      t('Copies your connections already received stay with them. This cannot be undone.'),
-                                                  ].join('\n\n'),
-                                                  trickQuestion: {
-                                                      question: `${t('To confirm, type')} "${t('empty')} ${driveDef.name}":`,
-                                                      answer: `${t('empty')} ${driveDef.name}`,
-                                                  },
-                                              },
+                                              confirmOptions: purgeConfirm(t('empty'), t('Empty drive'), t('Empty'), driveDef.name, [
+                                                  `${t('Every file on')} ${driveDef.name} ${t('is deleted, with its payloads. The drive itself stays.')}`,
+                                                  t('This runs in the background: on a large drive, files disappear over the next minutes. Files you add after confirming are kept.'),
+                                              ]),
                                           },
                                           {
                                               label: t('Delete drive'),
@@ -150,26 +141,15 @@ const DriveDetails = () => {
                                                   await deleteDrive({targetDrive: targetDriveInfo});
                                                   navigate(getOwnerAppPath(driveDef.appId));
                                               },
-                                              confirmOptions: {
-                                                  type: 'critical' as const,
-                                                  title: t('Delete drive'),
-                                                  buttonText: t('Delete'),
-                                                  body: [
-                                                      `${driveDef.name} ${t('is deleted with every file on it, and every circle and app loses its access to it.')}`,
-                                                      t('The drive disappears at once; its files are removed in the background, and a new drive cannot reuse its address until they are.'),
-                                                      t('To keep the files, cancel and use Export first.'),
-                                                      t('Copies your connections already received stay with them. This cannot be undone.'),
-                                                  ].join('\n\n'),
-                                                  trickQuestion: {
-                                                      question: `${t('To confirm, type')} "${t('delete')} ${driveDef.name}":`,
-                                                      answer: `${t('delete')} ${driveDef.name}`,
-                                                  },
-                                              },
+                                              confirmOptions: purgeConfirm(t('delete'), t('Delete drive'), t('Delete'), driveDef.name, [
+                                                  `${driveDef.name} ${t('is deleted with every file on it, and every circle and app loses its access to it.')}`,
+                                                  t('The drive disappears at once; its files are removed in the background, and a new drive cannot reuse its address until they are.'),
+                                              ]),
                                           },
                                       ]
                                     : []),
                             ]}
-                            state={exportStatus === 'pending' ? exportStatus : emptyStatus === 'pending' ? emptyStatus : deleteStatus}
+                            state={[emptyStatus, deleteStatus].find((status) => status === 'pending') ?? exportStatus}
                             type="secondary"
                         />
                     </>
@@ -440,6 +420,25 @@ const DriveDetails = () => {
         </>
     );
 };
+
+/**
+ * The confirmation for emptying or deleting a drive: the action's own lines, the closing lines both share, and
+ * "<verb> <drive>" to type before the button enables.
+ */
+const purgeConfirm = (verb: string, title: string, buttonText: string, driveName: string, lines: string[]) => ({
+    type: 'critical' as const,
+    title,
+    buttonText,
+    body: [
+        ...lines,
+        t('To keep the files, cancel and use Export first.'),
+        t('Copies your connections already received stay with them. This cannot be undone.'),
+    ].join('\n\n'),
+    trickQuestion: {
+        question: `${t('To confirm, type')} "${verb} ${driveName}":`,
+        answer: `${verb} ${driveName}`,
+    },
+});
 
 /** The way out of an ownership that is already set. Understated on purpose -- it is the escape
     hatch, not something to invite. */

@@ -201,40 +201,39 @@ export const editDriveArchiveFlag = async (
     });
 };
 
-/**
- * Owner only. Hard-deletes every file on an archived, non-system drive and keeps the drive. Peers keep any copies
- * they received. Accepted (202), not done: the server removes the files in the background.
- */
-export const emptyDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
+/** POSTs `{ targetDrive }` to an owner endpoint that answers 202 Accepted and finishes in the background. */
+const postAccepted = async (
+  dotYouClient: DotYouClient,
+  path: string,
+  targetDrive: TargetDrive,
+  tag: string
+): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
 
   const client = dotYouClient.createAxiosClient();
   return client
-    .post('/drive/mgmt/empty', { targetDrive: targetDrive })
+    .post(path, { targetDrive: targetDrive })
     .then((response) => response.status === 202)
     .catch((error) => {
-      console.error('[odin-js:emptyDrive]', error);
+      console.error(`[odin-js:${tag}]`, error);
       throw error;
     });
 };
+
+/**
+ * Owner only. Hard-deletes every file on an archived, non-system drive and keeps the drive. Peers keep any copies
+ * they received. Accepted (202), not done: the server removes the files in the background.
+ */
+export const emptyDrive = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
+  postAccepted(dotYouClient, '/drive/mgmt/empty', targetDrive, 'emptyDrive');
 
 /**
  * Owner only. Deletes an archived, non-system drive with all its files, its followers and every grant naming
  * it. Peers keep any copies they received. Accepted (202): the drive is gone at once, its files go in the
  * background, and its alias cannot be reused until they have.
  */
-export const deleteDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
-  assertIfDefined('targetDrive', targetDrive);
-
-  const client = dotYouClient.createAxiosClient();
-  return client
-    .post('/drive/mgmt/delete', { targetDrive: targetDrive })
-    .then((response) => response.status === 202)
-    .catch((error) => {
-      console.error('[odin-js:deleteDrive]', error);
-      throw error;
-    });
-};
+export const deleteDrive = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
+  postAccepted(dotYouClient, '/drive/mgmt/delete', targetDrive, 'deleteDrive');
 
 /** A drive still being emptied or deleted in the background. */
 export interface DrivePurgeStatus {
@@ -265,18 +264,8 @@ export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DriveP
 };
 
 /** Owner only. Restarts an empty or delete whose background job stopped. */
-export const retryDrivePurge = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
-  assertIfDefined('targetDrive', targetDrive);
-
-  const client = dotYouClient.createAxiosClient();
-  return client
-    .post('/drive/mgmt/purges/retry', { targetDrive: targetDrive })
-    .then((response) => response.status === 202)
-    .catch((error) => {
-      console.error('[odin-js:retryDrivePurge]', error);
-      throw error;
-    });
-};
+export const retryDrivePurge = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
+  postAccepted(dotYouClient, '/drive/mgmt/purges/retry', targetDrive, 'retryDrivePurge');
 
 export const editDriveAllowSubscriptions = async (
   dotYouClient: DotYouClient,

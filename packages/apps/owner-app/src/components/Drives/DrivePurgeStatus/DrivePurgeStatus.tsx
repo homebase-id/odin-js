@@ -1,3 +1,4 @@
+import { MutationStatus } from '@tanstack/react-query';
 import { ActionButton, Alert, t } from '@homebase-id/common-app';
 import { DrivePurgeStatus as Purge } from '@homebase-id/js-lib/core';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
@@ -51,11 +52,15 @@ const PurgeAlert = ({
 }: {
   purge: Purge;
   onRetry: () => void;
-  retryStatus: 'idle' | 'pending' | 'success' | 'error';
+  retryStatus: MutationStatus;
 }) => {
   const name = purge.name || t('a drive');
   const doing = purge.kind === 'delete' ? t('Deleting') : t('Emptying');
-  const left = `${purge.filesRemaining} ${purge.filesRemaining === 1 ? t('file left') : t('files left')}`;
+  // The server counts only up to 10,001; past that the exact number would cost a scan of the whole drive.
+  const left =
+    purge.filesRemaining > 10_000
+      ? `10,000+ ${t('files left')}`
+      : `${purge.filesRemaining} ${purge.filesRemaining === 1 ? t('file left') : t('files left')}`;
 
   if (purge.stopped || purge.lastError) {
     return (

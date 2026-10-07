@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getDrivePurges, retryDrivePurge, TargetDrive } from '@homebase-id/js-lib/core';
+import { DrivePurgeStatus, getDrivePurges, retryDrivePurge, TargetDrive } from '@homebase-id/js-lib/core';
+import { invalidateFiles } from '../files/useFiles';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
 const POLL_MS = 3000;
@@ -16,20 +17,21 @@ export const useDrivePurges = () => {
   const fetch = useQuery({
     queryKey: ['drive-purges'],
     queryFn: () => getDrivePurges(dotYouClient),
-    refetchInterval: (query) => (query.state.data?.length ? POLL_MS : false),
+    // Nothing changes on a purge that has stopped until the owner retries, so only a running one is polled.
+    refetchInterval: (query) => (query.state.data?.some((purge) => !purge.stopped) ? POLL_MS : false),
   });
 
-  const pending = useRef<string[]>([]);
+  const previous = useRef<DrivePurgeStatus[] | undefined>(undefined);
   useEffect(() => {
     const now = (fetch.data ?? []).map((purge) => purge.targetDrive.alias);
-    const finished = pending.current.filter((alias) => !now.includes(alias));
+    const finished = (previous.current ?? []).filter(
+      (purge) => !now.includes(purge.targetDrive.alias)
+    );
     if (finished.length) {
       queryClient.invalidateQueries({ queryKey: ['drives'] });
-      queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === 'files' && finished.includes(query.queryKey[2] as string),
-      });
+      finished.forEach((purge) => invalidateFiles(queryClient, purge.targetDrive, 'all'));
     }
-    pending.current = now;
+    previous.current = fetch.data;
   }, [fetch.data, queryClient]);
 
   return {
