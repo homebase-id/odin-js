@@ -202,8 +202,8 @@ export const editDriveArchiveFlag = async (
 };
 
 /**
- * Owner only. Hard-deletes every file on a non-system drive and keeps the drive. Peers keep any copies they
- * received.
+ * Owner only. Hard-deletes every file on an archived, non-system drive and keeps the drive. Peers keep any copies
+ * they received. Accepted (202), not done: the server removes the files in the background.
  */
 export const emptyDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
   assertIfDefined('targetDrive', targetDrive);
@@ -211,7 +211,7 @@ export const emptyDrive = async (dotYouClient: DotYouClient, targetDrive: Target
   const client = dotYouClient.createAxiosClient();
   return client
     .post('/drive/mgmt/empty', { targetDrive: targetDrive })
-    .then((response) => response.status === 200)
+    .then((response) => response.status === 202)
     .catch((error) => {
       console.error('[odin-js:emptyDrive]', error);
       throw error;
@@ -220,7 +220,8 @@ export const emptyDrive = async (dotYouClient: DotYouClient, targetDrive: Target
 
 /**
  * Owner only. Deletes an archived, non-system drive with all its files, its followers and every grant naming
- * it. Peers keep any copies they received.
+ * it. Peers keep any copies they received. Accepted (202): the drive is gone at once, its files go in the
+ * background, and its alias cannot be reused until they have.
  */
 export const deleteDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
   assertIfDefined('targetDrive', targetDrive);
@@ -228,7 +229,7 @@ export const deleteDrive = async (dotYouClient: DotYouClient, targetDrive: Targe
   const client = dotYouClient.createAxiosClient();
   return client
     .post('/drive/mgmt/delete', { targetDrive: targetDrive })
-    .then((response) => response.status === 200)
+    .then((response) => response.status === 202)
     .catch((error) => {
       console.error('[odin-js:deleteDrive]', error);
       throw error;

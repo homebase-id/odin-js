@@ -132,6 +132,7 @@ const DriveDetails = () => {
                                                   buttonText: t('Empty'),
                                                   body: [
                                                       `${t('Every file on')} ${driveDef.name} ${t('is deleted, with its payloads. The drive itself stays.')}`,
+                                                      t('This runs in the background: on a large drive, files disappear over the next minutes. Files you add after confirming are kept.'),
                                                       t('To keep the files, cancel and use Export first.'),
                                                       t('Copies your connections already received stay with them. This cannot be undone.'),
                                                   ].join('\n\n'),
@@ -154,6 +155,7 @@ const DriveDetails = () => {
                                                   buttonText: t('Delete'),
                                                   body: [
                                                       `${driveDef.name} ${t('is deleted with every file on it, and every circle and app loses its access to it.')}`,
+                                                      t('The drive disappears at once; its files are removed in the background, and a new drive cannot reuse its address until they are.'),
                                                       t('To keep the files, cancel and use Export first.'),
                                                       t('Copies your connections already received stay with them. This cannot be undone.'),
                                                   ].join('\n\n'),
