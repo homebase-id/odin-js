@@ -66,10 +66,17 @@ export const EmailDnsSettings = () => {
   const relayProblem = relay?.problem ?? undefined;
   const needsAttention = emailNeedsAttention(health, mailHealth);
   const problems = relayProblem ? [relayProblem, ...healthErrors] : healthErrors;
-  const warnings =
-    relay?.status === 'unreachable'
-      ? [t('Outbound sending could not be checked right now.'), ...healthWarnings]
-      : healthWarnings;
+  // The server words it since odin-core#1887; the fallback is for servers from before
+  const relayWarning =
+    relay?.warning ??
+    (relay?.status === 'unreachable'
+      ? t('Outbound sending could not be checked right now.')
+      : null);
+  const warnings = relayWarning ? [relayWarning, ...healthWarnings] : healthWarnings;
+
+  // On DNS we do not host there is nothing for us to write, but the relay can still be asked to
+  // look again - so the button is offered for a relay problem whoever hosts the DNS (#1888).
+  const offerRepair = (broken.length > 0 && !thirdPartyDns) || !!relayProblem;
 
   // Publishing on third-party DNS writes nothing and returns the records to add by hand,
   // matched to the check for status. Otherwise, on known third-party DNS, the check itself
@@ -142,10 +149,10 @@ export const EmailDnsSettings = () => {
             {/* Missing records are usually an identity provisioned before this server offered
                 email: the records are written when an identity is created, so an older one
                 never received them. The same button registers the domain with the outbound
-                relay, which is the repair when the relay refused it. Safe to repeat. Not
-                offered for the other checks (key drift, DKIM pair proof): writing DNS does not
-                fix those. */}
-            {(broken.length > 0 || relayProblem) && !thirdPartyDns ? (
+                relay and asks it to verify, which is the repair when the relay refused it or
+                has a stale verdict. Safe to repeat. Not offered for the other checks (key
+                drift, DKIM pair proof): writing DNS does not fix those. */}
+            {offerRepair ? (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-row items-center gap-3">
                   <ActionButton
@@ -157,12 +164,14 @@ export const EmailDnsSettings = () => {
                     // The failure is shown from the mutation status below; not rethrown
                     onClick={() => publishDnsRecords().catch(() => undefined)}
                   >
-                    {t('Repair email setup')}
+                    {thirdPartyDns ? t('Check outbound sending again') : t('Repair email setup')}
                   </ActionButton>
                   <small className={MUTED}>
-                    {t(
-                      'Publishes the email records for your domain and sets up outbound sending. Safe to run more than once.'
-                    )}
+                    {thirdPartyDns
+                      ? t('Asks the mail relay to look at your domain again. Safe to repeat.')
+                      : t(
+                          'Publishes the email records for your domain and sets up outbound sending. Safe to run more than once.'
+                        )}
                   </small>
                 </div>
 
@@ -186,6 +195,16 @@ export const EmailDnsSettings = () => {
                   <Alert type="success">
                     {t(
                       'Records published. They can take a few minutes to appear - press Refresh to check again.'
+                    )}
+                  </Alert>
+                ) : null}
+
+                {/* Nothing written (not our DNS), but the relay was asked to verify - say so,
+                    or the press looks like it did nothing */}
+                {publishResult && !publishResult.dnsRecordsWritten && !publishResult.relayError ? (
+                  <Alert type="success">
+                    {t(
+                      'Asked the mail relay to verify your domain. It can take a few minutes - press Refresh to check again.'
                     )}
                   </Alert>
                 ) : null}
