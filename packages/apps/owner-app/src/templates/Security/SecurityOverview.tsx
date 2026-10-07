@@ -128,8 +128,15 @@ export const SecurityOverview = () => {
                     <span className="flex items-center text-red-600">
                       <Exclamation className="mr-1 h-4 w-4" />
                       {t(
-                        'Your recovery shards were not refreshed after your password changed. The shards your trusted connections held before the change can still recover your account.'
-                      )}
+                        'Your recovery shards were not refreshed after your password changed.'
+                      )}{' '}
+                      {info.usesAutomaticRecovery
+                        ? t(
+                            'The automated recovery shards from before the change can still recover your account.'
+                          )
+                        : t(
+                            'Trusted connections you are still connected to can use the shards they held before the change to recover your account.'
+                          )}
                       <Link
                         to="/owner/security/password-recovery?gs=1"
                         className="ml-2 text-blue-600 underline hover:text-blue-800"
