@@ -1,5 +1,5 @@
 import { classify, type PreviewClass } from './classify';
-import { formatSize, h, metaPart, type PreviewFile, type PreviewSlots } from './dom';
+import { extensionTag, formatSize, h, metaPart, type PreviewFile, type PreviewSlots } from './dom';
 import { renderImage } from './render-image';
 import { renderJson } from './render-json';
 import { renderMarkdown } from './render-markdown';
@@ -38,9 +38,7 @@ export function renderPreviewBody(file: PreviewFile, slots?: PreviewSlots): HTML
 
 /** "JPG image", "DOCX file": the extension the recipient recognises, not a raw mime string. */
 export function kindLabel(file: PreviewFile, kind: PreviewClass): string {
-  const dot = file.name.lastIndexOf('.');
-  const ext = dot > 0 ? file.name.slice(dot + 1) : '';
-  const tag = ext && ext.length <= 6 ? ext.toUpperCase() : '';
+  const tag = extensionTag(file.name, 6);
   return tag ? `${tag} ${S.kind[kind]}` : S.kind[kind].replace(/^./, (c) => c.toUpperCase());
 }
 

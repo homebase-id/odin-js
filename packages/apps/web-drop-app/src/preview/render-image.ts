@@ -1,4 +1,4 @@
-import { blockContextMenu, fallback, h, notice, type PreviewFile } from './dom';
+import { blockContextMenu, fallback, h, notice, swapWithFallback, type PreviewFile } from './dom';
 import { PREVIEW_STRINGS as S } from './strings';
 
 const HEIF = /^image\/hei[cf]/;
@@ -13,7 +13,7 @@ export function renderImage(file: PreviewFile, maybe: boolean): HTMLElement {
   blockContextMenu(img);
   img.addEventListener('error', () => {
     if (maybe && isHeif(file)) void convertHeif(img, file);
-    else img.replaceWith(fallback(maybe ? S.tiffFailed : S.imageFailed));
+    else swapWithFallback(img, maybe ? S.tiffFailed : S.imageFailed);
   });
   img.src = file.url;
   return img;

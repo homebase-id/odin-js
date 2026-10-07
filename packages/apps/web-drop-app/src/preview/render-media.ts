@@ -6,30 +6,27 @@ const narrow = () => typeof window !== 'undefined' && window.matchMedia?.('(max-
 
 const controlsList = (base: string) => (narrow() ? `${base} noplaybackrate` : base);
 
+function mediaElement<T extends HTMLMediaElement>(media: T, file: PreviewFile, failed: { title: string; body: string }): T {
+  media.controls = true;
+  media.setAttribute('controlsList', controlsList('nodownload noremoteplayback'));
+  media.disableRemotePlayback = true;
+  media.preload = 'metadata';
+  media.setAttribute('aria-label', file.name);
+  blockContextMenu(media);
+  media.addEventListener('error', () => swapWithFallback(media, failed));
+  return media;
+}
+
 export function renderVideo(file: PreviewFile): HTMLElement {
   const video = h('video', 'preview-video');
-  video.controls = true;
-  video.setAttribute('controlsList', controlsList('nodownload noremoteplayback'));
   video.disablePictureInPicture = true;
-  video.disableRemotePlayback = true;
   video.playsInline = true;
-  video.preload = 'metadata';
-  video.setAttribute('aria-label', file.name);
-  blockContextMenu(video);
-  video.addEventListener('error', () => swapWithFallback(video, S.videoFailed));
-  video.src = file.url;
+  mediaElement(video, file, S.videoFailed).src = file.url;
   return video;
 }
 
 export function renderAudio(file: PreviewFile): HTMLElement {
-  const audio = h('audio', 'preview-audio');
-  audio.controls = true;
-  audio.setAttribute('controlsList', controlsList('nodownload noremoteplayback'));
-  audio.disableRemotePlayback = true;
-  audio.preload = 'metadata';
-  audio.setAttribute('aria-label', file.name);
-  blockContextMenu(audio);
-  audio.addEventListener('error', () => swapWithFallback(audio, S.audioFailed));
+  const audio = mediaElement(h('audio', 'preview-audio'), file, S.audioFailed);
   audio.src = file.url;
   return audio;
 }
