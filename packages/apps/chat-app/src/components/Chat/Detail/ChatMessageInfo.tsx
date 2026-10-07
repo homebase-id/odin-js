@@ -12,6 +12,7 @@ import {
   getOwnerDrivePath,
   CHAT_APP_ID,
 } from '@homebase-id/common-app';
+import { isHiddenReactionCode } from '../../../utils/messageKinds';
 import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
@@ -40,10 +41,13 @@ export const ChatMessageInfo = ({
   const isAuthor =
     msg.fileMetadata.senderOdinId === loggedOnIdentity || !msg.fileMetadata.senderOdinId;
 
-  const { data: reactions } = useChatReaction({
+  const { data: allReactions } = useChatReaction({
     messageFileId: msg.fileId,
     messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
+  const visibleReactions = allReactions?.filter(
+    (reaction) => !isHiddenReactionCode(reaction.body.trim())
+  );
 
   const { data: transferHistory } = useTransferHistory({
     fileId: msg.fileId,
@@ -127,11 +131,11 @@ export const ChatMessageInfo = ({
           </div>
         ) : null}
 
-        {reactions?.length ? (
+        {visibleReactions?.length ? (
           <div>
             <p className="mb-2 text-xl">{t('Reactions')}</p>
             <div className="flex flex-col gap-4">
-              {reactions?.map((reaction) => {
+              {visibleReactions?.map((reaction) => {
                 return (
                   <div className="flex flex-row items-center text-lg" key={reaction.body}>
                     <AuthorImage odinId={reaction.authorOdinId} size="xs" className="mr-2" />
