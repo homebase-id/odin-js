@@ -110,8 +110,13 @@ export const useCircle = (props?: { circleId?: string }) => {
   const revokeDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) =>
     await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain: domain });
 
-  const removeCircleInternal = async ({ circleId }: { circleId: string }) =>
-    await removeCircle(dotYouClient, circleId);
+  const removeCircleInternal = async ({
+    circleId,
+    removeMembers,
+  }: {
+    circleId: string;
+    removeMembers?: boolean;
+  }) => await removeCircle(dotYouClient, circleId, { removeMembers });
 
   const setOwningApp = async ({ circleId, appId }: { circleId: string; appId: string }) =>
     await setCircleOwningApp(dotYouClient, circleId, appId);
