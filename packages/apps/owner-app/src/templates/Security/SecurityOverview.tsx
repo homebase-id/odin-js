@@ -123,6 +123,21 @@ export const SecurityOverview = () => {
                   {info?.isConfigured && info?.recoveryRisk && (
                     <DealerRecoveryRiskHeadline report={info.recoveryRisk} />
                   )}
+
+                  {info?.isConfigured && info?.rotationPending && (
+                    <span className="flex items-center text-red-600">
+                      <Exclamation className="mr-1 h-4 w-4" />
+                      {t(
+                        'Your recovery shards were not refreshed after your password changed. The shards your trusted connections held before the change can still recover your account.'
+                      )}
+                      <Link
+                        to="/owner/security/password-recovery?gs=1"
+                        className="ml-2 text-blue-600 underline hover:text-blue-800"
+                      >
+                        {t('Set up again')}
+                      </Link>
+                    </span>
+                  )}
                 </SettingsRow>
 
                 <SettingsRow label={t('Email monthly security health report:')}>
