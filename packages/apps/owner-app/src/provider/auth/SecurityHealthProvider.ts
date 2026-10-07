@@ -87,7 +87,11 @@ export interface RecoveryInfo {
   emailLastVerified: number | null,
   status: VerificationStatus,
   hasRecoveryKeyBeenViewed: boolean,
-  recoveryRisk: DealerRecoveryRiskReport
+  recoveryRisk: DealerRecoveryRiskReport,
+
+  // The shards predate the current password and could not be rotated; the shards held
+  // before the change still work until recovery is set up again
+  rotationPending: boolean
 }
 
 export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInfo | null> => {
