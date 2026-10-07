@@ -89,8 +89,9 @@ export interface RecoveryInfo {
   hasRecoveryKeyBeenViewed: boolean,
   recoveryRisk: DealerRecoveryRiskReport,
 
-  // The shards predate the current password and could not be rotated; the shards held
-  // before the change still work until recovery is set up again
+  // The shards predate the current password and could not be rotated; until recovery is set up
+  // again, delegates still connected (or automated players) can release the shards from before
+  // the change (odin-core #1885)
   rotationPending: boolean
 }
 
