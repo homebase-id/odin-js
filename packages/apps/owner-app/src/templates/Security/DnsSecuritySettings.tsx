@@ -189,7 +189,8 @@ const RecordsBlock = ({
     return (
       <div className="flex flex-col gap-3">
         <Alert type="success">{t('Your DNS records are set up correctly.')}</Alert>
-        <AllRecords records={allRecords} origin={origin} expand={expand} />
+        {/* Own DNS host: the Homebase NS rows are not the owner's setup, so they would only read as "Not found" */}
+        <AllRecords records={visibleRecords} origin={origin} expand={expand} />
       </div>
     );
   }
@@ -279,9 +280,14 @@ const DnssecBlock = ({
   }
   if (dnssec.status === 'zoneUnsigned')
     return (
-      <DnssecMissing>
-        {t('Your DNS host does not sign your zone. Using Homebase nameservers signs it for you.')}
-      </DnssecMissing>
+      <div className="flex flex-col gap-3">
+        <DnssecMissing>
+          {t(
+            'Your DNS host does not sign your zone. Turn on DNSSEC (zone signing) at your DNS host, then add the DS record it gives you at your registrar. Or use Homebase nameservers, which sign it for you.'
+          )}
+        </DnssecMissing>
+        <DsHint provider={provider} />
+      </div>
     );
   if (dnssec.status === 'parentUnsigned')
     // The zone is signed, so the DS is already known; it just has nowhere to go yet
