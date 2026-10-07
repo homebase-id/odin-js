@@ -283,7 +283,10 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
 
     emptyDrive: useMutation({
       mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => emptyDrive(dotYouClient, targetDrive),
-      onSettled: (_data, _error, { targetDrive }) => invalidateFiles(targetDrive),
+      onSettled: (_data, _error, { targetDrive }) => {
+        invalidateFiles(targetDrive);
+        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
+      },
     }),
 
     // A deleted drive also drops out of every circle and app grant, so those are refetched too.
@@ -291,6 +294,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => deleteDrive(dotYouClient, targetDrive),
       onSettled: (_data, _error, { targetDrive }) => {
         invalidateFiles(targetDrive);
+        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
         queryClient.invalidateQueries({ queryKey: ['drives'] });
         queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
         queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });

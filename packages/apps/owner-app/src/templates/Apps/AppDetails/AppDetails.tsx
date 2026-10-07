@@ -1,4 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { DrivePurgeStatus } from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import { useApp } from '../../../hooks/apps/useApp';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
@@ -123,6 +124,7 @@ const AppDetails = () => {
       <ErrorNotification
         error={allowAppError || revokeAppError || uninstallAppError}
       />
+      <DrivePurgeStatus appId={decodedAppKey} className="mb-5" />
       <PageMeta
         icon={Grid}
         browserTitle={app.name}

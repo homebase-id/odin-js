@@ -21,6 +21,7 @@ import {DriveStatusDialog} from '../../../components/Drives/DriveStatusDialog/Dr
 import {SetOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import {ReassignOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
+import {DrivePurgeStatus} from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import {
     ActionButton,
     ActionGroup,
@@ -180,6 +181,7 @@ const DriveDetails = () => {
                 ]}
             />
             <ErrorNotification error={emptyError || deleteError}/>
+            <DrivePurgeStatus driveAlias={targetDriveInfo.alias} className="mb-5"/>
             <Section
                 title={t('Metadata')}
                 actions={

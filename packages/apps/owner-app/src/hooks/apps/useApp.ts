@@ -213,6 +213,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
         invalidateApp(queryClient, param.appId);
         invalidateApps(queryClient);
         queryClient.invalidateQueries({ queryKey: ['drives'] });
+        queryClient.invalidateQueries({ queryKey: ['drive-purges'] });
         queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
         queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
       },

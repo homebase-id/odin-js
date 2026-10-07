@@ -236,6 +236,48 @@ export const deleteDrive = async (dotYouClient: DotYouClient, targetDrive: Targe
     });
 };
 
+/** A drive still being emptied or deleted in the background. */
+export interface DrivePurgeStatus {
+  targetDrive: TargetDrive;
+  name?: string;
+  /** The app that owned the drive. */
+  appId?: string;
+  kind: 'empty' | 'delete';
+  /** When the owner asked, unix ms. */
+  requested: number;
+  filesRemaining: number;
+  lastError?: string;
+  lastErrorAt?: number;
+  /** No job is working on it any more; retryDrivePurge restarts it. */
+  stopped: boolean;
+}
+
+/** Owner only. Every empty and delete still being purged; empty when nothing is pending. */
+export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DrivePurgeStatus[]> => {
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .get<DrivePurgeStatus[]>('/drive/mgmt/purges')
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error('[odin-js:getDrivePurges]', error);
+      throw error;
+    });
+};
+
+/** Owner only. Restarts an empty or delete whose background job stopped. */
+export const retryDrivePurge = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
+  assertIfDefined('targetDrive', targetDrive);
+
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post('/drive/mgmt/purges/retry', { targetDrive: targetDrive })
+    .then((response) => response.status === 202)
+    .catch((error) => {
+      console.error('[odin-js:retryDrivePurge]', error);
+      throw error;
+    });
+};
+
 export const editDriveAllowSubscriptions = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
