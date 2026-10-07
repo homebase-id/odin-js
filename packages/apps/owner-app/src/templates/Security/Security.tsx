@@ -11,32 +11,19 @@ import {DnsSecuritySettings} from "./DnsSecuritySettings";
 import {EmailDnsSettings} from "./EmailDnsSettings";
 import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
 import {useMailHealth} from "../../hooks/mail/useMailHealth";
-import {emailNeedsAttention as computeEmailNeedsAttention} from "./dns/mailAttention";
-import {dnssecTone} from "./dns/dnssec";
+import {dnsTabTone, emailNeedsAttention as computeEmailNeedsAttention, TabTone} from "./dns/attention";
 
-type DotTone = 'red' | 'orange';
-
-const Dot = ({tone}: { tone: DotTone }) => (
+const Dot = ({tone}: { tone: TabTone }) => (
   <span className={`inline-block h-2 w-2 rounded-full ${tone === 'red' ? 'bg-red-500' : 'bg-orange-400'}`}/>
 );
 
 const Security = () => {
   const {sectionId} = useParams();
 
-  // Dot on the DNS tab, coloured by how bad it is. Red: a required record is broken, or
-  // validating resolvers refuse the domain (DS mismatch). Orange: the DNSSEC chain is not
-  // anchored - mail still works, but without DANE and with slightly weaker deliverability -
-  // the same set the server's monthly health report flags (dnssec.needsAttention). A managed
-  // domain's enclosing zone is ours to fix and only lights the dot when it actually breaks
-  // resolution. Shares the DNS tab's query (5 min stale time), so it costs no extra fetch.
+  // Both dots come from dns/attention.ts. Shares the DNS tab's query (5 min stale time), so
+  // it costs no extra fetch.
   const {fetchDnsHealth: {data: dnsHealth}} = useDnsHealth();
-  const dnsDot: DotTone | null = !dnsHealth
-    ? null
-    : !dnsHealth.recordsAreValid || dnssecTone(dnsHealth.dnssec) === 'red'
-      ? 'red'
-      : dnsHealth.dnssec.needsAttention
-        ? 'orange'
-        : null;
+  const dnsDot = dnsTabTone(dnsHealth);
 
   // Same treatment for email, by the same rule the Email tab uses. No records at all means
   // email is not set up - nothing to act on, so no dot (and no expensive verify call).

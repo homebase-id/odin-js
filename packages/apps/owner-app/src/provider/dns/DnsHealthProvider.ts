@@ -81,8 +81,6 @@ export interface MailRelayHealth {
   // Optional: absent from servers before odin-core#1887.
   // Worth saying but not wrong, e.g. the relay could not be asked - the server's wording
   warning?: string | null;
-  // Some relay rows are not published yet; the broken rows already say so
-  recordsNotLiveYet?: boolean;
 }
 
 export interface DnsHealth {
