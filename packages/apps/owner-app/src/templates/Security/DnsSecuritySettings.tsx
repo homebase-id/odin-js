@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { t, ActionButton, Alert, LoadingBlock } from '@homebase-id/common-app';
 import { Refresh } from '@homebase-id/common-app/icons';
 import { NameserverSetup, RecordSetup } from './dns/DnsExport';
@@ -10,6 +10,7 @@ import {
   TABLE_HEAD_BASE,
 } from './dns/DnsRecordRow';
 import { isDelegated, isMissing, requiredRecords, zoneOrigin } from './dns/zoneFile';
+import { dnssecNotGreen, enclosingZoneIncomplete, parentZone } from './dns/dnssec';
 import { DnsProvider, useDnsProvider } from './dns/providers';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
@@ -53,8 +54,13 @@ export const DnsSecuritySettings = () => {
       : mode === 'nameservers' && origin
         ? 'nameservers'
         : 'records';
-  // Optional and DNSSEC stay out of the nameserver setup only; every other view shows them
+  // Optional records stay out of the nameserver setup only; every other view shows them
   const showingNameservers = view === 'nameservers';
+  // Anything not green opens the record list, so what is wrong is on screen without a click
+  const expandRecords =
+    shown.some(isMissing) ||
+    nsRecords.some(isMissing) ||
+    (!!health && dnssecNotGreen(health.dnssec));
 
   return (
     <>
@@ -98,6 +104,7 @@ export const DnsSecuritySettings = () => {
             <RecordsBlock
               view={view}
               nsRecords={nsRecords}
+              expand={expandRecords}
               shown={shown}
               zone={zone}
               origin={origin}
@@ -109,7 +116,7 @@ export const DnsSecuritySettings = () => {
               optionalRecords={health.optionalRecords}
               show={view !== 'delegated' && !showingNameservers}
             />
-            <DnssecBlock dnssec={health.dnssec} provider={provider} hidden={showingNameservers} />
+            <DnssecBlock dnssec={health.dnssec} provider={provider} origin={origin} />
           </div>
         ) : null}
       </Section>
@@ -117,9 +124,29 @@ export const DnsSecuritySettings = () => {
   );
 };
 
+// Every view offers the full record list - including the NS rows, graded against the parent's
+// delegation, because "uses Homebase nameservers" is itself a claim the owner may need to check
+const AllRecords = ({
+  records,
+  origin,
+  expand,
+}: {
+  records: DnsHealthRecord[];
+  origin: string;
+  expand: boolean;
+}) => (
+  <details open={expand}>
+    <summary className={`cursor-pointer ${MUTED}`}>{t('Show records')}</summary>
+    <div className="mt-3">
+      <DnsRecordsTable records={records} origin={origin} />
+    </div>
+  </details>
+);
+
 const RecordsBlock = ({
   view,
   nsRecords,
+  expand,
   shown: visibleRecords,
   zone: zoneRecords,
   origin,
@@ -129,6 +156,7 @@ const RecordsBlock = ({
 }: {
   view: View;
   nsRecords: DnsHealthRecord[];
+  expand: boolean;
   shown: DnsHealthRecord[];
   zone: DnsHealthRecord[];
   origin: string;
@@ -136,33 +164,47 @@ const RecordsBlock = ({
   provider: DnsProvider;
   onSelectProvider: (id: string) => void;
 }) => {
+  const allRecords = [...nsRecords, ...visibleRecords];
   if (view === 'delegated') {
+    // Delegated means the NS rows check out; the other records can still be wrong
+    const recordsOk = !visibleRecords.some(isMissing);
     return (
-      <Alert type="success">{t('Your domain uses Homebase nameservers. Nothing to do.')}</Alert>
+      <div className="flex flex-col gap-3">
+        {recordsOk ? (
+          <Alert type="success">
+            {t('Your DNS is correctly set up (using Homebase servers, nothing to do).')}
+          </Alert>
+        ) : (
+          <Alert type="warning">
+            {t(
+              'Your domain uses Homebase servers, but some records are missing or wrong. Press Refresh in a few minutes; if it persists, contact support.'
+            )}
+          </Alert>
+        )}
+        <AllRecords records={allRecords} origin={origin} expand={expand} />
+      </div>
     );
   }
   if (view === 'good') {
     return (
       <div className="flex flex-col gap-3">
         <Alert type="success">{t('Your DNS records are set up correctly.')}</Alert>
-        <details>
-          <summary className={`cursor-pointer ${MUTED}`}>{t('Show records')}</summary>
-          <div className="mt-3">
-            <DnsRecordsTable records={visibleRecords} origin={origin} />
-          </div>
-        </details>
+        <AllRecords records={allRecords} origin={origin} expand={expand} />
       </div>
     );
   }
   if (view === 'nameservers') {
     return (
-      <NameserverSetup
-        nsRecords={nsRecords}
-        origin={origin}
-        provider={provider}
-        onSelectProvider={onSelectProvider}
-        onUseRecords={() => onModeChange('records')}
-      />
+      <div className="flex flex-col gap-4">
+        <NameserverSetup
+          nsRecords={nsRecords}
+          origin={origin}
+          provider={provider}
+          onSelectProvider={onSelectProvider}
+          onUseRecords={() => onModeChange('records')}
+        />
+        <AllRecords records={allRecords} origin={origin} expand={false} />
+      </div>
     );
   }
   return (
@@ -208,18 +250,24 @@ const OptionalRecordsBlock = ({
 const DnssecBlock = ({
   dnssec,
   provider,
-  hidden,
+  origin,
 }: {
   dnssec: DnssecHealth;
   provider: DnsProvider;
-  hidden: boolean;
+  origin: string;
 }) => {
-  // A mismatch breaks resolution, so it shows even when nameservers are the chosen path
-  if (hidden && dnssec.status !== 'dsMismatch') return null;
-
   if (dnssec.status === 'secure')
     return <p className={MUTED}>{t('DNSSEC: fully active, with an unbroken chain of trust.')}</p>;
-  if (dnssec.status === 'inherited')
+  if (dnssec.status === 'inherited') {
+    if (enclosingZoneIncomplete(dnssec))
+      return (
+        <Alert type="warning">
+          {t('DNSSEC for the')} <span className="font-mono">{dnssec.enclosingZone}</span>{' '}
+          {t(
+            'zone your domain is part of is not complete. This is on our side - nothing for you to do.'
+          )}
+        </Alert>
+      );
     return (
       <p className={MUTED}>
         {/* Not necessarily Homebase's zone: id.example.com can sit in the owner's own
@@ -228,17 +276,26 @@ const DnssecBlock = ({
         {t('zone your domain is part of, nothing to do.')}
       </p>
     );
+  }
   if (dnssec.status === 'zoneUnsigned')
     return (
-      <p className={MUTED}>
-        {t('DNSSEC: not available, your DNS host does not sign your zone. That is fine.')}
-      </p>
+      <DnssecMissing>
+        {t('Your DNS host does not sign your zone. Using Homebase nameservers signs it for you.')}
+      </DnssecMissing>
     );
   if (dnssec.status === 'parentUnsigned')
+    // The zone is signed, so the DS is already known; it just has nowhere to go yet
     return (
-      <p className={MUTED}>
-        {t("DNSSEC: not available, your domain's parent zone is not signed. That is fine.")}
-      </p>
+      <div className="flex flex-col gap-3">
+        <DnssecMissing>
+          {t('Your zone is signed, but its parent zone')}{' '}
+          <span className="font-mono">{parentZone(origin)}</span>{' '}
+          {t(
+            'is not, so the chain of trust cannot reach it. Turn on DNSSEC for the parent zone where it is hosted, then add this DS record there:'
+          )}
+        </DnssecMissing>
+        <DsTable dsRecords={dnssec.dsToPublish} copyable />
+      </div>
     );
   if (dnssec.status === 'dsMismatch')
     return (
@@ -259,14 +316,20 @@ const DnssecBlock = ({
   // dsMissing
   return (
     <div className="flex flex-col gap-3">
-      <Alert type="warning">
-        {t('Recommended: add this DS record at your registrar (DNSSEC).')}
-      </Alert>
+      <DnssecMissing>{t('Add this DS record at your registrar:')}</DnssecMissing>
       <DsTable dsRecords={dnssec.dsToPublish} copyable />
       <DsHint provider={provider} />
     </div>
   );
 };
+
+// Every unanchored state leads with the same reason to care, then says what is in the way
+const DnssecMissing = ({ children }: { children: ReactNode }) => (
+  <Alert type="warning">
+    <p>{t('For your security and email deliverability, DNSSEC should be configured.')}</p>
+    <p className="mt-1 text-sm">{children}</p>
+  </Alert>
+);
 
 // Where this provider takes the DS record; the provider is picked in the records block
 const DsHint = ({ provider }: { provider: DnsProvider }) => (

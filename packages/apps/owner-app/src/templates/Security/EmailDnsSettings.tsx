@@ -3,6 +3,7 @@ import { Exclamation, Refresh } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
+import { MailRelayHealth } from '../../provider/dns/DnsHealthProvider';
 import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
 import { RecordSetup } from './dns/DnsExport';
 import { useDnsProvider } from './dns/providers';
@@ -58,7 +59,17 @@ export const EmailDnsSettings = () => {
   } = useMailHealth({ enabled: records.length > 0 });
   const healthErrors = mailHealth?.errors ?? [];
   const healthWarnings = mailHealth?.warnings ?? [];
-  const needsAttention = broken.length > 0 || healthErrors.length > 0;
+
+  // The outbound relay. A domain it refused has no relay rows to show as broken, which is how
+  // a mailbox that could not send looked healthy here (2026-10-07). The server says so now.
+  const relay = health?.relay;
+  const relayProblem = relay?.needsAttention ? describeRelay(relay) : undefined;
+  const needsAttention = broken.length > 0 || healthErrors.length > 0 || !!relayProblem;
+  const problems = relayProblem ? [relayProblem, ...healthErrors] : healthErrors;
+  const warnings =
+    relay?.status === 'unreachable'
+      ? [t('Outbound sending could not be checked right now.'), ...healthWarnings]
+      : healthWarnings;
 
   // Publishing on third-party DNS writes nothing and returns the records to add by hand,
   // matched to the check for status. Otherwise, on known third-party DNS, the check itself
@@ -115,7 +126,11 @@ export const EmailDnsSettings = () => {
         ) : (
           <div className="flex flex-col gap-4">
             {!needsAttention ? (
-              <Alert type="success">{t('Your email is correctly set up.')}</Alert>
+              <Alert type="success">
+                {isDelegated(nsRecords)
+                  ? t('Your email is correctly set up (using Homebase servers, nothing to do).')
+                  : t('Your email is correctly set up.')}
+              </Alert>
             ) : (
               <Alert type="warning">
                 {t(
@@ -126,10 +141,11 @@ export const EmailDnsSettings = () => {
 
             {/* Missing records are usually an identity provisioned before this server offered
                 email: the records are written when an identity is created, so an older one
-                never received them. Publishing them is safe to repeat. Offered only for
-                missing/incorrect RECORDS - the other checks (key drift, DKIM pair proof) are
-                not fixed by writing DNS. */}
-            {broken.length > 0 && !thirdPartyDns ? (
+                never received them. The same button registers the domain with the outbound
+                relay, which is the repair when the relay refused it. Safe to repeat. Not
+                offered for the other checks (key drift, DKIM pair proof): writing DNS does not
+                fix those. */}
+            {(broken.length > 0 || relayProblem) && !thirdPartyDns ? (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-row items-center gap-3">
                   <ActionButton
@@ -138,14 +154,25 @@ export const EmailDnsSettings = () => {
                     className="px-3 py-1 text-sm"
                     icon={Refresh}
                     state={publishStatus === 'pending' ? 'loading' : undefined}
-                    onClick={() => publishDnsRecords()}
+                    // The failure is shown from the mutation status below; not rethrown
+                    onClick={() => publishDnsRecords().catch(() => undefined)}
                   >
-                    {t('Publish missing records')}
+                    {t('Repair email setup')}
                   </ActionButton>
                   <small className={MUTED}>
-                    {t('Adds the email records for your domain. Safe to run more than once.')}
+                    {t(
+                      'Publishes the email records for your domain and sets up outbound sending. Safe to run more than once.'
+                    )}
                   </small>
                 </div>
+
+                {/* The relay's own words: a plan limit or a bad request is something a person
+                    has to change, and saying which is the whole point of the button */}
+                {publishResult?.relayError ? (
+                  <Alert type="warning">
+                    {t('Outbound sending could not be set up:')} {publishResult.relayError}
+                  </Alert>
+                ) : null}
 
                 {publishStatus === 'error' ? (
                   <Alert type="critical">
@@ -190,17 +217,27 @@ export const EmailDnsSettings = () => {
             )}
 
             {/* Errors first: these are the ones that also trigger the monthly report. */}
-            {healthErrors.length > 0 ? (
-              <CheckList title={t('Problems')} items={healthErrors} tone="bad" />
+            {problems.length > 0 ? (
+              <CheckList title={t('Problems')} items={problems} tone="bad" />
             ) : null}
-            {healthWarnings.length > 0 ? (
-              <CheckList title={t('Could not be checked')} items={healthWarnings} tone="muted" />
+            {warnings.length > 0 ? (
+              <CheckList title={t('Could not be checked')} items={warnings} tone="muted" />
             ) : null}
           </div>
         )}
       </Section>
     </>
   );
+};
+
+const describeRelay = (relay: MailRelayHealth) => {
+  if (relay.status === 'notRegistered')
+    return relay.lastError
+      ? `${t('Outbound sending is not set up. The mail relay refused your domain:')} ${relay.lastError}`
+      : t('Outbound sending is not set up: the mail relay has not registered your domain.');
+  return relay.problems.length
+    ? `${t('Outbound sending is not verified yet:')} ${relay.problems.join('; ')}`
+    : t('Outbound sending is not verified yet.');
 };
 
 // The non-record checks. Warnings are things we could not verify rather than things that

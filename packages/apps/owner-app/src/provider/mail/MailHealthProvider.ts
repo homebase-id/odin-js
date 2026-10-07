@@ -25,7 +25,8 @@ export const getMailHealth = async (dotYouClient: DotYouClient): Promise<MailHea
 
 // POST /api/owner/v1/mail/publish-dns-records - (re)writes this identity's static mail DNS
 // records (MX, SPF, DMARC, MTA-STS, TLS-RPT, mta-sts CNAME) into whichever zone holds the
-// tenant's records.
+// tenant's records, and (re)registers the domain with the outbound relay, publishing its
+// CNAMEs too. A relay refusal comes back in relayError.
 //
 // Those records are written at provisioning time, so an identity provisioned before tenant
 // mail was enabled never received them: it ends up with a working mailbox, valid DKIM, and
@@ -45,6 +46,9 @@ export interface MailDnsRecord {
 export interface MailDnsPublishResult {
   dnsRecordsWritten: boolean;
   records: MailDnsRecord[];
+  // Why the outbound relay would not register the domain, in its own words; null when it did
+  // (or no relay is configured). The other records are published regardless.
+  relayError?: string | null;
 }
 
 export const publishMailDnsRecords = async (
