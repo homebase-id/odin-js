@@ -23,10 +23,12 @@ const toKey = (odinId: string) => odinId.toLowerCase();
 async function verifyOnce(
     client: DotYouClient,
     req: VerifyRemotePlayerShardRequest
-): Promise<"valid" | "invalid" | "error" | "serverError"> {
+): Promise<"valid" | "invalid" | "notConnected" | "error" | "serverError"> {
     try {
         const result: ShardVerificationResult | null = await verifyRemotePlayerShard(client, req);
         if (result?.remoteServerError) return "serverError";
+        // a disconnected delegate may still hold the shard but cannot deliver it (odin-core #1885)
+        if (result?.isConnected === false) return "notConnected";
         return result?.isValid ? "valid" : "invalid";
     } catch {
         return "error";
@@ -167,6 +169,7 @@ export const PlayerStatusList = ({recoveryInfo}: { recoveryInfo: RecoveryInfo })
                             let status: Status;
                             if (p.isMissing) status = "error";
                             else if (statusOverride) status = statusOverride;
+                            else if (p.isConnected === false) status = "notConnected";
                             else status = p.isValid ? "valid" : "invalid";
 
                             return (
