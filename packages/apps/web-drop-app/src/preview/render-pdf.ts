@@ -1,17 +1,20 @@
-import { h, notice, type PreviewFile } from './dom';
+import { fallback, h, notice, scrollable, type PreviewFile } from './dom';
+import { PREVIEW_STRINGS as S } from './strings';
 
 const MAX_PAGES = 100;
 
 // Pages are painted to canvas on purpose: the browser's own PDF viewer has download and print
 // buttons. pdfjs is imported only when a PDF is present, so other drops never pay for it.
 export function renderPdf(file: PreviewFile): HTMLElement {
-  const host = h('div', 'preview-pdf');
-  host.appendChild(notice('Loading PDF…'));
+  const host = scrollable(h('div', 'preview-pdf'), S.scrollRegion(file.name));
+  host.setAttribute('aria-busy', 'true');
+  host.appendChild(notice(S.pdfLoading));
   host.addEventListener('contextmenu', (e) => e.preventDefault());
 
   void paintPdf(host, file).catch((e) => {
     console.warn('[webdrop] pdf render failed', e);
-    host.replaceChildren(notice("This PDF can't be shown in this browser."));
+    host.removeAttribute('aria-busy');
+    host.replaceChildren(fallback(S.pdfFailed));
   });
   return host;
 }
@@ -34,13 +37,16 @@ async function paintPdf(host: HTMLElement, file: PreviewFile) {
       const page = await doc.getPage(n);
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = h('canvas', 'preview-pdf-page');
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', `${file.name}, ${n} / ${doc.numPages}`);
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       host.appendChild(canvas);
       await page.render({ canvas, viewport }).promise;
     }
-    if (doc.numPages > MAX_PAGES) host.appendChild(notice(`Only the first ${MAX_PAGES} pages are shown.`));
+    if (doc.numPages > MAX_PAGES) host.appendChild(notice(S.pdfCapped(MAX_PAGES)));
   } finally {
+    host.removeAttribute('aria-busy');
     void task.destroy();
   }
 }

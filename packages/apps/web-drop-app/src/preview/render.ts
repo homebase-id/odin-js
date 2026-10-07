@@ -1,4 +1,4 @@
-import { classify } from './classify';
+import { classify, type PreviewClass } from './classify';
 import { formatSize, h, type PreviewFile } from './dom';
 import { renderImage } from './render-image';
 import { renderJson } from './render-json';
@@ -7,6 +7,7 @@ import { renderPdf } from './render-pdf';
 import { renderTable } from './render-table';
 import { renderText } from './render-text';
 import { renderUnavailable } from './render-unavailable';
+import { PREVIEW_STRINGS as S } from './strings';
 
 export function renderPreviewBody(file: PreviewFile): HTMLElement {
   switch (classify(file.contentType, file.name)) {
@@ -31,16 +32,36 @@ export function renderPreviewBody(file: PreviewFile): HTMLElement {
   }
 }
 
+const SOURCE_MIMES = /^(text\/(markdown|html)|application\/(xhtml\+)?xml|text\/xml)/;
+
+/** "JPG image", "DOCX file": the extension the recipient recognises, not a raw mime string. */
+export function kindLabel(file: PreviewFile, kind: PreviewClass): string {
+  const dot = file.name.lastIndexOf('.');
+  const ext = dot > 0 ? file.name.slice(dot + 1) : '';
+  const tag = ext && ext.length <= 6 ? ext.toUpperCase() : '';
+  return tag ? `${tag} ${S.kind[kind]}` : S.kind[kind].replace(/^./, (c) => c.toUpperCase());
+}
+
 /** One inline preview per file. Nothing in here offers a download. */
 export function renderPreviewList(files: PreviewFile[]): HTMLElement {
   const list = h('ul', 'previews');
   for (const file of files) {
+    const kind = classify(file.contentType, file.name);
     const item = h('li', 'preview');
     const caption = h('div', 'preview-caption');
-    caption.appendChild(h('span', 'preview-name', file.name));
-    caption.appendChild(h('span', 'payload-type', `${file.contentType} · ${formatSize(file.bytes.length)}`));
+    const name = h('span', 'preview-name', file.name);
+    name.setAttribute('dir', 'auto');
+    caption.appendChild(name);
+    const meta = h('span', 'preview-meta', `${kindLabel(file, kind)} · ${formatSize(file.bytes.length)}`);
+    meta.setAttribute('title', file.contentType);
+    caption.appendChild(meta);
     item.appendChild(caption);
+
     item.appendChild(renderPreviewBody(file));
+
+    if (kind === 'text' && SOURCE_MIMES.test(file.contentType.toLowerCase())) {
+      item.appendChild(h('p', 'preview-note', S.shownAsSource));
+    }
     list.appendChild(item);
   }
   return list;

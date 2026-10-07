@@ -17,6 +17,18 @@ const formatRemaining = (ms: number) => {
   return h > 0 ? `${pad(h)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}` : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 };
 
+const VIEW_ONLY_BANNER = `
+  <section class="view-only-banner" role="note" aria-labelledby="view-only-title">
+    <p id="view-only-title" class="view-only-badge">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+        <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="3" fill="currentColor"/>
+      </svg>
+      View only
+    </p>
+    <p class="view-only-text">These files open here, in your browser. The sender asked that they not be downloaded or saved.</p>
+  </section>`;
+
 /** The open screen markup. View-only drops get a #previews slot and never an `<a download>`. */
 export function openScreenHtml(
   files: { name: string; contentType: string; url: string }[],
@@ -42,7 +54,7 @@ export function openScreenHtml(
 
       ${
         viewOnly
-          ? '<div id="previews"></div>'
+          ? `${VIEW_ONLY_BANNER}<div id="previews"></div>`
           : `<ul class="payloads">
         ${files
           .map(

@@ -1,5 +1,4 @@
-import { h } from './dom';
-import { decodeCapped, withTruncationNote } from './render-text';
+import { decodeCapped, textBlock, withTruncationNote } from './render-text';
 import type { PreviewFile } from './dom';
 
 export function prettyJson(text: string, truncated: boolean): string {
@@ -13,5 +12,5 @@ export function prettyJson(text: string, truncated: boolean): string {
 
 export function renderJson(file: PreviewFile): HTMLElement {
   const { text, truncated } = decodeCapped(file.bytes);
-  return withTruncationNote(h('pre', 'preview-text', prettyJson(text, truncated)), truncated);
+  return withTruncationNote(textBlock(file, prettyJson(text, truncated)), truncated);
 }

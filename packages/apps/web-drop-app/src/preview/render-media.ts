@@ -1,4 +1,5 @@
-import { h, swapWithNotice, type PreviewFile } from './dom';
+import { h, swapWithFallback, type PreviewFile } from './dom';
+import { PREVIEW_STRINGS as S } from './strings';
 
 export function renderVideo(file: PreviewFile): HTMLElement {
   const video = h('video', 'preview-video');
@@ -6,8 +7,10 @@ export function renderVideo(file: PreviewFile): HTMLElement {
   video.setAttribute('controlsList', 'nodownload noremoteplayback');
   video.disablePictureInPicture = true;
   video.playsInline = true;
+  video.preload = 'metadata';
+  video.setAttribute('aria-label', file.name);
   video.addEventListener('contextmenu', (e) => e.preventDefault());
-  video.addEventListener('error', () => swapWithNotice(video, "This video can't be played in this browser."));
+  video.addEventListener('error', () => swapWithFallback(video, S.videoFailed));
   video.src = file.url;
   return video;
 }
@@ -16,8 +19,10 @@ export function renderAudio(file: PreviewFile): HTMLElement {
   const audio = h('audio', 'preview-audio');
   audio.controls = true;
   audio.setAttribute('controlsList', 'nodownload');
+  audio.preload = 'metadata';
+  audio.setAttribute('aria-label', file.name);
   audio.addEventListener('contextmenu', (e) => e.preventDefault());
-  audio.addEventListener('error', () => swapWithNotice(audio, "This audio can't be played in this browser."));
+  audio.addEventListener('error', () => swapWithFallback(audio, S.audioFailed));
   audio.src = file.url;
   return audio;
 }

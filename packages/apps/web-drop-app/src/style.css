@@ -12,6 +12,7 @@
   --ok: #3ddc84;
   --amber: #ffb020;
   --mono: 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --code: 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 }
 
 * {
@@ -315,7 +316,7 @@ body::after {
 }
 
 .payload-type {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--dim);
   font-size: 0.7rem;
   white-space: nowrap;
@@ -888,83 +889,237 @@ body.theme-clean .destroy-button:hover {
 
 /* --- view-only previews --------------------------------------------------------------------- */
 
+/* on body, not :root, so the mixes resolve against each theme's own --ground and --ink */
+body {
+  color-scheme: dark; /* native video/audio controls and scrollbars follow the theme */
+  --radius: 0;
+  --inset: color-mix(in srgb, var(--ground) 70%, var(--panel));
+  --stripe: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+body.theme-clean {
+  color-scheme: light;
+  --radius: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.screen.view-only {
+  max-width: 60rem;
+}
+
+.view-only-banner {
+  width: min(52rem, 100%);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--signal);
+  border-radius: var(--radius);
+  text-align: start;
+}
+
+.view-only-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  padding: 0.3rem 0.6rem;
+  color: var(--ink); /* the signal colour is under 4.5:1 for text this small; it marks the edge */
+  border: 1px solid var(--signal);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.view-only-badge svg {
+  color: var(--signal);
+}
+
+.view-only-text {
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 30rem) {
+  .view-only-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .previews {
   list-style: none;
   padding: 0;
-  width: min(44rem, 100%);
+  width: min(52rem, 100%);
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 .preview {
-  padding: 0.85rem 1.1rem;
+  min-width: 0;
+  padding: 0.9rem clamp(0.75rem, 3vw, 1.1rem) 1.1rem;
   background: var(--panel);
   border: 1px solid var(--line);
-  text-align: left;
+  border-radius: var(--radius);
+  text-align: start;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.75rem;
 }
 
 .preview-caption {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.9rem;
+  gap: 0.2rem 0.9rem;
+  min-width: 0;
 }
 
 .preview-name {
+  flex: 1 1 14rem;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+.preview-meta {
+  color: var(--dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .preview-image,
 .preview-video {
+  display: block;
   max-width: 100%;
   max-height: 70vh;
   align-self: center;
+  border-radius: var(--radius);
   -webkit-user-drag: none;
   user-select: none;
   -webkit-touch-callout: none;
 }
 
+.preview-image {
+  height: auto;
+  background: var(--inset);
+}
+
+.preview-video {
+  width: 100%;
+  background: var(--inset);
+}
+
 .preview-audio {
   width: 100%;
+  height: 2.75rem;
 }
 
 .preview-text,
-.preview-table-wrap {
+.preview-table-wrap,
+.preview-pdf {
   margin: 0;
   max-height: 60vh;
   overflow: auto;
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.preview-text {
+  padding: 0.85rem 1rem;
+  font-family: var(--code);
   font-size: 0.8rem;
+  line-height: 1.6;
+  tab-size: 4;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.preview-text-wrap,
+.preview-table-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .preview-table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
   font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .preview-table th,
 .preview-table td {
-  border: 1px solid var(--line);
-  padding: 0.25rem 0.6rem;
-  text-align: left;
+  padding: 0.45rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.preview-table th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  color: var(--dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.preview-table td {
+  white-space: nowrap;
+}
+
+.preview-table td.long {
+  min-width: 14rem;
+  max-width: 24rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.preview-table .num {
+  text-align: end;
+}
+
+.preview-table tbody tr:nth-child(even) td {
+  background: var(--stripe);
 }
 
 .preview-pdf {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
   max-height: 80vh;
-  overflow: auto;
+  padding: 0.75rem;
 }
 
 .preview-pdf-page {
   max-width: 100%;
   height: auto;
   user-select: none;
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--ground) 60%, transparent);
 }
 
 .preview-note,
@@ -972,9 +1127,70 @@ body.theme-clean .destroy-button:hover {
   margin: 0;
   color: var(--dim);
   font-size: 0.75rem;
+  line-height: 1.5;
 }
 
+.preview-fallback,
+.preview-unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.6rem 1rem;
+  text-align: center;
+  background: var(--inset);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.preview-fallback .preview-note,
+.preview-unavailable .preview-note {
+  max-width: 28rem;
+}
+
+.preview-fallback-title,
 .preview-unavailable-title {
-  margin: 0 0 0.3rem;
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.preview-unavailable-file {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* a folded-corner document with the file's extension on it */
+.preview-unavailable-glyph {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 2.75rem;
+  height: 3.4rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.45rem;
+  border: 1px solid var(--dim);
+  border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 0.8rem, 100% 100%, 0 100%);
   color: var(--signal);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.preview-unavailable-glyph::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  inset-inline-end: -1px;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-bottom: 1px solid var(--dim);
+  border-inline-start: 1px solid var(--dim);
+}
+
+body.theme-clean .preview-unavailable-glyph {
+  border-radius: 4px;
 }

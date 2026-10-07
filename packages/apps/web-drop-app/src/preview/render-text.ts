@@ -1,4 +1,5 @@
-import { h, notice, type PreviewFile } from './dom';
+import { h, notice, scrollable, type PreviewFile } from './dom';
+import { PREVIEW_STRINGS as S } from './strings';
 
 export const MAX_TEXT_BYTES = 2 * 1024 * 1024;
 
@@ -9,16 +10,22 @@ export function decodeCapped(bytes: Uint8Array): { text: string; truncated: bool
   return { text, truncated };
 }
 
+export const textBlock = (file: PreviewFile, text: string): HTMLElement => {
+  const pre = scrollable(h('pre', 'preview-text', text), S.scrollRegion(file.name));
+  pre.setAttribute('dir', 'auto');
+  return pre;
+};
+
 export const withTruncationNote = (pre: HTMLElement, truncated: boolean): HTMLElement => {
   if (!truncated) return pre;
   const wrap = h('div', 'preview-text-wrap');
   wrap.appendChild(pre);
-  wrap.appendChild(notice('Truncated: only the first 2 MB are shown.'));
+  wrap.appendChild(notice(S.truncated));
   return wrap;
 };
 
 // Source is shown as source - html, xml and markdown are never rendered, only read as text.
 export function renderText(file: PreviewFile): HTMLElement {
   const { text, truncated } = decodeCapped(file.bytes);
-  return withTruncationNote(h('pre', 'preview-text', text), truncated);
+  return withTruncationNote(textBlock(file, text), truncated);
 }
