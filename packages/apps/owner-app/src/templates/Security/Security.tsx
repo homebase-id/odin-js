@@ -11,34 +11,26 @@ import {DnsSecuritySettings} from "./DnsSecuritySettings";
 import {EmailDnsSettings} from "./EmailDnsSettings";
 import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
 import {useMailHealth} from "../../hooks/mail/useMailHealth";
+import {emailNeedsAttention as computeEmailNeedsAttention} from "./dns/mailAttention";
 
 const Security = () => {
   const {sectionId} = useParams();
 
-  // Red dot on the DNS tab when the user should act: a required record is broken, a
-  // stale DS makes validating resolvers refuse the domain, or the DNSSEC chain is not
-  // anchored yet (dsMissing - with SMTP/DANE coming, an unanchored chain is a real
-  // to-do, not just optional hardening; the server only reports dsMissing when the
-  // parent is signed, i.e. when the user can actually fix it). States the user cannot
-  // act on (inherited, parentUnsigned, zoneUnsigned) stay quiet. Shares the DNS tab's
-  // query (5 min stale time), so opening the tab costs no extra fetch.
+  // Red dot on the DNS tab when the owner should act: a required record is broken, or the
+  // DNSSEC chain is not anchored - the same set the server's monthly health report flags
+  // (dnssec.needsAttention, the server's verdict). Since 2026-10-07 that includes parentUnsigned and zoneUnsigned: an
+  // unanchored zone weakens security and mail deliverability even when the fix lies with
+  // the registrar. A managed domain's enclosing zone is ours to fix and stays off the dot.
+  // Shares the DNS tab's query (5 min stale time), so opening the tab costs no extra fetch.
   const {fetchDnsHealth: {data: dnsHealth}} = useDnsHealth();
   const dnsNeedsAttention =
-    !!dnsHealth &&
-    (!dnsHealth.recordsAreValid ||
-      dnsHealth.dnssec.status === 'dsMismatch' ||
-      dnsHealth.dnssec.status === 'dsMissing');
+    !!dnsHealth && (!dnsHealth.recordsAreValid || dnsHealth.dnssec.needsAttention);
 
-  // Same treatment for email. No records at all means email is not set up - nothing to act
-  // on, so no dot. The dot covers the SAME set the Email tab and the monthly security health
-  // report act on: broken mail DNS records, plus the checks a record comparison cannot make
-  // (DKIM pair proof, public-key drift). Errors only - warnings are things we could not
-  // check, and a dot that cries wolf gets ignored.
+  // Same treatment for email, by the same rule the Email tab uses. No records at all means
+  // email is not set up - nothing to act on, so no dot (and no expensive verify call).
   const emailRecords = dnsHealth?.mailRecords ?? [];
   const {fetchMailHealth: {data: mailHealth}} = useMailHealth({enabled: emailRecords.length > 0});
-  const emailNeedsAttention =
-    emailRecords.some((record) => record.status !== 'success') ||
-    (mailHealth?.errors?.length ?? 0) > 0;
+  const emailNeedsAttention = computeEmailNeedsAttention(dnsHealth, mailHealth);
 
   return (
     <>
