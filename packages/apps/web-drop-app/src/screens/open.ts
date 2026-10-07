@@ -1,4 +1,5 @@
 import type { DroppedFile, DropSource } from '../drop-source';
+import { renderPreviewList } from '../preview/render';
 import { renderDestructed } from './destructed';
 
 interface Downloaded {
@@ -15,6 +16,60 @@ const formatRemaining = (ms: number) => {
   const h = Math.floor(s / 3600);
   return h > 0 ? `${pad(h)}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}` : `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
 };
+
+/** The open screen markup. View-only drops get a #previews slot and never an `<a download>`. */
+export function openScreenHtml(
+  files: { name: string; contentType: string; url: string }[],
+  viewOnly: boolean,
+  deadline: number
+): string {
+  return `
+    <main class="screen${viewOnly ? ' view-only' : ''}">
+      <header class="masthead">
+        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
+        <h1 class="wordmark">WEB<span>DROP</span></h1>
+      </header>
+
+      ${
+        deadline > 0
+          ? `<section class="countdown-block">
+               <p class="countdown-label">This drop will self-destruct in</p>
+               <p id="countdown" class="countdown">--:--</p>
+               <div class="fuse"><div id="fuse-burn" class="fuse-burn"></div></div>
+             </section>`
+          : '<p class="countdown-label">This drop does not expire.</p>'
+      }
+
+      ${
+        viewOnly
+          ? '<div id="previews"></div>'
+          : `<ul class="payloads">
+        ${files
+          .map(
+            (f) => `
+          <li class="payload">
+            <span class="payload-icon" aria-hidden="true">&#8595;</span>
+            <a href="${f.url}" download="${f.name}">${f.name}</a>
+            <span class="payload-type">${f.contentType}</span>
+          </li>`
+          )
+          .join('')}
+      </ul>`
+      }
+
+      <button id="destroy" class="destroy-button">I'm done &mdash; destroy it now</button>
+
+      <footer class="fineprint">
+        ${
+          viewOnly
+            ? 'View only: downloading is discouraged, not prevented'
+            : 'save what you need &middot; the drop will not wait'
+        }<br />
+        <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
+      </footer>
+    </main>
+  `;
+}
 
 /**
  * The open screen: fetch every payload (the FIRST payload fetch is what starts the server-side
@@ -54,49 +109,21 @@ export async function renderOpen(root: HTMLElement, source: DropSource, onDestru
     url: URL.createObjectURL(new Blob([f.bytes as BlobPart], { type: f.contentType })),
   }));
 
+  const viewOnly = header.viewOnly === true;
+
   // The clock started on the first payload fetch above; the header now carries the absolute time.
   const resolved = await source.fetchHeader();
   const deadline = resolved && resolved.ttl > 0 ? resolved.ttl : 0;
   const fuseTotal = deadline > 0 ? deadline - Date.now() : 0;
 
-  root.innerHTML = `
-    <main class="screen">
-      <header class="masthead">
-        <img class="logo" src="./homebase-logo.svg" alt="Homebase" />
-        <h1 class="wordmark">WEB<span>DROP</span></h1>
-      </header>
-
-      ${
-        deadline > 0
-          ? `<section class="countdown-block">
-               <p class="countdown-label">This drop will self-destruct in</p>
-               <p id="countdown" class="countdown">--:--</p>
-               <div class="fuse"><div id="fuse-burn" class="fuse-burn"></div></div>
-             </section>`
-          : '<p class="countdown-label">This drop does not expire.</p>'
-      }
-
-      <ul class="payloads">
-        ${files
-          .map(
-            (f) => `
-          <li class="payload">
-            <span class="payload-icon" aria-hidden="true">&#8595;</span>
-            <a href="${f.url}" download="${f.name}">${f.name}</a>
-            <span class="payload-type">${f.contentType}</span>
-          </li>`
-          )
-          .join('')}
-      </ul>
-
-      <button id="destroy" class="destroy-button">I'm done &mdash; destroy it now</button>
-
-      <footer class="fineprint">
-        save what you need &middot; the drop will not wait<br />
-        <a class="homebase-cta" href="https://homebase.id" target="_blank" rel="noopener">This is cool - I want a Homebase account too</a>
-      </footer>
-    </main>
-  `;
+  root.innerHTML = openScreenHtml(files, viewOnly, deadline);
+  if (viewOnly) {
+    // Built with DOM calls and textContent only; the previews are the one place payload bytes
+    // become visible, and none of them offers a download.
+    root.querySelector('#previews')?.replaceWith(
+      renderPreviewList(dropped.map((f, i) => ({ ...f, url: files[i].url })))
+    );
+  }
 
   let timer: ReturnType<typeof setInterval> | undefined;
 
