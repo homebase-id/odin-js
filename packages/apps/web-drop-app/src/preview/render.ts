@@ -2,16 +2,12 @@ import { classify, type PreviewClass } from './classify';
 import { extensionTag, formatSize, h, metaPart, type PreviewFile, type PreviewSlots } from './dom';
 import { renderImage } from './render-image';
 import { renderJson } from './render-json';
-import { renderMarkdown } from './render-markdown';
 import { renderAudio, renderVideo } from './render-media';
 import { renderPdf } from './render-pdf';
 import { renderTable } from './render-table';
 import { renderText } from './render-text';
 import { renderUnavailable } from './render-unavailable';
 import { PREVIEW_STRINGS as S } from './strings';
-
-const isMarkdown = (file: PreviewFile) =>
-  /^text\/markdown\b/i.test(file.contentType) || /\.(md|markdown)$/i.test(file.name);
 
 export function renderPreviewBody(
   file: PreviewFile,
@@ -30,7 +26,7 @@ export function renderPreviewBody(
     case 'pdf':
       return renderPdf(file, slots);
     case 'text':
-      return isMarkdown(file) ? renderMarkdown(file, slots) : renderText(file);
+      return renderText(file);
     case 'json':
       return renderJson(file);
     case 'table':

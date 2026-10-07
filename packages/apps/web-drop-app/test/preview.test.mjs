@@ -72,15 +72,11 @@ test('unpreviewable files get the not-available card under their name and size, 
   assert.match(item.textContent, /2 B/);
 });
 
-test('markdown is formatted from tokens: raw html stays text and unsafe links are not links', async () => {
-  const md = renderPreviewBody(
-    file('n.md', 'text/markdown', `# Notes\n\nThe **key** is \`4417\` [x](javascript:alert(1))\n\n${HOSTILE}\n`)
-  );
-  await new Promise((r) => setTimeout(r, 100));
+test('markdown renders as plain text through the code view, never as html', () => {
+  const md = renderPreviewBody(file('n.md', 'text/markdown', `# Notes\n\n**key** [x](javascript:alert(1))\n\n${HOSTILE}\n`));
   const nodes = walk(md);
-  assert.ok(nodes.some((e) => e.tagName === 'STRONG' && e.textContent === 'key'));
-  assert.ok(nodes.some((e) => e.tagName === 'CODE' && e.textContent === '4417'));
-  assert.equal(nodes.some((e) => e.tagName === 'IMG' || e.tagName === 'A'), false);
+  assert.equal(nodes.some((e) => ['STRONG', 'A', 'IMG', 'H1'].includes(e.tagName)), false);
+  assert.ok(md.textContent.includes('**key**'));
   assert.ok(md.textContent.includes(HOSTILE));
 });
 

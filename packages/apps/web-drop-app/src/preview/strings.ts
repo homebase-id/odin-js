@@ -30,8 +30,6 @@ export const PREVIEW_STRINGS = {
   pdfFitPageLabel: 'Fit whole page',
   zoomPercent: (n: number) => `${Math.round(n * 100)}%`,
   imageFailed: { title: "Can't show this image", body: "This image can't be shown in this browser." },
-  heicConverting: 'Converting this photo for your browser…',
-  heicConverted: 'Converted for this browser',
   heicFailed: {
     title: "Can't show this photo here",
     body: "This photo couldn't be decoded in this browser. Safari on iPhone, iPad or Mac can show it.",
@@ -46,10 +44,6 @@ export const PREVIEW_STRINGS = {
   tableColumns: (n: number) => (n === 1 ? '1 column' : `${n} columns`),
   tableScrollHint: 'scroll',
   truncated: 'Truncated: only the first 2 MB are shown.',
-  markdownView: 'Markdown view',
-  markdownFormatted: 'Formatted',
-  markdownSource: 'Source',
-  markdownLoading: 'Formatting…',
   unavailableTitle: 'Preview not available',
   unavailableBody: "This file type can't be previewed in a browser. View-only drops don't offer downloads.",
 };
