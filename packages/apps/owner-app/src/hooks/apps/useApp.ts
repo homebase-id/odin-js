@@ -8,7 +8,6 @@ import {
   AllowApp,
   GetAppRegistration,
   RegisterApp,
-  RemoveApp,
   UninstallApp,
   RevokeApp,
   UpdateAuthorizedCircles,
@@ -122,10 +121,6 @@ export const useApp = ({ appId }: { appId?: string }) => {
     return await AllowApp(dotYouClient, { appId: appId });
   };
 
-  const removeAppInternal = async ({ appId }: { appId: string }) => {
-    return await RemoveApp(dotYouClient, { appId: appId });
-  };
-
   const uninstallAppInternal = async ({
     appId,
     deleteOwnedCirclesAndDrives,
@@ -203,16 +198,6 @@ export const useApp = ({ appId }: { appId?: string }) => {
     }),
     allowApp: useMutation({
       mutationFn: allowAppInternal,
-      onSuccess: (data, param) => {
-        invalidateApp(queryClient, param.appId);
-        invalidateApps(queryClient);
-      },
-      onError: (ex) => {
-        console.error(ex);
-      },
-    }),
-    removeApp: useMutation({
-      mutationFn: removeAppInternal,
       onSuccess: (data, param) => {
         invalidateApp(queryClient, param.appId);
         invalidateApps(queryClient);

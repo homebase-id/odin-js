@@ -56,7 +56,6 @@ const AppDetails = () => {
     fetch: { data: app, isLoading: appLoading },
     revokeApp: { mutate: revokeApp, status: revokeAppStatus, error: revokeAppError },
     allowApp: { mutate: allowApp, status: allowAppStatus, error: allowAppError },
-    removeApp: { mutateAsync: removeApp, status: removeAppStatus, error: removeAppError },
     uninstallApp: { mutateAsync: uninstallApp, status: uninstallAppStatus, error: uninstallAppError },
     updateAuthorizedCircles: {
       mutate: updateCircles,
@@ -122,7 +121,7 @@ const AppDetails = () => {
   return (
     <>
       <ErrorNotification
-        error={allowAppError || revokeAppError || removeAppError || uninstallAppError}
+        error={allowAppError || revokeAppError || uninstallAppError}
       />
       <PageMeta
         icon={Grid}
@@ -157,32 +156,6 @@ const AppDetails = () => {
                   }}
                 >
                   {t('Restore app')}
-                </ActionButton>
-                <ActionButton
-                  type="remove"
-                  className="my-auto"
-                  onClick={async () => {
-                    await removeApp({ appId: decodedAppKey });
-                    navigate('/owner/apps');
-                  }}
-                  state={removeAppStatus}
-                  icon={Trash}
-                  confirmOptions={{
-                    type: 'critical',
-                    title: t('Remove App'),
-                    buttonText: t('Remove'),
-                    body: `${t('Are you sure you want to remove')} ${app.name}? ${t(
-                      'It will no longer have access to your identity. The linked drives and data will remain.'
-                    )}`,
-                    trickQuestion: {
-                      question: `${t('Fill in the name of the app')} (${app.name}) ${t(
-                        'to confirm:'
-                      )}`,
-                      answer: app.name,
-                    },
-                  }}
-                >
-                  {t('Remove app')}
                 </ActionButton>
                 <ActionButton
                   type="remove"
