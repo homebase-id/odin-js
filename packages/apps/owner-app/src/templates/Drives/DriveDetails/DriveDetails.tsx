@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Link, useParams} from 'react-router-dom';
+import {Link, useNavigate, useParams} from 'react-router-dom';
 import {useOwnerAppName} from '../../../hooks/apps/useOwnerAppName';
 import {useDrive} from '../../../hooks/drives/useDrive';
 import Section from '../../../components/ui/Sections/Section';
@@ -24,12 +24,13 @@ import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 import {
     ActionButton,
     ActionGroup,
+    ErrorNotification,
     CirclePermissionView,
     t,
     useCircles,
   getOwnerAppPath,
 } from '@homebase-id/common-app';
-import {HardDrive, Download, HeartBeat, Pencil} from '@homebase-id/common-app/icons';
+import {HardDrive, Download, HeartBeat, Pencil, Trash} from '@homebase-id/common-app/icons';
 
 const DriveDetails = () => {
     const {driveKey} = useParams();
@@ -45,6 +46,9 @@ const DriveDetails = () => {
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
     const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
     const {mutateAsync: reassignOwningApp} = useDrive().reassignOwningApp;
+    const {mutateAsync: emptyDrive, status: emptyStatus, error: emptyError} = useDrive().emptyDrive;
+    const {mutateAsync: deleteDrive, status: deleteStatus, error: deleteError} = useDrive().deleteDrive;
+    const navigate = useNavigate();
 
     const {data: circles} = useCircles().fetch;
     const {data: apps} = useApps().fetchRegistered;
@@ -114,8 +118,54 @@ const DriveDetails = () => {
                                     icon: HeartBeat,
                                     onClick: () => setIsShowDriveStatus(true),
                                 },
+                                ...(readOnly
+                                    ? []
+                                    : [
+                                          {
+                                              label: t('Empty drive'),
+                                              icon: Trash,
+                                              onClick: () => emptyDrive({targetDrive: targetDriveInfo}),
+                                              confirmOptions: {
+                                                  type: 'critical' as const,
+                                                  title: t('Empty drive'),
+                                                  buttonText: t('Empty'),
+                                                  body: `${t('Every file on')} ${driveDef.name} ${t(
+                                                      'is deleted, with its payloads. The drive stays. Copies your connections already received stay with them. This cannot be undone.'
+                                                  )}`,
+                                                  trickQuestion: {
+                                                      question: `${t('Fill in the name of the drive')} (${driveDef.name}) ${t('to confirm:')}`,
+                                                      answer: driveDef.name,
+                                                  },
+                                              },
+                                          },
+                                      ]),
+                                // The server deletes only an archived drive; archiving is the first "are you sure".
+                                ...(driveDef.isArchived && !readOnly
+                                    ? [
+                                          {
+                                              label: t('Delete drive'),
+                                              icon: Trash,
+                                              onClick: async () => {
+                                                  await deleteDrive({targetDrive: targetDriveInfo});
+                                                  navigate(getOwnerAppPath(driveDef.appId));
+                                              },
+                                              confirmOptions: {
+                                                  type: 'critical' as const,
+                                                  title: t('Delete drive'),
+                                                  buttonText: t('Delete'),
+                                                  body: `${driveDef.name} ${t(
+                                                      'is deleted with all its files, and every circle and app loses its access to it. Copies your connections already received stay with them. This cannot be undone.'
+                                                  )}`,
+                                                  trickQuestion: {
+                                                      question: `${t('Fill in the name of the drive')} (${driveDef.name}) ${t('to confirm:')}`,
+                                                      answer: driveDef.name,
+                                                  },
+                                              },
+                                          },
+                                      ]
+                                    : []),
                             ]}
-                            state={exportStatus}
+                            state={exportStatus === 'pending' ? exportStatus : emptyStatus === 'pending' ? emptyStatus : deleteStatus}
                             type="secondary"
                         />
                     </>
@@ -126,6 +176,7 @@ const DriveDetails = () => {
                     {title: driveDef.name ?? ''},
                 ]}
             />
+            <ErrorNotification error={emptyError || deleteError}/>
             <Section
                 title={t('Metadata')}
                 actions={

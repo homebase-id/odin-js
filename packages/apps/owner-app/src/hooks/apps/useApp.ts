@@ -9,6 +9,7 @@ import {
   GetAppRegistration,
   RegisterApp,
   RemoveApp,
+  UninstallApp,
   RevokeApp,
   UpdateAuthorizedCircles,
   UpdatePermissions,
@@ -125,6 +126,16 @@ export const useApp = ({ appId }: { appId?: string }) => {
     return await RemoveApp(dotYouClient, { appId: appId });
   };
 
+  const uninstallAppInternal = async ({
+    appId,
+    deleteOwnedCirclesAndDrives,
+  }: {
+    appId: string;
+    deleteOwnedCirclesAndDrives: boolean;
+  }) => {
+    return await UninstallApp(dotYouClient, { appId, deleteOwnedCirclesAndDrives });
+  };
+
   const updateAuthorizedCircles = async ({
     appId,
     circleIds,
@@ -205,6 +216,20 @@ export const useApp = ({ appId }: { appId?: string }) => {
       onSuccess: (data, param) => {
         invalidateApp(queryClient, param.appId);
         invalidateApps(queryClient);
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+    // Its circles and drives may go with it, and other apps lose those circles from their grants.
+    uninstallApp: useMutation({
+      mutationFn: uninstallAppInternal,
+      onSuccess: (data, param) => {
+        invalidateApp(queryClient, param.appId);
+        invalidateApps(queryClient);
+        queryClient.invalidateQueries({ queryKey: ['drives'] });
+        queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
       },
       onError: (ex) => {
         console.error(ex);

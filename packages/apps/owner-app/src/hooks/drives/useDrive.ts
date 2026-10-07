@@ -12,6 +12,8 @@ import {
   editDriveAllowCdn,
   setDriveOwningApp,
   reassignDriveOwningApp,
+  emptyDrive,
+  deleteDrive,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 import { useDotYouClientContext } from '@homebase-id/common-app';
@@ -125,6 +127,13 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     driveTypeSlug?: string;
   }) => {
     return reassignDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
+  };
+
+  const invalidateFiles = (targetDrive: TargetDrive) => {
+    queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === 'files' && query.queryKey[2] === targetDrive.alias,
+    });
+    queryClient.invalidateQueries({ queryKey: ['drive-status'] });
   };
 
   return {
@@ -269,6 +278,24 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       mutationFn: reassignOwningApp,
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['drives'] });
+      },
+    }),
+
+    emptyDrive: useMutation({
+      mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => emptyDrive(dotYouClient, targetDrive),
+      onSettled: (_data, _error, { targetDrive }) => invalidateFiles(targetDrive),
+    }),
+
+    // A deleted drive also drops out of every circle and app grant, so those are refetched too.
+    deleteDrive: useMutation({
+      mutationFn: ({ targetDrive }: { targetDrive: TargetDrive }) => deleteDrive(dotYouClient, targetDrive),
+      onSettled: (_data, _error, { targetDrive }) => {
+        invalidateFiles(targetDrive);
+        queryClient.invalidateQueries({ queryKey: ['drives'] });
+        queryClient.invalidateQueries({ queryKey: ['circles'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['circle'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['app'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['apps'], exact: false });
       },
     }),
   };

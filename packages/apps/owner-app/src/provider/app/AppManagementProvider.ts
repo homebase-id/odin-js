@@ -205,6 +205,18 @@ export const RemoveApp = async (
   return await client.post('appmanagement/deleteApp', request).then((response) => response.data);
 };
 
+/**
+ * Uninstalls a third-party app fully: its clients, its grants on every connection and its registration. An app
+ * that owns circles or drives is refused unless `deleteOwnedCirclesAndDrives` says they go with it.
+ */
+export const UninstallApp = async (
+  dotYouClient: DotYouClient,
+  request: { appId: string; deleteOwnedCirclesAndDrives: boolean }
+): Promise<void> => {
+  const client = dotYouClient.createAxiosClient();
+  return await client.post('appmanagement/uninstall', request).then((response) => response.data);
+};
+
 export const UpdateAuthorizedCircles = async (
   dotYouClient: DotYouClient,
   request: {

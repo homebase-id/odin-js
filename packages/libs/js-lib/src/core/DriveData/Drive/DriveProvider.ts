@@ -201,6 +201,40 @@ export const editDriveArchiveFlag = async (
     });
 };
 
+/**
+ * Owner only. Hard-deletes every file on a non-system drive and keeps the drive. Peers keep any copies they
+ * received.
+ */
+export const emptyDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
+  assertIfDefined('targetDrive', targetDrive);
+
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post('/drive/mgmt/empty', { targetDrive: targetDrive })
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:emptyDrive]', error);
+      throw error;
+    });
+};
+
+/**
+ * Owner only. Deletes an archived, non-system drive with all its files, its followers and every grant naming
+ * it. Peers keep any copies they received.
+ */
+export const deleteDrive = async (dotYouClient: DotYouClient, targetDrive: TargetDrive) => {
+  assertIfDefined('targetDrive', targetDrive);
+
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post('/drive/mgmt/delete', { targetDrive: targetDrive })
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:deleteDrive]', error);
+      throw error;
+    });
+};
+
 export const editDriveAllowSubscriptions = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

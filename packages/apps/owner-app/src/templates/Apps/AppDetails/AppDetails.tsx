@@ -57,6 +57,7 @@ const AppDetails = () => {
     revokeApp: { mutate: revokeApp, status: revokeAppStatus, error: revokeAppError },
     allowApp: { mutate: allowApp, status: allowAppStatus, error: allowAppError },
     removeApp: { mutateAsync: removeApp, status: removeAppStatus, error: removeAppError },
+    uninstallApp: { mutateAsync: uninstallApp, status: uninstallAppStatus, error: uninstallAppError },
     updateAuthorizedCircles: {
       mutate: updateCircles,
       status: updateCirclesState,
@@ -120,7 +121,9 @@ const AppDetails = () => {
 
   return (
     <>
-      <ErrorNotification error={allowAppError || revokeAppError || removeAppError} />
+      <ErrorNotification
+        error={allowAppError || revokeAppError || removeAppError || uninstallAppError}
+      />
       <PageMeta
         icon={Grid}
         browserTitle={app.name}
@@ -180,6 +183,32 @@ const AppDetails = () => {
                   }}
                 >
                   {t('Remove app')}
+                </ActionButton>
+                <ActionButton
+                  type="remove"
+                  className="my-auto"
+                  onClick={async () => {
+                    await uninstallApp({ appId: decodedAppKey, deleteOwnedCirclesAndDrives: true });
+                    navigate('/owner/apps');
+                  }}
+                  state={uninstallAppStatus}
+                  icon={Trash}
+                  confirmOptions={{
+                    type: 'critical',
+                    title: t('Uninstall App'),
+                    buttonText: t('Uninstall'),
+                    body: `${t('Are you sure you want to uninstall')} ${app.name}? ${t(
+                      'The app, its circles and its drives with all their data are deleted from your identity. Connections lose everything the app granted them. Copies your connections already received stay with them. This cannot be undone.'
+                    )}`,
+                    trickQuestion: {
+                      question: `${t('Fill in the name of the app')} (${app.name}) ${t(
+                        'to confirm:'
+                      )}`,
+                      answer: app.name,
+                    },
+                  }}
+                >
+                  {t('Uninstall app')}
                 </ActionButton>
               </>
             ) : (
