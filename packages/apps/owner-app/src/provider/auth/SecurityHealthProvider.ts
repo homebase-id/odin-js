@@ -87,7 +87,12 @@ export interface RecoveryInfo {
   emailLastVerified: number | null,
   status: VerificationStatus,
   hasRecoveryKeyBeenViewed: boolean,
-  recoveryRisk: DealerRecoveryRiskReport
+  recoveryRisk: DealerRecoveryRiskReport,
+
+  // The shards predate the current password and could not be rotated; until recovery is set up
+  // again, delegates still connected (or automated players) can release the shards from before
+  // the change (odin-core #1885)
+  rotationPending: boolean
 }
 
 export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInfo | null> => {

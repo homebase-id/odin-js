@@ -8,4 +8,4 @@ import { isMissing } from './zoneFile';
 export const emailNeedsAttention = (dnsHealth?: DnsHealth, mailHealth?: MailHealth) =>
   (dnsHealth?.mailRecords ?? []).some(isMissing) ||
   (mailHealth?.errors?.length ?? 0) > 0 ||
-  !!dnsHealth?.relay.needsAttention;
+  !!dnsHealth?.relay?.needsAttention;

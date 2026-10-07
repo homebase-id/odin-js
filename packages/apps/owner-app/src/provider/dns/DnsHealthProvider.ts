@@ -90,7 +90,10 @@ export interface DnsHealth {
   tenantMailEnabled: boolean;
   optionalRecords: OptionalDnsRecord[];
   dnssec: DnssecHealth;
-  relay: MailRelayHealth;
+  // Optional: the owner-app ships with the identity host, but a release can carry it ahead of
+  // the server code that adds this field (2026-10-07: the Security page threw on a server
+  // without it). Absent reads as "nothing to report".
+  relay?: MailRelayHealth;
 }
 
 export const getDnsHealth = async (dotYouClient: DotYouClient): Promise<DnsHealth> => {
