@@ -1,6 +1,6 @@
 import './style.css';
 import { base64UrlToBytes } from './crypto';
-import { DemoSource, V2Source, type DropSource } from './drop-source';
+import { DemoSource, MAX_SUPPORTED_VERSION, V2Source, type DropSource } from './drop-source';
 import { renderIntro } from './screens/intro';
 import { renderOpen } from './screens/open';
 import { renderDestructed } from './screens/destructed';
@@ -41,6 +41,11 @@ const main = async () => {
 
   const header = await source.fetchHeader().catch(() => null);
   if (!header) return renderDestructed(root);
+
+  // A newer writer than this viewer: do not guess at the shape, and never touch a payload.
+  if ((header.v ?? 1) > MAX_SUPPORTED_VERSION) {
+    return renderDestructed(root, 'THIS DROP NEEDS A NEWER VIEWER', undefined, 'Reload this page, or try again later.');
+  }
 
   document.body.classList.add(`theme-${header.theme === 'clean' || header.theme === 'choplifter' ? header.theme : 'mission'}`);
 

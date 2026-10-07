@@ -12,6 +12,7 @@
   --ok: #3ddc84;
   --amber: #ffb020;
   --mono: 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  --code: 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
 }
 
 * {
@@ -315,7 +316,7 @@ body::after {
 }
 
 .payload-type {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--dim);
   font-size: 0.7rem;
   white-space: nowrap;
@@ -884,4 +885,603 @@ body.theme-clean .destroy-button:hover {
 
 @keyframes cursor-blink {
   50% { opacity: 0; }
+}
+
+
+/* --- view-only previews --------------------------------------------------------------------- */
+
+/* on body, not :root, so the mixes resolve against each theme's own --ground, --ink and accents */
+body {
+  color-scheme: dark; /* native video/audio controls and scrollbars follow the theme */
+  --radius: 0;
+  --inset: color-mix(in srgb, var(--ground) 70%, var(--panel));
+  --stripe: color-mix(in srgb, var(--ink) 4%, transparent);
+  /* accents lifted toward the text colour so small text clears 4.5:1 on every theme */
+  --signal-ink: color-mix(in srgb, var(--signal) 72%, var(--ink));
+  --tok-key: var(--signal-ink);
+  --tok-str: color-mix(in srgb, var(--ok) 80%, var(--ink));
+  --tok-num: color-mix(in srgb, var(--amber) 55%, var(--ink));
+  --tok-prop: var(--ink);
+  --tok-com: var(--dim);
+}
+
+body.theme-clean {
+  color-scheme: light;
+  --radius: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* the red-outlined button needs a ring that is not also red */
+.destroy-button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.view-only [hidden] {
+  display: none !important;
+}
+
+.screen.view-only {
+  max-width: 60rem;
+}
+
+.view-only .fineprint {
+  opacity: 1;
+}
+
+.view-only .homebase-cta {
+  color: var(--signal-ink);
+  border-bottom-color: currentColor;
+}
+
+.view-only-banner {
+  width: min(52rem, 100%);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--signal);
+  border-radius: var(--radius);
+  text-align: start;
+}
+
+.view-only-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  padding: 0.3rem 0.6rem;
+  color: var(--ink);
+  border: 1px solid var(--signal);
+  border-radius: var(--radius);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.view-only-badge svg {
+  color: var(--signal-ink);
+}
+
+.view-only-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.view-only-honest {
+  color: var(--dim);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 30rem) {
+  .view-only-banner {
+    flex-direction: column;
+  }
+}
+
+.previews {
+  list-style: none;
+  padding: 0;
+  width: min(52rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.preview {
+  --card-pad: clamp(0.75rem, 3vw, 1.1rem);
+  min-width: 0;
+  padding: 0.9rem var(--card-pad) 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  min-width: 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 2px solid var(--signal);
+}
+
+.preview-name {
+  flex: 1 1 16rem;
+  min-width: 0;
+  text-align: start;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.preview-name.expanded {
+  display: block;
+}
+
+.preview-name[role='button'] {
+  cursor: pointer;
+}
+
+.preview-meta {
+  margin-inline-start: auto;
+  display: flex;
+  flex-wrap: wrap;
+  color: var(--dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.preview-meta-part + .preview-meta-part::before {
+  content: '·';
+  margin-inline: 0.45em;
+}
+
+.preview-scroll-hint {
+  color: var(--signal-ink);
+}
+
+.preview-scroll-hint::after {
+  content: ' →';
+}
+
+.preview-scroll-hint:dir(rtl)::after {
+  content: ' ←';
+}
+
+/* --- card toolbar (pdf page + zoom) --- */
+
+.preview-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.preview-tools:empty {
+  display: none;
+}
+
+.preview-tools-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin-inline: calc(-1 * var(--card-pad));
+  padding: 0.5rem var(--card-pad);
+  background: var(--panel);
+  border-block: 1px solid var(--line);
+}
+
+.preview-tools-spacer {
+  flex: 1;
+}
+
+.preview-chip {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.preview-segmented {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.preview-tool {
+  min-width: 2.5rem;
+  min-height: 2.25rem;
+  padding: 0 0.7rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.preview-tool + .preview-tool {
+  border-inline-start: 1px solid var(--line);
+}
+
+.preview-tool:hover:not(:disabled) {
+  background: var(--stripe);
+}
+
+.preview-tool[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--signal) 16%, transparent);
+  box-shadow: inset 0 -2px var(--signal);
+}
+
+.preview-tool:disabled {
+  color: var(--dim);
+  cursor: default;
+}
+
+.preview-tool:focus-visible {
+  outline-offset: -2px;
+}
+
+.preview-zoom-level {
+  min-width: 3.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-inline: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- images and media --- */
+
+.preview-image,
+.preview-video {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  align-self: center;
+  border-radius: var(--radius);
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.preview-image {
+  height: auto;
+  background: var(--inset);
+}
+
+.preview-video {
+  width: 100%;
+  background: var(--inset);
+}
+
+.preview-audio {
+  width: 100%;
+  height: 2.75rem;
+}
+
+.preview-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.preview-figure .preview-image {
+  width: auto;
+}
+
+/* --- text, code, tables --- */
+
+.preview-text,
+.preview-table-frame,
+.preview-pdf {
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.preview-text,
+.preview-table-wrap {
+  margin: 0;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.preview-text {
+  padding: 0.85rem 1rem;
+  font-family: var(--code);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  tab-size: 4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.preview-code {
+  padding-inline: 0 1rem;
+  counter-reset: ln;
+  /* the gutter band; code is always left-to-right, so a physical gradient is right here */
+  background: linear-gradient(to right, var(--stripe) calc(var(--gutter) + 0.75ch), transparent 0) var(--inset);
+}
+
+/* wrapped lines hang under their own indentation plus two columns */
+.preview-code .ln {
+  display: block;
+  position: relative;
+  counter-increment: ln;
+  padding-inline-start: calc(var(--gutter) + 1.75ch + var(--indent, 0ch) + 2ch);
+  text-indent: calc(-1 * (var(--indent, 0ch) + 2ch));
+}
+
+.preview-code .ln::before {
+  content: counter(ln);
+  position: absolute;
+  inset-inline-start: 0;
+  width: var(--gutter);
+  text-align: end;
+  text-indent: 0;
+  color: var(--dim);
+  user-select: none;
+}
+
+.tok-key { color: var(--tok-key); }
+.tok-str { color: var(--tok-str); }
+.tok-num { color: var(--tok-num); }
+.tok-prop { color: var(--tok-prop); font-weight: 600; }
+.tok-com { color: var(--tok-com); font-style: italic; }
+
+.preview-text-wrap,
+.preview-table-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.preview-table-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+/* fades the inline-end edge while columns remain off-screen */
+.preview-table-frame::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 3.5rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms;
+  background: linear-gradient(to right, transparent, var(--inset) 85%);
+}
+
+.preview-table-frame:dir(rtl)::after {
+  background: linear-gradient(to left, transparent, var(--inset) 85%);
+}
+
+.preview-table-frame.more-end::after {
+  opacity: 1;
+}
+
+.preview-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-table th,
+.preview-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  background: var(--inset);
+  white-space: nowrap;
+}
+
+.preview-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--panel);
+  color: var(--dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* the first column (a date, a name) stays put while the rest scroll past it */
+.preview-table-wrap .preview-table :is(th, td):first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  border-inline-end: 1px solid var(--line);
+}
+
+.preview-table-wrap .preview-table th:first-child {
+  z-index: 2;
+}
+
+.preview-table td.long {
+  min-width: 14rem;
+  max-width: 24rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.preview-table .num {
+  text-align: end;
+}
+
+.preview-table tbody tr:nth-child(even) td {
+  background: linear-gradient(var(--stripe), var(--stripe)) var(--inset);
+}
+
+/* --- pdf --- */
+
+.preview-pdf {
+  padding: 0.75rem;
+}
+
+.preview-pdf-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+
+/* auto margins centre a page that fits and collapse to zero for a zoomed one, so it scrolls */
+.preview-pdf-page {
+  display: block;
+  flex: none;
+  margin-inline: auto;
+  width: calc(var(--zoom, 1) * 100%);
+  height: auto;
+  user-select: none;
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--ground) 60%, transparent);
+}
+
+.preview-pdf.fit-page .preview-pdf-page {
+  width: calc(var(--zoom, 1) * min(100%, (100svh - 7rem) * var(--ratio, 0.7071)));
+}
+
+/* a phone page uses the card's full width: every pixel is text size */
+@media (max-width: 40rem) {
+  .preview-pdf {
+    margin-inline: calc(-1 * var(--card-pad));
+    margin-bottom: -1.1rem;
+    padding: 0.5rem 0;
+    border-inline: 0;
+    border-bottom: 0;
+    border-radius: 0;
+  }
+
+  .preview-pdf-pages {
+    gap: 0.5rem;
+  }
+
+  .preview-pdf-page {
+    box-shadow: none;
+  }
+
+  .preview-zoom-level {
+    display: none;
+  }
+
+  .preview-tools-sticky {
+    gap: 0.4rem;
+  }
+}
+
+/* --- can't-show states --- */
+
+.preview-note {
+  margin: 0;
+  color: var(--dim);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.preview-fallback,
+.preview-unavailable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.6rem 1rem;
+  text-align: center;
+  background: var(--inset);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.preview-fallback .preview-note,
+.preview-unavailable .preview-note {
+  max-width: 28rem;
+}
+
+.preview-fallback-title,
+.preview-unavailable-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* a folded-corner document with the file's extension on it */
+.preview-unavailable-glyph {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 2.75rem;
+  height: 3.4rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.45rem;
+  border: 1px solid var(--dim);
+  border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - 0.8rem) 0, 100% 0.8rem, 100% 100%, 0 100%);
+  color: var(--signal-ink);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.preview-unavailable-glyph::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  inset-inline-end: -1px;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-bottom: 1px solid var(--dim);
+  border-inline-start: 1px solid var(--dim);
+}
+
+body.theme-clean .preview-unavailable-glyph {
+  border-radius: 4px;
 }
