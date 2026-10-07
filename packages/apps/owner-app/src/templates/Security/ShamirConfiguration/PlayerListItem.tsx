@@ -3,7 +3,7 @@ import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
 import {ConnectionImage, ConnectionName, t} from "@homebase-id/common-app";
 import {ReactNode} from "react";
 
-export type Status = "loading" | "valid" | "invalid" | "error" | "moot";
+export type Status = "loading" | "valid" | "invalid" | "notConnected" | "error" | "moot";
 
 export const PlayerListItem = ({
                                    player,
@@ -45,6 +45,7 @@ export const PlayerListItem = ({
                         <span className="text-sm text-slate-700 dark:text-slate-300">
                             {status === "valid" && t("Shard verified")}
                             {status === "invalid" && t("Shard invalid")}
+                            {status === "notConnected" && t("Not connected")}
                             {status === "error" && t("Error verifying")}
                             {status === "loading" && t("Verifying...")}
             </span>
@@ -68,7 +69,7 @@ export const PlayerListItem = ({
                     }
 
                     {/* Retry button */}
-                    {(status === "invalid" || status === "error") && (
+                    {(status === "invalid" || status === "notConnected" || status === "error") && (
                         <div className="mt-1 md:mt-0">
                             <button
                                 onClick={(e) => {
