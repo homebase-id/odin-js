@@ -197,14 +197,10 @@ const AppDetails = () => {
                     type: 'critical',
                     title: t('Uninstall App'),
                     buttonText: t('Uninstall'),
-                    body: `${t('Are you sure you want to uninstall')} ${app.name}? ${t(
-                      'The app, its circles and its drives with all their data are deleted from your identity. Connections lose everything the app granted them. Copies your connections already received stay with them. This cannot be undone.'
-                    )}`,
+                    body: uninstallWarning(app.name, ownedDrives, ownedCircles),
                     trickQuestion: {
-                      question: `${t('Fill in the name of the app')} (${app.name}) ${t(
-                        'to confirm:'
-                      )}`,
-                      answer: app.name,
+                      question: `${t('To confirm, type')} "${t('uninstall')} ${app.name}":`,
+                      answer: `${t('uninstall')} ${app.name}`,
                     },
                   }}
                 >
@@ -722,6 +718,31 @@ const ClientView = ({
     </div>
   );
 };
+
+/** Names everything an uninstall deletes, so the owner confirms the actual drives and circles, not a category. */
+const uninstallWarning = (
+  appName: string,
+  ownedDrives: { name?: string }[],
+  ownedCircles: { name?: string }[]
+) =>
+  [
+    `${t('Uninstalling')} ${appName} ${t(
+      'deletes it from your identity, and your connections lose everything it granted them.'
+    )}`,
+    ownedDrives.length
+      ? `${t('These drives are deleted, with every file on them')}:\n${ownedDrives
+          .map((drive) => `  • ${drive.name}`)
+          .join('\n')}\n${t('To keep any of their files, export the drive from its page first.')}`
+      : undefined,
+    ownedCircles.length
+      ? `${t('These circles are deleted, and their members lose what the circles granted')}:\n${ownedCircles
+          .map((circle) => `  • ${circle.name}`)
+          .join('\n')}`
+      : undefined,
+    t('Copies your connections already received stay with them. This cannot be undone.'),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 
 export default AppDetails;
 

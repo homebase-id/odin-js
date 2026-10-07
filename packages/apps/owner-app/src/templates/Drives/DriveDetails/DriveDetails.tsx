@@ -118,9 +118,10 @@ const DriveDetails = () => {
                                     icon: HeartBeat,
                                     onClick: () => setIsShowDriveStatus(true),
                                 },
-                                ...(readOnly
-                                    ? []
-                                    : [
+                                // Archiving first is the first "are you sure": the server deletes only an archived
+                                // drive, and it never archives a system drive, so neither action is offered on one.
+                                ...(driveDef.isArchived && !readOnly
+                                    ? [
                                           {
                                               label: t('Empty drive'),
                                               icon: Trash,
@@ -129,19 +130,17 @@ const DriveDetails = () => {
                                                   type: 'critical' as const,
                                                   title: t('Empty drive'),
                                                   buttonText: t('Empty'),
-                                                  body: `${t('Every file on')} ${driveDef.name} ${t(
-                                                      'is deleted, with its payloads. The drive stays. Copies your connections already received stay with them. This cannot be undone.'
-                                                  )}`,
+                                                  body: [
+                                                      `${t('Every file on')} ${driveDef.name} ${t('is deleted, with its payloads. The drive itself stays.')}`,
+                                                      t('To keep the files, cancel and use Export first.'),
+                                                      t('Copies your connections already received stay with them. This cannot be undone.'),
+                                                  ].join('\n\n'),
                                                   trickQuestion: {
-                                                      question: `${t('Fill in the name of the drive')} (${driveDef.name}) ${t('to confirm:')}`,
-                                                      answer: driveDef.name,
+                                                      question: `${t('To confirm, type')} "${t('empty')} ${driveDef.name}":`,
+                                                      answer: `${t('empty')} ${driveDef.name}`,
                                                   },
                                               },
                                           },
-                                      ]),
-                                // The server deletes only an archived drive; archiving is the first "are you sure".
-                                ...(driveDef.isArchived && !readOnly
-                                    ? [
                                           {
                                               label: t('Delete drive'),
                                               icon: Trash,
@@ -153,12 +152,14 @@ const DriveDetails = () => {
                                                   type: 'critical' as const,
                                                   title: t('Delete drive'),
                                                   buttonText: t('Delete'),
-                                                  body: `${driveDef.name} ${t(
-                                                      'is deleted with all its files, and every circle and app loses its access to it. Copies your connections already received stay with them. This cannot be undone.'
-                                                  )}`,
+                                                  body: [
+                                                      `${driveDef.name} ${t('is deleted with every file on it, and every circle and app loses its access to it.')}`,
+                                                      t('To keep the files, cancel and use Export first.'),
+                                                      t('Copies your connections already received stay with them. This cannot be undone.'),
+                                                  ].join('\n\n'),
                                                   trickQuestion: {
-                                                      question: `${t('Fill in the name of the drive')} (${driveDef.name}) ${t('to confirm:')}`,
-                                                      answer: driveDef.name,
+                                                      question: `${t('To confirm, type')} "${t('delete')} ${driveDef.name}":`,
+                                                      answer: `${t('delete')} ${driveDef.name}`,
                                                   },
                                               },
                                           },
