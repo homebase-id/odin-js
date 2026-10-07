@@ -19,6 +19,14 @@ import { base64ToBytes, decryptDropPayload } from './crypto';
 
 /** The drop's encrypted manifest payload - bookkeeping, not one of the recipient's files. */
 const MANIFEST_KEY = 'wdr_meta';
+/**
+ * View-only drops store the manifest here instead. A viewer that predates view-only looks for
+ * wdr_meta, finds no IV and refuses to open - before any payload request, so no burn clock starts.
+ */
+const VIEW_ONLY_MANIFEST_KEY = 'wdr_vmeta';
+
+/** The highest content version this viewer understands; anything newer must not be opened. */
+export const MAX_SUPPORTED_VERSION = 2;
 
 export interface DropPayload {
   key: string;
@@ -40,6 +48,10 @@ export interface DropHeader {
   theme?: string;
   /** Decrypted from the header's intro blob when the fragment key is present. */
   intro?: DropIntro;
+  /** Content version of the drop; absent on the demo source. */
+  v?: number;
+  /** No download affordance at all: files are shown inline only. */
+  viewOnly?: boolean;
 }
 
 export interface DroppedFile {
@@ -79,11 +91,16 @@ export class V2Source implements DropSource {
 
   /** payload key -> base64 IV, cached from the header's cleartext content. */
   private ivs: Record<string, string> = {};
+  private manifestKey = MANIFEST_KEY;
+  private version = 1;
 
   private url(tail: string) {
     return `/api/v2/drives/${this.driveId}/files/by-uid/${this.dropId}/${tail}`;
   }
 
+  // cache: 'no-store' keeps the browser from heuristically keeping a copy of the response (only
+  // ciphertext here, but there is no reason to leave it behind).
+  //
   // credentials: 'omit' is load-bearing, not hygiene. A drop link is a capability URL and must
   // read the same for every holder - but if the OWNER opens their own link while logged in on
   // this host, the browser's ambient cookie authenticates the request and the server wraps the
@@ -92,7 +109,7 @@ export class V2Source implements DropSource {
   // viewer walked straight to the destruct screen. Cookieless, everyone is anonymous and the
   // response is plain.
   private fetchAnonymously(tail: string) {
-    return fetch(this.url(tail), { credentials: 'omit' });
+    return fetch(this.url(tail), { credentials: 'omit', cache: 'no-store' });
   }
 
   async fetchHeader(): Promise<DropHeader | null> {
@@ -100,12 +117,25 @@ export class V2Source implements DropSource {
     if (!response.ok) return null;
 
     const header = await response.json();
-    // The drop file carries one bookkeeping payload alongside the real files: wdr_meta, the
-    // encrypted manifest. It is fetched by its literal key at open time, never through this
-    // list - and it must not leak into what the screens show, or a one-file drop greets its
-    // recipient with "2 files" and a byte total padded by ciphertext bookkeeping.
+
+    let content: Record<string, any> = {};
+    try {
+      content = JSON.parse(header?.fileMetadata?.appData?.content ?? '{}') ?? {};
+    } catch {
+      // Malformed content degrades to a legacy-shaped drop; the screens cope.
+    }
+    this.ivs = content.ivs ?? {};
+    this.manifestKey = VIEW_ONLY_MANIFEST_KEY in this.ivs ? VIEW_ONLY_MANIFEST_KEY : MANIFEST_KEY;
+    this.version = typeof content.v === 'number' ? content.v : 1;
+    const viewOnly = content.viewOnly === true || this.manifestKey === VIEW_ONLY_MANIFEST_KEY;
+
+    // The drop file carries one bookkeeping payload alongside the real files: the encrypted
+    // manifest (wdr_meta, or wdr_vmeta when view-only). It is fetched by its literal key at open
+    // time, never through this list - and it must not leak into what the screens show, or a
+    // one-file drop greets its recipient with "2 files" and a byte total padded by ciphertext
+    // bookkeeping. Both keys are filtered whichever one this drop uses.
     const payloads = (header?.fileMetadata?.payloads ?? [])
-      .filter((p: { key: string }) => p.key !== MANIFEST_KEY)
+      .filter((p: { key: string }) => p.key !== MANIFEST_KEY && p.key !== VIEW_ONLY_MANIFEST_KEY)
       .map(
       (p: { key: string; descriptorContent?: string; contentType: string; bytesWritten: number }) => ({
         key: p.key,
@@ -118,8 +148,6 @@ export class V2Source implements DropSource {
     let theme: string | undefined;
     let intro: DropIntro | undefined;
     try {
-      const content = JSON.parse(header?.fileMetadata?.appData?.content ?? '{}');
-      this.ivs = content.ivs ?? {};
       theme = content.theme ?? undefined;
       // The intro decrypts from the HEADER alone - deliberately, since a header read never
       // starts the burn clock, so personalizing this screen costs a prefetching scanner nothing.
@@ -140,13 +168,14 @@ export class V2Source implements DropSource {
       // A malformed or undecryptable intro degrades to the impersonal screen, never to an error.
     }
 
-    return { ttl: header?.fileMetadata?.ttl ?? 0, payloads, theme, intro };
+    return { ttl: header?.fileMetadata?.ttl ?? 0, payloads, theme, intro, v: this.version, viewOnly };
   }
 
   async openDrop(): Promise<DroppedFile[] | null> {
     if (!this.key) return null; // no fragment key, nothing decryptable
+    if (this.version > MAX_SUPPORTED_VERSION) return null; // never read a payload we can't interpret
 
-    const manifestBytes = await this.fetchAndDecrypt(MANIFEST_KEY);
+    const manifestBytes = await this.fetchAndDecrypt(this.manifestKey);
     if (!manifestBytes) return null;
 
     const manifest: { key: string; name: string; contentType: string }[] = JSON.parse(
