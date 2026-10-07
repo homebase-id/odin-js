@@ -13,8 +13,12 @@ import { PREVIEW_STRINGS as S } from './strings';
 const isMarkdown = (file: PreviewFile) =>
   /^text\/markdown\b/i.test(file.contentType) || /\.(md|markdown)$/i.test(file.name);
 
-export function renderPreviewBody(file: PreviewFile, slots?: PreviewSlots): HTMLElement {
-  switch (classify(file.contentType, file.name)) {
+export function renderPreviewBody(
+  file: PreviewFile,
+  slots?: PreviewSlots,
+  kind: PreviewClass = classify(file.contentType, file.name)
+): HTMLElement {
+  switch (kind) {
     case 'image':
       return renderImage(file, false);
     case 'image-maybe':
@@ -88,7 +92,7 @@ export function renderPreviewList(files: PreviewFile[]): HTMLElement {
     item.appendChild(head);
 
     const tools = h('div', 'preview-tools');
-    const body = renderPreviewBody(file, { meta, tools });
+    const body = renderPreviewBody(file, { meta, tools }, kind);
     if (tools.children.length > 0) item.appendChild(tools);
     item.appendChild(body);
     list.appendChild(item);

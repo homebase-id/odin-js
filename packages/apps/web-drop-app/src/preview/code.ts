@@ -1,4 +1,4 @@
-import { h, scrollable, type PreviewFile } from './dom';
+import { extensionOf, h, scrollable, type PreviewFile } from './dom';
 import { PREVIEW_STRINGS as S } from './strings';
 
 type Token = 'plain' | 'key' | 'str' | 'num' | 'com' | 'prop';
@@ -41,12 +41,7 @@ const KEYWORDS = new Set(
 
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const extensionOf = (name: string) => {
-  const dot = name.lastIndexOf('.');
-  return dot > 0 ? name.slice(dot + 1).toLowerCase() : '';
-};
-
-export const grammarFor = (file: PreviewFile): Grammar | null => GRAMMARS[extensionOf(file.name)] ?? null;
+export const grammarFor = (file: PreviewFile): Grammar | null => GRAMMARS[extensionOf(file.name).toLowerCase()] ?? null;
 
 function tokenize(text: string, g: Grammar): Segment[] {
   const parts: string[] = [];

@@ -75,9 +75,13 @@ export const swapWithFallback = (node: HTMLElement, text: { title: string; body:
   node.replaceWith(fallback(text));
 };
 
+export const extensionOf = (name: string): string => {
+  const dot = name.lastIndexOf('.');
+  return dot > 0 ? name.slice(dot + 1) : '';
+};
+
 /** Upper-cased extension for a badge, or '' when there is none or it is too long to be one. */
 export const extensionTag = (name: string, maxLength: number): string => {
-  const dot = name.lastIndexOf('.');
-  const ext = dot > 0 ? name.slice(dot + 1) : '';
+  const ext = extensionOf(name);
   return ext.length > 0 && ext.length <= maxLength ? ext.toUpperCase() : '';
 };
