@@ -47,6 +47,8 @@ export interface RemotePlayerReadinessResult
 export interface ShardVerificationResult {
   isValid: boolean
   remoteServerError: boolean
+  // false when a delegate is no longer connected, so cannot deliver its shard (odin-core #1885)
+  isConnected: boolean
 }
 
 export interface VerifyRemotePlayerReadinessRequest {

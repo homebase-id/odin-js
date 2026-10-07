@@ -57,6 +57,8 @@ export interface PlayerShardHealthResult {
   shardId: string;
   trustLevel: ShardTrustLevel;
   isMissing: boolean;
+  // false when a delegate is no longer connected, so cannot deliver its shard (odin-core #1885)
+  isConnected: boolean;
 }
 
 export enum ShardTrustLevel {
