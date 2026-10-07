@@ -31,7 +31,7 @@ import {
     useCircles,
   getOwnerAppPath,
 } from '@homebase-id/common-app';
-import {HardDrive, Download, HeartBeat, Pencil, Trash} from '@homebase-id/common-app/icons';
+import {HardDrive, Download, HeartBeat, Pencil, Trash, Archive, Refresh} from '@homebase-id/common-app/icons';
 
 const DriveDetails = () => {
     const {driveKey} = useParams();
@@ -50,6 +50,7 @@ const DriveDetails = () => {
         reassignOwningApp: {mutateAsync: reassignOwningApp},
         emptyDrive: {mutateAsync: emptyDrive, status: emptyStatus, error: emptyError},
         deleteDrive: {mutateAsync: deleteDrive, status: deleteStatus, error: deleteError},
+        editArchiveStatus: {mutate: setArchived, status: archiveStatus, error: archiveError},
     } = useDrive();
     const navigate = useNavigate();
 
@@ -101,6 +102,8 @@ const DriveDetails = () => {
         link.click();
     };
 
+    const archiveFirst = t('Archive the drive first');
+
     // console.log('dd', driveDef)
     return (
         <>
@@ -121,12 +124,32 @@ const DriveDetails = () => {
                                     icon: HeartBeat,
                                     onClick: () => setIsShowDriveStatus(true),
                                 },
-                                // Archiving first is the first "are you sure": the server deletes only an archived
-                                // drive, and it never archives a system drive, so neither action is offered on one.
-                                ...(driveDef.isArchived && !readOnly
+                                // Always listed so they can be found; usable once the drive is archived, which is the
+                                // first "are you sure" -- the server refuses an active drive. A system drive can never
+                                // be archived (the server refuses), so neither is offered on one.
+                                ...(!readOnly && !driveDef.isSystemDrive
                                     ? [
+                                          driveDef.isArchived
+                                              ? {
+                                                    label: t('Restore drive'),
+                                                    icon: Refresh,
+                                                    onClick: () => setArchived({targetDrive: targetDriveInfo, newArchived: false}),
+                                                }
+                                              : {
+                                                    label: t('Archive drive'),
+                                                    icon: Archive,
+                                                    onClick: () => setArchived({targetDrive: targetDriveInfo, newArchived: true}),
+                                                    confirmOptions: {
+                                                        type: 'warning' as const,
+                                                        title: t('Archive drive'),
+                                                        buttonText: t('Archive'),
+                                                        body: `${driveDef.name} ${t('is hidden from apps and connections, and they can no longer write to it. You can restore it at any time. Once archived, it can be emptied or deleted.')}`,
+                                                    },
+                                                },
                                           {
                                               label: t('Empty drive'),
+                                              disabled: !driveDef.isArchived,
+                                              hint: archiveFirst,
                                               icon: Trash,
                                               onClick: () => emptyDrive({targetDrive: targetDriveInfo}),
                                               confirmOptions: purgeConfirm(t('empty'), t('Empty drive'), t('Empty'), driveDef.name, [
@@ -136,6 +159,8 @@ const DriveDetails = () => {
                                           },
                                           {
                                               label: t('Delete drive'),
+                                              disabled: !driveDef.isArchived,
+                                              hint: archiveFirst,
                                               icon: Trash,
                                               onClick: async () => {
                                                   await deleteDrive({targetDrive: targetDriveInfo});
@@ -149,7 +174,7 @@ const DriveDetails = () => {
                                       ]
                                     : []),
                             ]}
-                            state={[emptyStatus, deleteStatus].find((status) => status === 'pending') ?? exportStatus}
+                            state={[archiveStatus, emptyStatus, deleteStatus].find((status) => status === 'pending') ?? exportStatus}
                             type="secondary"
                         />
                     </>
@@ -160,7 +185,7 @@ const DriveDetails = () => {
                     {title: driveDef.name ?? ''},
                 ]}
             />
-            <ErrorNotification error={emptyError || deleteError}/>
+            <ErrorNotification error={archiveError || emptyError || deleteError}/>
             <DrivePurgeStatus driveAlias={targetDriveInfo.alias} className="mb-5"/>
             <Section
                 title={t('Metadata')}
