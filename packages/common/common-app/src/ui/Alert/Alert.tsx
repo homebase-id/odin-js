@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Question, Exclamation } from '../../ui/Icons';
+import { Check, Question, Exclamation } from '../../ui/Icons';
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
   title?: ReactNode;
@@ -8,7 +8,15 @@ interface AlertProps {
   isCompact?: boolean;
 }
 
+const ICONS = {
+  critical: { Icon: Exclamation, color: 'text-red-400 dark:text-red-300' },
+  warning: { Icon: Exclamation, color: 'text-orange-400' },
+  success: { Icon: Check, color: 'text-green-500' },
+  info: { Icon: Question, color: 'text-blue-400' },
+} as const;
+
 export const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
+  const icon = ICONS[type];
   const bgClass =
     type === 'critical'
       ? 'bg-red-50 dark:bg-red-900 dark:text-white'
@@ -31,31 +39,11 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
        ${className ?? ''}`}
     >
       <div className={`flex w-full flex-row flex-wrap gap-5 sm:flex-nowrap items-center`}>
-        {type === 'critical' ? (
-          <div
-            className={`flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300 ${
-              isCompact ? '' : 'sm:h-10 sm:w-10'
-            }`}
-          >
-            <Exclamation />
-          </div>
-        ) : type === 'warning' ? (
-          <div
-            className={`flex h-8 w-8 flex-shrink-0 text-orange-400 ${
-              isCompact ? '' : 'sm:h-10 sm:w-10'
-            }`}
-          >
-            <Exclamation />
-          </div>
-        ) : (
-          <div
-            className={`flex h-8 w-8 flex-shrink-0 text-blue-400 ${
-              isCompact ? '' : 'sm:h-10 sm:w-10'
-            }`}
-          >
-            <Question />
-          </div>
-        )}
+        <div
+          className={`flex h-8 w-8 flex-shrink-0 ${icon.color} ${isCompact ? '' : 'sm:h-10 sm:w-10'}`}
+        >
+          <icon.Icon />
+        </div>
         <div className={`flex-grow ${isCompact ? 'contents' : 'contents sm:block'}`}>
           {title && <p className="mb-2 ml-3 text-xl sm:ml-0">{title}</p>}
           {typeof children === 'string' ? <p>{children}</p> : children}

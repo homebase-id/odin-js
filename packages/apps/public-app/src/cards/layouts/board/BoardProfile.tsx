@@ -4,6 +4,7 @@ import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { BreakAtDots, CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
+import { AudienceChip } from '../../parts/AudienceChip';
 
 // The board's centred column, drawn at two sizes: the phone card and the desktop page.
 // `ring` scales the design's ring width with the portrait (4px on the card, 6px on the page).
@@ -15,6 +16,7 @@ const SIZES = {
     name: 'text-[24px]',
     nameGap: 'mt-4',
     host: 'mt-1 text-[13px]',
+    audience: 'mt-2.5 text-[11px]',
     blocks: 'mt-[22px] !gap-[10px]',
     socials: 'mt-6',
   },
@@ -24,6 +26,7 @@ const SIZES = {
     name: 'text-[32px]',
     nameGap: 'mt-5',
     host: 'mt-1.5 text-[15px]',
+    audience: 'mt-3 text-[12px]',
     // rows grow to the reference's 58px / 14px radius; the primitive draws 52px / 12px
     blocks: 'mt-7 !gap-3.5 [&>a]:min-h-[58px] [&>a]:rounded-[14px]',
     socials: 'mt-[26px]',
@@ -63,6 +66,14 @@ export const BoardProfile = ({
           <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
+      {/* A flat tag in the ground art's tint: no ledge, no icon tile and narrower than the link rows,
+          so it is not one more of them. The radius is half of one line: a pill until the name wraps */}
+      <AudienceChip
+        audience={data.audience}
+        className={`max-w-[min(85%,20rem)] flex-shrink-0 gap-1.5 rounded-xl bg-[color:color-mix(in_srgb,var(--card-ink)_12%,transparent)] px-2.5 py-0.5 font-medium leading-5 tracking-[0.02em] text-[color:color-mix(in_srgb,var(--card-ink)_92%,transparent)] ${sizes.audience}`}
+        hug
+        glyphClassName="h-5 w-[1.15em]"
+      />
       <CardBlocks design={design} data={data} className={`w-full text-[15px] ${sizes.blocks}`} />
       <CardSocials variant={design.socials} data={data} className={sizes.socials} />
     </>

@@ -10,7 +10,7 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
+import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -185,6 +185,13 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   {data.headline}
                 </p>
               ) : null}
+              {/* The column is ~215px between the photos at 768: the tape takes all of it, in a smaller
+                  hand and with a third line */}
+              <AudienceTape
+                audience={data.audience}
+                lines="[@container(max-width:280px)]:!line-clamp-3"
+                className="ml-2.5 mt-4 max-w-[min(100%-0.625rem,19rem)] text-[length:clamp(19px,9cqw,22px)]"
+              />
               <CardSocials
                 variant="glyphs"
                 data={restData}
@@ -202,6 +209,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 <CardSocials
                   variant="wordmark"
                   data={data}
+                  boxOnly
                   className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10"
                 />
                 {/* The reference captions its map with an address; the headline already sits under the name */}

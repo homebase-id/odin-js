@@ -1,0 +1,55 @@
+{
+    "design": "dossier",
+    "data": {
+        "odinId": "frodo.dotyou.cloud",
+        "headline": "Ring bearer",
+        "photo": {
+            "src": "data:image/png;base64,iVBORw0KGgo="
+        },
+        "links": [],
+        "socials": [],
+        "posts": []
+    },
+    "audience": {
+        "kind": "circle",
+        "label": "Friends"
+    },
+    "overrides": {
+        "palette": {
+            "ground": "#112233",
+            "ink": "#F0F0F0",
+            "muted": "#99AABB",
+            "accent": "#ABCDEF",
+            "surface": "#223344",
+            "surfaceInk": "#FFFFFF"
+        },
+        "type": {
+            "display": "caveat",
+            "text": "newsreader",
+            "label": "space-mono",
+            "displayCase": "upper"
+        },
+        "portraits": [
+            {
+                "source": "photo",
+                "shape": "square",
+                "ring": 2,
+                "shadow": "soft",
+                "tilt": 5,
+                "tape": true,
+                "mono": true
+            }
+        ],
+        "blocks": [
+            {
+                "kind": "posts",
+                "presentation": "row"
+            },
+            {
+                "kind": "links",
+                "presentation": "button"
+            }
+        ],
+        "socials": "handles"
+    }
+}

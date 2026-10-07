@@ -44,9 +44,35 @@ export interface DsRecord {
 export interface DnssecHealth {
   status: DnssecStatus;
   enclosingZone: string;
+  // When status is 'inherited': how the enclosing zone itself grades. Ours to fix, not the
+  // owner's, so it colours the panel but never the tab dot.
+  enclosingZoneStatus?: DnssecStatus | null;
+  // The server's verdict (the same rule as its monthly health report), so the dot needs no copy
+  needsAttention: boolean;
   dsToPublish: DsRecord[];
   parentDsRecords: DsRecord[];
   parentZoneSigned: boolean;
+}
+
+// The outbound relay's verdict on this identity's domain. notRegistered is the case that used
+// to be invisible: the relay refused the domain, so there were no relay rows to show as broken.
+export type MailRelayStatus =
+  | 'notApplicable'
+  | 'registered'
+  | 'unverified'
+  | 'notRegistered'
+  | 'unreachable';
+
+export interface MailRelayHealth {
+  status: MailRelayStatus;
+  // The relay's own per-record diagnostics, verbatim
+  problems: string[];
+  // Why the relay last refused the domain, in its own words
+  lastError?: string | null;
+  // The verdict described for a human, null when nothing needs attention - the same wording
+  // the monthly email uses, so the client shows it rather than writing its own
+  problem?: string | null;
+  needsAttention: boolean;
 }
 
 export interface DnsHealth {
@@ -64,6 +90,10 @@ export interface DnsHealth {
   tenantMailEnabled: boolean;
   optionalRecords: OptionalDnsRecord[];
   dnssec: DnssecHealth;
+  // Optional: the owner-app ships with the identity host, but a release can carry it ahead of
+  // the server code that adds this field (2026-10-07: the Security page threw on a server
+  // without it). Absent reads as "nothing to report".
+  relay?: MailRelayHealth;
 }
 
 export const getDnsHealth = async (dotYouClient: DotYouClient): Promise<DnsHealth> => {

@@ -2,13 +2,15 @@ import { Component, useEffect, useRef, useState, type CSSProperties, type ReactN
 import { flushSync } from 'react-dom';
 import { DotYouClientContext, toSocialLink } from '@homebase-id/common-app';
 import type { DotYouClient } from '@homebase-id/js-lib/core';
-import type { LayoutId } from './CardDesign';
+import type { CardDesign, LayoutId } from './CardDesign';
+import type { CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
-import { CARD_PRESETS, presetFromParam } from './presets';
+import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
 import {
   cardSocials,
+  type CardAudience,
   type CardData,
   type CardLink,
   type CardPhoto,
@@ -38,7 +40,12 @@ type AppData = {
   socials?: { type: string; username: string }[];
   posts?: (Omit<CardPost, 'image'> & { image?: AppImage })[];
 };
-type RenderRequest = { design: string; data: AppData };
+type RenderRequest = {
+  design: string;
+  data: AppData;
+  audience?: CardAudience;
+  overrides?: CardOverrides;
+};
 
 declare global {
   interface Window {
@@ -47,6 +54,8 @@ declare global {
     homebaseCardHost?: { post: (json: string) => void };
   }
 }
+
+const ARABIC_FACES = /IBM Plex Sans Arabic|Aref Ruqaa|Reem Kufi/;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -59,7 +68,16 @@ const ownerClient = (odinId: string) =>
     getLoggedInIdentity: () => odinId,
   }) as unknown as DotYouClient;
 
-const toCardData = (data: AppData, dropped: (reason: string) => void): CardData => {
+const toAudience = (audience: CardAudience | undefined): CardAudience | undefined =>
+  audience?.kind === 'public' || audience?.kind === 'circle'
+    ? { kind: audience.kind, label: audience.label }
+    : undefined;
+
+const toCardData = (
+  data: AppData,
+  dropped: (reason: string) => void,
+  audience?: CardAudience
+): CardData => {
   if (!data?.odinId) throw new Error('data.odinId is required');
   const image = (value: AppImage | undefined, field: string): CardPhoto | undefined => {
     if (!value?.src) return undefined;
@@ -83,6 +101,7 @@ const toCardData = (data: AppData, dropped: (reason: string) => void): CardData 
     posts: (data.posts ?? [])
       .slice(0, 12)
       .map((post, index) => ({ ...post, image: image(post.image, `posts[${index}].image`) })),
+    audience: toAudience(audience),
   };
 };
 
@@ -139,10 +158,14 @@ const EXPORT_FRAME: CSSProperties = {
 
 // The router's own boundary would unmount the whole page, and with it the host API
 class CardBoundary extends Component<
-  { children: ReactNode; onError: (error: unknown) => void },
+  { children: ReactNode; onError: (error: unknown) => void; resetKey: unknown },
   { failed: boolean }
 > {
   state = { failed: false };
+  componentDidUpdate(prev: { resetKey: unknown }) {
+    if (this.state.failed && prev.resetKey !== this.props.resetKey)
+      this.setState({ failed: false });
+  }
   static getDerivedStateFromError() {
     return { failed: true };
   }
@@ -154,11 +177,11 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { id: number; layout: LayoutId; data: CardData };
+type Rendered = { design: CardDesign; data: CardData };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
-    design={CARD_PRESETS[card.layout]}
+    design={card.design}
     data={card.data}
     className="flex min-h-full flex-col [&>*]:flex-grow"
   />
@@ -197,18 +220,21 @@ const CardApp = ({ host }: { host: CardHost }) => {
       const started = performance.now();
       const id = ++renders;
       try {
-        const layout = presetFromParam(request?.design);
-        if (!layout) throw new Error(`unknown design "${request?.design}"`);
-        const data = toCardData(request.data, postError);
+        const design = resolveRequestDesign(request);
+        const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ id, layout, data }));
+        flushSync(() => setCard({ design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
           // a newer render() owns the next ready
           if (id === renders)
-            post({ type: 'ready', layout, ms: Math.round(performance.now() - started) });
+            post({
+              type: 'ready',
+              layout: design.layout,
+              ms: Math.round(performance.now() - started),
+            });
         });
       } catch (error) {
         postError(error);
@@ -272,8 +298,10 @@ const CardApp = ({ host }: { host: CardHost }) => {
     if (host === 'app') window.homebaseCard = { render, exportPng };
     else window.addEventListener('message', onMessage);
 
-    // Start fetching every card font now, so the first render() only waits for what is still in flight
+    // Start fetching every card font now, so the first render() only waits for what is still in flight.
+    // The Arabic faces are skipped: unicode-range fetches them only when a card shows Arabic text
     document.fonts.forEach((face) => {
+      if (ARABIC_FACES.test(face.family)) return;
       face.load().catch((error) => postError(`font ${face.family}: ${message(error)}`));
     });
 
@@ -294,9 +322,9 @@ const CardApp = ({ host }: { host: CardHost }) => {
       <main ref={main} className="h-full">
         {card ? (
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary key={card.id} onError={onCardError}>
+            <CardBoundary resetKey={card} onError={onCardError}>
               {wide ? (
-                <CardPage design={CARD_PRESETS[card.layout]} data={card.data} />
+                <CardPage design={card.design} data={card.data} />
               ) : (
                 <CompactCard card={card} />
               )}
@@ -307,7 +335,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
       {card && exporting ? (
         <div ref={snapshot} aria-hidden style={EXPORT_FRAME}>
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary onError={onCardError}>
+            <CardBoundary resetKey={card} onError={onCardError}>
               <CompactCard card={card} />
             </CardBoundary>
           </DotYouClientContext.Provider>

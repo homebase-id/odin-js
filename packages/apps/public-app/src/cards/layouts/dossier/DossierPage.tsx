@@ -10,7 +10,14 @@ import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import { DossierContact, hairline, LocationLine, SectionLabel } from './DossierParts';
+import {
+  DossierAudience,
+  DossierContact,
+  hairline,
+  LocationLine,
+  SectionLabel,
+} from './DossierParts';
+import { contactFirst } from './contactFirst';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -20,6 +27,8 @@ const gutter = 'mx-auto w-full max-w-[1120px] px-10 lg:px-16';
 const ink = 'text-[color:var(--card-ink)]';
 const muted = 'text-[color:var(--card-muted)]';
 const tracked = 'uppercase tracking-[0.18em]';
+// One tracked space of the label face either side of the slash
+const SLASH = 'ms-[1ch] gap-[calc(1ch+0.18em)]';
 
 const initials = ({ firstName, surName, odinId }: CardData) => {
   const letters = [firstName, surName]
@@ -34,23 +43,28 @@ const pad = (value: number, length = 2) => String(value).padStart(length, '0');
 const isoDate = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-export const DossierPage = ({ design, data }: LayoutProps) => (
-  <div className="flex min-h-[inherit] flex-col">
-    <TopBar data={data} />
-    <main className="pb-24">
-      <div
-        className={`${gutter} grid grid-cols-[minmax(0,43fr)_minmax(0,49fr)] gap-x-10 pt-[52px] lg:gap-x-[72px]`}
-      >
-        <Identity design={design} data={data} />
-        <div className="flex flex-col gap-[34px] pt-1">
-          <DossierContact design={design} data={data} size="page" />
-          <Elsewhere design={design} data={data} />
+export const DossierPage = ({ design, data }: LayoutProps) => {
+  const first = contactFirst(design);
+  const contact = <DossierContact design={design} data={data} size="page" />;
+  return (
+    <div className="flex min-h-[inherit] flex-col">
+      <TopBar data={data} />
+      <main className="pb-24">
+        <div
+          className={`${gutter} grid grid-cols-[minmax(0,43fr)_minmax(0,49fr)] gap-x-10 pt-[52px] lg:gap-x-[72px]`}
+        >
+          <Identity design={design} data={data} />
+          <div className="flex flex-col gap-[34px] pt-1">
+            {first && contact}
+            <Elsewhere design={design} data={data} />
+            {!first && contact}
+          </div>
         </div>
-      </div>
-      <PostIndex data={data} />
-    </main>
-  </div>
-);
+        <PostIndex data={data} />
+      </main>
+    </div>
+  );
+};
 
 const TopBar = ({ data }: { data: CardData }) => {
   const firstLink = data.links.find(isUsableLink);
@@ -58,12 +72,25 @@ const TopBar = ({ data }: { data: CardData }) => {
 
   return (
     <header className={`border-b ${hairline}`}>
-      <div className={`${gutter} flex h-14 items-center justify-between gap-8`}>
-        <span aria-hidden className={`whitespace-nowrap text-[12px] ${tracked} ${muted}`}>
-          {initials(data)} / {t('File')} 001
-        </span>
-        <div className="flex min-w-0 items-center gap-8">
-          <nav aria-label={t('Sections')} className="min-w-0">
+      <div className={`${gutter} flex min-h-14 items-start justify-between gap-12 py-5`}>
+        {/* The file line is the design's slot for metadata: S.G. / FILE 001 / FRIENDS.
+            It takes the bar's free width and stops a clear gap short of the nav. A long name wraps
+            and the bar grows under it; the tablet bar is short of room, so it may take a third line */}
+        <div
+          className={`flex min-w-0 flex-1 items-start text-[12px] leading-4 ${tracked} ${muted}`}
+        >
+          <span aria-hidden className="flex-shrink-0 whitespace-nowrap">
+            {initials(data)} / {t('File')} 001
+          </span>
+          <DossierAudience
+            data={data}
+            lines="max-lg:!line-clamp-3"
+            className={`${SLASH} before:content-['/']`}
+          />
+        </div>
+        {/* One file line tall, so the nav stays centred on the first line when the file line wraps */}
+        <div className="flex h-4 flex-shrink-0 items-center gap-8">
+          <nav aria-label={t('Sections')}>
             <ul className="flex items-center gap-8">
               {data.posts.length ? (
                 <li>

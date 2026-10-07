@@ -4,7 +4,7 @@ import ProfileNav from '../../components/Auth/ProfileNav/ProfileNav';
 import LoginDialog from '../../components/Dialog/LoginDialog/LoginDialog';
 import { CARD_FOCUS } from '../CardDesign';
 
-// The desktop pages' account control; each layout styles the button
+// Each layout styles the button
 export const CardSignIn = ({ className }: { className: string }) => {
   const client = useDotYouClientContext();
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +32,7 @@ export const CardSignIn = ({ className }: { className: string }) => {
         title={t('Sign in')}
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
-        returnPath={window.location.pathname}
+        returnPath={window.location.pathname + window.location.search}
       />
     </>
   );
