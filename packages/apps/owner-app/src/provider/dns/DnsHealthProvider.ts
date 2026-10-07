@@ -49,6 +49,11 @@ export interface DnssecHealth {
   enclosingZoneStatus?: DnssecStatus | null;
   // The server's verdict (the same rule as its monthly health report), so the dot needs no copy
   needsAttention: boolean;
+  // Optional: absent from servers before odin-core#1887.
+  // No nameserver answered the DNSKEY lookup: "could not tell", not "unsigned"
+  lookupFailed?: boolean;
+  // Validating resolvers refuse the domain (DS mismatch on its zone or on the apex it inherits)
+  breaksResolution?: boolean;
   dsToPublish: DsRecord[];
   parentDsRecords: DsRecord[];
   parentZoneSigned: boolean;
@@ -73,6 +78,9 @@ export interface MailRelayHealth {
   // the monthly email uses, so the client shows it rather than writing its own
   problem?: string | null;
   needsAttention: boolean;
+  // Optional: absent from servers before odin-core#1887.
+  // Worth saying but not wrong, e.g. the relay could not be asked - the server's wording
+  warning?: string | null;
 }
 
 export interface DnsHealth {
