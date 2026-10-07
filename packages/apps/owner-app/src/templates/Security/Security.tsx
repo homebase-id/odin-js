@@ -11,32 +11,26 @@ import {DnsSecuritySettings} from "./DnsSecuritySettings";
 import {EmailDnsSettings} from "./EmailDnsSettings";
 import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
 import {useMailHealth} from "../../hooks/mail/useMailHealth";
-import {dnssecNeedsOwner} from "./dns/dnssec";
+import {emailNeedsAttention as computeEmailNeedsAttention} from "./dns/mailAttention";
 
 const Security = () => {
   const {sectionId} = useParams();
 
   // Red dot on the DNS tab when the owner should act: a required record is broken, or the
   // DNSSEC chain is not anchored - the same set the server's monthly health report flags
-  // (dnssecNeedsOwner). Since 2026-10-07 that includes parentUnsigned and zoneUnsigned: an
+  // (dnssec.needsAttention, the server's verdict). Since 2026-10-07 that includes parentUnsigned and zoneUnsigned: an
   // unanchored zone weakens security and mail deliverability even when the fix lies with
   // the registrar. A managed domain's enclosing zone is ours to fix and stays off the dot.
   // Shares the DNS tab's query (5 min stale time), so opening the tab costs no extra fetch.
   const {fetchDnsHealth: {data: dnsHealth}} = useDnsHealth();
   const dnsNeedsAttention =
-    !!dnsHealth && (!dnsHealth.recordsAreValid || dnssecNeedsOwner(dnsHealth.dnssec));
+    !!dnsHealth && (!dnsHealth.recordsAreValid || dnsHealth.dnssec.needsAttention);
 
-  // Same treatment for email. No records at all means email is not set up - nothing to act
-  // on, so no dot. The dot covers the SAME set the Email tab and the monthly security health
-  // report act on: broken mail DNS records, plus the checks a record comparison cannot make
-  // (DKIM pair proof, public-key drift), and the outbound relay refusing the domain. Errors
-  // only - warnings are things we could not check, and a dot that cries wolf gets ignored.
+  // Same treatment for email, by the same rule the Email tab uses. No records at all means
+  // email is not set up - nothing to act on, so no dot (and no expensive verify call).
   const emailRecords = dnsHealth?.mailRecords ?? [];
   const {fetchMailHealth: {data: mailHealth}} = useMailHealth({enabled: emailRecords.length > 0});
-  const emailNeedsAttention =
-    emailRecords.some((record) => record.status !== 'success') ||
-    (mailHealth?.errors?.length ?? 0) > 0 ||
-    !!dnsHealth?.relay.needsAttention;
+  const emailNeedsAttention = computeEmailNeedsAttention(dnsHealth, mailHealth);
 
   return (
     <>

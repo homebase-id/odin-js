@@ -3,7 +3,7 @@ import { Exclamation, Refresh } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
-import { MailRelayHealth } from '../../provider/dns/DnsHealthProvider';
+import { emailNeedsAttention } from './dns/mailAttention';
 import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
 import { RecordSetup } from './dns/DnsExport';
 import { useDnsProvider } from './dns/providers';
@@ -63,8 +63,8 @@ export const EmailDnsSettings = () => {
   // The outbound relay. A domain it refused has no relay rows to show as broken, which is how
   // a mailbox that could not send looked healthy here (2026-10-07). The server says so now.
   const relay = health?.relay;
-  const relayProblem = relay?.needsAttention ? describeRelay(relay) : undefined;
-  const needsAttention = broken.length > 0 || healthErrors.length > 0 || !!relayProblem;
+  const relayProblem = relay?.problem ?? undefined;
+  const needsAttention = emailNeedsAttention(health, mailHealth);
   const problems = relayProblem ? [relayProblem, ...healthErrors] : healthErrors;
   const warnings =
     relay?.status === 'unreachable'
@@ -228,16 +228,6 @@ export const EmailDnsSettings = () => {
       </Section>
     </>
   );
-};
-
-const describeRelay = (relay: MailRelayHealth) => {
-  if (relay.status === 'notRegistered')
-    return relay.lastError
-      ? `${t('Outbound sending is not set up. The mail relay refused your domain:')} ${relay.lastError}`
-      : t('Outbound sending is not set up: the mail relay has not registered your domain.');
-  return relay.problems.length
-    ? `${t('Outbound sending is not verified yet:')} ${relay.problems.join('; ')}`
-    : t('Outbound sending is not verified yet.');
 };
 
 // The non-record checks. Warnings are things we could not verify rather than things that

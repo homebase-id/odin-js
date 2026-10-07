@@ -47,6 +47,8 @@ export interface DnssecHealth {
   // When status is 'inherited': how the enclosing zone itself grades. Ours to fix, not the
   // owner's, so it colours the panel but never the tab dot.
   enclosingZoneStatus?: DnssecStatus | null;
+  // The server's verdict (the same rule as its monthly health report), so the dot needs no copy
+  needsAttention: boolean;
   dsToPublish: DsRecord[];
   parentDsRecords: DsRecord[];
   parentZoneSigned: boolean;
@@ -67,7 +69,9 @@ export interface MailRelayHealth {
   problems: string[];
   // Why the relay last refused the domain, in its own words
   lastError?: string | null;
-  // notRegistered or unverified - the server's verdict, so the client does not re-derive it
+  // The verdict described for a human, null when nothing needs attention - the same wording
+  // the monthly email uses, so the client shows it rather than writing its own
+  problem?: string | null;
   needsAttention: boolean;
 }
 
