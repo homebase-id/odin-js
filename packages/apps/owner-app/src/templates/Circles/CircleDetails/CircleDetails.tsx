@@ -165,10 +165,8 @@ const CircleDetails = () => {
                                           'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
                                         ),
                                   trickQuestion: {
-                                    question: `${t('Fill in the name of the circle')} (${circle.name}) ${t(
-                                      'to confirm:'
-                                    )}`,
-                                    answer: circle.name,
+                                    question: `${t('To confirm, type')} "${t('delete')} ${circle.name}":`,
+                                    answer: `${t('delete')} ${circle.name}`,
                                   },
                                 },
                                 label: t('Delete'),
