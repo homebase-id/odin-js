@@ -104,6 +104,11 @@ const CircleDetails = () => {
     stringGuidsEqual(circleId, CONFIRMED_CONNECTIONS_CIRCLE_ID) ||
     stringGuidsEqual(circleId, AUTO_CONNECTIONS_CIRCLE_ID);
 
+  // The server refuses to delete a system circle or a built-in one the app tree declares, so the
+  // action is not offered for either.
+  const canDelete = !isSystemCircle && !circle.isTreeDeclared;
+  const memberCount = members?.length ?? 0;
+
   return (
     <>
       <ErrorNotification error={enableCircleError} />
@@ -136,18 +141,40 @@ const CircleDetails = () => {
                   },
                   ...(circle.disabled
                     ? [
-                        {
-                          icon: Trash,
-                          onClick: () => removeCircle({ circleId }),
-                          confirmOptions: {
-                            title: `${t('Remove Circle')} ${circle.name}`,
-                            buttonText: t('Remove'),
-                            body: t(
-                              'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
-                            ),
-                          },
-                          label: t('Delete'),
-                        },
+                        ...(canDelete
+                          ? [
+                              {
+                                icon: Trash,
+                                // A circle with members is only deleted once they are removed;
+                                // the confirm below says so, and confirming asks the server to
+                                // revoke the circle from every member first.
+                                onClick: () =>
+                                  removeCircle({ circleId, removeMembers: memberCount > 0 }),
+                                confirmOptions: {
+                                  title: `${t('Remove Circle')} ${circle.name}`,
+                                  buttonText:
+                                    memberCount > 0 ? t('Remove members and delete') : t('Remove'),
+                                  body:
+                                    memberCount > 0
+                                      ? `${t('This circle has')} ${memberCount} ${
+                                          memberCount === 1 ? t('member') : t('members')
+                                        }. ${t(
+                                          'Remove them all and delete the circle? They will lose the access provided by the permissions of this circle.'
+                                        )}`
+                                      : t(
+                                          'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
+                                        ),
+                                  trickQuestion: {
+                                    question: `${t('Fill in the name of the circle')} (${circle.name}) ${t(
+                                      'to confirm:'
+                                    )}`,
+                                    answer: circle.name,
+                                  },
+                                },
+                                label: t('Delete'),
+                              },
+                            ]
+                          : []),
                         {
                           icon: Check,
                           onClick: () => {

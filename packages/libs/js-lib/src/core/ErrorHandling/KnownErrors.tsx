@@ -44,6 +44,8 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'cannotAllowCirclesOrIdentitiesOnAnonymousOrOwnerOnly')
     return t('Cannot allow circles or identities on anonymous or owner only');
   if (errorCode === 'cannotDeleteCircleWithMembers') return t('Cannot delete circle with members');
+  if (errorCode === 'cannotDeleteSystemCircle') return t('System circles cannot be deleted');
+  if (errorCode === 'cannotDeleteBuiltInCircle') return t('Built-in circles cannot be deleted');
   if (errorCode === 'identityAlreadyMemberOfCircle') return t('Identity already member of circle');
   if (errorCode === 'notAConnectedIdentity') return t('Not a connected identity');
   if (errorCode === 'notAFollowerIdentity') return t('Not a follower identity');
