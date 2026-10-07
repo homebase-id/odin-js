@@ -11,25 +11,25 @@ import {DnsSecuritySettings} from "./DnsSecuritySettings";
 import {EmailDnsSettings} from "./EmailDnsSettings";
 import {useDnsHealth} from "../../hooks/dns/useDnsHealth";
 import {useMailHealth} from "../../hooks/mail/useMailHealth";
-import {emailNeedsAttention as computeEmailNeedsAttention} from "./dns/mailAttention";
+import {dnsTabTone, emailNeedsAttention as computeEmailNeedsAttention, TabTone} from "./dns/attention";
+
+const Dot = ({tone}: { tone: TabTone }) => (
+  <span className={`inline-block h-2 w-2 rounded-full ${tone === 'red' ? 'bg-red-500' : 'bg-orange-400'}`}/>
+);
 
 const Security = () => {
   const {sectionId} = useParams();
 
-  // Red dot on the DNS tab when the owner should act: a required record is broken, or the
-  // DNSSEC chain is not anchored - the same set the server's monthly health report flags
-  // (dnssec.needsAttention, the server's verdict). Since 2026-10-07 that includes parentUnsigned and zoneUnsigned: an
-  // unanchored zone weakens security and mail deliverability even when the fix lies with
-  // the registrar. A managed domain's enclosing zone is ours to fix and stays off the dot.
-  // Shares the DNS tab's query (5 min stale time), so opening the tab costs no extra fetch.
+  // Both dots come from dns/attention.ts. Shares the DNS tab's query (5 min stale time), so
+  // it costs no extra fetch.
   const {fetchDnsHealth: {data: dnsHealth}} = useDnsHealth();
-  const dnsNeedsAttention =
-    !!dnsHealth && (!dnsHealth.recordsAreValid || dnsHealth.dnssec.needsAttention);
+  const dnsDot = dnsTabTone(dnsHealth);
 
   // Same treatment for email, by the same rule the Email tab uses. No records at all means
   // email is not set up - nothing to act on, so no dot (and no expensive verify call).
   const emailRecords = dnsHealth?.mailRecords ?? [];
   const {fetchMailHealth: {data: mailHealth}} = useMailHealth({enabled: emailRecords.length > 0});
+  // Everything on the email list stops or spam-folders mail, so its dot is always red
   const emailNeedsAttention = computeEmailNeedsAttention(dnsHealth, mailHealth);
 
   return (
@@ -57,21 +57,17 @@ const Security = () => {
             title: (
               <span className="flex flex-row items-center gap-2">
                 DNS
-                {dnsNeedsAttention ? (
-                  <span className="inline-block h-2 w-2 rounded-full bg-red-500"/>
-                ) : null}
+                {dnsDot ? <Dot tone={dnsDot}/> : null}
               </span>
             ),
-            text: dnsNeedsAttention ? 'DNS •' : 'DNS',
+            text: dnsDot ? 'DNS •' : 'DNS',
             path: `/owner/security/dns`,
           },
           {
             title: (
               <span className="flex flex-row items-center gap-2">
                 Email
-                {emailNeedsAttention ? (
-                  <span className="inline-block h-2 w-2 rounded-full bg-red-500"/>
-                ) : null}
+                {emailNeedsAttention ? <Dot tone="red"/> : null}
               </span>
             ),
             text: emailNeedsAttention ? 'Email •' : 'Email',
