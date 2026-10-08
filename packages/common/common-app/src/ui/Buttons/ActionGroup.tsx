@@ -14,6 +14,11 @@ export interface ActionGroupOptionPropsBase {
   onClick?: React.MouseEventHandler<HTMLElement>;
   href?: string;
 
+  /** Listed but not clickable, so the action can be found before it is available. */
+  disabled?: boolean;
+  /** Shown under the label, e.g. why the option is disabled. */
+  hint?: string;
+
   className?: string;
 }
 
@@ -162,6 +167,8 @@ const ActionOption = ({
   label,
   onClick,
   href,
+  disabled,
+  hint,
   className,
   ...props
 }: ActionGroupOptionProps) => {
@@ -171,6 +178,23 @@ const ActionOption = ({
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [needsOption, setNeedsOption] = useState(false);
   const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement> | null>();
+
+  if (disabled) {
+    return (
+      <li
+        aria-disabled="true"
+        className={`text-foreground/40 bg-background cursor-not-allowed text-base ${className || ''}`}
+      >
+        <div className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2">
+          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
+          <span className="flex flex-col">
+            <span>{label}</span>
+            {hint ? <span className="text-xs">{hint}</span> : null}
+          </span>
+        </div>
+      </li>
+    );
+  }
 
   return (
     <>

@@ -257,9 +257,25 @@ const DnssecBlock = ({
   provider: DnsProvider;
   origin: string;
 }) => {
+  // A lookup nobody answered says nothing about the zone: not a finding, just "try again"
+  if (dnssec.lookupFailed)
+    return (
+      <p className={MUTED}>
+        {t('DNSSEC: could not be checked right now. Press Refresh to try again.')}
+      </p>
+    );
   if (dnssec.status === 'secure')
     return <p className={MUTED}>{t('DNSSEC: fully active, with an unbroken chain of trust.')}</p>;
   if (dnssec.status === 'inherited') {
+    if (dnssec.breaksResolution)
+      return (
+        <Alert type="critical">
+          {t('DNSSEC for the')} <span className="font-mono">{dnssec.enclosingZone}</span>{' '}
+          {t(
+            'zone your domain is part of is broken, and validating DNS resolvers cannot resolve your domain. This is on our side - we are looking into it.'
+          )}
+        </Alert>
+      );
     if (enclosingZoneIncomplete(dnssec))
       return (
         <Alert type="warning">

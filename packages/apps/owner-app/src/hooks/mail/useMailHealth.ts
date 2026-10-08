@@ -16,9 +16,13 @@ export const useMailHealth = ({ enabled }: { enabled: boolean }) => {
     // than let a still-red row read as a failed write.
     publishDnsRecords: useMutation({
       mutationFn: () => publishMailDnsRecords(dotYouClient),
-      onSuccess: () => {
+      onSuccess: (result) => {
         queryClient.invalidateQueries({ queryKey: ['dns-health'] });
-        queryClient.invalidateQueries({ queryKey: ['mail-health'] });
+        // The key checks (DKIM pair proof, key drift) only change when records were written;
+        // a relay-only re-check must not re-run the most expensive check on the page
+        if (result.dnsRecordsWritten) {
+          queryClient.invalidateQueries({ queryKey: ['mail-health'] });
+        }
       },
     }),
     fetchMailHealth: useQuery({

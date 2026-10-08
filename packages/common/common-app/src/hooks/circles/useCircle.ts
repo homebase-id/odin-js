@@ -103,8 +103,13 @@ export const useCircle = (props?: { circleId?: string }) => {
   const revokeDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) =>
     await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain: domain });
 
-  const removeCircleInternal = async ({ circleId }: { circleId: string }) =>
-    await removeCircle(dotYouClient, circleId);
+  const removeCircleInternal = async ({
+    circleId,
+    removeMembers,
+  }: {
+    circleId: string;
+    removeMembers?: boolean;
+  }) => await removeCircle(dotYouClient, circleId, { removeMembers });
 
   const setOwningApp = async ({ circleId, appId }: { circleId: string; appId: string }) =>
     await setCircleOwningApp(dotYouClient, circleId, appId);
@@ -114,14 +119,14 @@ export const useCircle = (props?: { circleId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['circle', circleId],
+      queryKey: ['circle', formatGuidId(circleId)],
       queryFn: () => fetch({ circleId: circleId as string }),
       refetchOnWindowFocus: false,
       enabled: !!circleId,
     }),
 
     fetchMembers: useQuery({
-      queryKey: ['circleMembers', circleId],
+      queryKey: ['circleMembers', formatGuidId(circleId)],
       queryFn: () => fetchMembers({ circleId: circleId as string }),
 
       refetchOnWindowFocus: false,
@@ -131,11 +136,12 @@ export const useCircle = (props?: { circleId?: string }) => {
     createOrUpdate: useMutation({
       mutationFn: createOrUpdate,
       onMutate: async (newCircle) => {
-        await queryClient.cancelQueries({ queryKey: ['circle', newCircle.id] });
+        const circleKey = ['circle', formatGuidId(newCircle.id)];
+        await queryClient.cancelQueries({ queryKey: circleKey });
 
         // Update single attribute
-        const previousCircle = queryClient.getQueryData(['circle', newCircle.id]);
-        queryClient.setQueryData(['circle', newCircle.id], newCircle);
+        const previousCircle = queryClient.getQueryData(circleKey);
+        queryClient.setQueryData(circleKey, newCircle);
 
         // Update section attributes
         const previousCircles: CircleDefinition[] | undefined = queryClient.getQueryData([
@@ -152,7 +158,7 @@ export const useCircle = (props?: { circleId?: string }) => {
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['circle', newCircle.id], context?.previousCircle);
+        queryClient.setQueryData(['circle', formatGuidId(newCircle.id)], context?.previousCircle);
         queryClient.setQueryData(['circles'], context?.previousCircles);
       },
       onSettled: (newCircle) => {

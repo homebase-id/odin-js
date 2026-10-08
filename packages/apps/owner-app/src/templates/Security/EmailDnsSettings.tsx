@@ -3,7 +3,7 @@ import { Exclamation, Refresh } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import { useDnsHealth } from '../../hooks/dns/useDnsHealth';
 import { useMailHealth } from '../../hooks/mail/useMailHealth';
-import { emailNeedsAttention } from './dns/mailAttention';
+import { emailNeedsAttention } from './dns/attention';
 import { DnsRecordsTable, MUTED } from './dns/DnsRecordRow';
 import { RecordSetup } from './dns/DnsExport';
 import { useDnsProvider } from './dns/providers';
@@ -66,10 +66,33 @@ export const EmailDnsSettings = () => {
   const relayProblem = relay?.problem ?? undefined;
   const needsAttention = emailNeedsAttention(health, mailHealth);
   const problems = relayProblem ? [relayProblem, ...healthErrors] : healthErrors;
-  const warnings =
-    relay?.status === 'unreachable'
-      ? [t('Outbound sending could not be checked right now.'), ...healthWarnings]
-      : healthWarnings;
+  // The server words it (odin-core#1887), like the relay problem
+  const warnings = relay?.warning ? [relay.warning, ...healthWarnings] : healthWarnings;
+
+  // On DNS we do not host there is nothing for us to write, but the relay can still be asked to
+  // look again - so the button is offered for a relay problem whoever hosts the DNS (#1888).
+  const offerRepair = (broken.length > 0 && !thirdPartyDns) || !!relayProblem;
+  const [repairLabel, repairHint] = thirdPartyDns
+    ? [
+        t('Check outbound sending again'),
+        t('Asks the mail relay to look at your domain again. Safe to repeat.'),
+      ]
+    : [
+        t('Repair email setup'),
+        t(
+          'Publishes the email records for your domain and sets up outbound sending. Safe to run more than once.'
+        ),
+      ];
+
+  // After a press: records written, or (on DNS we do not host) the relay asked to verify.
+  // Neither when the relay refused - that is shown on its own, in the relay's words.
+  const publishedMessage = publishResult?.dnsRecordsWritten
+    ? t('Records published. They can take a few minutes to appear - press Refresh to check again.')
+    : publishResult && !publishResult.relayError && relay && relay.status !== 'notApplicable'
+      ? t(
+          'Asked the mail relay to verify your domain. It can take a few minutes - press Refresh to check again.'
+        )
+      : null;
 
   // Publishing on third-party DNS writes nothing and returns the records to add by hand,
   // matched to the check for status. Otherwise, on known third-party DNS, the check itself
@@ -142,10 +165,10 @@ export const EmailDnsSettings = () => {
             {/* Missing records are usually an identity provisioned before this server offered
                 email: the records are written when an identity is created, so an older one
                 never received them. The same button registers the domain with the outbound
-                relay, which is the repair when the relay refused it. Safe to repeat. Not
-                offered for the other checks (key drift, DKIM pair proof): writing DNS does not
-                fix those. */}
-            {(broken.length > 0 || relayProblem) && !thirdPartyDns ? (
+                relay and asks it to verify, which is the repair when the relay refused it or
+                has a stale verdict. Safe to repeat. Not offered for the other checks (key
+                drift, DKIM pair proof): writing DNS does not fix those. */}
+            {offerRepair ? (
               <div className="flex flex-col gap-2">
                 <div className="flex flex-row items-center gap-3">
                   <ActionButton
@@ -157,13 +180,9 @@ export const EmailDnsSettings = () => {
                     // The failure is shown from the mutation status below; not rethrown
                     onClick={() => publishDnsRecords().catch(() => undefined)}
                   >
-                    {t('Repair email setup')}
+                    {repairLabel}
                   </ActionButton>
-                  <small className={MUTED}>
-                    {t(
-                      'Publishes the email records for your domain and sets up outbound sending. Safe to run more than once.'
-                    )}
-                  </small>
+                  <small className={MUTED}>{repairHint}</small>
                 </div>
 
                 {/* The relay's own words: a plan limit or a bad request is something a person
@@ -180,15 +199,9 @@ export const EmailDnsSettings = () => {
                   </Alert>
                 ) : null}
 
-                {/* Written, but DNS is not instant - without saying so, rows that are still
-                    red a moment later read as the write having failed. */}
-                {publishResult?.dnsRecordsWritten ? (
-                  <Alert type="success">
-                    {t(
-                      'Records published. They can take a few minutes to appear - press Refresh to check again.'
-                    )}
-                  </Alert>
-                ) : null}
+                {/* DNS is not instant - without saying so, rows that are still red a moment
+                    later read as the press having failed */}
+                {publishedMessage ? <Alert type="success">{publishedMessage}</Alert> : null}
               </div>
             ) : null}
 

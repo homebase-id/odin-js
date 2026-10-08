@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Link, useParams} from 'react-router-dom';
+import {Link, useNavigate, useParams} from 'react-router-dom';
 import {useOwnerAppName} from '../../../hooks/apps/useOwnerAppName';
 import {useDrive} from '../../../hooks/drives/useDrive';
 import Section from '../../../components/ui/Sections/Section';
@@ -21,15 +21,17 @@ import {DriveStatusDialog} from '../../../components/Drives/DriveStatusDialog/Dr
 import {SetOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/SetOwningAppDialog';
 import {ReassignOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
+import {DrivePurgeStatus} from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import {
     ActionButton,
     ActionGroup,
+    ErrorNotification,
     CirclePermissionView,
     t,
     useCircles,
   getOwnerAppPath,
 } from '@homebase-id/common-app';
-import {HardDrive, Download, HeartBeat, Pencil} from '@homebase-id/common-app/icons';
+import {HardDrive, Download, HeartBeat, Pencil, Trash, Archive, Refresh} from '@homebase-id/common-app/icons';
 
 const DriveDetails = () => {
     const {driveKey} = useParams();
@@ -43,8 +45,14 @@ const DriveDetails = () => {
     });
     const appName = useOwnerAppName(driveDef?.appId ?? undefined);
     const {mutateAsync: exportUnencrypted, status: exportStatus} = useExport().exportUnencrypted;
-    const {mutateAsync: setOwningApp} = useDrive().setOwningApp;
-    const {mutateAsync: reassignOwningApp} = useDrive().reassignOwningApp;
+    const {
+        setOwningApp: {mutateAsync: setOwningApp},
+        reassignOwningApp: {mutateAsync: reassignOwningApp},
+        emptyDrive: {mutateAsync: emptyDrive, status: emptyStatus, error: emptyError},
+        deleteDrive: {mutateAsync: deleteDrive, status: deleteStatus, error: deleteError},
+        editArchiveStatus: {mutate: setArchived, status: archiveStatus, error: archiveError},
+    } = useDrive();
+    const navigate = useNavigate();
 
     const {data: circles} = useCircles().fetch;
     const {data: apps} = useApps().fetchRegistered;
@@ -94,6 +102,8 @@ const DriveDetails = () => {
         link.click();
     };
 
+    const archiveFirst = t('Archive the drive first');
+
     // console.log('dd', driveDef)
     return (
         <>
@@ -114,8 +124,57 @@ const DriveDetails = () => {
                                     icon: HeartBeat,
                                     onClick: () => setIsShowDriveStatus(true),
                                 },
+                                // Always listed so they can be found; usable once the drive is archived, which is the
+                                // first "are you sure" -- the server refuses an active drive. A system drive can never
+                                // be archived (the server refuses), so neither is offered on one.
+                                ...(!readOnly && !driveDef.isSystemDrive
+                                    ? [
+                                          driveDef.isArchived
+                                              ? {
+                                                    label: t('Restore drive'),
+                                                    icon: Refresh,
+                                                    onClick: () => setArchived({targetDrive: targetDriveInfo, newArchived: false}),
+                                                }
+                                              : {
+                                                    label: t('Archive drive'),
+                                                    icon: Archive,
+                                                    onClick: () => setArchived({targetDrive: targetDriveInfo, newArchived: true}),
+                                                    confirmOptions: {
+                                                        type: 'warning' as const,
+                                                        title: t('Archive drive'),
+                                                        buttonText: t('Archive'),
+                                                        body: `${driveDef.name} ${t('is hidden from apps and connections, and they can no longer write to it. You can restore it at any time. Once archived, it can be emptied or deleted.')}`,
+                                                    },
+                                                },
+                                          {
+                                              label: t('Empty drive'),
+                                              disabled: !driveDef.isArchived,
+                                              hint: archiveFirst,
+                                              icon: Trash,
+                                              onClick: () => emptyDrive({targetDrive: targetDriveInfo}),
+                                              confirmOptions: purgeConfirm(t('empty'), t('Empty drive'), t('Empty'), driveDef.name, [
+                                                  `${t('Every file on')} ${driveDef.name} ${t('is deleted, with its payloads. The drive itself stays.')}`,
+                                                  t('This runs in the background: on a large drive, files disappear over the next minutes. Files you add after confirming are kept.'),
+                                              ]),
+                                          },
+                                          {
+                                              label: t('Delete drive'),
+                                              disabled: !driveDef.isArchived,
+                                              hint: archiveFirst,
+                                              icon: Trash,
+                                              onClick: async () => {
+                                                  await deleteDrive({targetDrive: targetDriveInfo});
+                                                  navigate(getOwnerAppPath(driveDef.appId));
+                                              },
+                                              confirmOptions: purgeConfirm(t('delete'), t('Delete drive'), t('Delete'), driveDef.name, [
+                                                  `${driveDef.name} ${t('is deleted with every file on it, and every circle and app loses its access to it.')}`,
+                                                  t('The drive disappears at once; its files are removed in the background, and a new drive cannot reuse its address until they are.'),
+                                              ]),
+                                          },
+                                      ]
+                                    : []),
                             ]}
-                            state={exportStatus}
+                            state={[archiveStatus, emptyStatus, deleteStatus].find((status) => status === 'pending') ?? exportStatus}
                             type="secondary"
                         />
                     </>
@@ -126,6 +185,8 @@ const DriveDetails = () => {
                     {title: driveDef.name ?? ''},
                 ]}
             />
+            <ErrorNotification error={archiveError || emptyError || deleteError}/>
+            <DrivePurgeStatus driveAlias={targetDriveInfo.alias} className="mb-5"/>
             <Section
                 title={t('Metadata')}
                 actions={
@@ -384,6 +445,25 @@ const DriveDetails = () => {
         </>
     );
 };
+
+/**
+ * The confirmation for emptying or deleting a drive: the action's own lines, the closing lines both share, and
+ * "<verb> <drive>" to type before the button enables.
+ */
+const purgeConfirm = (verb: string, title: string, buttonText: string, driveName: string, lines: string[]) => ({
+    type: 'critical' as const,
+    title,
+    buttonText,
+    body: [
+        ...lines,
+        t('To keep the files, cancel and use Export first.'),
+        t('Copies your connections already received stay with them. This cannot be undone.'),
+    ].join('\n\n'),
+    trickQuestion: {
+        question: `${t('To confirm, type')} "${verb} ${driveName}":`,
+        answer: `${verb} ${driveName}`,
+    },
+});
 
 /** The way out of an ownership that is already set. Understated on purpose -- it is the escape
     hatch, not something to invite. */
