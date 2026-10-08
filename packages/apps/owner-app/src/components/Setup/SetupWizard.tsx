@@ -26,12 +26,6 @@ const defaultData: WelcomeData = {
         odinId: window.location.hostname,
         other: [],
     },
-    circles: [
-        {name: 'Friends', description: 'Your friends'},
-        {name: 'Family', description: 'Your family'},
-        {name: 'Work', description: 'Your professional connections'},
-        {name: 'Acquaintances', description: 'Your network'},
-    ],
     enableAutomatedPasswordRecovery: true
 };
 

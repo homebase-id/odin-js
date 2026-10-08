@@ -2,8 +2,6 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 
 import {WelcomeData} from '../../templates/Setup/Setup';
 import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
-import {toGuidId} from '@homebase-id/js-lib/helpers';
-import {CircleDefinition} from '@homebase-id/js-lib/network';
 import {
   SetupAutoFollow,
   SetupBlog,
@@ -36,22 +34,10 @@ export const useInit = () => {
   const doInitWithData = async (data: WelcomeData) => {
     if (!isAuthenticated) return;
 
-    // No appId on these: every circle has an owning app, and the server assigns the System app to
-    // circles created by the owner console and this wizard. Naming an id here would only be this
-    // client guessing at the same answer, and a wrong guess is permanent.
-    const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
-      return {
-        id: toGuidId(circle.name),
-        name: circle.name,
-        description: circle.description,
-        permissions: {
-          keys: [10],
-        },
-      };
-    });
-
-    // Initialize
-    await initialize(dotYouClient, firstRunToken, initDrives, initCircles);
+    // Initialize. No circles: the server creates the built-in ones (Friends among them) itself. The
+    // wizard used to send Friends, Family, Work and Acquaintances, and the server created whichever
+    // did not exist yet -- so new identities kept getting the three the server no longer seeds.
+    await initialize(dotYouClient, firstRunToken, initDrives);
 
     if (data?.enableAutomatedPasswordRecovery === true) {
       try {
