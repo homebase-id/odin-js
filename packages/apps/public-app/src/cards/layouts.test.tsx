@@ -44,7 +44,7 @@ const order = (html: string) => ({
 });
 
 const LINKS_FIRST = {
-  blocks: [{ kind: 'posts' }, { kind: 'chat' }, { kind: 'links' }, { kind: 'moments' }],
+  blocks: [{ kind: 'posts' }, { kind: 'links' }, { kind: 'moments' }],
 };
 const MOMENTS_FIRST = {
   blocks: [{ kind: 'moments' }, { kind: 'links' }],
@@ -62,23 +62,6 @@ describe('section order override', () => {
       expect(momentsFirst.moments).toBeLessThan(momentsFirst.links);
     }
   );
-});
-
-describe('dossier chat position', () => {
-  const chat = (html: string) => html.indexOf('open a chat');
-  it('puts the contact row above the elsewhere rows when chat comes first', () => {
-    const html = render('dossier', LINKS_FIRST);
-    expect(chat(html)).toBeGreaterThan(-1);
-    expect(chat(html)).toBeLessThan(html.indexOf('Shire Weekly'));
-  });
-
-  it('puts it below them when chat comes after links and moments', () => {
-    const html = render('dossier', {
-      blocks: [{ kind: 'links' }, { kind: 'moments' }, { kind: 'chat' }],
-    });
-    expect(chat(html)).toBeGreaterThan(html.indexOf('Shire Weekly'));
-    expect(chat(html)).toBeGreaterThan(html.indexOf('Moments'));
-  });
 });
 
 describe('socials variants', () => {

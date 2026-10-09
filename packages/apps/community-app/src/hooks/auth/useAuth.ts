@@ -25,7 +25,7 @@ import {
 } from '@homebase-id/common-app';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import { ChatDrive } from '../../chat/providers/ConversationProvider';
 
 export const useValidateAuthorization = () => {
   const { hasSharedSecret } = useDotYouClient();

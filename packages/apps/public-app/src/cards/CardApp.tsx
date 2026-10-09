@@ -59,7 +59,7 @@ const ARABIC_FACES = /IBM Plex Sans Arabic|Aref Ruqaa|Reem Kufi/;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
-// The owner is looking at their own card: no chat block, and nothing here may reach the network
+// The owner is looking at their own card: nothing here may reach the network
 const ownerClient = (odinId: string) =>
   ({
     isOwner: () => true,

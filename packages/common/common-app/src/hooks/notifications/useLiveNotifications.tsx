@@ -21,12 +21,7 @@ import {
   COMMUNITY_APP_ID,
 } from '../../constants';
 import {hasDebugFlag, stringGuidsEqual} from '@homebase-id/js-lib/helpers';
-import {
-  invalidateActiveConnections,
-  invalidatePendingConnection,
-  invalidatePendingConnections,
-  invalidateSentConnections,
-} from '../connections/useConnections';
+import { invalidateActiveConnections } from '../connections/useConnections';
 
 interface LiveNotification {
   title: string;
@@ -67,7 +62,8 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
             : t('Your connection request was accepted'),
         body: otherId ? <DomainHighlighter>{otherId}</DomainHighlighter> : undefined,
         imgSrc: `${host}/pub/image`,
-        href: `/owner/connections/${otherId}`,
+        // Requests are answered in the Homebase app; the web can show who it is.
+        href: host,
       };
 
       setLiveNotifications((oldSet) => [
@@ -75,13 +71,8 @@ export const useLiveNotifications = (props: { drives?: TargetDrive[] } | undefin
         liveNotification,
       ]);
 
-      if (wsNotification.notificationType === 'connectionRequestReceived') {
-        invalidatePendingConnections(queryClient);
-        invalidatePendingConnection(queryClient);
-      } else {
-        invalidateSentConnections(queryClient);
+      if (wsNotification.notificationType === 'connectionRequestAccepted')
         invalidateActiveConnections(queryClient);
-      }
     } else if (wsNotification.notificationType === 'appNotificationAdded') {
       const clientNotification = wsNotification as AppNotification;
 
@@ -236,18 +227,19 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
         OWNER_CONNECTION_ACCEPTED_TYPE_ID,
       ].includes(payload.options.typeId)
     ) {
-      return `/owner/connections/${payload.senderId}`;
+      // Connections are managed in the Homebase app; the web can show who it is.
+      return new DotYouClient({ api: ApiType.Guest, hostIdentity: payload.senderId }).getRoot();
     } else if (payload.options.typeId === OWNER_INTRODUCTION_RECEIVED_TYPE_ID) {
-      return `/owner/connections`;
+      // Introductions are answered in the Homebase app, and there is no single person to show.
+      return undefined;
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_SHARD_REQUESTED) {
       return `/owner/security/release-shards`
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
       return `/owner/security/overview`
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
-    return `/apps/chat/${payload.options.typeId}`;
-  } else if (payload.options.appId === MAIL_APP_ID) {
-    return `/apps/mail/inbox/${payload.options.typeId}`;
+    // The Kotlin/WASM chat app routes by URL fragment, not path: there is no per-conversation URL.
+    return `/apps/chat`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID)
       return `/apps/feed?post=${payload.options.tagId}`;

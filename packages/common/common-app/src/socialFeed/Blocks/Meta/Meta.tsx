@@ -9,7 +9,7 @@ import { ActionGroupOptionProps, ActionGroup, ErrorNotification } from '../../..
 import { ChannelDefinitionVm, useManagePost, useManageSocialFeed } from '../../../hooks';
 import { useIsConnected } from '../../../hooks';
 import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
-import { Persons, UserX, Times, Flag, Block, Link, Trash, Lock } from '../../../ui/Icons';
+import { Persons, UserX, Times, Flag, Link, Trash, Lock } from '../../../ui/Icons';
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 import { useDotYouClientContext } from '../../../hooks';
 
@@ -207,11 +207,6 @@ const ExternalActions = ({
         const reportUrl = await getReportContentUrl();
         window.open(reportUrl, '_blank');
       },
-    },
-    {
-      icon: Block,
-      label: `${t('Block this user')}`,
-      href: `${host}/owner/connections/${odinId}/block`,
     },
   ];
 

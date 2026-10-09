@@ -21,7 +21,6 @@ export interface onChangeParams {
 export interface WelcomeData {
     profile: ProfileSetupData;
     social: SocialSetupData;
-    circles: { name: string; description: string }[];
     enableAutomatedPasswordRecovery: boolean
 }
 

@@ -19,7 +19,7 @@ import {
  *   type      { display, text, label } each a FONT_STACKS key; displayCase "none"|"upper"|"italic-2nd-line"
  *   portraits [{ source "photo"|"header", shape "circle"|"square"|"rounded"|"ellipse", ring 0..12,
  *               shadow "soft"|"hard", tilt -15..15, tape bool, mono bool }]  (max 2; replaces the preset's list)
- *   blocks    [{ kind "chat"|"links"|"moments"|"posts", presentation "bare"|"boxed"|"row"|"button" }]
+ *   blocks    [{ kind "links"|"moments"|"posts", presentation "bare"|"boxed"|"row"|"button" }]
  *             existing kinds only, first mention wins; listed order is the order, unlisted kinds are hidden
  *   socials   "glyphs"|"bar"|"wordmark"|"handles"
  */

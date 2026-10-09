@@ -5,7 +5,7 @@ import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData, CardPost } from '../../useCardData';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
-import { CardBlock, isUsableLink, useChatHref } from '../../parts/Blocks';
+import { isUsableLink } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
@@ -137,11 +137,9 @@ const Notes = ({ posts }: { posts: CardPost[] }) => {
 
 export const CollagePage = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
-  const chatHref = useChatHref(data.odinId);
-  const chatBlock = design.blocks.find((b) => b.kind === 'chat');
   const socials = data.socials;
   const hasCollage = !!(print || cutout);
-  const hasAside = !!(chatBlock && chatHref) || socials.length > 0 || !!data.header;
+  const hasAside = socials.length > 0 || !!data.header;
   const grid =
     HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
   // The wordmark box shows the first social; the glyphs under the name carry the rest
@@ -201,11 +199,6 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
 
             {hasAside ? (
               <div className="flex flex-col gap-3.5 pb-6 pt-[124px]">
-                {chatBlock && chatHref ? (
-                  <div className="rotate-[1.5deg] [&>a]:flex [&>a]:h-16 [&>a]:gap-3.5 [&>a]:px-[22px] [&>a]:text-lg [&>a]:shadow-[0_3px_9px_rgba(0,0,0,0.28)] [&_svg]:h-[26px] [&_svg]:w-[26px]">
-                    <CardBlock block={chatBlock} data={data} chatHref={chatHref} />
-                  </div>
-                ) : null}
                 <CardSocials
                   variant="wordmark"
                   data={data}

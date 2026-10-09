@@ -14,7 +14,6 @@ export const OWNER_APPS_ROOT = '/apps';
 
 export const FEED_ROOT_PATH = '/apps/feed';
 export const CHAT_ROOT_PATH = '/apps/chat';
-export const MAIL_ROOT_PATH = '/apps/mail';
 export const COMMUNITY_ROOT_PATH = '/apps/community';
 
 export const APP_KEYS = ['feed', 'chat', 'mail', 'community'];
