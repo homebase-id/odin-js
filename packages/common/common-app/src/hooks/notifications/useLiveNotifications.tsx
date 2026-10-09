@@ -237,6 +237,9 @@ export const buildNotificationTargetLink = (payload: PushNotification) => {
     } else if (payload.options.typeId === OWNER_SHAMIR_PASSWORD_RECOVERY_RISK_REPORT_GENERATED) {
       return `/owner/security/overview`
     }
+  } else if (payload.options.appId === CHAT_APP_ID) {
+    // The Kotlin/WASM chat app routes by URL fragment, not path: there is no per-conversation URL.
+    return `/apps/chat`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID)
       return `/apps/feed?post=${payload.options.tagId}`;
