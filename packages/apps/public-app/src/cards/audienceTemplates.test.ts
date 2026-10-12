@@ -24,8 +24,8 @@ describe('audience templates', () => {
 
   it('an unstored public card renders the public template, with no write', () => {
     const design = resolveEmbedDesign({});
-    expect(design.layout).toBe('board');
-    expect(design.palette.ground).toBe('#1E5B45');
+    expect(design.layout).toBe('links');
+    expect(design.palette.ground).toBe('#DDF0E6');
   });
 
   it('a stored card and the site theme still win over the template', () => {

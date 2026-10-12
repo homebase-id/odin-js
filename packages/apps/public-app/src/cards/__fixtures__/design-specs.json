@@ -137,14 +137,14 @@
     ],
     "audienceTemplates": {
         "public": {
-            "design": "board",
+            "design": "links",
             "overrides": {
                 "palette": {
-                    "ground": "#1E5B45",
-                    "ink": "#FFFFFF",
-                    "muted": "#BFD6CC",
+                    "ground": "#DDF0E6",
+                    "ink": "#12301F",
+                    "muted": "#4A6B58",
                     "surface": "#FFFFFF",
-                    "surfaceInk": "#173B2E"
+                    "surfaceInk": "#12301F"
                 }
             }
         },
