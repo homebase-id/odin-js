@@ -207,7 +207,8 @@ describe('links design', () => {
     const out = html(
       withLinks(0, { links: [{ id: 's', text: 'Site', target: 'https://example.com/a' }] })
     );
-    const tile = out.slice(out.indexOf('<a '), out.indexOf('</a>'));
+    const start = out.indexOf('<a href="https://example.com/a"');
+    const tile = out.slice(start, out.indexOf('</a>', start));
     expect(tile).toContain('>S<');
     expect(tile).toContain('favicon.ico');
     expect(tile.indexOf('>S<')).toBeLessThan(tile.indexOf('<img'));

@@ -6,7 +6,7 @@ import type { CardData, CardPost } from '../../useCardData';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardImg } from '../../parts/CardImg';
 import { CardSignIn } from '../../parts/SignIn';
-import { LINKS_VARS, LinksProfile } from './LinksParts';
+import { LINKS_VARS, LinksIdentity, LinksList } from './LinksParts';
 
 const DATE = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
@@ -66,7 +66,7 @@ const LinksPosts = ({ data }: { data: CardData }) => {
   if (!posts.length) return null;
   const knownCount = posts.length < LOADED_CAP;
   return (
-    <section aria-labelledby={headingId} className="mx-auto w-full max-w-[560px] px-5 pt-12">
+    <section aria-labelledby={headingId} className="w-full">
       <div className="flex items-baseline justify-between gap-4 pb-4">
         <h2
           id={headingId}
@@ -93,16 +93,23 @@ const LinksPosts = ({ data }: { data: CardData }) => {
   );
 };
 
-export const LinksPage = ({ design, data }: LayoutProps) => (
-  <div style={LINKS_VARS} className="relative min-h-[inherit] pb-20">
-    <header className="flex justify-end px-6 pt-5">
-      <CardSignIn className="rounded-full bg-[color:var(--card-accent)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface)]" />
-    </header>
-    <main>
-      <div className="mx-auto w-full max-w-[560px] px-5 pt-6">
-        <LinksProfile design={design} data={data} size="page" />
-      </div>
-      <LinksPosts data={data} />
-    </main>
-  </div>
-);
+// From 1024 the identity becomes a sticky column beside the links, instead of a stretched phone column
+export const LinksPage = ({ design, data }: LayoutProps) => {
+  const hasPosts = data.posts.length > 0;
+  return (
+    <div style={LINKS_VARS} className="relative min-h-[inherit] overflow-hidden pb-20">
+      <header className="flex justify-end px-6 pt-5">
+        <CardSignIn className="rounded-full bg-[color:var(--card-accent)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface)]" />
+      </header>
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-10 px-5 pt-6 lg:grid lg:max-w-[1120px] lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-16 lg:px-10 lg:pt-8">
+        <aside className="lg:sticky lg:top-10 lg:self-start">
+          <LinksIdentity design={design} data={data} size="page" split />
+        </aside>
+        <div className="flex min-w-0 flex-col gap-12 lg:max-w-[640px]">
+          <LinksList design={design} data={data} skipMoments={hasPosts} emptyNote={!hasPosts} />
+          <LinksPosts data={data} />
+        </div>
+      </main>
+    </div>
+  );
+};
