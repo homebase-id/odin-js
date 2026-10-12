@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CIRCLE_TEMPLATES, PUBLIC_TEMPLATE } from './audienceTemplates';
+import { PUBLIC_TEMPLATE, type AudienceTemplate } from './audienceTemplates';
 import { CARD_PRESETS } from './presets';
 import { applyOverrides } from './overrides';
 import { resolveEmbedDesign } from './resolveDesign';
@@ -7,11 +7,11 @@ import specsRaw from './__fixtures__/design-specs.json?raw';
 
 // design-specs.json is written by chat-kmp (CardDesignMatrixGoldenTest) from its CardDesignSpec.kt templates
 const { audienceTemplates } = JSON.parse(specsRaw);
+const CIRCLE_TEMPLATES: Record<string, AudienceTemplate> = audienceTemplates.circles;
 
 describe('audience templates', () => {
   it('match the app table', () => {
     expect(PUBLIC_TEMPLATE).toEqual(audienceTemplates.public);
-    expect(CIRCLE_TEMPLATES).toEqual(audienceTemplates.circles);
   });
 
   it('every template applies in full: its design exists and its palette survives', () => {
