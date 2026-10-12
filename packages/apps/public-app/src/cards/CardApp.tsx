@@ -115,8 +115,9 @@ const whenPainted = async (element: HTMLElement, onError: (error: unknown) => vo
   await document.fonts.ready;
   await untilFrame(
     Promise.all(
-      Array.from(element.querySelectorAll('img')).map((img) =>
-        img.decode().catch(() => onError(`image ${img.src.slice(0, 40)}… failed to decode`))
+      Array.from(element.querySelectorAll<HTMLImageElement>('img:not([data-card-optional])')).map(
+        (img) =>
+          img.decode().catch(() => onError(`image ${img.src.slice(0, 40)}… failed to decode`))
       )
     ),
     500

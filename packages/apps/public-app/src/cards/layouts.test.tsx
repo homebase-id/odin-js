@@ -6,6 +6,10 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { HomebaseCard } from './HomebaseCard';
 import { CardSocials } from './parts/Socials';
+import { CardPage } from './CardPage';
+import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
+import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
+import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
 
 vi.mock('@homebase-id/common-app', () => ({
   HOME_ROOT_PATH: '/home/',
@@ -16,6 +20,9 @@ vi.mock('@homebase-id/common-app', () => ({
     getLoggedInIdentity: () => 'visitor.dotyou.cloud',
   }),
 }));
+
+// the sign-in button reads window, which the node test environment does not have
+vi.mock('./parts/SignIn', () => ({ CardSignIn: () => <button type="button">Sign in</button> }));
 
 const Icon = () => null;
 const data = {
@@ -51,7 +58,7 @@ const MOMENTS_FIRST = {
 };
 
 describe('section order override', () => {
-  it.each(['poster', 'board', 'collage', 'dossier'] as const)(
+  it.each(['poster', 'board', 'collage', 'dossier', 'links'] as const)(
     '%s card follows the order of the blocks override',
     (layout) => {
       const linksFirst = order(render(layout, LINKS_FIRST));
@@ -103,5 +110,110 @@ describe('socials variants', () => {
     const one = { ...data, socials: data.socials.slice(0, 1) };
     const html = renderToStaticMarkup(<CardSocials variant="wordmark" data={one} />);
     expect(html).not.toContain('<ul');
+  });
+});
+
+describe('links design', () => {
+  const html = (node: CardData, wide = false, overrides?: unknown) => {
+    const design = applyOverrides(CARD_PRESETS.links, overrides);
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={node} />
+        ) : (
+          <HomebaseCard design={design} data={node} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const withLinks = (count: number, extra: Partial<CardData> = {}) =>
+    ({
+      ...data,
+      links: Array.from({ length: count }, (_, i) => ({
+        id: `l${i}`,
+        text: `Link ${i}`,
+        target: `https://site${i}.example/path`,
+      })),
+      ...extra,
+    }) as CardData;
+
+  it.each([
+    ['render-payload', renderPayloadRaw],
+    ['render-payload-public', renderPublicRaw],
+    ['render-payload-circle', renderCircleRaw],
+  ])('%s fixture renders as links on the card and the page, with no console errors', (_n, raw) => {
+    const request = JSON.parse(raw);
+    const node = {
+      ...request.data,
+      links: request.data.links ?? [],
+      socials: [],
+      posts: request.data.posts ?? [],
+      audience: request.audience,
+    } as CardData;
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const warns = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    for (const wide of [false, true]) {
+      const out = html(node, wide, request.overrides);
+      expect(out).toContain(request.data.odinId);
+    }
+    // useLayoutEffect in the shared name and audience parts warns on any server render
+    const real = errors.mock.calls.filter(
+      ([message]) => !String(message).includes('useLayoutEffect')
+    );
+    expect(real).toEqual([]);
+    expect(warns).not.toHaveBeenCalled();
+    vi.restoreAllMocks();
+  });
+
+  it('shows favicon, title and muted domain for a link', () => {
+    const out = html(data);
+    expect(out).toContain('src="https://shire.example/favicon.ico"');
+    expect(out).toContain('Shire Weekly');
+    expect(out).toContain('>shire.example<');
+  });
+
+  it('falls back to the initial letter when the favicon cannot be built', () => {
+    const odd = withLinks(0, {
+      links: [{ id: 'x', text: 'zebra', target: 'mailto:z@example.com' }],
+    });
+    const out = html(odd);
+    expect(out).not.toContain('favicon.ico');
+    expect(out).toContain('>Z<');
+  });
+
+  it('holds with no links, with 12 links, and with a very long name', () => {
+    expect(html(withLinks(0), true)).toContain('Frodo');
+    const twelve = html(withLinks(12));
+    expect(twelve.match(/favicon\.ico/g)).toHaveLength(12);
+    const long = 'Bartholomew'.repeat(12);
+    expect(html(withLinks(2, { firstName: long, surName: long }), true)).toContain(long);
+  });
+
+  it('drops unsafe link targets', () => {
+    const out = html(
+      withLinks(0, { links: [{ id: 'j', text: 'bad', target: 'javascript:alert(1)' }] })
+    );
+    expect(out).not.toContain('javascript:');
+  });
+
+  it('keeps right-to-left text in its own direction', () => {
+    const rtl = withLinks(0, {
+      firstName: 'فرودو',
+      headline: 'حامل الخاتم',
+      links: [{ id: 'a', text: 'نشرة الشاير', target: 'https://shire.example' }],
+    });
+    const out = html(rtl);
+    expect(out).toContain('dir="auto"');
+    expect(out).toContain('نشرة الشاير');
+  });
+
+  it('honours the palette and socials overrides', () => {
+    const out = html(data, false, { palette: { accent: '#00FF00' }, socials: 'handles' });
+    expect(out).toContain('#00FF00');
+    expect(out).toContain('@frodo');
+  });
+
+  it('lists posts on the page', () => {
+    expect(html(data, true)).toContain('Hello');
   });
 });

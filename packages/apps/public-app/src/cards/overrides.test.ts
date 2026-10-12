@@ -132,7 +132,15 @@ describe('design resolution', () => {
     const r = resolveRequestDesign({ design: 'board', overrides });
     expect(r.layout).toBe('board');
     expect(ground(r)).toBe('#000000');
-    expect(() => resolveRequestDesign({ design: 'nope', overrides })).toThrow();
+  });
+
+  it('an unknown design falls back to the default design, in both modes', () => {
+    expect(resolveRequestDesign({ design: 'nope', overrides })).toEqual(board);
+    expect(resolveRequestDesign({ design: undefined })).toEqual(board);
+    expect(resolveEmbedDesign({ param: 'nope' })).toEqual(board);
+    expect(
+      resolveEmbedDesign({ card: { design: 'nope', overrides }, themeDesign: 'nope' })
+    ).toEqual(board);
   });
 
   it('web mode: card overrides apply when the card attribute chose the layout', () => {
