@@ -6,7 +6,7 @@ import type { CardData, CardPost } from '../../useCardData';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardImg } from '../../parts/CardImg';
 import { CardSignIn } from '../../parts/SignIn';
-import { LinksProfile } from './LinksParts';
+import { LINKS_VARS, LinksProfile } from './LinksParts';
 
 const DATE = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
@@ -22,7 +22,7 @@ const PostRow = ({ post }: { post: CardPost }) => {
   return (
     <Link
       to={post.href}
-      className={`flex items-start gap-4 rounded-2xl bg-[var(--card-surface)] p-4 text-[color:var(--card-surface-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.18),0_0_0_1px_rgba(128,128,128,0.14)] ${CARD_FOCUS}`}
+      className={`flex items-start gap-4 rounded-[18px] bg-[var(--card-surface)] p-4 text-[color:var(--card-surface-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_9%,transparent)] ${CARD_FOCUS}`}
     >
       <span className="min-w-0 flex-1 text-start">
         <span className="block truncate text-[12px] text-[color:var(--card-muted)]" dir="ltr">
@@ -94,7 +94,7 @@ const LinksPosts = ({ data }: { data: CardData }) => {
 };
 
 export const LinksPage = ({ design, data }: LayoutProps) => (
-  <div className="relative min-h-[inherit] pb-20">
+  <div style={LINKS_VARS} className="relative min-h-[inherit] pb-20">
     <header className="flex justify-end px-6 pt-5">
       <CardSignIn className="rounded-full bg-[color:var(--card-accent)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface)]" />
     </header>
