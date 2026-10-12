@@ -16,7 +16,7 @@ import {
   type Presentation,
 } from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
-import { POSTS_HREF } from '../../parts/posts';
+import { LOADED_POSTS, POSTS_HREF } from '../../parts/posts';
 import { CardBlock, displayUrl, hasBlockContent, useChatHref } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
@@ -447,9 +447,8 @@ const PlaceTile = ({
   );
 };
 
-const LOADED_CAP = 12;
 const momentsDetail = (data: CardData) =>
-  data.posts.length < LOADED_CAP
+  data.posts.length < LOADED_POSTS
     ? data.posts.length === 1
       ? t('1 post')
       : t('{0} posts', data.posts.length)

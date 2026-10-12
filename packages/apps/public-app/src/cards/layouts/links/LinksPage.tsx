@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData, CardPost } from '../../useCardData';
-import { POSTS_HREF, postDate } from '../../parts/posts';
+import { LOADED_POSTS, POSTS_HREF, postDate } from '../../parts/posts';
 import { CardImg } from '../../parts/CardImg';
 import { CardSignIn } from '../../parts/SignIn';
 import { LinksIdentity, LinksList, linksVars } from './LinksParts';
@@ -14,7 +14,6 @@ const DATE = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 });
 const POSTS_SHOWN = 6;
-const LOADED_CAP = 12;
 
 const PostRow = ({ post }: { post: CardPost }) => {
   const date = postDate(post);
@@ -74,7 +73,7 @@ export const LinksPosts = ({
   const headingId = useId();
   const { posts } = data;
   if (!posts.length) return null;
-  const knownCount = posts.length < LOADED_CAP;
+  const knownCount = posts.length < LOADED_POSTS;
   return (
     <section aria-labelledby={headingId} className={`w-full ${className ?? ''}`}>
       <div className="flex items-baseline justify-between gap-4 pb-4">
