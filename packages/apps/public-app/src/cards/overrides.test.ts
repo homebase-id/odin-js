@@ -4,8 +4,10 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { pickCard } from './pickCard';
 import { resolveEmbedDesign, resolveRequestDesign } from './resolveDesign';
+import { PUBLIC_TEMPLATE } from './audienceTemplates';
 
 const board = CARD_PRESETS.board;
+const publicTemplate = applyOverrides(board, PUBLIC_TEMPLATE.overrides);
 const collage = CARD_PRESETS.collage;
 
 describe('applyOverrides', () => {
@@ -158,7 +160,7 @@ describe('design resolution', () => {
     expect(resolveEmbedDesign({ card: null, themeDesign: 'dossier' })).toEqual(
       CARD_PRESETS.dossier
     );
-    expect(resolveEmbedDesign({})).toEqual(board);
+    expect(resolveEmbedDesign({})).toEqual(publicTemplate);
   });
 
   it('web mode: overrides are not painted on a layout the card did not choose', () => {

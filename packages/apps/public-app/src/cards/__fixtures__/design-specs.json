@@ -135,6 +135,58 @@
         "moments",
         "posts"
     ],
+    "audienceTemplates": {
+        "public": {
+            "design": "board",
+            "overrides": {
+                "palette": {
+                    "ground": "#1E5B45",
+                    "ink": "#FFFFFF",
+                    "muted": "#BFD6CC",
+                    "surface": "#FFFFFF",
+                    "surfaceInk": "#173B2E"
+                }
+            }
+        },
+        "circles": {
+            "cefc4f7cbc8c34762e0f76703e7e174e": {
+                "design": "poster",
+                "overrides": {
+                    "palette": {
+                        "ground": "#2A0E14",
+                        "ink": "#F7E9EC",
+                        "muted": "#C9AEB4",
+                        "surface": "#5A3F45",
+                        "surfaceInk": "#F7E9EC"
+                    }
+                }
+            },
+            "3d594614f445f6b00014e9b77730b833": {
+                "design": "collage",
+                "overrides": {
+                    "palette": {
+                        "ground": "#DDE5D3",
+                        "ink": "#26331F",
+                        "muted": "#56664A",
+                        "surface": "#FFFFFF",
+                        "surfaceInk": "#26331F"
+                    }
+                }
+            },
+            "0f9263536b9fc61ada745644735bfd8f": {
+                "design": "links",
+                "overrides": {
+                    "palette": {
+                        "ground": "#F1F3F6",
+                        "ink": "#1B1F24",
+                        "muted": "#5C6673",
+                        "surface": "#FFFFFF",
+                        "surfaceInk": "#1B1F24"
+                    }
+                }
+            }
+        }
+    },
     "schemeGrounds": {
         "poster": [
             "#0F1626",
