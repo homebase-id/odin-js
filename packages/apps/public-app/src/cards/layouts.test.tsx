@@ -270,7 +270,9 @@ describe('links design', () => {
 
 describe('png export snapshot', () => {
   const node = (optional: boolean) =>
-    ({ hasAttribute: (name: string) => optional && name === 'data-card-optional' }) as unknown as Node;
+    ({
+      hasAttribute: (name: string) => optional && name === 'data-card-optional',
+    }) as unknown as Node;
 
   it('leaves optional favicons out so a failed favicon fetch cannot reject the export', () => {
     expect(snapshotFilter(node(true))).toBe(false);

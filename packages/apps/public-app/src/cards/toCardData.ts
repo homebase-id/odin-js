@@ -7,6 +7,7 @@ import {
   type CardPhoto,
   type CardPost,
 } from './useCardData';
+import { LOADED_POSTS } from './parts/posts';
 
 export type AppImage = { src: string };
 export type AppData = {
@@ -53,7 +54,7 @@ export const toCardData = (
       (data.socials ?? []).map((social, priority) => toSocialLink({ ...social, priority }))
     ),
     posts: (data.posts ?? [])
-      .slice(0, 12)
+      .slice(0, LOADED_POSTS)
       .map((post, index) => ({ ...post, image: image(post.image, `posts[${index}].image`) })),
     audience: toAudience(audience),
   };

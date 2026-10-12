@@ -17,7 +17,7 @@ import {
 } from '@homebase-id/js-lib/profile';
 import { HomePageConfig, PostContent } from '@homebase-id/js-lib/public';
 import { EmbeddedThumb, HomebaseFile, TargetDrive } from '@homebase-id/js-lib/core';
-import { cardPost, usePostHref } from './parts/posts';
+import { cardPost, LOADED_POSTS, usePostHref } from './parts/posts';
 import { useProfileCard } from './useProfileCard';
 
 export type CardImage = {
@@ -111,7 +111,7 @@ export const useCardData = (): CardData | undefined => {
     links: (links ?? []).map(({ id, text, target }) => ({ id, text, target })),
     socials: cardSocials(socials ?? []),
     posts: flattenInfinteData<HomebaseFile<PostContent>>(postPages, BLOG_POST_INFIITE_PAGE_SIZE)
-      .slice(0, 12)
+      .slice(0, LOADED_POSTS)
       .map((post) => cardPost(post, postHref(post))),
     audience,
   };
