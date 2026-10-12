@@ -106,7 +106,7 @@ describe('chat-kmp matrix fixtures', () => {
 
   it.each(fixtures)(
     '$name: renders card and page with the payload data and no console errors',
-    ({ payload, design: id }) => {
+    ({ payload }) => {
       const onDropped = vi.fn();
       const design = resolveRequestDesign(payload);
       const node = toCardData(payload.data, onDropped, payload.audience);
@@ -126,10 +126,7 @@ describe('chat-kmp matrix fixtures', () => {
         expect(out).toContain(payload.data.photo!.src);
         for (const social of payload.data.socials) expect(out).toContain(social.username);
         const linksBlock = design.blocks.some((b) => b.kind === 'links');
-        // The collage page lists only the first link, in its top bar; see the it.fails below
-        const shown =
-          wide && id === 'collage' ? payload.data.links.slice(0, 1) : payload.data.links;
-        for (const link of shown) {
+        for (const link of payload.data.links) {
           if (linksBlock) {
             expect(out).toContain(link.text);
             expect(out).toContain(new URL(link.target).host);
@@ -143,8 +140,7 @@ describe('chat-kmp matrix fixtures', () => {
     }
   );
 
-  // Known mismatch: the collage page (wide) renders only the first link, so a second link in the payload is not shown
-  it.fails('collage page renders every link in the payload', () => {
+  it('collage page renders every link in the payload', () => {
     const { payload } = fixtures.find((f) => f.name === 'collage/circle/plain')!;
     const out = renderToStaticMarkup(
       <MemoryRouter>
