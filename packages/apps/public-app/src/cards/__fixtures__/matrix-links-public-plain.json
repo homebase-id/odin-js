@@ -1,0 +1,30 @@
+{
+    "design": "links",
+    "data": {
+        "odinId": "frodo.dotyou.cloud",
+        "firstName": "Frodo",
+        "surName": "Baggins",
+        "displayName": "Frodo Baggins",
+        "headline": "Ring bearer",
+        "photo": {
+            "src": "data:image/jpeg;base64,public-key"
+        },
+        "links": [
+            {
+                "id": "1",
+                "text": "Public site",
+                "target": "https://public.example.com/a"
+            }
+        ],
+        "socials": [
+            {
+                "type": "twitter",
+                "username": "frodo"
+            }
+        ],
+        "posts": []
+    },
+    "audience": {
+        "kind": "public"
+    }
+}

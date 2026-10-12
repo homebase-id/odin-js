@@ -1,0 +1,235 @@
+{
+    "ids": [
+        "poster",
+        "board",
+        "collage",
+        "dossier",
+        "links"
+    ],
+    "specs": {
+        "poster": {
+            "options": [
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 0,
+            "schemes": [
+                "midnight",
+                "wine",
+                "pine",
+                "cobalt",
+                "rust"
+            ]
+        },
+        "board": {
+            "options": [
+                "ACCENT",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 1,
+            "schemes": [
+                "forest",
+                "plum",
+                "terracotta",
+                "charcoal",
+                "sky",
+                "butter",
+                "blush"
+            ]
+        },
+        "collage": {
+            "options": [
+                "ACCENT",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 2,
+            "schemes": [
+                "sage",
+                "mist",
+                "rose",
+                "lilac",
+                "kraft",
+                "night",
+                "mono"
+            ]
+        },
+        "dossier": {
+            "options": [
+                "ACCENT",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 1,
+            "schemes": [
+                "ink",
+                "moss",
+                "oxblood",
+                "graphite",
+                "paper",
+                "blueprint",
+                "sand"
+            ]
+        },
+        "links": {
+            "options": [
+                "ACCENT",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 1,
+            "schemes": [
+                "cloud",
+                "slate",
+                "mint",
+                "peach",
+                "lavender",
+                "navy",
+                "lemon"
+            ]
+        }
+    },
+    "fonts": [
+        "montserrat",
+        "montserrat-alt",
+        "newsreader",
+        "caveat",
+        "archivo-black",
+        "space-mono"
+    ],
+    "portraitShapes": [
+        "circle",
+        "square",
+        "rounded",
+        "ellipse"
+    ],
+    "socialsStyles": [
+        "glyphs",
+        "bar",
+        "wordmark",
+        "handles"
+    ],
+    "blockKinds": [
+        "chat",
+        "links",
+        "moments",
+        "posts"
+    ],
+    "audienceTemplates": {
+        "public": {
+            "design": "board",
+            "overrides": {
+                "palette": {
+                    "ground": "#1E5B45",
+                    "ink": "#FFFFFF",
+                    "muted": "#BFD6CC",
+                    "surface": "#FFFFFF",
+                    "surfaceInk": "#173B2E"
+                }
+            }
+        },
+        "circles": {
+            "cefc4f7cbc8c34762e0f76703e7e174e": {
+                "design": "poster",
+                "overrides": {
+                    "palette": {
+                        "ground": "#2A0E14",
+                        "ink": "#F7E9EC",
+                        "muted": "#C9AEB4",
+                        "surface": "#5A3F45",
+                        "surfaceInk": "#F7E9EC"
+                    }
+                }
+            },
+            "3d594614f445f6b00014e9b77730b833": {
+                "design": "collage",
+                "overrides": {
+                    "palette": {
+                        "ground": "#DDE5D3",
+                        "ink": "#26331F",
+                        "muted": "#56664A",
+                        "surface": "#FFFFFF",
+                        "surfaceInk": "#26331F"
+                    }
+                }
+            },
+            "0f9263536b9fc61ada745644735bfd8f": {
+                "design": "links",
+                "overrides": {
+                    "palette": {
+                        "ground": "#F1F3F6",
+                        "ink": "#1B1F24",
+                        "muted": "#5C6673",
+                        "surface": "#FFFFFF",
+                        "surfaceInk": "#1B1F24"
+                    }
+                }
+            }
+        }
+    },
+    "schemeGrounds": {
+        "poster": [
+            "#0F1626",
+            "#2A0E14",
+            "#0E1E16",
+            "#10215C",
+            "#3A1708"
+        ],
+        "board": [
+            "#1E5B45",
+            "#5B2A6E",
+            "#9A3B26",
+            "#23262B",
+            "#DCEBFA",
+            "#F7E7A6",
+            "#F6D6D9"
+        ],
+        "collage": [
+            "#DDE5D3",
+            "#DCE6F0",
+            "#F3DCDC",
+            "#E6DFF0",
+            "#C9A882",
+            "#1F1C19",
+            "#EDEDED"
+        ],
+        "dossier": [
+            "#0D1B2A",
+            "#0F1A14",
+            "#1C0F10",
+            "#2A2D33",
+            "#F4F1EA",
+            "#12355B",
+            "#E8DCC6"
+        ],
+        "links": [
+            "#F1F3F6",
+            "#1B1F24",
+            "#DDF0E6",
+            "#FBE3D6",
+            "#E7E3F7",
+            "#14213D",
+            "#F8F2C8"
+        ]
+    }
+}

@@ -4,8 +4,10 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { pickCard } from './pickCard';
 import { resolveEmbedDesign, resolveRequestDesign } from './resolveDesign';
+import { PUBLIC_TEMPLATE } from './audienceTemplates';
 
 const board = CARD_PRESETS.board;
+const publicTemplate = applyOverrides(board, PUBLIC_TEMPLATE.overrides);
 const collage = CARD_PRESETS.collage;
 
 describe('applyOverrides', () => {
@@ -132,7 +134,15 @@ describe('design resolution', () => {
     const r = resolveRequestDesign({ design: 'board', overrides });
     expect(r.layout).toBe('board');
     expect(ground(r)).toBe('#000000');
-    expect(() => resolveRequestDesign({ design: 'nope', overrides })).toThrow();
+  });
+
+  it('an unknown design falls back to the default design, in both modes', () => {
+    expect(resolveRequestDesign({ design: 'nope', overrides })).toEqual(board);
+    expect(resolveRequestDesign({ design: undefined })).toEqual(board);
+    expect(resolveEmbedDesign({ param: 'nope' })).toEqual(board);
+    expect(
+      resolveEmbedDesign({ card: { design: 'nope', overrides }, themeDesign: 'nope' })
+    ).toEqual(board);
   });
 
   it('web mode: card overrides apply when the card attribute chose the layout', () => {
@@ -150,7 +160,7 @@ describe('design resolution', () => {
     expect(resolveEmbedDesign({ card: null, themeDesign: 'dossier' })).toEqual(
       CARD_PRESETS.dossier
     );
-    expect(resolveEmbedDesign({})).toEqual(board);
+    expect(resolveEmbedDesign({})).toEqual(publicTemplate);
   });
 
   it('web mode: overrides are not painted on a layout the card did not choose', () => {

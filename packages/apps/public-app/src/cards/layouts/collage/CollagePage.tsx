@@ -140,8 +140,12 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
   const chatHref = useChatHref(data.odinId);
   const chatBlock = design.blocks.find((b) => b.kind === 'chat');
   const socials = data.socials;
+  const linksBlock = design.blocks.find((b) => b.kind === 'links');
+  // The top bar carries the first link
+  const moreLinks = linksBlock ? data.links.filter(isUsableLink).slice(1) : [];
   const hasCollage = !!(print || cutout);
-  const hasAside = !!(chatBlock && chatHref) || socials.length > 0 || !!data.header;
+  const hasAside =
+    !!(chatBlock && chatHref) || socials.length > 0 || !!data.header || moreLinks.length > 0;
   const grid =
     HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
   // The wordmark box shows the first social; the glyphs under the name carry the rest
@@ -204,6 +208,15 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 {chatBlock && chatHref ? (
                   <div className="rotate-[1.5deg] [&>a]:flex [&>a]:h-16 [&>a]:gap-3.5 [&>a]:px-[22px] [&>a]:text-lg [&>a]:shadow-[0_3px_9px_rgba(0,0,0,0.28)] [&_svg]:h-[26px] [&_svg]:w-[26px]">
                     <CardBlock block={chatBlock} data={data} chatHref={chatHref} />
+                  </div>
+                ) : null}
+                {linksBlock && moreLinks.length ? (
+                  <div className="flex flex-col gap-2.5 [&>a:nth-child(even)]:rotate-[0.75deg] [&>a:nth-child(odd)]:rotate-[-0.75deg] [&>a]:shadow-[0_3px_9px_rgba(0,0,0,0.18)]">
+                    <CardBlock
+                      block={linksBlock}
+                      data={{ ...data, links: moreLinks }}
+                      chatHref={chatHref}
+                    />
                   </div>
                 ) : null}
                 <CardSocials
