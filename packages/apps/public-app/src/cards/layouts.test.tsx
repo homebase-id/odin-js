@@ -229,13 +229,14 @@ describe('links design', () => {
     expect(html(withLinks(2, { firstName: long, surName: long }), true)).toContain(long);
   });
 
-  it('titles an unlabelled link with its host and shows the path under it', () => {
+  it('titles an unlabelled link with its site name and keeps the domain line', () => {
     const out = html(
       withLinks(0, { links: [{ id: 'u', text: '', target: 'https://www.figma.com/@frodo/work' }] })
     );
     expect(out).toContain('href="https://www.figma.com/@frodo/work"');
+    expect(out).toContain('>Figma<');
     expect(out).toMatch(/dir="ltr"[^>]*>figma\.com</);
-    expect(out).toContain('/@frodo/work');
+    expect(out).toContain('› @frodo');
   });
 
   it('drops unsafe link targets', () => {

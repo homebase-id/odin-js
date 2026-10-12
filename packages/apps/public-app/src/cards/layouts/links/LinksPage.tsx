@@ -6,7 +6,7 @@ import type { CardData, CardPost } from '../../useCardData';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardImg } from '../../parts/CardImg';
 import { CardSignIn } from '../../parts/SignIn';
-import { LinksIdentity, LinksList, hasLinks, isLinkable, linksVars } from './LinksParts';
+import { LinksIdentity, LinksList, linksVars } from './LinksParts';
 
 const DATE = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
@@ -60,7 +60,17 @@ const PostRow = ({ post }: { post: CardPost }) => {
   );
 };
 
-const LinksPosts = ({ data, className }: { data: CardData; className?: string }) => {
+export const LinksPosts = ({
+  data,
+  heading = t('Latest posts'),
+  limit = POSTS_SHOWN,
+  className,
+}: {
+  data: CardData;
+  heading?: string;
+  limit?: number;
+  className?: string;
+}) => {
   const headingId = useId();
   const { posts } = data;
   if (!posts.length) return null;
@@ -72,7 +82,7 @@ const LinksPosts = ({ data, className }: { data: CardData; className?: string })
           id={headingId}
           className="font-[family-name:var(--card-display)] text-[22px] font-semibold"
         >
-          {t('Latest posts')}
+          {heading}
         </h2>
         <Link
           to={POSTS_HREF}
@@ -82,8 +92,8 @@ const LinksPosts = ({ data, className }: { data: CardData; className?: string })
           {knownCount ? t('All {0}', posts.length) : t('All posts')}
         </Link>
       </div>
-      <ul className="flex flex-col gap-2.5">
-        {posts.slice(0, POSTS_SHOWN).map((post) => (
+      <ul className="flex flex-col gap-2">
+        {posts.slice(0, limit).map((post) => (
           <li key={post.id}>
             <PostRow post={post} />
           </li>
@@ -93,42 +103,30 @@ const LinksPosts = ({ data, className }: { data: CardData; className?: string })
   );
 };
 
-// From 1024 the identity becomes a column beside the links. With no links there is nothing to
-// set beside it, so the page stays one centred column
+// From 1024 the identity holds still beside one flow of links, then posts. Neither column sets the
+// other's height, and posts keep one place whatever the number of links
 export const LinksPage = ({ design, data }: LayoutProps) => {
   const hasPosts = data.posts.length > 0;
-  const split = hasLinks(data);
-  // A long list would leave the identity column bare, so the posts move under it
-  const postsBeside = data.links.filter(isLinkable).length > 5;
   return (
     <div style={linksVars(design)} className="relative min-h-[inherit] overflow-hidden pb-20">
       <header className="flex justify-end px-6 pt-5">
         <CardSignIn className="rounded-full bg-[color:var(--card-accent)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface)]" />
       </header>
-      {split ? (
-        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-10 px-5 pt-6 lg:grid lg:max-w-[1120px] lg:grid-cols-[340px_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:gap-y-12 lg:px-10 lg:pt-8 xl:max-w-[1240px]">
-          <aside
-            className={`lg:col-start-1 lg:row-start-1 lg:self-start ${postsBeside ? '' : 'lg:sticky lg:top-10'}`}
-          >
-            <LinksIdentity design={design} data={data} size="page" split />
-          </aside>
-          <div
-            className={`min-w-0 lg:col-start-2 lg:row-start-1 lg:max-w-[640px] xl:max-w-none ${postsBeside ? 'lg:row-span-2' : ''}`}
-          >
-            <LinksList design={design} data={data} skipMoments={hasPosts} columns />
-          </div>
-          <LinksPosts
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-8 px-5 pt-6 lg:max-w-[1120px] lg:flex-row lg:items-start lg:gap-16 lg:px-10 lg:pt-8 xl:max-w-[1240px]">
+        <aside className="lg:sticky lg:top-10 lg:w-[340px] lg:flex-shrink-0">
+          <LinksIdentity design={design} data={data} size="page" split />
+        </aside>
+        <div className="flex min-w-0 flex-1 flex-col gap-12">
+          <LinksList
+            design={design}
             data={data}
-            className={`lg:row-start-2 lg:self-start ${postsBeside ? 'lg:col-start-1' : 'lg:col-start-2 lg:max-w-[640px] xl:max-w-none'}`}
+            skipMoments={hasPosts}
+            emptyNote={!hasPosts}
+            columns
           />
-        </main>
-      ) : (
-        <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-5 pt-6 lg:pt-8">
-          <LinksIdentity design={design} data={data} size="page" />
-          <LinksList design={design} data={data} skipMoments={hasPosts} emptyNote={!hasPosts} />
           <LinksPosts data={data} />
-        </main>
-      )}
+        </div>
+      </main>
     </div>
   );
 };

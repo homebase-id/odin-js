@@ -56,15 +56,6 @@ const shortHost = (host: string) => {
   return `${host.slice(0, 9)}…${host.slice(-(MAX_HOST - 10))}`;
 };
 
-const faviconUrl = (target: string) => {
-  try {
-    const { protocol, host } = new URL(target);
-    return protocol === 'http:' || protocol === 'https:' ? `${protocol}//${host}/favicon.ico` : '';
-  } catch {
-    return '';
-  }
-};
-
 // A link without a label still goes somewhere; its address becomes the title
 // eslint-disable-next-line react-refresh/only-export-components
 export const isLinkable = (link: CardLink) =>
@@ -76,8 +67,7 @@ const FAVICON_HINTS: Record<string, 'dark' | 'blank'> = {
   'github.com': 'dark',
   'medium.com': 'blank',
 };
-const hintFor = (target: string) => {
-  const host = linkHost(target);
+const hintFor = (host: string) => {
   const key = Object.keys(FAVICON_HINTS).find((h) => host === h || host.endsWith(`.${h}`));
   return key ? FAVICON_HINTS[key] : undefined;
 };
@@ -117,6 +107,83 @@ const inspect = (src: string) =>
     probe.src = src;
   });
 
+const load = (src: string, minWidth: number) =>
+  new Promise<boolean>((resolve) => {
+    const image = new Image();
+    image.referrerPolicy = 'no-referrer';
+    image.onload = () => resolve(image.naturalWidth >= minWidth);
+    image.onerror = () => resolve(false);
+    image.src = src;
+  });
+
+// fill: an apple-touch-icon is an opaque, full-bleed square, so it becomes the whole well
+type SiteIcon = { src: string; fill: boolean; dark: boolean } | null;
+
+// Only the site's own icons, never a third-party favicon service that would learn who views the card
+const resolveIcon = async (origin: string, host: string): Promise<SiteIcon> => {
+  const touch = `${origin}/apple-touch-icon.png`;
+  if (await load(touch, 120)) return { src: touch, fill: true, dark: false };
+  const hint = hintFor(host);
+  const ico = `${origin}/favicon.ico`;
+  if (hint === 'blank' || !(await load(ico, 16))) return null;
+  const verdict = (await inspect(ico)) ?? (hint === 'dark' ? 'dark' : 'ok');
+  return verdict === 'failed' ? null : { src: ico, fill: false, dark: verdict === 'dark' };
+};
+
+// One answer per site for the page's lifetime, so a repeated host never resolves two ways
+const pendingIcons = new Map<string, Promise<SiteIcon>>();
+const settledIcons = new Map<string, SiteIcon>();
+const siteOrigin = (target: string) => {
+  try {
+    const { protocol, host } = new URL(target);
+    return protocol === 'http:' || protocol === 'https:' ? `${protocol}//${host}` : '';
+  } catch {
+    return '';
+  }
+};
+
+const useSiteIcon = (target: string) => {
+  const origin = siteOrigin(target);
+  const [icon, setIcon] = useState<SiteIcon | undefined>(() =>
+    origin ? settledIcons.get(origin) : null
+  );
+  useEffect(() => {
+    if (!origin) return setIcon(null);
+    if (settledIcons.has(origin)) return setIcon(settledIcons.get(origin));
+    let live = true;
+    let pending = pendingIcons.get(origin);
+    if (!pending) {
+      pending = resolveIcon(origin, linkHost(target)).then((found) => {
+        settledIcons.set(origin, found);
+        return found;
+      });
+      pendingIcons.set(origin, pending);
+    }
+    pending.then((found) => live && setIcon(found));
+    return () => {
+      live = false;
+    };
+  }, [origin, target]);
+  return icon;
+};
+
+// Five turns, none of them zero, so an initial never reads as the accent's own well
+const hueOf = (text: string) => {
+  let hash = 0;
+  for (const char of text) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  return 60 + (Math.abs(hash) % 5) * 60;
+};
+
+// Each site's initial gets its own turn of the accent's hue, so a column of initials reads as
+// different places. Browsers without relative colour keep the accent well
+const monogramStyle = (host: string): CSSProperties => {
+  const ink = `oklch(from var(--card-accent) l max(c, 0.11) calc(h + ${hueOf(host)}))`;
+  return {
+    color: ink,
+    backgroundColor: `color-mix(in oklch, ${ink} 15%, var(--card-surface))`,
+  };
+};
+
 const initial = (link: CardLink) =>
   (Array.from(link.text.trim())[0] ?? Array.from(linkHost(link.target))[0] ?? '?').toUpperCase();
 
@@ -155,53 +222,44 @@ const WASH =
 const WELL =
   'rounded-[var(--links-well-radius)] bg-[color:color-mix(in_srgb,var(--card-accent)_12%,var(--card-surface))] text-[color:var(--card-accent)]';
 
-// The initial is the placeholder; the favicon is laid over it, on the same well, only once it has
-// proven visible. The overlay is optional, so a PNG export drops it and keeps the initial
+// The initial is the placeholder; the icon is laid over it only once it has proven visible.
+// The overlay is optional, so a PNG export drops it and keeps the initial
 const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
-  const src = faviconUrl(link.target);
-  const hint = hintFor(link.target);
-  const [verdict, setVerdict] = useState<Verdict | 'pending'>(
-    !src || hint === 'blank' ? 'failed' : 'pending'
-  );
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!loaded || verdict !== 'pending') return;
-    let live = true;
-    inspect(src).then((seen) => live && setVerdict(seen ?? (hint === 'dark' ? 'dark' : 'ok')));
-    return () => {
-      live = false;
-    };
-  }, [loaded, verdict, src, hint]);
-
-  const shown = verdict === 'ok' || verdict === 'dark';
+  const origin = siteOrigin(link.target);
+  const icon = useSiteIcon(link.target);
+  // Until the site has answered, its favicon.ico waits invisibly in place
+  const shown =
+    icon ??
+    (icon === undefined && origin
+      ? { src: `${origin}/favicon.ico`, fill: false, dark: false }
+      : null);
   return (
     <span
       aria-hidden
+      style={monogramStyle(linkHost(link.target))}
       className={`relative flex flex-shrink-0 items-center justify-center overflow-hidden font-semibold ${WELL} ${
-        large ? 'h-14 w-14 text-[20px]' : 'h-10 w-10 text-[15px]'
+        large ? 'h-14 w-14 text-[22px]' : 'h-10 w-10 text-[15px]'
       }`}
     >
       {initial(link)}
-      {verdict !== 'failed' ? (
+      {shown ? (
         <span
           data-card-optional
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${WELL} ${
-            shown ? 'opacity-100' : 'opacity-0'
-          }`}
+            icon ? 'opacity-100' : 'opacity-0'
+          } ${shown.fill ? '' : 'shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_6%,transparent)]'}`}
         >
           <img
-            src={src}
+            src={shown.src}
             alt=""
-            loading="lazy"
             referrerPolicy="no-referrer"
             data-card-optional
-            onLoad={(event) =>
-              event.currentTarget.naturalWidth < 16 ? setVerdict('failed') : setLoaded(true)
+            style={shown.dark ? { filter: 'var(--links-dark-mark)' } : undefined}
+            className={
+              shown.fill
+                ? 'h-full w-full object-cover'
+                : `object-contain ${large ? 'h-8 w-8' : 'h-6 w-6'}`
             }
-            onError={() => setVerdict('failed')}
-            style={verdict === 'dark' ? { filter: 'var(--links-dark-mark)' } : undefined}
-            className={`object-contain ${large ? 'h-8 w-8' : 'h-6 w-6'}`}
           />
         </span>
       ) : null}
@@ -211,9 +269,9 @@ const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
 
 // Not mirrored: a mirrored launch arrow reads as "collapse" at this size, and up-and-out reads the same in RTL
 const LAUNCH =
-  'h-3.5 w-3.5 flex-shrink-0 text-[color:var(--card-muted)] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100';
+  'h-4 w-4 flex-shrink-0 text-[color:var(--card-muted)] opacity-60 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100';
 const CHEVRON =
-  'h-3 w-3 flex-shrink-0 text-[color:var(--card-muted)] opacity-60 [&:dir(rtl)]:[transform:scaleX(-1)]';
+  'h-3.5 w-3.5 flex-shrink-0 text-[color:var(--card-muted)] opacity-60 transition-opacity group-hover:opacity-100 [&:dir(rtl)]:[transform:scaleX(-1)]';
 
 const TITLE = 'line-clamp-2 text-[15px] font-semibold leading-5 [overflow-wrap:anywhere]';
 const SUBTITLE = 'mt-0.5 block text-[12.5px] leading-4 text-[color:var(--card-muted)]';
@@ -235,25 +293,35 @@ const Where = ({ host, path }: { host?: string; path?: string }) =>
     </span>
   ) : null;
 
+// figma.com becomes "Figma": the name a person would give the link, not its address
+const siteName = (host: string) => {
+  const labels = host.split('.').filter(Boolean);
+  const name = labels.length > 1 ? labels[labels.length - 2] : (labels[0] ?? host);
+  return name.charAt(0).toUpperCase() + name.slice(1);
+};
+
 const describe = (link: CardLink) => {
   const host = linkHost(link.target);
   const segments = pathSegments(link.target);
   const label = link.text.trim();
-  if (label) return { title: label, host: shortHost(host), path: segments[0] ? `› ${segments[0]}` : '' };
-  return { title: host, path: segments.length ? `/${segments.join('/')}` : '' };
+  return {
+    title: label || siteName(host),
+    host: shortHost(host),
+    path: segments[0] ? `› ${segments[0]}` : '',
+    labelled: !!label,
+  };
 };
 
 const LinkText = ({ link, featured }: { link: CardLink; featured?: boolean }) => {
-  const { title, host, path } = describe(link);
+  const { title, host, path, labelled } = describe(link);
+  const size = featured
+    ? 'font-[family-name:var(--card-display)] text-[20px] font-semibold leading-[26px]'
+    : 'text-[15px] font-semibold leading-5';
   return (
     <span className="min-w-0 flex-1">
       <span
-        dir={link.text.trim() ? 'auto' : 'ltr'}
-        className={
-          featured
-            ? 'line-clamp-2 font-[family-name:var(--card-display)] text-[18px] font-semibold leading-6 [overflow-wrap:anywhere]'
-            : TITLE
-        }
+        dir={labelled ? 'auto' : 'ltr'}
+        className={`${size} ${labelled ? 'line-clamp-2 [overflow-wrap:anywhere]' : 'block truncate'}`}
       >
         {title}
       </span>
@@ -274,12 +342,12 @@ const FeaturedTile = ({ link }: { link: CardLink }) => (
     href={link.target}
     {...external}
     dir="auto"
-    className={`group flex min-w-0 items-center gap-4 rounded-[var(--links-hero-radius)] bg-[color:color-mix(in_srgb,var(--card-accent)_9%,var(--card-surface))] p-4 text-start text-[color:var(--card-surface-ink)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--card-accent)_22%,transparent)] transition-[background-color,box-shadow] duration-150 hover:bg-[color:color-mix(in_srgb,var(--card-accent)_14%,var(--card-surface))] hover:shadow-[0_8px_22px_-12px_color-mix(in_srgb,var(--card-accent)_55%,transparent),0_0_0_1px_color-mix(in_srgb,var(--card-accent)_35%,transparent)] ${CARD_FOCUS}`}
+    className={`group flex min-w-0 items-center gap-4 rounded-[var(--links-hero-radius)] bg-[color:color-mix(in_srgb,var(--card-accent)_9%,var(--card-surface))] px-4 py-5 text-start text-[color:var(--card-surface-ink)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--card-accent)_22%,transparent)] transition-[background-color,box-shadow] duration-150 hover:bg-[color:color-mix(in_srgb,var(--card-accent)_14%,var(--card-surface))] hover:shadow-[0_8px_22px_-12px_color-mix(in_srgb,var(--card-accent)_55%,transparent),0_0_0_1px_color-mix(in_srgb,var(--card-accent)_35%,transparent)] ${CARD_FOCUS}`}
   >
     <Favicon link={link} large />
     <LinkText link={link} featured />
-    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--links-well-radius)] bg-[color:var(--card-accent)] text-[color:var(--card-surface)]">
-      <ExternalLink aria-hidden className="h-4 w-4" />
+    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--links-well-radius)] bg-[color:var(--card-accent)] text-[color:var(--card-surface)] transition-transform duration-150 group-hover:scale-105">
+      <ExternalLink aria-hidden className="h-[18px] w-[18px]" />
     </span>
   </a>
 );
@@ -318,13 +386,18 @@ const LinkList = ({
       </ul>
     );
   const [featured, ...rest] = links;
+  // An odd count lets the last tile run the full width, so the grid never ends on a lone cell
+  const twoUp = columns && rest.length > 3;
   return (
     <div className="flex flex-col gap-2">
       <FeaturedTile link={featured} />
       {rest.length ? (
-        <ul className={`grid gap-2 ${columns && rest.length > 3 ? 'xl:grid-cols-2' : ''}`}>
-          {rest.map((link) => (
-            <li key={link.id} className="grid min-w-0">
+        <ul className={`grid gap-2 ${twoUp ? 'xl:grid-cols-2' : ''}`}>
+          {rest.map((link, index) => (
+            <li
+              key={link.id}
+              className={`grid min-w-0 ${twoUp && rest.length % 2 && index === rest.length - 1 ? 'xl:col-span-2' : ''}`}
+            >
               <LinkTile link={link} />
             </li>
           ))}
@@ -350,7 +423,10 @@ const PlaceTile = ({
 }) => {
   const content = (
     <>
-      <span aria-hidden className={`flex h-10 w-10 flex-shrink-0 items-center justify-center ${WELL}`}>
+      <span
+        aria-hidden
+        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center ${WELL}`}
+      >
         <Icon className="h-[18px] w-[18px]" />
       </span>
       <span className="min-w-0 flex-1">
@@ -469,8 +545,8 @@ const SIZES = {
     portrait: 'h-[128px] w-[128px]',
     name: 'text-[32px]',
     host: 'text-[14px]',
-    audience: 'text-[12px] md:max-w-full',
-    audienceLines: '!line-clamp-1 md:!line-clamp-none',
+    audience: 'text-[12px]',
+    audienceLines: '!line-clamp-1 md:!line-clamp-2',
   },
 } as const;
 
@@ -496,7 +572,7 @@ export const LinksIdentity = ({
           portrait={portrait}
           image={image}
           alt={ownerName(data)}
-          className={`mb-5 flex-shrink-0 ${sizes.portrait}`}
+          className={`mb-4 flex-shrink-0 ${sizes.portrait}`}
         />
       ) : null}
       <CardName
@@ -520,7 +596,7 @@ export const LinksIdentity = ({
       ) : null}
       <AudienceChip
         audience={data.audience}
-        className={`mt-3 max-w-[min(85%,22rem)] flex-shrink-0 gap-1.5 rounded-[var(--links-tile-radius)] bg-[color:color-mix(in_srgb,var(--card-ink)_7%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
+        className={`mt-4 max-w-[min(85%,22rem)] flex-shrink-0 gap-1.5 rounded-[var(--links-tile-radius)] bg-[color:color-mix(in_srgb,var(--card-ink)_7%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
         textClassName={sizes.audienceLines}
         hug
         glyphClassName="h-5 w-[1.15em]"
@@ -528,7 +604,7 @@ export const LinksIdentity = ({
       <SocialButtons
         design={design}
         data={data}
-        className={`mt-5 justify-center ${split ? 'lg:justify-start' : ''}`}
+        className={`mt-4 justify-center ${split ? 'lg:justify-start' : ''}`}
       />
     </div>
   );
