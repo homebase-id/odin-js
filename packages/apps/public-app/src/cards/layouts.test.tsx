@@ -229,6 +229,15 @@ describe('links design', () => {
     expect(html(withLinks(2, { firstName: long, surName: long }), true)).toContain(long);
   });
 
+  it('titles an unlabelled link with its host and shows the path under it', () => {
+    const out = html(
+      withLinks(0, { links: [{ id: 'u', text: '', target: 'https://www.figma.com/@frodo/work' }] })
+    );
+    expect(out).toContain('href="https://www.figma.com/@frodo/work"');
+    expect(out).toMatch(/dir="ltr"[^>]*>figma\.com</);
+    expect(out).toContain('/@frodo/work');
+  });
+
   it('drops unsafe link targets', () => {
     const out = html(
       withLinks(0, { links: [{ id: 'j', text: 'bad', target: 'javascript:alert(1)' }] })

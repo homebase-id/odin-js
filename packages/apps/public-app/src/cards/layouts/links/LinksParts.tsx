@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type FC, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChatBubble,
@@ -8,16 +8,16 @@ import {
   type IconProps,
 } from '@homebase-id/common-app/icons';
 import { t } from '@homebase-id/common-app';
-import { CARD_FOCUS, type CardDesign, type LayoutProps, type Presentation } from '../../CardDesign';
+import {
+  CARD_FOCUS,
+  type CardDesign,
+  type LayoutProps,
+  type Portrait,
+  type Presentation,
+} from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
 import { POSTS_HREF } from '../../parts/posts';
-import {
-  CardBlock,
-  displayUrl,
-  hasBlockContent,
-  isUsableLink,
-  useChatHref,
-} from '../../parts/Blocks';
+import { CardBlock, displayUrl, hasBlockContent, useChatHref } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
 import { BreakAtDots, CardName } from '../../parts/Type';
@@ -39,14 +39,21 @@ const decode = (segment: string) => {
   }
 };
 
-// Only the first segment, so the muted line names where it goes and never ends in an ellipsis
-const linkCrumb = (target: string) => {
+const pathSegments = (target: string) => {
   try {
-    const [first] = new URL(target).pathname.split('/').filter(Boolean).map(decode);
-    return first ? ` › ${first}` : '';
+    return new URL(target).pathname.split('/').filter(Boolean).map(decode);
   } catch {
-    return '';
+    return [];
   }
+};
+
+// Keeps the end of a long host, where the site's own name is, and leaves room for the path
+const MAX_HOST = 24;
+const shortHost = (host: string) => {
+  if (host.length <= MAX_HOST) return host;
+  const site = host.split('.').slice(-2).join('.');
+  if (site.length < host.length && site.length <= MAX_HOST - 2) return `…${site}`;
+  return `${host.slice(0, 9)}…${host.slice(-(MAX_HOST - 10))}`;
 };
 
 const faviconUrl = (target: string) => {
@@ -58,8 +65,13 @@ const faviconUrl = (target: string) => {
   }
 };
 
+// A link without a label still goes somewhere; its address becomes the title
+// eslint-disable-next-line react-refresh/only-export-components
+export const isLinkable = (link: CardLink) =>
+  !!link.target?.trim() && !/^\s*(javascript|data|vbscript):/i.test(link.target);
+
 // Cross-origin pixels cannot be read without CORS, so what is known about hosts that send none lives here:
-// a black mark on transparent (needs a light plate) or a favicon.ico that decodes to nothing
+// a black mark on transparent or a favicon.ico that decodes to nothing
 const FAVICON_HINTS: Record<string, 'dark' | 'blank'> = {
   'github.com': 'dark',
   'medium.com': 'blank',
@@ -110,22 +122,41 @@ const initial = (link: CardLink) =>
 
 const FLAT: Presentation[] = ['bare', 'row'];
 
-// A black favicon on transparent is drawn for a light browser tab; only those get this plate
+// Tiles and favicon wells take their corners from the portrait, so a square portrait gets square chrome
+const RADII: Record<Portrait['shape'], { tile: string; well: string; hero: string }> = {
+  circle: { tile: '18px', well: '9999px', hero: '22px' },
+  ellipse: { tile: '18px', well: '9999px', hero: '22px' },
+  rounded: { tile: '14px', well: '12px', hero: '18px' },
+  square: { tile: '6px', well: '4px', hero: '8px' },
+};
+
+const isDark = (hex: string) => {
+  const value = parseInt(hex.replace('#', ''), 16);
+  if (Number.isNaN(value)) return false;
+  const [r, g, b] = [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 110;
+};
+
 // eslint-disable-next-line react-refresh/only-export-components
-export const LINKS_VARS = { '--links-favicon-plate': '#FFFFFF' } as CSSProperties;
+export const linksVars = (design: CardDesign) => {
+  const radii = RADII[design.portraits[0]?.shape ?? 'circle'];
+  return {
+    '--links-tile-radius': radii.tile,
+    '--links-well-radius': radii.well,
+    '--links-hero-radius': radii.hero,
+    // A black mark drawn for a light browser tab turns white on a dark surface
+    '--links-dark-mark': isDark(design.palette.surface) ? 'invert(1)' : 'none',
+  } as CSSProperties;
+};
 
 const WASH =
   'pointer-events-none absolute -top-32 left-1/2 -z-10 h-[440px] w-[640px] -translate-x-1/2 bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--card-accent)_17%,transparent),transparent)]';
 
-const QUIET_PLATE =
-  'bg-[color:color-mix(in_srgb,var(--card-surface-ink)_6%,var(--card-surface))] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_12%,transparent)]';
-const DARK_MARK_PLATE =
-  'bg-[color:var(--links-favicon-plate)] shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_12%,transparent)]';
-const TINT =
-  'bg-[color:color-mix(in_srgb,var(--card-accent)_14%,var(--card-surface))] text-[color:var(--card-accent)]';
+const WELL =
+  'rounded-[var(--links-well-radius)] bg-[color:color-mix(in_srgb,var(--card-accent)_12%,var(--card-surface))] text-[color:var(--card-accent)]';
 
-// The tinted initial is the placeholder; the favicon is laid over it only once it has proven visible.
-// The overlay is optional, so a PNG export drops it and keeps the initial
+// The initial is the placeholder; the favicon is laid over it, on the same well, only once it has
+// proven visible. The overlay is optional, so a PNG export drops it and keeps the initial
 const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
   const src = faviconUrl(link.target);
   const hint = hintFor(link.target);
@@ -147,7 +178,7 @@ const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
   return (
     <span
       aria-hidden
-      className={`relative flex flex-shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold ${TINT} ${
+      className={`relative flex flex-shrink-0 items-center justify-center overflow-hidden font-semibold ${WELL} ${
         large ? 'h-14 w-14 text-[20px]' : 'h-10 w-10 text-[15px]'
       }`}
     >
@@ -155,9 +186,9 @@ const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
       {verdict !== 'failed' ? (
         <span
           data-card-optional
-          className={`absolute inset-0 flex items-center justify-center rounded-full transition-opacity duration-200 ${
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${WELL} ${
             shown ? 'opacity-100' : 'opacity-0'
-          } ${verdict === 'dark' ? DARK_MARK_PLATE : QUIET_PLATE}`}
+          }`}
         >
           <img
             src={src}
@@ -169,7 +200,8 @@ const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
               event.currentTarget.naturalWidth < 16 ? setVerdict('failed') : setLoaded(true)
             }
             onError={() => setVerdict('failed')}
-            className="h-[60%] w-[60%] object-contain"
+            style={verdict === 'dark' ? { filter: 'var(--links-dark-mark)' } : undefined}
+            className={`object-contain ${large ? 'h-8 w-8' : 'h-6 w-6'}`}
           />
         </span>
       ) : null}
@@ -179,25 +211,62 @@ const Favicon = ({ link, large }: { link: CardLink; large?: boolean }) => {
 
 // Not mirrored: a mirrored launch arrow reads as "collapse" at this size, and up-and-out reads the same in RTL
 const LAUNCH =
-  'h-3.5 w-3.5 flex-shrink-0 text-[color:var(--card-muted)] opacity-70 transition-opacity group-hover:opacity-100';
+  'h-3.5 w-3.5 flex-shrink-0 text-[color:var(--card-muted)] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100';
 const CHEVRON =
-  'h-3 w-3 flex-shrink-0 text-[color:var(--card-muted)] opacity-70 [&:dir(rtl)]:[transform:scaleX(-1)]';
+  'h-3 w-3 flex-shrink-0 text-[color:var(--card-muted)] opacity-60 [&:dir(rtl)]:[transform:scaleX(-1)]';
 
 const TITLE = 'line-clamp-2 text-[15px] font-semibold leading-5 [overflow-wrap:anywhere]';
-const SUBTITLE = 'mt-0.5 block truncate text-[12.5px] leading-4 text-[color:var(--card-muted)]';
+const SUBTITLE = 'mt-0.5 block text-[12.5px] leading-4 text-[color:var(--card-muted)]';
 
-const Where = ({ target }: { target: string }) => (
-  <span className={SUBTITLE}>
-    <span dir="ltr">
-      <span dir="ltr">{linkHost(target)}</span>
-      <span className="opacity-80">{linkCrumb(target)}</span>
+// Host and path stay left-to-right; inline, so a right-to-left tile still sets them at its start
+const Where = ({ host, path }: { host?: string; path?: string }) =>
+  host || path ? (
+    <span className={SUBTITLE}>
+      <span dir="ltr" className="inline-flex max-w-full items-baseline">
+        {host ? (
+          <span dir="ltr" className="flex-shrink-0">
+            {host}
+          </span>
+        ) : null}
+        {path ? (
+          <span className={`min-w-0 truncate opacity-80 ${host ? 'ms-1' : ''}`}>{path}</span>
+        ) : null}
+      </span>
     </span>
-  </span>
-);
+  ) : null;
 
-const SURFACE =
-  'bg-[var(--card-surface)] text-[color:var(--card-surface-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_9%,transparent)]';
+const describe = (link: CardLink) => {
+  const host = linkHost(link.target);
+  const segments = pathSegments(link.target);
+  const label = link.text.trim();
+  if (label) return { title: label, host: shortHost(host), path: segments[0] ? `› ${segments[0]}` : '' };
+  return { title: host, path: segments.length ? `/${segments.join('/')}` : '' };
+};
+
+const LinkText = ({ link, featured }: { link: CardLink; featured?: boolean }) => {
+  const { title, host, path } = describe(link);
+  return (
+    <span className="min-w-0 flex-1">
+      <span
+        dir={link.text.trim() ? 'auto' : 'ltr'}
+        className={
+          featured
+            ? 'line-clamp-2 font-[family-name:var(--card-display)] text-[18px] font-semibold leading-6 [overflow-wrap:anywhere]'
+            : TITLE
+        }
+      >
+        {title}
+      </span>
+      <Where host={host} path={path} />
+    </span>
+  );
+};
+
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
+
+const TILE_SHADOW =
+  'shadow-[0_1px_2px_rgba(0,0,0,0.05),0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_8%,transparent)]';
+const TILE = `group flex min-h-[64px] min-w-0 items-center gap-3.5 rounded-[var(--links-tile-radius)] bg-[var(--card-surface)] px-3.5 py-3 text-start text-[color:var(--card-surface-ink)] ${TILE_SHADOW} transition-colors duration-150 hover:bg-[color:color-mix(in_srgb,var(--card-accent)_7%,var(--card-surface))] active:bg-[color:color-mix(in_srgb,var(--card-accent)_12%,var(--card-surface))] ${CARD_FOCUS}`;
 
 // dir: a title in a right-to-left script turns the whole tile, favicon to its start
 const FeaturedTile = ({ link }: { link: CardLink }) => (
@@ -205,60 +274,35 @@ const FeaturedTile = ({ link }: { link: CardLink }) => (
     href={link.target}
     {...external}
     dir="auto"
-    className={`group relative flex flex-col gap-4 overflow-hidden rounded-[24px] bg-[color:color-mix(in_srgb,var(--card-accent)_9%,var(--card-surface))] p-5 text-start text-[color:var(--card-surface-ink)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--card-accent)_22%,transparent)] transition-shadow duration-150 hover:shadow-[0_8px_22px_-10px_color-mix(in_srgb,var(--card-accent)_55%,transparent),0_0_0_1px_color-mix(in_srgb,var(--card-accent)_35%,transparent)] ${CARD_FOCUS}`}
+    className={`group flex min-w-0 items-center gap-4 rounded-[var(--links-hero-radius)] bg-[color:color-mix(in_srgb,var(--card-accent)_9%,var(--card-surface))] p-4 text-start text-[color:var(--card-surface-ink)] shadow-[0_0_0_1px_color-mix(in_srgb,var(--card-accent)_22%,transparent)] transition-[background-color,box-shadow] duration-150 hover:bg-[color:color-mix(in_srgb,var(--card-accent)_14%,var(--card-surface))] hover:shadow-[0_8px_22px_-12px_color-mix(in_srgb,var(--card-accent)_55%,transparent),0_0_0_1px_color-mix(in_srgb,var(--card-accent)_35%,transparent)] ${CARD_FOCUS}`}
   >
-    <span className="flex items-start justify-between gap-3">
-      <Favicon link={link} large />
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)]">
-        <ExternalLink aria-hidden className="h-3.5 w-3.5 text-[color:var(--card-accent)]" />
-      </span>
-    </span>
-    <span className="min-w-0">
-      <span
-        dir="auto"
-        className="line-clamp-2 font-[family-name:var(--card-display)] text-[21px] font-semibold leading-7 [overflow-wrap:anywhere]"
-      >
-        {link.text}
-      </span>
-      <Where target={link.target} />
+    <Favicon link={link} large />
+    <LinkText link={link} featured />
+    <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--links-well-radius)] bg-[color:var(--card-accent)] text-[color:var(--card-surface)]">
+      <ExternalLink aria-hidden className="h-4 w-4" />
     </span>
   </a>
 );
 
-const ROW = `group flex min-h-[64px] min-w-0 items-center gap-3.5 ps-4 text-start ${CARD_FOCUS}`;
-// The divider starts at the text, as grouped lists draw it
-const ROW_BODY =
-  'flex min-h-[64px] min-w-0 flex-1 items-center gap-3 py-3 pe-4 [li+li_&]:border-t [li+li_&]:border-[color:color-mix(in_srgb,var(--card-surface-ink)_10%,transparent)]';
-
-const RowText = ({ title, subtitle }: { title: ReactNode; subtitle: ReactNode }) => (
-  <span className="min-w-0 flex-1">
-    {title}
-    {subtitle}
-  </span>
-);
-
-const LinkRow = ({ link }: { link: CardLink }) => (
-  <a href={link.target} {...external} dir="auto" className={ROW}>
+const LinkTile = ({ link }: { link: CardLink }) => (
+  <a href={link.target} {...external} dir="auto" className={TILE}>
     <Favicon link={link} />
-    <span className={ROW_BODY}>
-      <RowText
-        title={
-          <span dir="auto" className={TITLE}>
-            {link.text}
-          </span>
-        }
-        subtitle={<Where target={link.target} />}
-      />
-      <ExternalLink aria-hidden className={LAUNCH} />
-    </span>
+    <LinkText link={link} />
+    <ExternalLink aria-hidden className={LAUNCH} />
   </a>
 );
 
 const FLAT_ROW = `group flex min-w-0 items-center gap-3.5 border-t border-[color:color-mix(in_srgb,var(--card-ink)_14%,transparent)] py-3 text-start ${CARD_FOCUS}`;
 
-const GROUP = `overflow-hidden rounded-[20px] ${SURFACE}`;
-
-const LinkList = ({ links, flat }: { links: CardLink[]; flat: boolean }) => {
+const LinkList = ({
+  links,
+  flat,
+  columns,
+}: {
+  links: CardLink[];
+  flat: boolean;
+  columns?: boolean;
+}) => {
   if (flat)
     return (
       <ul className="flex flex-col">
@@ -266,14 +310,7 @@ const LinkList = ({ links, flat }: { links: CardLink[]; flat: boolean }) => {
           <li key={link.id} className="min-w-0">
             <a href={link.target} {...external} dir="auto" className={FLAT_ROW}>
               <Favicon link={link} />
-              <RowText
-                title={
-                  <span dir="auto" className={TITLE}>
-                    {link.text}
-                  </span>
-                }
-                subtitle={<Where target={link.target} />}
-              />
+              <LinkText link={link} />
               <ExternalLink aria-hidden className={LAUNCH} />
             </a>
           </li>
@@ -282,13 +319,13 @@ const LinkList = ({ links, flat }: { links: CardLink[]; flat: boolean }) => {
     );
   const [featured, ...rest] = links;
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <FeaturedTile link={featured} />
       {rest.length ? (
-        <ul className={GROUP}>
+        <ul className={`grid gap-2 ${columns && rest.length > 3 ? 'xl:grid-cols-2' : ''}`}>
           {rest.map((link) => (
-            <li key={link.id} className="min-w-0">
-              <LinkRow link={link} />
+            <li key={link.id} className="grid min-w-0">
+              <LinkTile link={link} />
             </li>
           ))}
         </ul>
@@ -311,30 +348,24 @@ const PlaceTile = ({
   href: string;
   internal?: boolean;
 }) => {
-  const className = `${GROUP} ${ROW} transition-shadow`;
   const content = (
     <>
-      <span
-        aria-hidden
-        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] ${TINT}`}
-      >
+      <span aria-hidden className={`flex h-10 w-10 flex-shrink-0 items-center justify-center ${WELL}`}>
         <Icon className="h-[18px] w-[18px]" />
       </span>
-      <span className={ROW_BODY}>
-        <RowText
-          title={<span className={TITLE}>{label}</span>}
-          subtitle={<span className={SUBTITLE}>{detail}</span>}
-        />
-        <Chevron aria-hidden className={CHEVRON} />
+      <span className="min-w-0 flex-1">
+        <span className={TITLE}>{label}</span>
+        <span className={`${SUBTITLE} truncate`}>{detail}</span>
       </span>
+      <Chevron aria-hidden className={CHEVRON} />
     </>
   );
   return internal ? (
-    <Link to={href} className={className}>
+    <Link to={href} className={TILE}>
       {content}
     </Link>
   ) : (
-    <a href={href} className={className}>
+    <a href={href} className={TILE}>
       {content}
     </a>
   );
@@ -352,14 +383,16 @@ const LinksBlock = ({
   block,
   data,
   chatHref,
+  columns,
 }: {
   block: CardDesign['blocks'][number];
   data: CardData;
   chatHref: string | undefined;
+  columns?: boolean;
 }) => {
   const flat = FLAT.includes(block.presentation);
   if (block.kind === 'links')
-    return <LinkList links={data.links.filter(isUsableLink)} flat={flat} />;
+    return <LinkList links={data.links.filter(isLinkable)} flat={flat} columns={columns} />;
   if (block.presentation === 'boxed' && block.kind === 'moments')
     return (
       <PlaceTile
@@ -382,24 +415,40 @@ const LinksBlock = ({
   return <CardBlock block={block} data={data} chatHref={chatHref} />;
 };
 
-// The two variants that draw glyphs become tonal buttons; handles and wordmark keep their own build
+const handleOf = (social: CardData['socials'][number]) =>
+  typeof social.children === 'string' && social.children ? `@${social.children}` : undefined;
+
+// Glyphs and bar become tonal buttons; handles keep each network's mark beside the name, so four
+// identical handles can still be told apart. Wordmark keeps the shared build
 const SocialButtons = ({ design, data, className }: LayoutProps & { className: string }) => {
-  if (design.socials !== 'glyphs' && design.socials !== 'bar')
-    return <CardSocials variant={design.socials} data={data} className={className} />;
   if (!data.socials.length) return null;
+  if (design.socials === 'wordmark')
+    return <CardSocials variant={design.socials} data={data} className={className} />;
+  const handles = design.socials === 'handles';
   return (
-    <ul className={`flex flex-wrap gap-3 ${className}`}>
+    <ul className={`flex flex-wrap ${handles ? 'gap-2' : 'gap-3'} ${className}`}>
       {data.socials.map((social) => {
         const Icon = social.icon;
+        const handle = handles ? handleOf(social) : undefined;
+        const name = social.type || linkHost(social.link);
         return (
           <li key={social.link}>
             <a
               href={social.link}
               {...external}
-              aria-label={social.type || linkHost(social.link)}
-              className={`flex h-10 w-10 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)] ${CARD_FOCUS}`}
+              aria-label={handle ? `${name} ${handle}` : name}
+              className={`flex items-center justify-center bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)] ${CARD_FOCUS} ${
+                handle
+                  ? 'h-8 gap-1.5 rounded-[var(--links-tile-radius)] pe-3 ps-2.5 text-[12.5px] font-medium'
+                  : 'h-10 w-10 rounded-[var(--links-well-radius)]'
+              }`}
             >
-              <Icon className="h-[18px] w-[18px]" />
+              <Icon className={handle ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-[18px] w-[18px]'} />
+              {handle ? (
+                <span dir="ltr" className="text-[color:var(--card-ink)]">
+                  {handle}
+                </span>
+              ) : null}
             </a>
           </li>
         );
@@ -414,12 +463,14 @@ const SIZES = {
     name: 'text-[26px]',
     host: 'text-[13px]',
     audience: 'text-[11px]',
+    audienceLines: '!line-clamp-1',
   },
   page: {
     portrait: 'h-[128px] w-[128px]',
     name: 'text-[32px]',
     host: 'text-[14px]',
-    audience: 'text-[12px]',
+    audience: 'text-[12px] md:max-w-full',
+    audienceLines: '!line-clamp-1 md:!line-clamp-none',
   },
 } as const;
 
@@ -469,7 +520,8 @@ export const LinksIdentity = ({
       ) : null}
       <AudienceChip
         audience={data.audience}
-        className={`mt-3 max-w-[min(85%,20rem)] flex-shrink-0 gap-1.5 rounded-xl bg-[color:color-mix(in_srgb,var(--card-ink)_8%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
+        className={`mt-3 max-w-[min(85%,22rem)] flex-shrink-0 gap-1.5 rounded-[var(--links-tile-radius)] bg-[color:color-mix(in_srgb,var(--card-ink)_7%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
+        textClassName={sizes.audienceLines}
         hug
         glyphClassName="h-5 w-[1.15em]"
       />
@@ -482,18 +534,22 @@ export const LinksIdentity = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const hasLinks = (data: CardData) => data.links.some(isLinkable);
+
 export const LinksList = ({
   design,
   data,
   skipMoments,
   emptyNote = true,
-}: LayoutProps & { skipMoments?: boolean; emptyNote?: boolean }) => {
+  columns,
+}: LayoutProps & { skipMoments?: boolean; emptyNote?: boolean; columns?: boolean }) => {
   const chatHref = useChatHref(data.odinId);
   const blocks = design.blocks.filter(
     (block) =>
       block.kind !== 'posts' &&
       !(skipMoments && block.kind === 'moments') &&
-      hasBlockContent(block.kind, data, chatHref)
+      (block.kind === 'links' ? hasLinks(data) : hasBlockContent(block.kind, data, chatHref))
   );
   if (!blocks.length)
     return emptyNote ? (
@@ -504,7 +560,13 @@ export const LinksList = ({
   return (
     <nav aria-label={t('Links')} className="flex w-full flex-col gap-3">
       {blocks.map((block) => (
-        <LinksBlock key={block.kind} block={block} data={data} chatHref={chatHref} />
+        <LinksBlock
+          key={block.kind}
+          block={block}
+          data={data}
+          chatHref={chatHref}
+          columns={columns}
+        />
       ))}
     </nav>
   );

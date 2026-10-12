@@ -6,7 +6,7 @@ import type { CardData, CardPost } from '../../useCardData';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardImg } from '../../parts/CardImg';
 import { CardSignIn } from '../../parts/SignIn';
-import { LINKS_VARS, LinksIdentity, LinksList } from './LinksParts';
+import { LinksIdentity, LinksList, hasLinks, isLinkable, linksVars } from './LinksParts';
 
 const DATE = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
@@ -22,7 +22,7 @@ const PostRow = ({ post }: { post: CardPost }) => {
   return (
     <Link
       to={post.href}
-      className={`flex items-start gap-4 rounded-[18px] bg-[var(--card-surface)] p-4 text-[color:var(--card-surface-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_9%,transparent)] ${CARD_FOCUS}`}
+      className={`flex items-start gap-4 rounded-[var(--links-tile-radius)] bg-[var(--card-surface)] p-4 text-[color:var(--card-surface-ink)] shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_color-mix(in_srgb,var(--card-surface-ink)_9%,transparent)] ${CARD_FOCUS}`}
     >
       <span className="min-w-0 flex-1 text-start">
         <span className="block truncate text-[12px] text-[color:var(--card-muted)]" dir="ltr">
@@ -53,20 +53,20 @@ const PostRow = ({ post }: { post: CardPost }) => {
         <CardImg
           image={post.image}
           alt=""
-          className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl"
+          className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-[var(--links-well-radius)]"
         />
       ) : null}
     </Link>
   );
 };
 
-const LinksPosts = ({ data }: { data: CardData }) => {
+const LinksPosts = ({ data, className }: { data: CardData; className?: string }) => {
   const headingId = useId();
   const { posts } = data;
   if (!posts.length) return null;
   const knownCount = posts.length < LOADED_CAP;
   return (
-    <section aria-labelledby={headingId} className="w-full">
+    <section aria-labelledby={headingId} className={`w-full ${className ?? ''}`}>
       <div className="flex items-baseline justify-between gap-4 pb-4">
         <h2
           id={headingId}
@@ -93,23 +93,42 @@ const LinksPosts = ({ data }: { data: CardData }) => {
   );
 };
 
-// From 1024 the identity becomes a sticky column beside the links, instead of a stretched phone column
+// From 1024 the identity becomes a column beside the links. With no links there is nothing to
+// set beside it, so the page stays one centred column
 export const LinksPage = ({ design, data }: LayoutProps) => {
   const hasPosts = data.posts.length > 0;
+  const split = hasLinks(data);
+  // A long list would leave the identity column bare, so the posts move under it
+  const postsBeside = data.links.filter(isLinkable).length > 5;
   return (
-    <div style={LINKS_VARS} className="relative min-h-[inherit] overflow-hidden pb-20">
+    <div style={linksVars(design)} className="relative min-h-[inherit] overflow-hidden pb-20">
       <header className="flex justify-end px-6 pt-5">
         <CardSignIn className="rounded-full bg-[color:var(--card-accent)] px-[18px] py-2 text-[13px] font-semibold text-[color:var(--card-surface)]" />
       </header>
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-10 px-5 pt-6 lg:grid lg:max-w-[1120px] lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-16 lg:px-10 lg:pt-8">
-        <aside className="lg:sticky lg:top-10 lg:self-start">
-          <LinksIdentity design={design} data={data} size="page" split />
-        </aside>
-        <div className="flex min-w-0 flex-col gap-12 lg:max-w-[640px]">
+      {split ? (
+        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-10 px-5 pt-6 lg:grid lg:max-w-[1120px] lg:grid-cols-[340px_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-16 lg:gap-y-12 lg:px-10 lg:pt-8 xl:max-w-[1240px]">
+          <aside
+            className={`lg:col-start-1 lg:row-start-1 lg:self-start ${postsBeside ? '' : 'lg:sticky lg:top-10'}`}
+          >
+            <LinksIdentity design={design} data={data} size="page" split />
+          </aside>
+          <div
+            className={`min-w-0 lg:col-start-2 lg:row-start-1 lg:max-w-[640px] xl:max-w-none ${postsBeside ? 'lg:row-span-2' : ''}`}
+          >
+            <LinksList design={design} data={data} skipMoments={hasPosts} columns />
+          </div>
+          <LinksPosts
+            data={data}
+            className={`lg:row-start-2 lg:self-start ${postsBeside ? 'lg:col-start-1' : 'lg:col-start-2 lg:max-w-[640px] xl:max-w-none'}`}
+          />
+        </main>
+      ) : (
+        <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-5 pt-6 lg:pt-8">
+          <LinksIdentity design={design} data={data} size="page" />
           <LinksList design={design} data={data} skipMoments={hasPosts} emptyNote={!hasPosts} />
           <LinksPosts data={data} />
-        </div>
-      </main>
+        </main>
+      )}
     </div>
   );
 };
