@@ -293,10 +293,11 @@ const AttributeFields = ({
     default:
       return (
         <>
-          {Object.keys(attribute.data || {}).map((dataKey) => {
+          {Object.entries(attribute.data || {}).map(([dataKey, value]) => {
             return (
               <p className="whitespace-pre-line" key={dataKey}>
-                {dataKey}: {attribute.data?.[dataKey]}
+                {/* unknown attribute types can hold nested objects, which React cannot render */}
+                {dataKey}: {typeof value === 'object' ? JSON.stringify(value) : value}
               </p>
             );
           })}
