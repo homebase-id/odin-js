@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t } from '@homebase-id/common-app';
 import { CARD_FOCUS, type LayoutProps, type Presentation } from '../../CardDesign';
 import { ownerName, type CardLink } from '../../useCardData';
 import {
@@ -158,7 +159,7 @@ export const LinksProfile = ({
         glyphClassName="h-5 w-[1.15em]"
       />
       {blocks.length ? (
-        <nav aria-label="Links" className={`flex w-full flex-col gap-2.5 ${sizes.gap}`}>
+        <nav aria-label={t('Links')} className={`flex w-full flex-col gap-2.5 ${sizes.gap}`}>
           {blocks.map((block) =>
             block.kind === 'links' ? (
               <ul key="links" className="flex flex-col gap-2.5">

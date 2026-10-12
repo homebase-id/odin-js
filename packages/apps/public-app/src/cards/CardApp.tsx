@@ -8,6 +8,7 @@ import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
 import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
+import { snapshotFilter } from './snapshotFilter';
 import {
   cardSocials,
   type CardAudience,
@@ -129,7 +130,7 @@ const whenPainted = async (element: HTMLElement, onError: (error: unknown) => vo
 const rasterize = async (element: HTMLElement) => {
   const { toSvg } = await import('html-to-image');
   const { offsetWidth: width, offsetHeight: height } = element;
-  const svg = await toSvg(element);
+  const svg = await toSvg(element, { filter: snapshotFilter });
   const image = new Image();
   await new Promise((resolve, reject) => {
     image.onload = resolve;

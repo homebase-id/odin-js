@@ -7,6 +7,7 @@ import { CARD_PRESETS } from './presets';
 import { HomebaseCard } from './HomebaseCard';
 import { CardSocials } from './parts/Socials';
 import { CardPage } from './CardPage';
+import { snapshotFilter } from './snapshotFilter';
 import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
 import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
 import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
@@ -203,8 +204,8 @@ describe('links design', () => {
       links: [{ id: 'a', text: 'نشرة الشاير', target: 'https://shire.example' }],
     });
     const out = html(rtl);
-    expect(out).toContain('dir="auto"');
-    expect(out).toContain('نشرة الشاير');
+    expect(out).toMatch(/dir="auto"[^>]*>نشرة الشاير</);
+    expect(out).toMatch(/dir="ltr"[^>]*>shire\.example</);
   });
 
   it('honours the palette and socials overrides', () => {
@@ -215,5 +216,16 @@ describe('links design', () => {
 
   it('lists posts on the page', () => {
     expect(html(data, true)).toContain('Hello');
+  });
+});
+
+describe('png export snapshot', () => {
+  const node = (optional: boolean) =>
+    ({ hasAttribute: (name: string) => optional && name === 'data-card-optional' }) as unknown as Node;
+
+  it('leaves optional favicons out so a failed favicon fetch cannot reject the export', () => {
+    expect(snapshotFilter(node(true))).toBe(false);
+    expect(snapshotFilter(node(false))).toBe(true);
+    expect(snapshotFilter({ nodeType: 3 } as unknown as Node)).toBe(true);
   });
 });
