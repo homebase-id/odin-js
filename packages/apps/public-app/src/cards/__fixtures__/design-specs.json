@@ -87,7 +87,27 @@
                 "sand"
             ]
         },
-        "links": "none"
+        "links": {
+            "options": [
+                "ACCENT",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 1,
+            "schemes": [
+                "cloud",
+                "slate",
+                "mint",
+                "peach",
+                "lavender",
+                "navy",
+                "lemon"
+            ]
+        }
     },
     "fonts": [
         "montserrat",
@@ -149,6 +169,15 @@
             "#F4F1EA",
             "#12355B",
             "#E8DCC6"
+        ],
+        "links": [
+            "#F1F3F6",
+            "#1B1F24",
+            "#DDF0E6",
+            "#FBE3D6",
+            "#E7E3F7",
+            "#14213D",
+            "#F8F2C8"
         ]
     }
 }

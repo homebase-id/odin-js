@@ -201,8 +201,7 @@ describe('chat-kmp CardDesignSpecs against what odin-js supports', () => {
     expect([...ids].sort()).toEqual(Object.keys(CARD_PRESETS).sort());
   });
 
-  // Known mismatch: chat-kmp has no CardDesignSpecs entry (nor CardDesign constant) for links yet
-  it.fails('declares a spec for every design id', () => {
+  it('declares a spec for every design id', () => {
     for (const id of ids) expect(kotlinSpecs[id], `CardDesignSpecs.of("${id}")`).not.toBe('none');
   });
 
