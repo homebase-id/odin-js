@@ -14,7 +14,7 @@ export const LinksCard = ({ design, data }: LayoutProps) => {
       <LinksIdentity design={design} data={data} size="card" />
       <LinksList design={design} data={data} skipMoments={postsInstead} emptyNote={!postsInstead} />
       {postsInstead ? (
-        <LinksPosts data={data} heading={t('Moments')} limit={3} className="mt-2" />
+        <LinksPosts data={data} heading={t('Feed')} limit={3} className="mt-2" />
       ) : null}
     </div>
   );

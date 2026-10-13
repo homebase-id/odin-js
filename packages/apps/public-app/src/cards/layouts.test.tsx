@@ -57,7 +57,7 @@ const render = (layout: keyof typeof CARD_PRESETS, overrides: unknown) =>
 
 const order = (html: string) => ({
   links: html.indexOf('Shire Weekly'),
-  moments: html.indexOf('Moments'),
+  moments: html.indexOf('Feed'),
 });
 
 const LINKS_FIRST = {
@@ -94,7 +94,7 @@ describe('dossier chat position', () => {
       blocks: [{ kind: 'links' }, { kind: 'moments' }, { kind: 'chat' }],
     });
     expect(chat(html)).toBeGreaterThan(html.indexOf('Shire Weekly'));
-    expect(chat(html)).toBeGreaterThan(html.indexOf('Moments'));
+    expect(chat(html)).toBeGreaterThan(html.indexOf('Feed'));
   });
 });
 

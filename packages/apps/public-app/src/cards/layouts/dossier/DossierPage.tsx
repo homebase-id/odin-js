@@ -161,7 +161,7 @@ const Elsewhere = ({ design, data }: LayoutProps) => {
             {
               id: 'moments',
               href: POSTS_HREF,
-              label: t('Moments'),
+              label: t('Feed'),
               url: `${data.odinId}${POSTS_HREF}`,
               icon: ImageIcon,
             },
