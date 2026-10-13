@@ -6,6 +6,7 @@ import type { CardDesign, LayoutId } from './CardDesign';
 import type { CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
+import { VisitorPreviewContext } from './parts/Blocks';
 import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
 import { snapshotFilter } from './snapshotFilter';
@@ -26,6 +27,7 @@ type RenderRequest = {
   data: AppData;
   audience?: CardAudience;
   overrides?: CardOverrides;
+  visitorPreview?: boolean;
 };
 
 declare global {
@@ -122,7 +124,7 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { design: CardDesign; data: CardData };
+type Rendered = { design: CardDesign; data: CardData; visitorPreview: boolean };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
@@ -169,7 +171,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ design, data }));
+        flushSync(() => setCard({ design, data, visitorPreview: !!request.visitorPreview }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
@@ -267,22 +269,26 @@ const CardApp = ({ host }: { host: CardHost }) => {
       <main ref={main} className="h-full">
         {card ? (
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary resetKey={card} onError={onCardError}>
-              {wide ? (
-                <CardPage design={card.design} data={card.data} />
-              ) : (
-                <CompactCard card={card} />
-              )}
-            </CardBoundary>
+            <VisitorPreviewContext.Provider value={card.visitorPreview}>
+              <CardBoundary resetKey={card} onError={onCardError}>
+                {wide ? (
+                  <CardPage design={card.design} data={card.data} />
+                ) : (
+                  <CompactCard card={card} />
+                )}
+              </CardBoundary>
+            </VisitorPreviewContext.Provider>
           </DotYouClientContext.Provider>
         ) : null}
       </main>
       {card && exporting ? (
         <div ref={snapshot} aria-hidden style={EXPORT_FRAME}>
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary resetKey={card} onError={onCardError}>
-              <CompactCard card={card} />
-            </CardBoundary>
+            <VisitorPreviewContext.Provider value={card.visitorPreview}>
+              <CardBoundary resetKey={card} onError={onCardError}>
+                <CompactCard card={card} />
+              </CardBoundary>
+            </VisitorPreviewContext.Provider>
           </DotYouClientContext.Provider>
         </div>
       ) : null}

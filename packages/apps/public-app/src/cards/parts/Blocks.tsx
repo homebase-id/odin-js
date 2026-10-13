@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react';
+import { createContext, useContext, type FC, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { t, useDotYouClientContext } from '@homebase-id/common-app';
 import { ChatBubble, Chevron, Globe, ImageIcon, IconProps } from '@homebase-id/common-app/icons';
@@ -13,10 +13,15 @@ import type { CardData, CardLink, CardPost } from '../useCardData';
 import { POSTS_HREF } from './posts';
 import { CardImg } from './CardImg';
 
+// The app's editor preview draws the chat block the way a visitor sees it
+// eslint-disable-next-line react-refresh/only-export-components
+export const VisitorPreviewContext = createContext(false);
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useChatHref = (owner: string) => {
   const client = useDotYouClientContext();
-  if (client.isOwner()) return undefined;
+  const visitorPreview = useContext(VisitorPreviewContext);
+  if (client.isOwner() && !visitorPreview) return undefined;
   const loggedOn = client.getLoggedInIdentity();
   return loggedOn
     ? `${new DotYouClient({ hostIdentity: loggedOn, api: ApiType.Guest }).getRoot()}/apps/chat/open/${owner}`
