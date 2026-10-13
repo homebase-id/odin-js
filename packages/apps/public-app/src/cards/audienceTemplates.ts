@@ -8,14 +8,14 @@ export type AudienceTemplate = { design: LayoutId; overrides: CardOverrides };
  * table and writes it to the server on a circle card's first edit; the circle table is pinned by __fixtures__/design-specs.json.
  */
 export const PUBLIC_TEMPLATE: AudienceTemplate = {
-  design: 'board',
+  design: 'links',
   overrides: {
     palette: {
-      ground: '#1E5B45',
-      ink: '#FFFFFF',
-      muted: '#BFD6CC',
+      ground: '#DDF0E6',
+      ink: '#12301F',
+      muted: '#4A6B58',
       surface: '#FFFFFF',
-      surfaceInk: '#173B2E',
+      surfaceInk: '#12301F',
     },
   },
 };

@@ -7,7 +7,10 @@ import { resolveEmbedDesign, resolveRequestDesign } from './resolveDesign';
 import { PUBLIC_TEMPLATE } from './audienceTemplates';
 
 const board = CARD_PRESETS.board;
-const publicTemplate = applyOverrides(board, PUBLIC_TEMPLATE.overrides);
+const publicTemplate = applyOverrides(
+  CARD_PRESETS[PUBLIC_TEMPLATE.design],
+  PUBLIC_TEMPLATE.overrides
+);
 const collage = CARD_PRESETS.collage;
 
 describe('applyOverrides', () => {
