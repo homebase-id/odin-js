@@ -219,8 +219,8 @@ export const saveCommunity = async (
       )
     ) {
       if (dotYouClient.getType() === ApiType.Owner) {
-        // The community app owns its drives. The slug is left to the server: only it knows which
-        // slugs this app has already used, so only it can dedupe two communities sharing a title.
+        // The community app owns its drives. The slug is derived from the title by ensureDrive,
+        // unique among the slugs this app's drives already hold.
         await ensureDrive(
           dotYouClient,
           targetDrive,

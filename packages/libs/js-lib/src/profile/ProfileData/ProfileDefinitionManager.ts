@@ -110,7 +110,7 @@ export const saveProfileDefinition = async (
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
   // Profile drives belong to the contacts app, which owns the standard profile drive too. The slug is
-  // left to the server: only it knows which slugs that app has already used.
+  // derived from the name by ensureDrive, unique among the slugs that app's drives already hold.
   await ensureDrive(
     dotYouClient,
     targetDrive,
@@ -120,7 +120,7 @@ export const saveProfileDefinition = async (
     false,
     false,
     CONTACTS_APP_ID,
-    undefined, // using undefined here intentionally leaves the slug to the server
+    undefined, // derived from the name by ensureDrive
     PROFILE_DRIVE_TYPE_SLUG
   );
   const { versionTag } = (await getProfileDefinitionInternal(

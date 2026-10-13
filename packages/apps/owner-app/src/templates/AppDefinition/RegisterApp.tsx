@@ -20,6 +20,7 @@ import {
   getStateParam,
 } from '@homebase-id/common-app';
 import { PermissionSet } from '@homebase-id/js-lib/core';
+import { isValidSlug } from '@homebase-id/js-lib/helpers';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useDrives } from '../../hooks/drives/useDrives';
 import {
@@ -71,7 +72,16 @@ const RegisterApp = () => {
   const cd = searchParams.get('cd');
   const circleDriveGrants = drivesParamToDriveGrantRequest(cd || undefined);
 
-  if (!appId || !name || !appSlug || !returnUrl || !driveGrants || !circleDriveGrants) {
+  // The server refuses a missing or malformed app slug and never coerces one, built-in apps
+  // included, so a bad `as` is refused here before the owner is asked to approve anything.
+  if (
+    !appId ||
+    !name ||
+    !isValidSlug(appSlug) ||
+    !returnUrl ||
+    !driveGrants ||
+    !circleDriveGrants
+  ) {
     console.error(
       'Any of the following required params was not found or was malformed in the url: appId, n, as, return, d, cd'
     );

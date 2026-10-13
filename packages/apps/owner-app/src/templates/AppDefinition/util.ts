@@ -1,5 +1,5 @@
 import { PermissionSet } from '@homebase-id/js-lib/core';
-import { tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { isValidSlug, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import { DriveGrantRequest } from '../../provider/app/AppManagementProviderTypes';
 import { AppDriveAuthorizationParams } from '@homebase-id/js-lib/auth';
 
@@ -20,7 +20,8 @@ export const circleToCircleIds = (queryParamVal: string | undefined): string[] =
  * asked for and neither side finds out.
  *
  * `ts` (the drive type slug) is required on every grant for the same reason: the app knows the type
- * of the drive it is asking for, and a grant without one cannot name the drive it wants.
+ * of the drive it is asking for, and a grant without one cannot name the drive it wants. `ts`, and
+ * `ds` when stated, must be valid slugs: the server refuses anything else and never coerces.
  */
 export const drivesParamToDriveGrantRequest = (
   queryParamVal: string | undefined
@@ -31,9 +32,15 @@ export const drivesParamToDriveGrantRequest = (
     const drivesParamObject = queryParamVal && tryJsonParse(queryParamVal);
     return (Array.isArray(drivesParamObject) ? drivesParamObject : [drivesParamObject]).map(
       (d: AppDriveAuthorizationParams) => {
-        if (!d.ts)
+        if (!isValidSlug(d.ts))
           throw new Error(
-            `Drive grant for ${d.a}/${d.t} ("${d.n}") is missing its drive type slug (ts)`
+            `Drive grant for ${d.a}/${d.t} ("${d.n}") is missing a valid drive type slug (ts)`
+          );
+        // A stated drive slug is sent to the server as is, and the server refuses a malformed one --
+        // so refuse it here, before the owner is asked to approve anything.
+        if (d.ds && !isValidSlug(d.ds))
+          throw new Error(
+            `Drive grant for ${d.a}/${d.t} ("${d.n}") has an invalid drive slug (ds)`
           );
 
         return {
@@ -56,7 +63,7 @@ export const drivesParamToDriveGrantRequest = (
             allowAnonymousReads: d.r || false,
             allowSubscriptions: d.s || false,
             attributes: (d.at && tryJsonParse(d.at)) || undefined,
-            // Left undefined the server derives the slug; see TargetDriveAccessRequest.driveSlug.
+            // Left undefined, ensureDrive derives the slug; see TargetDriveAccessRequest.driveSlug.
             driveSlug: d.ds || undefined,
             driveTypeSlug: d.ts,
           },

@@ -111,8 +111,8 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
   }: {
     targetDrive: TargetDrive;
     appId: string;
-    driveSlug?: string;
-    driveTypeSlug?: string;
+    driveSlug: string;
+    driveTypeSlug: string;
   }) => {
     return setDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
   };
@@ -126,7 +126,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     targetDrive: TargetDrive;
     appId: string;
     driveSlug: string;
-    driveTypeSlug?: string;
+    driveTypeSlug: string;
   }) => {
     return reassignDriveOwningApp(dotYouClient, targetDrive, appId, driveSlug, driveTypeSlug);
   };

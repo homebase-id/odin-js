@@ -55,9 +55,9 @@ const getExtendAuthorizationUrl = (
       r: allowAnonymousReads,
       s: allowSubscriptions,
       // The readable form of this drive's type, shared by every channel drive. No drive slug: a
-      // channel drive is a runtime instance drive, so the server derives its slug from `name`
-      // against the set the feed app already holds -- only it can dedupe two channels sharing a
-      // name.
+      // channel drive is a runtime instance drive, so the owner console derives its slug from `name`
+      // when it creates the drive (ensureDrive), against the slugs the feed app's drives already
+      // hold -- an app cannot list those, so it cannot dedupe two channels sharing a name.
       ts: CHANNEL_DRIVE_TYPE_SLUG,
     },
   ];

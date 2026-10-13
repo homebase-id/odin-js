@@ -78,10 +78,10 @@ export interface DriveGrantRequest {
     /**
      * The drive half of `/apps/{appSlug}/drives/{driveSlug}`, declared by the app asking for the
      * drive. Required to be stated, but `undefined` is legitimate for a runtime instance drive (one
-     * per channel, community or profile): there the server derives the slug from `name` against the
-     * set the owning app already holds, which is the only place that set is known. The slug is
-     * immutable once written, so a supplied one is permanent -- and a slug this app already uses is
-     * refused rather than silently changed.
+     * per channel, community or profile): there `ensureDrive` derives the slug from `name`, unique
+     * against the slugs the owning app's drives already hold -- the server derives nothing. The slug
+     * is immutable once written, so a supplied one is permanent -- and a slug this app already uses
+     * is refused rather than silently changed.
      */
     driveSlug: string | undefined;
 
