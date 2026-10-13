@@ -472,7 +472,7 @@ const LinksBlock = ({
     return (
       <PlaceTile
         icon={ImageIcon}
-        label={t('Moments')}
+        label={t('Feed')}
         detail={momentsDetail(data)}
         href={POSTS_HREF}
         internal

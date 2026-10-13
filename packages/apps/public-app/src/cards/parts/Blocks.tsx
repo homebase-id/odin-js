@@ -200,7 +200,7 @@ export const CardBlock = ({
       <Item
         presentation={block.presentation}
         href={POSTS_HREF}
-        label={t('Moments')}
+        label={t('Feed')}
         icon={ImageIcon}
         thumbs={thumbs}
         url={`${data.odinId}${POSTS_HREF}`}
