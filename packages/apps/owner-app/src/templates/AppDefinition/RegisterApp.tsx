@@ -26,8 +26,10 @@ import { useDrives } from '../../hooks/drives/useDrives';
 import {
   permissionParamToPermissionSet,
   drivesParamToDriveGrantRequest,
+  drivesParamProblems,
   circleParamToCircleIds,
 } from './util';
+import { InvalidAppRequest } from './InvalidAppRequest';
 
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&cd=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A2%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
@@ -73,19 +75,40 @@ const RegisterApp = () => {
   const circleDriveGrants = drivesParamToDriveGrantRequest(cd || undefined);
 
   // The server refuses a missing or malformed app slug and never coerces one, built-in apps
-  // included, so a bad `as` is refused here before the owner is asked to approve anything.
+  // included, so a bad `as` is refused here before the owner is asked to approve anything. Every
+  // problem is named, so the developer can fix the link without guessing.
+  const problems = [
+    ...(!appId ? [t('`appId` is missing')] : []),
+    ...(!name ? [t('`n` (app name) is missing')] : []),
+    ...(!appSlug
+      ? [t('`as` (app slug) is missing')]
+      : !isValidSlug(appSlug)
+        ? [`${t('`as` (app slug) is not a valid slug')} ("${appSlug}")`]
+        : []),
+    ...(!returnUrl ? [t('`return` is missing')] : []),
+    ...drivesParamProblems(d || undefined, 'd'),
+    ...drivesParamProblems(cd || undefined, 'cd'),
+  ];
+
   if (
+    problems.length ||
     !appId ||
     !name ||
-    !isValidSlug(appSlug) ||
+    !appSlug ||
     !returnUrl ||
     !driveGrants ||
     !circleDriveGrants
   ) {
-    console.error(
-      'Any of the following required params was not found or was malformed in the url: appId, n, as, return, d, cd'
+    console.error('Invalid app registration request', problems);
+    return (
+      <InvalidAppRequest
+        appName={name}
+        origin={origin}
+        problems={problems}
+        cancelUrl={cancelUrl}
+        returnUrl={returnUrl}
+      />
     );
-    return <div>Bad request</div>;
   }
 
   const {

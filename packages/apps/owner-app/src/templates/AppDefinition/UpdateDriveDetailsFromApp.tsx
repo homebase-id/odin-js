@@ -5,7 +5,8 @@ import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrive } from '../../hooks/drives/useDrive';
-import { drivesParamToDriveGrantRequest } from './util';
+import { drivesParamToDriveGrantRequest, drivesParamProblems } from './util';
+import { InvalidAppRequest } from './InvalidAppRequest';
 
 const UpdateDriveDetailsFromApp = () => {
   // Read the queryString
@@ -58,7 +59,14 @@ const UpdateDriveDetailsFromApp = () => {
 
   // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
   // one is its bug, but dropping a drive from the prompt would change less than was asked for.
-  if (!driveGrants) return <div>Bad request</div>;
+  if (!driveGrants)
+    return (
+      <InvalidAppRequest
+        appName={appRegistration?.name}
+        problems={drivesParamProblems(d || undefined, 'd')}
+        returnUrl={returnUrl}
+      />
+    );
 
   return (
     <>

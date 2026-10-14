@@ -16,11 +16,13 @@ import { useState } from 'react';
 import {
   circleToCircleIds,
   drivesParamToDriveGrantRequest,
+  drivesParamProblems,
   permissionParamToPermissionSet,
 } from './util';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { useDrive } from '../../hooks/drives/useDrive';
+import { InvalidAppRequest } from './InvalidAppRequest';
 
 export const ExtendAppPermissions = () => {
   // Read the queryString
@@ -156,7 +158,17 @@ export const ExtendAppPermissions = () => {
 
   // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
   // one is its bug, but dropping a drive from the prompt would grant less than was asked for.
-  if (isBadRequest) return <div>Bad request</div>;
+  if (isBadRequest)
+    return (
+      <InvalidAppRequest
+        appName={appRegistration?.name}
+        problems={[
+          ...drivesParamProblems(d || undefined, 'd'),
+          ...drivesParamProblems(cd || undefined, 'cd'),
+        ]}
+        returnUrl={returnUrl}
+      />
+    );
 
   return (
     <>
