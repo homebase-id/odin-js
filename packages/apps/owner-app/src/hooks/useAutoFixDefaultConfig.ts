@@ -13,7 +13,6 @@ import {
 import { useEffect, useRef } from 'react';
 import { useAttribute } from './profiles/useAttribute';
 import { useSettings } from './settings/useSettings';
-import { autoFixConnections } from '../provider/network/troubleshooting/DataConversionProvider';
 
 export const AUTO_FIX_VERSION = '0.0.4';
 export const useAutofixDefaultConfig = () => {
@@ -27,7 +26,6 @@ export const useAutofixDefaultConfig = () => {
   const lastRunAutoFix = uiSettings?.lastRunAutoFix;
   const shouldRun = lastRunAutoFix !== AUTO_FIX_VERSION;
 
-  const dotYouClient = useDotYouClientContext();
   const isRunning = useRef<boolean>();
 
   const { fixDefaultProfileImage } = useFixDefaultProfileImage();
@@ -39,7 +37,6 @@ export const useAutofixDefaultConfig = () => {
     (async () => {
       try {
         await fixDefaultProfileImage();
-        await autoFixConnections(dotYouClient);
 
         updateUiSetting({ ...uiSettings, lastRunAutoFix: AUTO_FIX_VERSION });
         console.log('[useAutoFixDefaultConfig] Finished ', AUTO_FIX_VERSION);
