@@ -8,11 +8,13 @@ import {
   t,
   usePortal,
 } from '@homebase-id/common-app';
+import { TargetDrive } from '@homebase-id/js-lib/core';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useDrives } from '../../../hooks/drives/useDrives';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { DriveSlugs, useDriveSlugFields } from './DriveSlugFields';
 
 /**
  * Hands something that belongs to no app to one that does.
@@ -22,16 +24,17 @@ import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
  * undoable from the console. That is what the warning is for, and why nothing is preselected --
  * a default app would make the irreversible choice the easy one.
  *
- * Drives carry an address as well as an owner, so they get the optional slug fields. Circles have
- * no address and pass showSlugFields false.
+ * Drives carry an address as well as an owner, so they get the slug fields -- both required, since
+ * the server keeps and derives nothing. Circles have no address and pass showSlugFields false.
  */
 export const SetOwningAppDialog = ({
   title,
   subject,
   isOpen,
   showSlugFields,
-  existingDriveSlug,
-  existingDriveTypeSlug,
+  targetDrive,
+  suggestedDriveSlug,
+  suggestedDriveTypeSlug,
   circleDriveGrants,
   onConfirm,
   onCancel,
@@ -41,20 +44,22 @@ export const SetOwningAppDialog = ({
   subject: string;
   isOpen: boolean;
   showSlugFields?: boolean;
+  /** The drive being handed over, when it is a drive. */
+  targetDrive?: TargetDrive;
   /**
-   * A slug the drive already carries. Adoption keeps it rather than deriving a new one, and the
-   * server refuses to rename it on the way past -- so it is shown as settled rather than offered
-   * as a field that would only be rejected.
+   * What the slug fields start with -- e.g. the slug the drive already carries, or one made from
+   * its name. Only a starting point: the owner states both, and the server takes them as given.
    */
-  existingDriveSlug?: string | null;
-  existingDriveTypeSlug?: string | null;
+  suggestedDriveSlug?: string | null;
+  suggestedDriveTypeSlug?: string | null;
   /**
    * The circle's own drive grants. Assigning a circle to an app also gives that app the access the
    * circle requires -- owning a circle you cannot grant is not ownership -- so what that amounts to
    * is listed here before the owner confirms rather than discovered afterwards.
    */
   circleDriveGrants?: DriveGrant[];
-  onConfirm: (appId: string, driveSlug?: string, driveTypeSlug?: string) => Promise<unknown>;
+  /** `slugs` is set exactly when showSlugFields is, and then both are valid slugs. */
+  onConfirm: (appId: string, slugs?: DriveSlugs) => Promise<unknown>;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -64,16 +69,21 @@ export const SetOwningAppDialog = ({
   } = useDrives();
 
   const [appId, setAppId] = useState('');
-  const [driveSlug, setDriveSlug] = useState('');
-  const [driveTypeSlug, setDriveTypeSlug] = useState('');
   const [state, setState] = useState<ActionButtonState>('idle');
+  const { slugs, fields: slugFields } = useDriveSlugFields({
+    isOpen,
+    appId,
+    targetDrive,
+    suggestedDriveSlug,
+    suggestedDriveTypeSlug,
+  });
 
   if (!isOpen) return null;
 
+  const canSubmit = !!appId && (!showSlugFields || !!slugs);
+
   const reset = () => {
     setAppId('');
-    setDriveSlug('');
-    setDriveTypeSlug('');
     setState('idle');
   };
 
@@ -82,15 +92,11 @@ export const SetOwningAppDialog = ({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!appId) return false;
+          if (!canSubmit) return false;
 
           setState('loading');
           try {
-            await onConfirm(
-              appId,
-              driveSlug.trim() || undefined,
-              driveTypeSlug.trim() || undefined
-            );
+            await onConfirm(appId, showSlugFields ? slugs : undefined);
           } catch (ex) {
             console.error('Failed to set the owning app', ex);
             setState('error');
@@ -133,60 +139,7 @@ export const SetOwningAppDialog = ({
           ) : null}
         </div>
 
-        {showSlugFields ? (
-          <>
-            <div className="mb-5">
-              <Label htmlFor="driveSlug">{t('Drive slug')}</Label>
-              {existingDriveSlug ? (
-                <>
-                  <p className="font-mono">{existingDriveSlug}</p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {t('This drive already has a slug. Assigning it to an app keeps it.')}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <input
-                    id="driveSlug"
-                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
-                    placeholder={t('Derived from the name when left blank')}
-                    value={driveSlug}
-                    onChange={(e) => setDriveSlug(e.target.value)}
-                  />
-                  <p className="mt-1 text-sm text-slate-400">
-                    {t(
-                      'The segment this drive answers to under the app, as /apps/{app}/drives/{slug}.'
-                    )}
-                  </p>
-                </>
-              )}
-            </div>
-            <div className="mb-5">
-              <Label htmlFor="driveTypeSlug">{t('Drive type slug')}</Label>
-              {existingDriveTypeSlug ? (
-                <>
-                  <p className="font-mono">{existingDriveTypeSlug}</p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    {t('Kept as it is, the same as the slug.')}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <input
-                    id="driveTypeSlug"
-                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
-                    placeholder={t('Derived from the type when left blank')}
-                    value={driveTypeSlug}
-                    onChange={(e) => setDriveTypeSlug(e.target.value)}
-                  />
-                  <p className="mt-1 text-sm text-slate-400">
-                    {t('A category to filter on, not an address.')}
-                  </p>
-                </>
-              )}
-            </div>
-          </>
-        ) : null}
+        {showSlugFields ? slugFields : null}
 
         <GrantPreview
           appId={appId}
@@ -196,7 +149,7 @@ export const SetOwningAppDialog = ({
         />
 
         <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
-          <ActionButton state={state} icon={Arrow} disabled={!appId}>
+          <ActionButton state={state} icon={Arrow} disabled={!canSubmit}>
             {t('Assign')}
           </ActionButton>
           <ActionButton

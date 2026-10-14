@@ -79,9 +79,11 @@ export interface TargetDriveAccessRequest extends TargetDrive {
    * an address other identities resolve against.
    *
    * Required to be stated, but `undefined` is a legitimate value: for a *runtime instance* drive --
-   * one per feed channel, community or profile -- the server derives the slug from `name`, because
-   * only it holds the set of slugs the owning app already uses and so only it can dedupe two
-   * channels that happen to share a name. Every fixed drive names its own slug.
+   * one per feed channel, community or profile -- the owner console derives the slug from `name` when
+   * it creates the drive (see `ensureDrive`), because only the owner can list the slugs the owning
+   * app's drives already hold and so only it can dedupe two channels that share a name. The server
+   * itself derives nothing: whatever reaches it is a stated, valid slug. Every fixed drive names its
+   * own slug, which must be a valid slug (see `isValidSlug`).
    */
   driveSlug: string | undefined;
 

@@ -22,8 +22,8 @@ export const FONT_STACKS: Record<FontId, string> = {
   'space-mono': "'Space Mono', 'Reem Kufi', ui-monospace, 'SF Mono', Menlo, monospace",
 };
 
-export type LayoutId = 'poster' | 'board' | 'collage' | 'dossier';
-export const BLOCK_KINDS = ['links', 'moments', 'posts'] as const;
+export type LayoutId = 'poster' | 'board' | 'collage' | 'dossier' | 'links';
+export const BLOCK_KINDS = ['chat', 'links', 'moments', 'posts'] as const;
 export const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
 export const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
 export const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;

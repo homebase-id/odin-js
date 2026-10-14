@@ -11,7 +11,8 @@ import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { drivesParamToDriveGrantRequest, circleToCircleIds } from './util';
+import { drivesParamToDriveGrantRequest, drivesParamProblems, circleToCircleIds } from './util';
+import { InvalidAppRequest } from './InvalidAppRequest';
 import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import { useEffect } from 'react';
@@ -146,7 +147,14 @@ export const ExtendCirclePermissionsFromApp = () => {
 
   // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
   // one is its bug, but dropping a drive from the prompt would grant less than was asked for.
-  if (!circleDriveGrants) return <div>Bad request</div>;
+  if (!circleDriveGrants)
+    return (
+      <InvalidAppRequest
+        appName={appRegistration?.name}
+        problems={drivesParamProblems(cd || undefined, 'cd')}
+        returnUrl={returnUrl}
+      />
+    );
 
   return (
     <>

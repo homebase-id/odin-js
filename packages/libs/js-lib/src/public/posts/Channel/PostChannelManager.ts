@@ -143,9 +143,8 @@ export const saveChannelDefinition = async (
         //
         // The feed app owns every channel drive, and `channel` is the readable form of their shared
         // type. The drive slug is deliberately passed as undefined: a channel drive is a runtime
-        // instance drive, so the server derives its slug from the drive name, and only it holds the
-        // set of slugs the feed app has already used -- only it can dedupe two channels that happen
-        // to share a name.
+        // instance drive, so ensureDrive derives its slug from the channel name, unique among the
+        // slugs the feed app's drives already hold.
         await ensureDrive(
           dotYouClient,
           targetDrive,
@@ -155,7 +154,7 @@ export const saveChannelDefinition = async (
           false,
           true,
           FEED_APP_ID,
-          undefined, //leaving this undefined will let the server choose the slug
+          undefined, // derived from the name by ensureDrive
           CHANNEL_DRIVE_TYPE_SLUG
         );
       } else {

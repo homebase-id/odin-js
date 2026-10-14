@@ -27,6 +27,7 @@ import { useCollaborativeChannel } from '../hooks/socialFeed/channels/useCollabo
 import { ChannelDefinitionVm } from '../hooks/socialFeed/channels/useChannels';
 import { useManageChannel } from '../hooks/socialFeed/channels/useManageChannel';
 import { useDotYouClientContext } from '../hooks';
+import { ErrorNotification } from '../ui/Alert/ErrorNotification';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -45,7 +46,7 @@ export const ChannelItem = ({
   const [isEdit, setIsEdit] = useState(isDefaultEdit);
   const [isAclEdit, setIsAclEdit] = useState(isNew);
   const {
-    save: { mutateAsync: saveChannel, status: saveStatus },
+    save: { mutateAsync: saveChannel, status: saveStatus, error: saveError },
     remove: { mutateAsync: removeChannel },
   } = useManageChannel();
 
@@ -206,6 +207,7 @@ export const ChannelItem = ({
                 </Alert>
               ) : null}
 
+              <ErrorNotification error={saveError} />
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
@@ -213,6 +215,7 @@ export const ChannelItem = ({
 
                   if (!e.currentTarget.reportValidity()) return;
 
+                  // A refused save (a duplicate name, say) is shown through saveError below.
                   const uploadResult = await saveChannel({
                     ...chnlDsr,
                     fileMetadata: {
@@ -233,7 +236,7 @@ export const ChannelItem = ({
                       ...chnlDsr?.serverMetadata,
                       accessControlList: newAcl,
                     },
-                  });
+                  }).catch(() => undefined);
                   if (uploadResult) {
                     setIsEdit(false);
                     onClose && onClose();

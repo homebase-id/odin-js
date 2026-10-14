@@ -1,21 +1,17 @@
 import { Component, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
-import { DotYouClientContext, toSocialLink } from '@homebase-id/common-app';
+import { DotYouClientContext } from '@homebase-id/common-app';
 import type { DotYouClient } from '@homebase-id/js-lib/core';
 import type { CardDesign, LayoutId } from './CardDesign';
 import type { CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
+import { VisitorPreviewContext } from './parts/Blocks';
 import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
-import {
-  cardSocials,
-  type CardAudience,
-  type CardData,
-  type CardLink,
-  type CardPhoto,
-  type CardPost,
-} from './useCardData';
+import { snapshotFilter } from './snapshotFilter';
+import { toCardData, type AppData } from './toCardData';
+import type { CardAudience, CardData } from './useCardData';
 
 export type CardHost = 'app' | 'frame';
 
@@ -26,25 +22,12 @@ type CardEvent =
   | { type: 'png'; base64: string; width: number; height: number }
   | { type: 'error'; message: string };
 
-type AppImage = { src: string };
-type AppData = {
-  odinId: string;
-  firstName?: string;
-  surName?: string;
-  displayName?: string;
-  headline?: string;
-  bio?: string;
-  photo?: AppImage;
-  header?: AppImage;
-  links?: CardLink[];
-  socials?: { type: string; username: string }[];
-  posts?: (Omit<CardPost, 'image'> & { image?: AppImage })[];
-};
 type RenderRequest = {
   design: string;
   data: AppData;
   audience?: CardAudience;
   overrides?: CardOverrides;
+  visitorPreview?: boolean;
 };
 
 declare global {
@@ -59,7 +42,7 @@ const ARABIC_FACES = /IBM Plex Sans Arabic|Aref Ruqaa|Reem Kufi/;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
-// The owner is looking at their own card: nothing here may reach the network
+// The owner is looking at their own card: no chat block, and nothing here may reach the network
 const ownerClient = (odinId: string) =>
   ({
     isOwner: () => true,
@@ -67,43 +50,6 @@ const ownerClient = (odinId: string) =>
     getHostIdentity: () => odinId,
     getLoggedInIdentity: () => odinId,
   }) as unknown as DotYouClient;
-
-const toAudience = (audience: CardAudience | undefined): CardAudience | undefined =>
-  audience?.kind === 'public' || audience?.kind === 'circle'
-    ? { kind: audience.kind, label: audience.label }
-    : undefined;
-
-const toCardData = (
-  data: AppData,
-  dropped: (reason: string) => void,
-  audience?: CardAudience
-): CardData => {
-  if (!data?.odinId) throw new Error('data.odinId is required');
-  const image = (value: AppImage | undefined, field: string): CardPhoto | undefined => {
-    if (!value?.src) return undefined;
-    if (/^(data|blob):/i.test(value.src)) return { src: value.src };
-    dropped(`${field}.src is not a data: URL, dropped`);
-    return undefined;
-  };
-  return {
-    odinId: data.odinId,
-    firstName: data.firstName,
-    surName: data.surName,
-    displayName: data.displayName,
-    headline: data.headline,
-    bio: data.bio,
-    photo: image(data.photo, 'photo'),
-    header: image(data.header, 'header'),
-    links: data.links ?? [],
-    socials: cardSocials(
-      (data.socials ?? []).map((social, priority) => toSocialLink({ ...social, priority }))
-    ),
-    posts: (data.posts ?? [])
-      .slice(0, 12)
-      .map((post, index) => ({ ...post, image: image(post.image, `posts[${index}].image`) })),
-    audience: toAudience(audience),
-  };
-};
 
 // Chrome settles decode() and rAF only on a frame, and a WebView that draws none (off screen,
 // headless virtual time) never gets one: wait for it, but not forever
@@ -115,8 +61,9 @@ const whenPainted = async (element: HTMLElement, onError: (error: unknown) => vo
   await document.fonts.ready;
   await untilFrame(
     Promise.all(
-      Array.from(element.querySelectorAll('img')).map((img) =>
-        img.decode().catch(() => onError(`image ${img.src.slice(0, 40)}… failed to decode`))
+      Array.from(element.querySelectorAll<HTMLImageElement>('img:not([data-card-optional])')).map(
+        (img) =>
+          img.decode().catch(() => onError(`image ${img.src.slice(0, 40)}… failed to decode`))
       )
     ),
     500
@@ -128,7 +75,7 @@ const whenPainted = async (element: HTMLElement, onError: (error: unknown) => vo
 const rasterize = async (element: HTMLElement) => {
   const { toSvg } = await import('html-to-image');
   const { offsetWidth: width, offsetHeight: height } = element;
-  const svg = await toSvg(element);
+  const svg = await toSvg(element, { filter: snapshotFilter });
   const image = new Image();
   await new Promise((resolve, reject) => {
     image.onload = resolve;
@@ -177,7 +124,7 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { design: CardDesign; data: CardData };
+type Rendered = { design: CardDesign; data: CardData; visitorPreview: boolean };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
@@ -224,7 +171,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ design, data }));
+        flushSync(() => setCard({ design, data, visitorPreview: !!request.visitorPreview }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
@@ -322,22 +269,26 @@ const CardApp = ({ host }: { host: CardHost }) => {
       <main ref={main} className="h-full">
         {card ? (
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary resetKey={card} onError={onCardError}>
-              {wide ? (
-                <CardPage design={card.design} data={card.data} />
-              ) : (
-                <CompactCard card={card} />
-              )}
-            </CardBoundary>
+            <VisitorPreviewContext.Provider value={card.visitorPreview}>
+              <CardBoundary resetKey={card} onError={onCardError}>
+                {wide ? (
+                  <CardPage design={card.design} data={card.data} />
+                ) : (
+                  <CompactCard card={card} />
+                )}
+              </CardBoundary>
+            </VisitorPreviewContext.Provider>
           </DotYouClientContext.Provider>
         ) : null}
       </main>
       {card && exporting ? (
         <div ref={snapshot} aria-hidden style={EXPORT_FRAME}>
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <CardBoundary resetKey={card} onError={onCardError}>
-              <CompactCard card={card} />
-            </CardBoundary>
+            <VisitorPreviewContext.Provider value={card.visitorPreview}>
+              <CardBoundary resetKey={card} onError={onCardError}>
+                <CompactCard card={card} />
+              </CardBoundary>
+            </VisitorPreviewContext.Provider>
           </DotYouClientContext.Provider>
         </div>
       ) : null}

@@ -8,6 +8,9 @@ type Post = HomebaseFile<PostContent>;
 
 export const POSTS_HREF = `${HOME_ROOT_PATH}posts/${BlogConfig.PublicChannelSlug}`;
 
+// A card is handed at most this many posts; fewer means the count is the whole archive
+export const LOADED_POSTS = 12;
+
 export const usePostHref = () => {
   const client = useDotYouClientContext();
   const { data: channels } = useChannels({

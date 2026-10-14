@@ -21,6 +21,7 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
     },
     portraits: [],
     blocks: [
+      { kind: 'chat', presentation: 'bare' },
       { kind: 'moments', presentation: 'bare' },
       { kind: 'links', presentation: 'bare' },
       { kind: 'posts', presentation: 'bare' },
@@ -49,6 +50,7 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
     blocks: [
       { kind: 'links', presentation: 'boxed' },
       { kind: 'moments', presentation: 'boxed' },
+      { kind: 'chat', presentation: 'boxed' },
       { kind: 'posts', presentation: 'boxed' },
     ],
     socials: 'bar',
@@ -71,6 +73,7 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
       { source: 'header', shape: 'ellipse', tilt: 3, shadow: 'soft' },
     ],
     blocks: [
+      { kind: 'chat', presentation: 'button' },
       { kind: 'links', presentation: 'boxed' },
       { kind: 'moments', presentation: 'boxed' },
       { kind: 'posts', presentation: 'boxed' },
@@ -97,11 +100,39 @@ export const CARD_PRESETS: Record<LayoutId, CardDesign> = {
     },
     portraits: [{ source: 'photo', shape: 'square', mono: true }],
     blocks: [
+      { kind: 'chat', presentation: 'row' },
       { kind: 'moments', presentation: 'row' },
       { kind: 'links', presentation: 'row' },
       { kind: 'posts', presentation: 'row' },
     ],
     socials: 'handles',
+  },
+  links: {
+    version: 1,
+    layout: 'links',
+    palette: {
+      ground: '#F1F3F6',
+      ink: '#1B1F24',
+      muted: '#5C6673',
+      accent: '#1A66D6',
+      surface: '#FFFFFF',
+      surfaceInk: '#1B1F24',
+    },
+    ground: { photo: false },
+    type: {
+      display: 'montserrat',
+      displayCase: 'none',
+      text: 'montserrat',
+      label: 'montserrat',
+    },
+    portraits: [{ source: 'photo', shape: 'circle', ring: 3, shadow: 'soft' }],
+    blocks: [
+      { kind: 'links', presentation: 'boxed' },
+      { kind: 'moments', presentation: 'boxed' },
+      { kind: 'chat', presentation: 'boxed' },
+      { kind: 'posts', presentation: 'boxed' },
+    ],
+    socials: 'glyphs',
   },
 };
 

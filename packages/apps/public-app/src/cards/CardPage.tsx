@@ -5,12 +5,14 @@ import { PosterPage } from './layouts/poster/PosterPage';
 import { BoardPage } from './layouts/board/BoardPage';
 import { CollagePage } from './layouts/collage/CollagePage';
 import { DossierPage } from './layouts/dossier/DossierPage';
+import { LinksPage } from './layouts/links/LinksPage';
 
 const PAGES: Record<LayoutId, FC<LayoutProps>> = {
   poster: PosterPage,
   board: BoardPage,
   collage: CollagePage,
   dossier: DossierPage,
+  links: LinksPage,
 };
 
 export const CardPage = ({ design, data }: LayoutProps) => {

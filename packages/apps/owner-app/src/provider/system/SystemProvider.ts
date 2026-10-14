@@ -1,8 +1,17 @@
 import {DotYouClient, DriveDefinition, TargetDrive} from '@homebase-id/js-lib/core';
 import {CircleDefinition} from '@homebase-id/js-lib/network';
+import {assertValidSlug} from '@homebase-id/js-lib/helpers';
 
-export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDriveInfo'> {
+/**
+ * A drive the setup wizard asks the server to create (InitialSetupRequest.Drives). Each goes through
+ * the same create path as any other drive, so both slugs are required and must be valid slugs
+ * (see `isValidSlug`): the server derives neither.
+ */
+export interface DriveDefinitionParam
+    extends Omit<DriveDefinition, 'targetDriveInfo' | 'driveSlug' | 'driveTypeSlug'> {
     targetDrive: TargetDrive;
+    driveSlug: string;
+    driveTypeSlug: string;
 }
 
 //Handles management of the System
@@ -16,6 +25,10 @@ export const initialize = async (
 ) => {
     const client = dotYouClient.createAxiosClient();
     const url = root + '/initialize?';
+    drives?.forEach((d) => {
+        assertValidSlug('driveSlug', d.driveSlug);
+        assertValidSlug('driveTypeSlug', d.driveTypeSlug);
+    });
     const data = {firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? []};
 
     return client

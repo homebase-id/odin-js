@@ -4,6 +4,7 @@ import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useApp } from '../../hooks/apps/useApp';
+import { useApps } from '../../hooks/apps/useApps';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { useEffect, useMemo, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
@@ -168,7 +169,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
           <div className="container mx-auto p-5">
             <div className="max-w-[35rem] dark:text-white">
               {clientType === 'app' ? (
-                <AppDetails appId={clientId || undefined} targetDomain={targetDomain} />
+                <AppDetails clientId={clientId || undefined} targetDomain={targetDomain} />
               ) : (
                 <ServiceDetails targetDomain={targetDomain} clientName={clientName} />
               )}
@@ -268,9 +269,23 @@ const dateFormat: Intl.DateTimeFormatOptions = {
   year: 'numeric',
 };
 
-const AppDetails = ({ appId, targetDomain }: { appId?: string; targetDomain: string }) => {
+// An app's client_id is its app id or, from a device that knows only the slug, its slug (odin-core #1933).
+// The server matches a slug regardless of case.
+const GUID = /^\{?[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}\}?$/i;
+
+const useAppByClientId = (clientId?: string) => {
+  const isAppId = !!clientId && GUID.test(clientId);
+  const { data: byId } = useApp({ appId: isAppId ? clientId : undefined }).fetch;
+  const { data: apps } = useApps({ enabled: !!clientId && !isAppId }).fetchRegistered;
+
+  return isAppId
+    ? byId
+    : apps?.find((app) => app.appSlug?.toLowerCase() === clientId?.toLowerCase());
+};
+
+const AppDetails = ({ clientId, targetDomain }: { clientId?: string; targetDomain: string }) => {
   const [isDetails, setIsDetails] = useState(false);
-  const { data: appRegistration } = useApp({ appId }).fetch;
+  const appRegistration = useAppByClientId(clientId);
 
   return (
     <>

@@ -7,7 +7,7 @@ export const MAX_HEADER_CONTENT_BYTES = 7000; // 10240 bytes is the server limit
 // App ids, mirroring SystemAppConstants in odin-core. Change one, change both.
 //
 // These identify the app that OWNS a drive, and `ensureDrive` requires one: every drive is owned by
-// an app, and the server derives a drive slug against the set that app already holds.
+// an app, and drive slugs are unique within the app that owns them.
 //
 export const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 export const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';

@@ -1,0 +1,78 @@
+{
+    "design": "board",
+    "data": {
+        "odinId": "frodo.dotyou.cloud",
+        "firstName": "Frodo",
+        "surName": "Baggins",
+        "displayName": "Frodo Baggins",
+        "headline": "Ring bearer",
+        "photo": {
+            "src": "data:image/jpeg;base64,friends-key"
+        },
+        "links": [
+            {
+                "id": "1",
+                "text": "Friends only",
+                "target": "https://friends.example.com/b"
+            },
+            {
+                "id": "2",
+                "text": "Public site",
+                "target": "https://public.example.com/a"
+            }
+        ],
+        "socials": [
+            {
+                "type": "twitter",
+                "username": "frodo"
+            }
+        ],
+        "posts": []
+    },
+    "audience": {
+        "kind": "circle",
+        "label": "Friends"
+    },
+    "overrides": {
+        "palette": {
+            "ground": "#112233",
+            "ink": "#F0F0F0",
+            "muted": "#99AABB",
+            "accent": "#ABCDEF",
+            "surface": "#223344",
+            "surfaceInk": "#FFFFFF"
+        },
+        "type": {
+            "display": "caveat",
+            "text": "newsreader",
+            "label": "space-mono",
+            "displayCase": "upper"
+        },
+        "portraits": [
+            {
+                "source": "photo",
+                "shape": "rounded",
+                "ring": 2,
+                "shadow": "soft",
+                "tilt": 5,
+                "tape": true,
+                "mono": true
+            }
+        ],
+        "blocks": [
+            {
+                "kind": "posts",
+                "presentation": "row"
+            },
+            {
+                "kind": "links",
+                "presentation": "button"
+            },
+            {
+                "kind": "chat",
+                "presentation": "boxed"
+            }
+        ],
+        "socials": "handles"
+    }
+}

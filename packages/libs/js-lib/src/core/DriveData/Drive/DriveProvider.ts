@@ -2,6 +2,8 @@ import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
   assertIfDefined,
+  assertValidSlug,
+  deriveUniqueDriveSlug,
   drivesEqual,
   hasDebugFlag,
   stringGuidsEqual,
@@ -74,17 +76,18 @@ export const getDrivesByType = async (
 /**
  * Creates the drive if it does not already exist.
  *
- * `appId`, `driveSlug` and `driveTypeSlug` are the drive's address, and all three are required
- * parameters: every drive is owned by an app and addressable as `/apps/{appSlug}/drives/{driveSlug}`,
- * so there is no such thing as creating one without saying who owns it and what it is called.
+ * `appId`, `driveSlug` and `driveTypeSlug` are the drive's address: every drive is owned by an app
+ * and addressable as `/apps/{appSlug}/drives/{driveSlug}`. The server requires both slugs on create
+ * and never derives or coerces one, so whatever is sent here has to be a valid slug already.
  *
- * `driveSlug` may still be passed as `undefined`, and only for a *runtime instance* drive -- one per
- * feed channel, community or profile. There the server derives the slug from `name`, because only it
- * holds the set of slugs the owning app already uses and so only it can dedupe two channels that
- * share a name. Stating `undefined` is the point: it is a decision, not an omission.
+ * `driveSlug` may be passed as `undefined`, and only for a *runtime instance* drive -- one per feed
+ * channel, community or profile, named by the user. The slug is then derived here from `name` (or
+ * the alias when the name yields nothing) and made unique among the slugs the owning app's existing
+ * drives hold, since drive slugs are unique per owning app. That list is the one fetched below to
+ * check whether the drive exists, so it costs no extra call.
  *
  * A slug is immutable once written and is an address other identities resolve against, so whatever
- * is passed here is permanent.
+ * is sent here is permanent.
  */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
@@ -101,7 +104,8 @@ export const ensureDrive = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
   assertIfDefined('appId', appId);
-  assertIfDefined('driveTypeSlug', driveTypeSlug);
+  assertValidSlug('driveTypeSlug', driveTypeSlug);
+  if (driveSlug !== undefined) assertValidSlug('driveSlug', driveSlug);
 
   //create the drive if it does not exist
   const client = dotYouClient.createAxiosClient();
@@ -111,6 +115,16 @@ export const ensureDrive = async (
 
   if (foundDrive) return true;
 
+  const slug =
+    driveSlug ??
+    deriveUniqueDriveSlug(
+      name,
+      targetDrive.alias,
+      allDrives.results
+        .filter((d) => stringGuidsEqual(d.appId ?? undefined, appId))
+        .map((d) => d.driveSlug)
+    );
+
   const data = {
     name: name,
     targetDrive: targetDrive,
@@ -119,7 +133,7 @@ export const ensureDrive = async (
     allowSubscriptions: allowSubscriptions,
     allowCdn: allowCdn,
     appId: appId,
-    driveSlug: driveSlug,
+    driveSlug: slug,
     driveTypeSlug: driveTypeSlug,
   };
 
@@ -318,19 +332,21 @@ export const editDriveAllowCdn = async (
  * under that app.
  *
  * One way, and owner-only. The server refuses a drive that already names an app, and refuses a
- * provisioned one outright. Omit the slugs to have them derived from the drive's name and type --
- * a supplied slug is never coerced, so a malformed or already-taken one is rejected rather than
- * turned into an address nobody asked for.
+ * provisioned one outright. Both slugs are required: the server derives nothing and keeps nothing,
+ * and a malformed or already-taken slug is rejected rather than turned into an address nobody asked
+ * for.
  */
 export const setDriveOwningApp = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   appId: string,
-  driveSlug?: string,
-  driveTypeSlug?: string
+  driveSlug: string,
+  driveTypeSlug: string
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('appId', appId);
+  assertValidSlug('driveSlug', driveSlug);
+  assertValidSlug('driveTypeSlug', driveTypeSlug);
 
   const client = dotYouClient.createAxiosClient();
   const data = {
@@ -353,18 +369,19 @@ export const setDriveOwningApp = async (
  * Moves a drive from the app that owns it to another, at a new address.
  *
  * Requires the master key, so the owner console only. The old address stops resolving -- there is
- * no forwarding and no alias -- which is why the slug is required here rather than derived.
+ * no forwarding and no alias -- which is why both slugs are required here rather than derived.
  */
 export const reassignDriveOwningApp = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   appId: string,
   driveSlug: string,
-  driveTypeSlug?: string
+  driveTypeSlug: string
 ) => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('appId', appId);
-  assertIfDefined('driveSlug', driveSlug);
+  assertValidSlug('driveSlug', driveSlug);
+  assertValidSlug('driveTypeSlug', driveTypeSlug);
 
   const client = dotYouClient.createAxiosClient();
   const data = {

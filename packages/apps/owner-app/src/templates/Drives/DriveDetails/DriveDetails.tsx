@@ -11,7 +11,9 @@ import {PageMeta} from '@homebase-id/common-app';
 import {
     drivesEqual,
     getDrivePermissionFromNumber,
+    slugFromAlias,
     stringGuidsEqual,
+    toOdinSlug,
 } from '@homebase-id/js-lib/helpers';
 import {TRANSIENT_TEMP_DRIVE_ALIAS} from '@homebase-id/js-lib/core';
 import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
@@ -410,15 +412,21 @@ const DriveDetails = () => {
                 subject="drive"
                 isOpen={isSetOwningAppOpen}
                 showSlugFields={true}
-                existingDriveSlug={driveDef.driveSlug}
-                existingDriveTypeSlug={driveDef.driveTypeSlug}
+                targetDrive={targetDriveInfo}
+                // The address it has under the owner console, else one made from its name.
+                suggestedDriveSlug={
+                    driveDef.driveSlug ||
+                    toOdinSlug(driveDef.name) ||
+                    slugFromAlias(targetDriveInfo.alias)
+                }
+                suggestedDriveTypeSlug={driveDef.driveTypeSlug}
                 onCancel={() => setIsSetOwningAppOpen(false)}
-                onConfirm={async (appId, driveSlug, driveTypeSlug) => {
+                onConfirm={async (appId, slugs) => {
+                    if (!slugs) throw new Error('A drive is assigned to an app with both slugs');
                     await setOwningApp({
                         targetDrive: targetDriveInfo,
                         appId: appId,
-                        driveSlug: driveSlug,
-                        driveTypeSlug: driveTypeSlug,
+                        ...slugs,
                     });
                     setIsSetOwningAppOpen(false);
                 }}
@@ -430,14 +438,16 @@ const DriveDetails = () => {
                 isOpen={isReassignOwningAppOpen}
                 currentAppName={owningApp?.name}
                 requireSlug={true}
+                targetDrive={targetDriveInfo}
                 currentDriveSlug={driveDef.driveSlug}
+                currentDriveTypeSlug={driveDef.driveTypeSlug}
                 onCancel={() => setIsReassignOwningAppOpen(false)}
-                onConfirm={async (appId, driveSlug, driveTypeSlug) => {
+                onConfirm={async (appId, slugs) => {
+                    if (!slugs) throw new Error('A drive is reassigned with both slugs');
                     await reassignOwningApp({
                         targetDrive: targetDriveInfo,
                         appId: appId,
-                        driveSlug: driveSlug as string,
-                        driveTypeSlug: driveTypeSlug,
+                        ...slugs,
                     });
                     setIsReassignOwningAppOpen(false);
                 }}

@@ -1,3 +1,4 @@
+import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DrivePurgeStatus } from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import { useApp } from '../../../hooks/apps/useApp';
@@ -105,7 +106,11 @@ const AppDetails = () => {
     .map((circleId) => (circles ?? []).find((circle) => stringGuidsEqual(circle.id, circleId)))
     .filter((circle): circle is NonNullable<typeof circle> => !!circle);
 
+  // The automatic transient-drive grant is left out, as DrivePermissionView hides it: an app whose
+  // only grant is that one reads as having no access, rather than as an empty list.
   const driveGrants = app?.grant.driveGrants?.reduce((acc: DriveGrant[], grant) => {
+    if (stringGuidsEqual(grant.permissionedDrive.drive.alias, TRANSIENT_TEMP_DRIVE_ALIAS))
+      return acc;
     if (
       !acc.some((drive) =>
         drivesEqual(drive.permissionedDrive.drive, grant.permissionedDrive.drive)
