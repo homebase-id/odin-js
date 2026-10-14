@@ -1,12 +1,6 @@
 import { useEffect, useState, type CSSProperties, type FC } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  ChatBubble,
-  Chevron,
-  ExternalLink,
-  ImageIcon,
-  type IconProps,
-} from '@homebase-id/common-app/icons';
+import { Chevron, ExternalLink, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
 import { t } from '@homebase-id/common-app';
 import {
   CARD_FOCUS,
@@ -17,7 +11,7 @@ import {
 } from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
 import { LOADED_POSTS, POSTS_HREF } from '../../parts/posts';
-import { CardBlock, displayUrl, hasBlockContent, useChatHref } from '../../parts/Blocks';
+import { CardBlock, displayUrl, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
 import { BreakAtDots, CardName } from '../../parts/Type';
@@ -407,7 +401,7 @@ const LinkList = ({
   );
 };
 
-// Moments and chat stay on this site or in the app, so they read as places, not as outbound links
+// Moments stay on this site, so they read as a place, not as an outbound link
 const PlaceTile = ({
   icon: Icon,
   label,
@@ -457,12 +451,10 @@ const momentsDetail = (data: CardData) =>
 const LinksBlock = ({
   block,
   data,
-  chatHref,
   columns,
 }: {
   block: CardDesign['blocks'][number];
   data: CardData;
-  chatHref: string | undefined;
   columns?: boolean;
 }) => {
   const flat = FLAT.includes(block.presentation);
@@ -478,16 +470,7 @@ const LinksBlock = ({
         internal
       />
     );
-  if (block.presentation === 'boxed' && block.kind === 'chat' && chatHref)
-    return (
-      <PlaceTile
-        icon={ChatBubble}
-        label={t('Chat with me')}
-        detail={t('Opens Homebase Chat')}
-        href={chatHref}
-      />
-    );
-  return <CardBlock block={block} data={data} chatHref={chatHref} />;
+  return <CardBlock block={block} data={data} />;
 };
 
 const handleOf = (social: CardData['socials'][number]) =>
@@ -619,12 +602,11 @@ export const LinksList = ({
   emptyNote = true,
   columns,
 }: LayoutProps & { skipMoments?: boolean; emptyNote?: boolean; columns?: boolean }) => {
-  const chatHref = useChatHref(data.odinId);
   const blocks = design.blocks.filter(
     (block) =>
       block.kind !== 'posts' &&
       !(skipMoments && block.kind === 'moments') &&
-      (block.kind === 'links' ? hasLinks(data) : hasBlockContent(block.kind, data, chatHref))
+      (block.kind === 'links' ? hasLinks(data) : hasBlockContent(block.kind, data))
   );
   if (!blocks.length)
     return emptyNote ? (
@@ -635,13 +617,7 @@ export const LinksList = ({
   return (
     <nav aria-label={t('Links')} className="flex w-full flex-col gap-3">
       {blocks.map((block) => (
-        <LinksBlock
-          key={block.kind}
-          block={block}
-          data={data}
-          chatHref={chatHref}
-          columns={columns}
-        />
+        <LinksBlock key={block.kind} block={block} data={data} columns={columns} />
       ))}
     </nav>
   );

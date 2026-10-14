@@ -13,7 +13,6 @@ import {
   useUnreadPushNotificationsCount,
   OWNER_APP_ID,
   CHAT_APP_ID,
-  MAIL_APP_ID,
   FEED_APP_ID,
   PHOTO_APP_ID,
   COMMUNITY_APP_ID,
@@ -33,11 +32,7 @@ const Dashboard = () => {
         <Link className="underline" to="/owner/profile">
           profile
         </Link>
-        , manage your{' '}
-        <Link className="underline" to="/owner/connections">
-          connections
-        </Link>
-        {' '}and{' '}
+        {' '}and manage your{' '}
         <Link className="underline" to="/owner/apps">
           apps
         </Link>
@@ -48,7 +43,6 @@ const Dashboard = () => {
         <SystemApp />
         <FeedApp />
         <ChatApp />
-        <MailApp />
         <CommunityApp />
         <PhotoApp />
         <SocialSyncApp />
@@ -123,6 +117,7 @@ const SystemApp = () => {
   );
 };
 
+// The chat web app is the Kotlin/WASM chat-kmp bundle odin-core serves at /apps/chat.
 const ChatApp = () => {
   // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
   const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
@@ -159,26 +154,6 @@ const ChatApp = () => {
                 },
               ]
             : []),
-      ]}
-    />
-  );
-};
-
-const MailApp = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
-
-  return (
-    <AppWrapper
-      appId={MAIL_APP_ID}
-      name={'Mail'}
-      href={`/apps/mail`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/apps/${MAIL_APP_ID}`,
-        },
       ]}
     />
   );

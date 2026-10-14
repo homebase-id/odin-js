@@ -11,7 +11,6 @@ import {
 } from '@homebase-id/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
-import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
   const { owner } = useSiteData().data ?? {};
@@ -53,7 +52,6 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
             ) : null}
             <div className="mt-4 flex flex-row">
               <FollowLink className="my-1 mr-3" />
-              <ConnectLink className="my-1" />
             </div>
             <div className="-mb-4 mt-auto py-12">
               {channels?.map((channel) => {

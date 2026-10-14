@@ -1,6 +1,5 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
-  ConnectionInfo,
   getConnectionInfo,
   getPendingRequest,
   getSentRequest,
@@ -75,16 +74,4 @@ export const useDetailedConnectionInfo = ({ odinId }: { odinId?: string }) => {
 export const invalidateConnectionInfo = async (queryClient: QueryClient, odinId: string) => {
   await queryClient.invalidateQueries({ queryKey: ['connection-info', odinId] });
   await queryClient.invalidateQueries({ queryKey: ['detailed-connection-info', odinId] });
-};
-
-export const updateCachedConnectionInfo = (
-  queryClient: QueryClient,
-  odinId: string,
-  transformFn: (info: ConnectionInfo) => ConnectionInfo
-): ConnectionInfo | undefined => {
-  const queryData = queryClient.getQueryData<ConnectionInfo>(['connection-info', odinId]);
-  if (!queryData) return;
-  queryClient.setQueryData(['connection-info', odinId], transformFn(queryData));
-
-  return { ...queryData };
 };

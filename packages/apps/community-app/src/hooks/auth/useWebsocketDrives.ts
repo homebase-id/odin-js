@@ -2,7 +2,7 @@ import { TargetDrive } from '@homebase-id/js-lib/core';
 import { getTargetDriveFromCommunityId } from '../../providers/CommunityDefinitionProvider';
 import { LOCAL_COMMUNITY_APP_DRIVE } from '../../providers/CommunityMetadataProvider';
 import { useParams } from 'react-router-dom';
-import { ChatDrive } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import { ChatDrive } from '../../chat/providers/ConversationProvider';
 import { useLocalCommunityDrives } from '../community/useLocalCommunityDrives';
 
 export const useWebsocketDrives = () => {
