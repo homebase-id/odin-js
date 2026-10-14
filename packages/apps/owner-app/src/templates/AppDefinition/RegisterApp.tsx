@@ -1,4 +1,5 @@
 import {
+  AppCircleDeclaration,
   AppRegistrationRequest,
   DriveGrantRequest,
 } from '../../provider/app/AppManagementProviderTypes';
@@ -20,7 +21,7 @@ import {
   getStateParam,
 } from '@homebase-id/common-app';
 import { PermissionSet } from '@homebase-id/js-lib/core';
-import { isValidSlug } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, isValidSlug } from '@homebase-id/js-lib/helpers';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useDrives } from '../../hooks/drives/useDrives';
 import {
@@ -28,6 +29,8 @@ import {
   drivesParamToDriveGrantRequest,
   drivesParamProblems,
   circleParamToCircleIds,
+  appCirclesParamProblems,
+  appCirclesParamToDeclarations,
 } from './util';
 import { InvalidAppRequest } from './InvalidAppRequest';
 
@@ -73,6 +76,9 @@ const RegisterApp = () => {
   const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
   const cd = searchParams.get('cd');
   const circleDriveGrants = drivesParamToDriveGrantRequest(cd || undefined);
+  // Circles the app declares, created with it (odin-core #1939). Optional: empty when absent.
+  const ac = searchParams.get('ac');
+  const appCircles = appCirclesParamToDeclarations(ac || undefined);
 
   // The server refuses a missing or malformed app slug and never coerces one, built-in apps
   // included, so a bad `as` is refused here before the owner is asked to approve anything. Every
@@ -88,6 +94,7 @@ const RegisterApp = () => {
     ...(!returnUrl ? [t('`return` is missing')] : []),
     ...drivesParamProblems(d || undefined, 'd'),
     ...drivesParamProblems(cd || undefined, 'cd'),
+    ...appCirclesParamProblems(ac || undefined),
   ];
 
   if (
@@ -97,7 +104,8 @@ const RegisterApp = () => {
     !appSlug ||
     !returnUrl ||
     !driveGrants ||
-    !circleDriveGrants
+    !circleDriveGrants ||
+    !appCircles
   ) {
     console.error('Invalid app registration request', problems);
     return (
@@ -144,6 +152,7 @@ const RegisterApp = () => {
               defaultCircleIds={circleSelection}
               circlePermissionSet={circlePermissionSet}
               circleDriveGrants={circleDriveGrants}
+              appCircles={appCircles}
               registerApp={doRegisterApp}
               registerAppState={registerAppState}
               doCancel={doCancel}
@@ -167,6 +176,7 @@ const AppRegistration = ({
   defaultCircleIds,
   circlePermissionSet,
   circleDriveGrants,
+  appCircles,
   registerApp,
   registerAppState,
   doCancel,
@@ -180,6 +190,7 @@ const AppRegistration = ({
   defaultCircleIds?: string[];
   circlePermissionSet?: PermissionSet;
   circleDriveGrants?: DriveGrantRequest[];
+  appCircles: AppCircleDeclaration[];
   registerApp: (data: AppRegistrationRequest) => Promise<void>;
   registerAppState: ActionButtonState;
   doCancel: () => void;
@@ -203,8 +214,18 @@ const AppRegistration = ({
         drives: circleDriveGrants,
         permissionSet: circlePermissionSet,
       },
+      circles: appCircles,
     });
   };
+
+  // A declared circle's grant names only the drive; borrow the name the app gave it in `d`, so a
+  // drive this install is about to create shows by name rather than as an unknown alias.
+  const withDriveMeta = (grant: DriveGrantRequest): DriveGrantRequest => ({
+    ...grant,
+    driveMeta: driveGrants?.find((requested) =>
+      drivesEqual(requested.permissionedDrive.drive, grant.permissionedDrive.drive)
+    )?.driveMeta,
+  });
 
   const existingDriveGrants = driveGrants?.filter((grant) =>
     existingDrives?.some(
@@ -284,6 +305,41 @@ const AppRegistration = ({
                       key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                       driveGrant={grant}
                     />
+                  ))}
+                </div>
+              </Section>
+            </>
+          ) : null}
+
+          {appCircles.length ? (
+            <>
+              <p>
+                {t(
+                  'And creates these circles, which it owns. Anyone added to one gets what it grants'
+                )}
+                :
+              </p>
+              <Section>
+                <div className="flex flex-col gap-6">
+                  {appCircles.map((circle) => (
+                    <div key={circle.slug} className="flex flex-col gap-2">
+                      <p className="leading-none">
+                        {circle.emoji ? `${circle.emoji} ` : ''}
+                        <span className="font-bold">{circle.name}</span>
+                        {circle.description ? (
+                          <span className="block text-sm text-slate-400">{circle.description}</span>
+                        ) : null}
+                      </p>
+                      {circle.permissions.keys.map((permissionLevel) => (
+                        <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                      ))}
+                      {circle.driveGrants.map((grant) => (
+                        <DrivePermissionRequestView
+                          key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                          driveGrant={withDriveMeta(grant)}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
               </Section>
