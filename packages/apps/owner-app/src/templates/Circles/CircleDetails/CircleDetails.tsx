@@ -300,6 +300,13 @@ const CircleDetails = () => {
           <Fact label={t('Id')}>
             <span className="break-all font-mono text-slate-400">{circleId}</span>
           </Fact>
+          <Fact label={t('Slug')}>
+            {circle.slug ? (
+              <span className="break-all font-mono">{circle.slug}</span>
+            ) : (
+              <span className="text-slate-400">{t('None')}</span>
+            )}
+          </Fact>
         </dl>
       </Section>
 
