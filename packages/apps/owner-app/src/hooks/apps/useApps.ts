@@ -2,7 +2,7 @@ import { QueryClient, useQuery } from '@tanstack/react-query';
 import { GetAppRegistrations } from '../../provider/app/AppManagementProvider';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
-export const useApps = () => {
+export const useApps = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchRegistered = async () => {
@@ -15,6 +15,7 @@ export const useApps = () => {
       queryKey: ['apps'],
       queryFn: () => fetchRegistered(),
       refetchOnWindowFocus: false,
+      enabled,
     }),
   };
 };
