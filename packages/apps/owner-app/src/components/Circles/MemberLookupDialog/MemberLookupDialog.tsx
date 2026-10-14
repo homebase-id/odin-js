@@ -92,7 +92,7 @@ const MemberLookupDialog = ({
   return createPortal(dialog, target);
 };
 
-export const MemberLookupSelection = ({
+const MemberLookupSelection = ({
   title,
   gridClassName,
   defaultSelection,

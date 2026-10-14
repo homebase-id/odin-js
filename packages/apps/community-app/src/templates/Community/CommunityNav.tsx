@@ -40,10 +40,10 @@ import {
   Trash,
 } from '@homebase-id/common-app/icons';
 import { CommunityInfoDialog } from '../../components/Community/CommunityInfoDialog';
-import { useConversationMetadata } from '@homebase-id/chat-app/src/hooks/chat/useConversationMetadata';
-import { useChatMessages } from '@homebase-id/chat-app/src/hooks/chat/useChatMessages';
-import { ChatMessage } from '@homebase-id/chat-app/src/providers/ChatProvider';
-import { ConversationWithYourselfId } from '@homebase-id/chat-app/src/providers/ConversationProvider';
+import { useConversationMetadata } from '../../chat/hooks/chat/useConversationMetadata';
+import { useChatMessages } from '../../chat/hooks/chat/useChatMessages';
+import { ChatMessage } from '../../chat/providers/ChatProvider';
+import { ConversationWithYourselfId } from '../../chat/providers/ConversationProvider';
 import { useCommunityMessages } from '../../hooks/community/messages/useCommunityMessages';
 import { useHasUnreadThreads } from '../../hooks/community/threads/useCommunityThreads';
 import { MyProfileStatus, ProfileStatus } from '../../components/Community/status/MyProfileStatus';

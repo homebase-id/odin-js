@@ -179,22 +179,11 @@ self.addEventListener('notificationclick', (event) => {
 
   const {pathToOpen, postMessageData}: { pathToOpen: string; postMessageData?: unknown } =
     (() => {
-        if (
-          event.notification?.data?.options?.appId === CHAT_APP_ID &&
-          event.notification?.data?.options?.typeId
-        ) {
-          return {
-            pathToOpen: `/apps/chat/${event.notification?.data?.options?.typeId}`,
-          };
-        }
-
-        if (
-          event.notification?.data?.options?.appId === MAIL_APP_ID &&
-          event.notification?.data?.options?.typeId
-        ) {
-          return {
-            pathToOpen: `/apps/mail/inbox/${event.notification?.data?.options?.typeId}`,
-          };
+        // Chat opens the Kotlin/WASM app at its root: it routes by URL fragment, not path, so it has
+        // no per-conversation URL to open. Mail has no web app any more and falls through to the
+        // notifications list.
+        if (event.notification?.data?.options?.appId === CHAT_APP_ID) {
+          return {pathToOpen: `/apps/chat`};
         }
 
         if (event.notification?.data?.options?.appId === FEED_APP_ID) {

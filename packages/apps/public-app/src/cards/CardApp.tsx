@@ -6,7 +6,6 @@ import type { CardDesign, LayoutId } from './CardDesign';
 import type { CardOverrides } from './overrides';
 import { CardPage } from './CardPage';
 import { HomebaseCard } from './HomebaseCard';
-import { VisitorPreviewContext } from './parts/Blocks';
 import { resolveRequestDesign } from './resolveDesign';
 import { useMinWidth } from './useMinWidth';
 import { snapshotFilter } from './snapshotFilter';
@@ -27,7 +26,6 @@ type RenderRequest = {
   data: AppData;
   audience?: CardAudience;
   overrides?: CardOverrides;
-  visitorPreview?: boolean;
 };
 
 declare global {
@@ -42,7 +40,7 @@ const ARABIC_FACES = /IBM Plex Sans Arabic|Aref Ruqaa|Reem Kufi/;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
-// The owner is looking at their own card: no chat block, and nothing here may reach the network
+// The owner is looking at their own card: nothing here may reach the network
 const ownerClient = (odinId: string) =>
   ({
     isOwner: () => true,
@@ -124,7 +122,7 @@ class CardBoundary extends Component<
   }
 }
 
-type Rendered = { design: CardDesign; data: CardData; visitorPreview: boolean };
+type Rendered = { design: CardDesign; data: CardData };
 
 const CompactCard = ({ card }: { card: Rendered }) => (
   <HomebaseCard
@@ -171,7 +169,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
         const data = toCardData(request.data, postError, request.audience);
         owner = data.odinId;
         failure.current = undefined;
-        flushSync(() => setCard({ design, data, visitorPreview: !!request.visitorPreview }));
+        flushSync(() => setCard({ design, data }));
         const element = rendered();
         if (!element) throw failure.current ?? new Error('the card did not render');
         painted = whenPainted(element, postError).then(() => {
@@ -269,26 +267,22 @@ const CardApp = ({ host }: { host: CardHost }) => {
       <main ref={main} className="h-full">
         {card ? (
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <VisitorPreviewContext.Provider value={card.visitorPreview}>
-              <CardBoundary resetKey={card} onError={onCardError}>
-                {wide ? (
-                  <CardPage design={card.design} data={card.data} />
-                ) : (
-                  <CompactCard card={card} />
-                )}
-              </CardBoundary>
-            </VisitorPreviewContext.Provider>
+            <CardBoundary resetKey={card} onError={onCardError}>
+              {wide ? (
+                <CardPage design={card.design} data={card.data} />
+              ) : (
+                <CompactCard card={card} />
+              )}
+            </CardBoundary>
           </DotYouClientContext.Provider>
         ) : null}
       </main>
       {card && exporting ? (
         <div ref={snapshot} aria-hidden style={EXPORT_FRAME}>
           <DotYouClientContext.Provider value={ownerClient(card.data.odinId)}>
-            <VisitorPreviewContext.Provider value={card.visitorPreview}>
-              <CardBoundary resetKey={card} onError={onCardError}>
-                <CompactCard card={card} />
-              </CardBoundary>
-            </VisitorPreviewContext.Provider>
+            <CardBoundary resetKey={card} onError={onCardError}>
+              <CompactCard card={card} />
+            </CardBoundary>
           </DotYouClientContext.Provider>
         </div>
       ) : null}

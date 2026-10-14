@@ -1,0 +1,325 @@
+import {
+  ActionGroup,
+  ErrorBoundary,
+  ErrorNotification,
+  HybridLink,
+  t,
+  useDotYouClientContext,
+  useIntroductions,
+  useIsConnected,
+} from '@homebase-id/common-app';
+import { ChevronDown, ChevronLeft } from '@homebase-id/common-app/icons';
+import { ApiType, DotYouClient, HomebaseFile } from '@homebase-id/js-lib/core';
+import {
+  ConversationMetadata,
+  ConversationWithYourselfId,
+  UnifiedConversation,
+} from '../../providers/ConversationProvider';
+import { FC, useEffect, useState } from 'react';
+import { useConversation } from '../../hooks/chat/useConversation';
+import { ChatMessage } from '../../providers/ChatProvider';
+import { ChatHistory } from '../../components/Chat/ChatHistory';
+import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { ConversationAvatar } from '../../components/Chat/Conversations/Item/ConversationAvatar';
+import { ConversationTitle } from '../../components/Chat/Conversations/Item/ConversationTitle';
+
+export interface ChatComposerProps {
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
+  replyMsg: HomebaseFile<ChatMessage> | undefined;
+  clearReplyMsg: () => void;
+  onSend?: () => void;
+  tags?: string[];
+}
+
+export const ChatDetail = ({
+  conversationId,
+  communityTagId,
+  options,
+}: {
+  conversationId: string | undefined;
+  communityTagId?: string;
+  options: {
+    rootPath: string;
+    composer: FC<ChatComposerProps>;
+  };
+}) => {
+  const { rootPath, composer: Composer } = options;
+  const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
+  const { mutate: inviteRecipient } = useConversation().inviteRecipient;
+  const { mutate: introduceIdentities } = useIntroductions().introduceIdentities;
+  const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  if (!conversationId || isLoading || (!conversation && isFetched))
+    return (
+      <div className="flex h-full flex-grow flex-col items-center justify-center">
+        <p className="text-4xl">Homebase Chat</p>
+      </div>
+    );
+
+  const onSend = async () => {
+    const firstOfSeptember2024 = new Date('2024-08-01').getTime();
+    if (
+      !conversation ||
+      stringGuidsEqual(conversationId, ConversationWithYourselfId) ||
+      conversation?.fileMetadata.senderOdinId !== loggedOnIdentity ||
+      conversation.fileMetadata.created <= firstOfSeptember2024
+    ) {
+      return;
+    }
+
+    const filteredRecipients = conversation.fileMetadata.appData.content.recipients.filter(
+      (recipient) => recipient !== loggedOnIdentity
+    );
+
+    const anyRecipientMissingConversation =
+      conversation.serverMetadata?.originalRecipientCount !==
+      conversation.serverMetadata?.transferHistory?.summary.totalDelivered;
+    if (anyRecipientMissingConversation) {
+      console.debug('invite recipient(s)', filteredRecipients);
+      inviteRecipient({ conversation });
+      if (filteredRecipients.length > 1) {
+        // Group chat; Good to introduce everyone
+        await introduceIdentities({
+          message: t('{0} has added you to a group chat', loggedOnIdentity || ''),
+          recipients: filteredRecipients,
+        });
+      }
+    }
+  };
+
+  return (
+    <ErrorBoundary>
+      <div className="flex h-full flex-grow flex-col overflow-hidden">
+        <ChatHeader conversation={conversation || undefined} rootPath={rootPath} />
+        <GroupChatConnectedState conversation={conversation || undefined} />
+        <ErrorBoundary>
+          <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
+        </ErrorBoundary>
+        <ErrorBoundary key={conversationId}>
+          <Composer
+            tags={communityTagId ? [communityTagId] : undefined}
+            conversation={conversation || undefined}
+            replyMsg={replyMsg}
+            clearReplyMsg={() => setReplyMsg(undefined)}
+            onSend={onSend}
+            key={conversationId}
+          />
+        </ErrorBoundary>
+      </div>
+    </ErrorBoundary>
+  );
+};
+
+const ChatHeader = ({
+  conversation: conversationDsr,
+  rootPath,
+}: {
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
+  rootPath: string;
+}) => {
+  const navigate = useNavigate();
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  const withYourself =
+    conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
+  const conversation = conversationDsr?.fileMetadata.appData.content;
+  const recipients = conversation?.recipients;
+  const singleRecipient =
+    recipients && recipients.length === 2
+      ? recipients.filter((recipient) => recipient !== loggedOnIdentity)[0]
+      : undefined;
+
+  const infoChatMatch = useMatch({ path: `${rootPath}/:conversationKey/info` });
+  const showChatInfo = !!infoChatMatch;
+
+  const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
+  const {
+    mutate: deleteChat,
+    error: deleteChatError,
+    status: deleteChatStatus,
+  } = useConversation().deleteChat;
+  const {
+    mutate: archiveChat,
+    error: archiveChatError,
+    status: archiveChatStatus,
+  } = useConversation().archiveChat;
+  const { mutate: restoreChat, error: restoreChatError } = useConversation().restoreChat;
+  const { mutate: introduceIdentities, error: makeIntroductionError } =
+    useIntroductions().introduceIdentities;
+
+  const makeIntroduction = async () => {
+    if (!conversation) return;
+
+    const filteredRecipients = conversation.recipients.filter(
+      (recipient) => recipient !== loggedOnIdentity
+    );
+
+    await introduceIdentities({
+      message: t('{0} has added you to a group chat', loggedOnIdentity || ''),
+      recipients: filteredRecipients,
+    });
+  };
+
+  useEffect(() => {
+    if (deleteChatStatus === 'success') navigate(rootPath);
+  }, [deleteChatStatus]);
+
+  useEffect(() => {
+    if (archiveChatStatus === 'success') navigate(rootPath);
+  }, [archiveChatStatus]);
+
+  return (
+    <>
+      <ErrorNotification
+        error={
+          clearChatError ||
+          deleteChatError ||
+          restoreChatError ||
+          archiveChatError ||
+          makeIntroductionError
+        }
+      />
+      <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-3">
+        <HybridLink className="-m-1 p-1 lg:hidden" type="mute" href={rootPath}>
+          <ChevronLeft className="h-4 w-4" />
+        </HybridLink>
+
+        {conversationDsr ? (
+          <Link
+            to={`${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info`}
+            className="flex cursor-pointer flex-row items-center gap-2"
+          >
+            <ConversationAvatar
+              conversation={conversationDsr}
+              sizeClassName="h-[2rem] w-[2rem] lg:h-[2.5rem] lg:w-[2.5rem]"
+            />
+            <ConversationTitle conversation={conversationDsr} sizeClassName="" />
+          </Link>
+        ) : null}
+
+        {conversationDsr && !withYourself ? (
+          <ActionGroup
+            options={[
+              {
+                label: t('Chat info'),
+                href: `${rootPath}/${conversationDsr?.fileMetadata.appData.uniqueId}/info${window.location.search}`,
+              },
+              !singleRecipient
+                ? {
+                    label: t('Introduce everyone'),
+                    onClick: makeIntroduction,
+                  }
+                : undefined,
+              conversationDsr.fileMetadata.appData.archivalStatus !== 2
+                ? {
+                    label: t('Delete'),
+                    confirmOptions: {
+                      title: t('Delete chat'),
+                      buttonText: t('Delete'),
+                      body: t(
+                        `Are you sure you want to delete this chat and all messages? The messages will be lost and can't be recoved.`
+                      ),
+                    },
+                    onClick: () => {
+                      deleteChat({ conversation: conversationDsr });
+                    },
+                  }
+                : undefined,
+              conversationDsr.fileMetadata.appData.archivalStatus !== 3
+                ? {
+                    label: t('Archive'),
+                    confirmOptions: {
+                      title: t('Archive chat'),
+                      buttonText: t('Archive'),
+                      body: t(`Are you sure you want archive this chat?`),
+                      type: 'info',
+                    },
+                    onClick: () => {
+                      archiveChat({ conversation: conversationDsr });
+                    },
+                  }
+                : {
+                    label: t('Restore'),
+                    onClick: () => {
+                      restoreChat({ conversation: conversationDsr });
+                    },
+                  },
+              {
+                label: t('Clear'),
+                confirmOptions: {
+                  title: t('Clear chat'),
+                  buttonText: t('Clear'),
+                  body: t(
+                    'Are you sure you want to clear all messages from this chat? All messages will be lost.'
+                  ),
+                },
+                onClick: () => {
+                  clearChat({ conversation: conversationDsr });
+                },
+              },
+              // {label: t('Mute'), onClick: () => {}},
+            ]}
+            className="ml-auto"
+            type={'mute'}
+            size="square"
+          >
+            <>
+              <ChevronDown className="h-5 w-5" />
+              <span className="sr-only ml-1">{t('More')}</span>
+            </>
+          </ActionGroup>
+        ) : null}
+      </div>
+
+      {showChatInfo && conversationDsr ? (
+        <ChatInfo conversation={conversationDsr} onClose={() => navigate(-1)} />
+      ) : null}
+    </>
+  );
+};
+
+const GroupChatConnectedState = ({
+  conversation,
+}: {
+  conversation: HomebaseFile<UnifiedConversation, ConversationMetadata> | undefined;
+}) => {
+  const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
+
+  if (!conversation) return null;
+  const recipients = conversation.fileMetadata.appData.content.recipients;
+  if (!recipients) return null;
+
+  return (
+    <div className="border-t empty:hidden dark:border-t-slate-800">
+      {recipients
+        .filter((recipient) => recipient !== loggedOnIdentity)
+        .map((recipient) => {
+          return <RecipientConnectedState recipient={recipient} key={recipient} />;
+        })}
+    </div>
+  );
+};
+
+const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
+  const { data: isConnected, isFetched: isFetchedConnected } = useIsConnected(recipient);
+  if (!isConnected && isFetchedConnected) {
+    return (
+      <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
+        <p>
+          {t('You can only chat with connected identities, messages will not be delivered to')}:{' '}
+          <a
+            href={`${new DotYouClient({ hostIdentity: recipient, api: ApiType.Guest }).getRoot()}`}
+            className="underline"
+          >
+            {recipient}
+          </a>
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};

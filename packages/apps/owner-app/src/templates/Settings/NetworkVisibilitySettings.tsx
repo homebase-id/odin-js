@@ -44,13 +44,6 @@ export const NetworkVisibilitySettings = () => {
     });
   };
 
-  const handleUseReviewedSecurityTierChange: React.MouseEventHandler = async (e) => {
-    await updateFlag({
-      name: 'useReviewedSecurityTier',
-      value: e.currentTarget.id === 'useReviewedSecurityTierYes',
-    });
-  };
-
   const handleDisableAllowIntroductionsChange: React.MouseEventHandler = async (e) => {
     await updateFlag({
       name: 'disableAllowIntroductions',
@@ -288,39 +281,6 @@ export const NetworkVisibilitySettings = () => {
               name="disableAllowIntroductions"
               defaultChecked={systemSettings?.disableAllowIntroductions === true}
               onClick={handleDisableAllowIntroductionsChange}
-            />
-          </Section>
-          <Section
-            title={
-              <div className="flex flex-col">
-                {t('Require a review before a connection is treated as Reviewed')}
-                <small className="text-sm text-gray-400">
-                  {t(
-                    'Temporary. It is here so the new behaviour can be tried before it becomes permanent, and the setting goes away once reviewed-only is the only behaviour. It applies to every one of your connections at once — there is no partial rollout. Available once your identity has run the upgrade that fills in the review date for your existing connections'
-                  )}
-                </small>
-              </div>
-            }
-          >
-            <RadioOption
-              label={t('Yes')}
-              description={t(
-                'Connections you have reviewed are treated as Reviewed. The ones you have not are treated as Authenticated — no better placed than any logged-in identity — so anything you share at the Reviewed level stays out of reach until you review them'
-              )}
-              id="useReviewedSecurityTierYes"
-              name="useReviewedSecurityTier"
-              defaultChecked={systemSettings?.useReviewedSecurityTier === true}
-              onClick={handleUseReviewedSecurityTierChange}
-            />
-            <RadioOption
-              label={t('No')}
-              description={t(
-                'Every connection is treated as Reviewed whether or not you have actually reviewed them. This is the current behaviour'
-              )}
-              id="useReviewedSecurityTierNo"
-              name="useReviewedSecurityTier"
-              defaultChecked={systemSettings?.useReviewedSecurityTier !== true}
-              onClick={handleUseReviewedSecurityTierChange}
             />
           </Section>
         </>

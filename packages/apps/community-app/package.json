@@ -22,7 +22,6 @@
     "@tanstack/react-query": "5.51.1",
     "@tanstack/react-virtual": "3.11.2",
     "@homebase-id/common-app": "*",
-    "@homebase-id/chat-app": "*",
     "@homebase-id/ffmpeg": "*",
     "@homebase-id/js-lib": "*",
     "@homebase-id/rich-text-editor": "*",

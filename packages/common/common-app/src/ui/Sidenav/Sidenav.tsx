@@ -4,11 +4,7 @@ import {BuiltInProfiles} from '@homebase-id/js-lib/profile';
 import {isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
   FEED_APP_ID,
-  CHAT_APP_ID,
-  MAIL_APP_ID,
   FEED_ROOT_PATH,
-  CHAT_ROOT_PATH,
-  MAIL_ROOT_PATH,
   HOME_ROOT_PATH,
   COMMUNITY_APP_ID,
   OWNER_ROOT,
@@ -23,15 +19,12 @@ import {
 } from '../../hooks';
 import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
-import {AddressBook} from '../Icons';
 import {ArrowDown} from '../Icons';
 import {Bars} from '../Icons';
 import {Bell} from '../Icons';
-import {ChatBubble} from '../Icons';
 import {Cloud} from '../Icons';
 import {Cog} from '../Icons';
 import {Ellipsis} from '../Icons';
-import {Envelope} from '../Icons';
 import {Feed} from '../Icons';
 import {Globe} from '../Icons';
 import {Grid} from '../Icons';
@@ -156,13 +149,10 @@ export const Sidenav = ({
 
             <div className="py-3">
               <FeedNavItem/>
-              <ChatNavItem/>
-              <MailNavItem/>
               <CommunityNavItem/>
             </div>
 
             <div className={`py-3`}>
-              <NavItem icon={AddressBook} label={'Connections'} to={`${OWNER_ROOT}/connections`}/>
               {isTightHeight ? null : (
                 <NavItem
                   icon={Persons}
@@ -511,16 +501,6 @@ const FeedNavItem = () => {
   return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount}/>;
 };
 
-const ChatNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
-  return <NavItem icon={ChatBubble} label={'Chat'} to={CHAT_ROOT_PATH} unread={!!unreadCount}/>;
-};
-
-const MailNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: MAIL_APP_ID});
-  return <NavItem icon={Envelope} label={'Mail'} to={MAIL_ROOT_PATH} unread={!!unreadCount}/>;
-};
-
 const CommunityNavItem = () => {
   const {data: unreadCount} = useUnreadPushNotificationsCount({appId: COMMUNITY_APP_ID});
   return (
@@ -536,7 +516,6 @@ const MobileDrawer = ({setIsOpen}: { setIsOpen: (isOpen: boolean) => void }) => 
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner/'} end={true}/>
         <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true}/>
-        <NavItem icon={ChatBubble} to={CHAT_ROOT_PATH}/>
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName}/>

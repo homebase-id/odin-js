@@ -20,7 +20,7 @@ import {
 } from '../../../providers/CommunityMetadataProvider';
 import {useWebsocketDrives} from '../../auth/useWebsocketDrives';
 import {insertNewcommunityMetadata} from '../useCommunityMetadata';
-import {useChatSocketHandler} from '@homebase-id/chat-app/src/hooks/chat/live/useChatWebsocket';
+import {useChatSocketHandler} from '../../../chat/hooks/chat/live/useChatWebsocket';
 import {COMMUNITY_DRAFTS_FILE_TYPE, dsrToCommunityDrafts} from '../../../providers/CommunityDraftsProvider';
 import {insertNewCommunityDrafts} from '../useCommunityDrafts';
 
