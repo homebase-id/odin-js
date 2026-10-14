@@ -1,11 +1,11 @@
-import { DriveDefinition } from '@homebase-id/js-lib/core';
+import { DriveDefinition, TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import { Link } from 'react-router-dom';
 import { getOwnerDrivePath, t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
 import { DriveGrant } from '@homebase-id/js-lib/network';
-import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
+import { getDrivePermissionFromNumber, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 
 const DrivePermissionView = ({
   driveGrant,
@@ -19,6 +19,11 @@ const DrivePermissionView = ({
   const { data: drive, isLoading } = useDrive({
     targetDrive: driveGrant.permissionedDrive.drive,
   }).fetch;
+
+  // The transient drive is internal plumbing every transit-enabled app is granted automatically. The
+  // drive lists hide it, so its grant is hidden too -- otherwise it shows as a bare id.
+  if (stringGuidsEqual(driveGrant?.permissionedDrive?.drive?.alias, TRANSIENT_TEMP_DRIVE_ALIAS))
+    return null;
 
   if (isLoading) {
     return <LoadingBlock className={`h-4 max-w-xs ${className}`} />;

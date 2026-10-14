@@ -55,8 +55,9 @@ const getEnsureNewDriveAndPermissionPath = (
       attributes: attributes,
       allowSubscriptions: allowSubscriptions,
       // Unlike the fixed drives in useAuth, this one does not exist yet -- it is created per
-      // community. The slug is left to the server, which derives it from `name` against what
-      // Community already holds; two communities can share a title and only the server knows.
+      // community. The slug is left to the owner console, which derives it from `name` when it
+      // creates the drive (ensureDrive) against the slugs Community's drives already hold; two
+      // communities can share a title and this app cannot list those slugs.
       driveSlug: undefined,
       driveTypeSlug: COMMUNITY_DRIVE_TYPE_SLUG,
     },
@@ -310,7 +311,7 @@ export const getExtendCirclePermissionUrl = (
       d: description,
       // Same drive as getEnsureNewDriveAndPermissionPath declares, so the type slug has to match or
       // the two declarations disagree. No drive slug: a community drive is a runtime instance drive,
-      // so the server derives its slug from `name` against the set the community app already holds.
+      // so the owner console derives its slug from `name` (ensureDrive), unique within the app.
       ts: COMMUNITY_DRIVE_TYPE_SLUG,
     },
   ];

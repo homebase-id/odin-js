@@ -66,9 +66,13 @@ const AppsDashboard = () => {
       ) : (
         <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
           <OwnerConsoleCard drives={ownerConsoleDrives} circles={ownerConsoleCircles} />
-          {(apps ?? []).map((app) => (
-            <AppCard key={app.appId} app={app} {...ownedBy(app.appId)} />
-          ))}
+          {/* The owner console is registered as the built-in System app under the same id; the card
+              above already stands for it, so it is not listed a second time. */}
+          {(apps ?? [])
+            .filter((app) => !isOwnerConsoleApp(app.appId))
+            .map((app) => (
+              <AppCard key={app.appId} app={app} {...ownedBy(app.appId)} />
+            ))}
         </div>
       )}
     </>

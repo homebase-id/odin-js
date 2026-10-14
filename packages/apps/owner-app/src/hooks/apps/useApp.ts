@@ -49,9 +49,9 @@ interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'driv
  * rather than falling back to "it has the channel type, so call it a channel".
  *
  * The *drive* slug may still be undefined, and only for a runtime instance drive -- one per feed
- * channel or community, created through the extend-permissions flow. There the server derives it
- * from the name, because only the server holds the set of slugs the owning app already uses and so
- * only it can dedupe two channels that share a name. Every other drive names its own.
+ * channel or community, created through the extend-permissions flow. There `ensureDrive` derives it
+ * from the name, unique against the slugs the owning app's drives already hold; the server requires
+ * a stated slug and derives nothing. Every other drive names its own.
  */
 const ensureAppOwnedDrives = async (
   dotYouClient: DotYouClient,
