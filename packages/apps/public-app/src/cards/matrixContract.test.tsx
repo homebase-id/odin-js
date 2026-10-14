@@ -16,6 +16,9 @@ import specsRaw from './__fixtures__/design-specs.json?raw';
  */
 
 const specs = JSON.parse(specsRaw);
+// chat-kmp still sends the retired 'chat' block kind; applyOverrides drops it
+const RETIRED_KINDS = ['chat'];
+const current = (kinds: string[]) => kinds.filter((kind) => !RETIRED_KINDS.includes(kind));
 const Icon = () => null;
 
 vi.mock('@homebase-id/common-app', () => ({
@@ -98,8 +101,9 @@ describe('chat-kmp matrix fixtures', () => {
       expect(resolved.type.label).toBe(o.type.label);
       expect(resolved.type.displayCase).toBe(o.type.displayCase);
       expect(resolved.portraits).toEqual([o.portraits[0]]);
-      expect(resolved.blocks.map((b) => b.kind)).toEqual(o.blocks.map((b) => b.kind));
-      for (const block of o.blocks) expect(resolved.blocks).toContainEqual(block);
+      const blocks = o.blocks.filter((b) => !RETIRED_KINDS.includes(b.kind));
+      expect(resolved.blocks.map((b) => b.kind)).toEqual(blocks.map((b) => b.kind));
+      for (const block of blocks) expect(resolved.blocks).toContainEqual(block);
       expect(resolved.socials).toBe(o.socials);
     }
   );
@@ -122,7 +126,6 @@ describe('chat-kmp matrix fixtures', () => {
             )}
           </MemoryRouter>
         );
-        expect(out).toContain(payload.data.odinId);
         expect(out).toContain(payload.data.photo!.src);
         for (const social of payload.data.socials) expect(out).toContain(social.username);
         const linksBlock = design.blocks.some((b) => b.kind === 'links');
@@ -205,7 +208,7 @@ describe('chat-kmp CardDesignSpecs against what odin-js supports', () => {
     expect(specs.fonts).toEqual(Object.keys(FONT_STACKS));
     expect(specs.portraitShapes).toEqual([...SHAPES]);
     expect(specs.socialsStyles).toEqual([...SOCIALS]);
-    expect(specs.blockKinds).toEqual([...BLOCK_KINDS]);
+    expect(current(specs.blockKinds)).toEqual([...BLOCK_KINDS]);
   });
 
   it.each(DESIGNS)(

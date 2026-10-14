@@ -1,32 +1,12 @@
-import { t } from '@homebase-id/common-app';
-import { ChatBubble } from '@homebase-id/common-app/icons';
 import type { LayoutProps } from '../../CardDesign';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
-import { CardBlocks, useChatHref } from '../../parts/Blocks';
+import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { CARD_FOCUS as FOCUS } from '../../CardDesign';
 import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print } from './frames';
-
-// Round chat button: CardBlock's button always prints its label, which does not fit beside the wordmark
-const ChatButton = ({ odinId }: { odinId: string }) => {
-  const href = useChatHref(odinId);
-  if (!href) return null;
-  return (
-    <a
-      href={href}
-      aria-label={t('Chat with me')}
-      className={`ml-auto flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center gap-0.5 rounded-full bg-[var(--card-ink)] text-[color:var(--card-ground)] shadow-[0_2px_6px_rgba(0,0,0,0.28)] ${FOCUS}`}
-    >
-      <ChatBubble className="h-5 w-5" />
-      <span className="text-[10px] font-semibold leading-none">{t('Chat')}</span>
-    </a>
-  );
-};
 
 export const CollageCard = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
-  const hasChat = design.blocks.some((b) => b.kind === 'chat');
 
   return (
     <div className="relative flex min-h-[inherit] flex-col px-5 pb-5 pt-7">
@@ -77,7 +57,6 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
 
       <div className="mt-auto flex items-center gap-2.5 pt-6">
         <CardSocials variant={design.socials} data={data} className="min-w-0 flex-1" />
-        {hasChat ? <ChatButton odinId={data.odinId} /> : null}
       </div>
     </div>
   );
