@@ -21,7 +21,7 @@ import {
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
 import { invalidateApps } from './useApps';
-import { useDotYouClientContext } from '@homebase-id/common-app';
+import { invalidateCircles, useDotYouClientContext } from '@homebase-id/common-app';
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
@@ -182,6 +182,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
       onSuccess: (data, param) => {
         invalidateApp(queryClient, param.appId);
         invalidateApps(queryClient);
+        // Declared circles were created with the app.
+        if (param.circles?.length) invalidateCircles(queryClient);
       },
       onError: (ex) => {
         console.error(ex);

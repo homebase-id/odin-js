@@ -64,6 +64,23 @@ export interface AppRegistrationRequest {
 
   /** Permissions granted to members of the AuthorizedCircles */
   circleMemberPermissionGrant?: PermissionSetGrantRequest;
+
+  /**
+   * Circles the app declared (`ac`), created with it and owned by it (odin-core #1939). Optional.
+   * Each may grant only what this registration grants the app; the server refuses the whole
+   * install otherwise.
+   */
+  circles?: AppCircleDeclaration[];
+}
+
+/** One circle an app declared in its install request. Mirrors CreateAppCircleRequest in odin-core. */
+export interface AppCircleDeclaration {
+  slug: string;
+  name: string;
+  description?: string;
+  emoji?: string;
+  driveGrants: DriveGrantRequest[];
+  permissions: PermissionSet;
 }
 
 export interface DriveGrantRequest {

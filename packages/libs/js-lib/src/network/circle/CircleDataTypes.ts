@@ -171,6 +171,12 @@ export interface CircleDefinition {
   appId?: string;
 
   /**
+   * The circle's address within its owning app: unique per app and immutable once written
+   * (odin-core #1939). Read-only: an update never changes it. Not served by older identity hosts.
+   */
+  slug?: string;
+
+  /**
    * True when the app tree declares this circle, so every version upgrade re-applies its owner,
    * grant rule and designation -- an edit to any of the three is undone without warning. Derived
    * server-side from the build's app catalogue, so it is read-only: sending it back changes

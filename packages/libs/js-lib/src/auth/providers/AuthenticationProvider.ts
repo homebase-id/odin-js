@@ -43,9 +43,59 @@ export interface AppAuthorizationParams {
   d: string | undefined;
   cd: string | undefined;
   c: string | undefined;
+  /**
+   * Circles the app declares, as a JSON list of {@link AppCircleAuthorizationParams}. Optional: an app
+   * that declares none sends no `ac` at all. See {@link AppCircleRequest}.
+   */
+  ac?: string;
   return: string;
   o?: string;
 }
+
+/** One declared circle on the wire (`ac`). Short keys, like the drives in `d`, to keep the URL small. */
+export interface AppCircleAuthorizationParams {
+  /** slug -- required; how a later `circles/create` from the app finds this circle. */
+  s: string;
+  n: string;
+  d?: string;
+  e?: string;
+  /** drive grants: alias, type and the summed permission. */
+  g?: { a: string; t: string; p: number }[];
+  /** permission keys */
+  k?: number[];
+}
+
+/**
+ * A circle the app asks to have created when it is installed, owned by the app (odin-core #1939).
+ * The owner sees it, and what it grants, on the install screen.
+ *
+ * It may grant only what the app itself is being granted: drives in `drives` (and on a drive the app
+ * does not own, only Read) and keys in `permissionKeys`. The server refuses the whole install
+ * otherwise. Only the first install shows the install screen, so an app that needs the circle on
+ * every device still calls `circles/create` with the same slug, which finds this one.
+ */
+export interface AppCircleRequest {
+  /** The circle's address within the app; a valid slug (see `isValidSlug`). */
+  slug: string;
+  name: string;
+  description?: string;
+  emoji?: string;
+  driveGrants?: (TargetDrive & { permissions: DrivePermissionType[] })[];
+  permissionKeys?: number[];
+}
+
+export const parseAppCircleRequest = (circle: AppCircleRequest): AppCircleAuthorizationParams => ({
+  s: circle.slug,
+  n: circle.name,
+  d: circle.description,
+  e: circle.emoji,
+  g: circle.driveGrants?.map((grant) => ({
+    a: grant.alias,
+    t: grant.type,
+    p: sumPermissions(grant.permissions),
+  })),
+  k: circle.permissionKeys,
+});
 
 export interface AppDriveAuthorizationParams {
   a: string;
@@ -108,6 +158,10 @@ export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean
   return null;
 };
 
+/** The wire form of a drive permission: the flags summed into one number. */
+const sumPermissions = (permissions: DrivePermissionType[]): number =>
+  permissions.reduce((acc, permission) => acc + permission, 0);
+
 export const parseDriveAccessRequest = (
   TargetDriveAccessRequest: TargetDriveAccessRequest
 ): AppDriveAuthorizationParams => {
@@ -116,7 +170,7 @@ export const parseDriveAccessRequest = (
     t: TargetDriveAccessRequest.type,
     n: TargetDriveAccessRequest.name,
     d: TargetDriveAccessRequest.description,
-    p: TargetDriveAccessRequest.permissions.reduce((acc, permission) => acc + permission, 0),
+    p: sumPermissions(TargetDriveAccessRequest.permissions),
     r: TargetDriveAccessRequest.allowAnonymousRead,
     s: TargetDriveAccessRequest.allowSubscriptions,
     at: TargetDriveAccessRequest.attributes
@@ -146,7 +200,9 @@ export const getRegistrationParams = async (
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
-  state?: string
+  state?: string,
+  /** Circles to create with the app; optional. See {@link AppCircleRequest}. */
+  appCircles?: AppCircleRequest[]
 ): Promise<YouAuthorizationParams> => {
   const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
 
@@ -165,6 +221,9 @@ export const getRegistrationParams = async (
   };
 
   if (host) permissionRequest.o = host;
+  // Only when there are any, so an app that declares none sends the same request as before.
+  if (appCircles?.length)
+    permissionRequest.ac = JSON.stringify(appCircles.map(parseAppCircleRequest));
 
   const publicEccKey = await exportEccPublicKey(eccPublicKey);
 
