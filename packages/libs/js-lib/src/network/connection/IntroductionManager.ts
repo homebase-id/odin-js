@@ -38,21 +38,6 @@ export const sendIntroduction = async (
   return await promise;
 };
 
-export const confirmIntroduction = async (
-  dotYouClient: DotYouClient,
-  recipient: string
-): Promise<boolean | null> => {
-  const client = dotYouClient.createAxiosClient();
-
-  return client
-    .post<IntroductionResult>('/circles/connections/confirm-connection', { odinId: recipient })
-    .then((response) => response.status === 200)
-    .catch((error) => {
-      console.error('[DotYouCore-js:confirmIntroduction]', error);
-      throw error;
-    });
-};
-
 export interface Introduction {
   identity: string;
   message: string;
