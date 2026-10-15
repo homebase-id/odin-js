@@ -53,7 +53,6 @@ The NETWORK module manages social connections, circles, contacts, follows, and p
 
 ### Introductions
 - `sendIntroduction(dotYouClient, introduceeOdinIds, introduceToOdinIds, message?)` - Send introduction
-- `confirmIntroduction(dotYouClient, introducerOdinId, introduceeOdinIds)` - Confirm
 - `getReceivedIntroductions(dotYouClient)` - Get received
 - `removeAllReceivedIntroductions(dotYouClient, introducer OdinId)` - Remove all
 
