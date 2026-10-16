@@ -23,7 +23,11 @@ import {
   getProfileAttributes,
   Attribute,
 } from '@homebase-id/js-lib/profile';
-import { FollowRequest, createOrUpdateFollow } from '@homebase-id/js-lib/network';
+import {
+  FollowRequest,
+  createOrUpdateFollow,
+  sendAutoConnectRequest,
+} from '@homebase-id/js-lib/network';
 import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributeProvider';
 import { fallbackHeaderImage, invalidateSiteData } from '@homebase-id/common-app';
 import { QueryClient } from '@tanstack/react-query';
@@ -455,10 +459,25 @@ export const SetupDefaultIdentity = async (
   await SetupSocialData(queryClient, dotYouClient, data.social);
 };
 
+export const HOMEBASE_ODIN_ID = 'id.homebase.id';
+
 const DEFAULT_FOLLOW_REQUEST: FollowRequest = {
   notificationType: 'allNotifications',
-  odinId: 'id.homebase.id',
+  odinId: HOMEBASE_ODIN_ID,
 };
 export const SetupAutoFollow = async (dotYouClient: DotYouClient) => {
   await createOrUpdateFollow(dotYouClient, DEFAULT_FOLLOW_REQUEST, false);
+};
+
+// Connected is enough to chat: the server puts every new connection in the Chat circle on both sides.
+export const SetupAutoConnect = async (dotYouClient: DotYouClient, odinId: string, message: string) => {
+  return await sendAutoConnectRequest(dotYouClient, odinId, message);
+};
+
+/** Who owned the invitation code this identity signed up with; null when nobody did */
+export const getInvitedBy = async (dotYouClient: DotYouClient): Promise<string | null> => {
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .get<{ invitedBy: string | null }>(dotYouClient.getRoot() + '/api/v2/onboarding/invited-by')
+    .then((response) => response.data?.invitedBy ?? null);
 };

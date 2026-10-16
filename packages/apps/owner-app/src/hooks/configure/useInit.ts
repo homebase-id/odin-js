@@ -3,6 +3,8 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {WelcomeData} from '../../templates/Setup/Setup';
 import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
 import {
+  HOMEBASE_ODIN_ID,
+  SetupAutoConnect,
   SetupAutoFollow,
   SetupBlog,
   SetupDefaultIdentity,
@@ -57,10 +59,27 @@ export const useInit = () => {
 
     // Setup (default) Data
     await SetupDefaultIdentity(queryClient, dotYouClient, data);
-    try {
-      await SetupAutoFollow(dotYouClient);
-    } catch (ex) {
-      console.error('[init] autofollow failed', ex);
+    // Both are best-effort: a peer that is down must not fail setup.
+    if (data.followHomebase) {
+      try {
+        await SetupAutoFollow(dotYouClient);
+      } catch (ex) {
+        console.error('[init] autofollow failed', ex);
+      }
+    }
+
+    const connectTo: [string, string][] = [];
+    if (data.connectToHomebase) connectTo.push([HOMEBASE_ODIN_ID, 'Hi! I just joined Homebase.']);
+    if (data.connectToInviter && data.invitedBy)
+      connectTo.push([data.invitedBy, 'Hi! I just joined Homebase with your invitation.']);
+
+    for (const [odinId, message] of connectTo) {
+      try {
+        const result = await SetupAutoConnect(dotYouClient, odinId, message);
+        console.debug('[init] autoconnect', odinId, result?.outcome, result?.detail);
+      } catch (ex) {
+        console.error('[init] autoconnect failed', odinId, ex);
+      }
     }
 
     // Do a first publish of the static files

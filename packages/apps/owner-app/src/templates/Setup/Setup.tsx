@@ -7,6 +7,7 @@ import {useIsConfigured} from '../../hooks/configure/useIsConfigured';
 import {DomainHighlighter, ErrorNotification} from '@homebase-id/common-app';
 import {ProfileSetupData, SocialSetupData} from '../../provider/setup/SetupProvider';
 import SetupWizard from '../../components/Setup/SetupWizard';
+import SetupHomebaseConnect from '../../components/Setup/SetupHomebaseConnect';
 import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import LoadingPage from '../../components/Setup/Pages/LoadingPage';
 import {Eula} from './Eula';
@@ -21,10 +22,15 @@ export interface onChangeParams {
 export interface WelcomeData {
     profile: ProfileSetupData;
     social: SocialSetupData;
-    enableAutomatedPasswordRecovery: boolean
+    enableAutomatedPasswordRecovery: boolean;
+    connectToHomebase: boolean;
+    followHomebase: boolean;
+    /** Who owned the invitation code, if anyone; set by the connect step */
+    invitedBy?: string;
+    connectToInviter: boolean;
 }
 
-type State = 'eula' | 'wizard';
+type State = 'eula' | 'wizard' | 'connect';
 
 export const Setup = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -69,10 +75,13 @@ export const Setup = () => {
 
     const stateParamVal = searchParams.get('state');
     const [stepState, setStepState] = useState<State>(
+        // 'connect' is not restored: it needs the profile the wizard step collected
         stateParamVal && ['eula', 'wizard'].includes(stateParamVal)
             ? (stateParamVal as State)
             : 'eula'
     );
+    const [welcomeData, setWelcomeData] = useState<WelcomeData>();
+    const [enteredData, setEnteredData] = useState<WelcomeData>();
 
     useEffect(() => {
         if (!stepState) return;
@@ -99,10 +108,24 @@ export const Setup = () => {
                                     </small>
                                 </h1>
 
-                                {stepState === 'eula' ?
-                                    (<Eula onConfirm={() => setStepState('wizard')}/>) :
-                                    (<SetupWizard doInitWithData={doInitWithData}/>)
-                                }
+                                {stepState === 'eula' ? (
+                                    <Eula onConfirm={() => setStepState('wizard')}/>
+                                ) : stepState === 'connect' && welcomeData ? (
+                                    <SetupHomebaseConnect
+                                        data={welcomeData}
+                                        onBack={() => setStepState('wizard')}
+                                        onConfirm={doInitWithData}
+                                    />
+                                ) : (
+                                    <SetupWizard
+                                        initialData={enteredData}
+                                        onNext={(data, entered) => {
+                                            setWelcomeData(data);
+                                            setEnteredData(entered);
+                                            setStepState('connect');
+                                        }}
+                                    />
+                                )}
                             </>
                         )}
 

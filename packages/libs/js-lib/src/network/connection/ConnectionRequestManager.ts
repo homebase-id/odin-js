@@ -177,6 +177,34 @@ export const sendConnectionRequestWithOutcome = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
+/**
+ * Sends an app-origin ("auto-connect") request through the V2 API. Unlike the owner sends above,
+ * the recipient auto-accepts these unless it turned that off. Circles granted on connect (Chat) are
+ * added by the server; `circleIds` only names extra ones.
+ */
+export const sendAutoConnectRequest = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  message: string,
+  circleIds: string[] = []
+): Promise<ConnectionRequestResult> => {
+  // An absolute URL bypasses the client's /api/{owner|apps}/v1 base; V2 takes either token.
+  const url = dotYouClient.getRoot() + '/api/v2/connections/requests/auto-connect';
+  const data: ConnectionRequestHeader = {
+    recipient: odinId,
+    message: message,
+    circleIds: circleIds,
+  };
+
+  const client = dotYouClient.createAxiosClient();
+  return client
+    .post(url, data)
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
+
 export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
   const client = dotYouClient.createAxiosClient();
   const url = '/circles/connections/block';

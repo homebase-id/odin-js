@@ -26,13 +26,24 @@ const defaultData: WelcomeData = {
         odinId: window.location.hostname,
         other: [],
     },
-    enableAutomatedPasswordRecovery: true
+    enableAutomatedPasswordRecovery: true,
+    connectToHomebase: true,
+    followHomebase: true,
+    connectToInviter: true,
 };
 
-const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => void }) => {
-    const [data, setData] = useState(defaultData);
+const SetupWizard = ({
+    initialData,
+    onNext,
+}: {
+    initialData?: WelcomeData;
+    /** `entered` is what the user typed, without the fallbacks, so going back shows it unchanged */
+    onNext: (data: WelcomeData, entered: WelcomeData) => void;
+}) => {
+    const [data, setData] = useState(initialData ?? defaultData);
 
     useEffect(() => {
+        if (initialData) return;
         const valueFromLocalStorage = localStorage.getItem(SHOULD_USE_AUTOMATED_PASSWORD_RECOVERY) === "true";
         setData({...data, enableAutomatedPasswordRecovery: valueFromLocalStorage});
     }, [])
@@ -51,7 +62,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
             : window.location.hostname.split('.')[0].substring(0, 2);
 
     const doSetup = async () => {
-        const dataToUse = {...data};
+        const dataToUse = {...data, profile: {...data.profile}};
 
         // Set fallback image:
         if (!data.profile.imageData) {
@@ -70,7 +81,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
             dataToUse.profile.givenName = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
         }
 
-        doInitWithData(dataToUse);
+        onNext(dataToUse, data);
     };
 
     return (
@@ -156,7 +167,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
                     </div>
                 </div>
                 <div className="mt-auto flex flex-row-reverse gap-2">
-                    <ActionButton icon={Arrow}>{t('Setup')}</ActionButton>
+                    <ActionButton icon={Arrow}>{t('Next')}</ActionButton>
                 </div>
             </form>
         </>
