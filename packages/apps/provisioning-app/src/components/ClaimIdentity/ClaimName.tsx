@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Label } from '@homebase-id/common-app';
+import { Input, Label } from '@homebase-id/common-app';
 import { Arrow, Globe } from '@homebase-id/common-app/icons';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
@@ -33,6 +33,10 @@ interface ClaimNameProps {
   // itself once this cluster's registry says it is free, and stays put with the
   // usual "taken" line when it is not.
   autoClaimDomain: string | null;
+  invitationCode: string;
+  // Off on a host that takes signups without a code: then there is no field
+  invitationCodeNeeded: boolean;
+  onInvitationCodeChange: (code: string) => void;
   onClaim: () => void;
   onUseOwnDomain: () => void;
 }
@@ -46,6 +50,9 @@ const ClaimName = ({
   domainPrefix,
   apexesError,
   autoClaimDomain,
+  invitationCode,
+  invitationCodeNeeded,
+  onInvitationCodeChange,
   onClaim,
   onUseOwnDomain,
 }: ClaimNameProps) => {
@@ -68,7 +75,9 @@ const ClaimName = ({
   // Until the debounce catches up the result belongs to a name the user has
   // already moved on from
   const isSettled = debouncedPrefix === domainPrefix;
-  const canClaim = !!domainPrefix && isSettled && status === 'success' && isAvailable === true;
+  const needsInvitationCode = invitationCodeNeeded && !invitationCode.trim();
+  const canClaim =
+    !!domainPrefix && isSettled && status === 'success' && isAvailable === true && !needsInvitationCode;
   const isTaken = !!domainPrefix && isSettled && status === 'success' && isAvailable === false;
 
   // Gated on domainPrefix: the query is disabled until there is one, and a
@@ -129,6 +138,23 @@ const ClaimName = ({
           if (canClaim) onClaim();
         }}
       >
+        {invitationCodeNeeded ? (
+          <div className="mb-8">
+            <Label htmlFor="invitationCode">{t('Your invitation code')}</Label>
+            <Input
+              id="invitationCode"
+              name="invitation-code"
+              required
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              value={invitationCode}
+              placeholder="K7QX-M2PD-9FHW"
+              onChange={(e) => onInvitationCodeChange(e.target.value)}
+            />
+          </div>
+        ) : null}
+
         <div className="flex flex-row flex-wrap items-baseline justify-between gap-2">
           <Label htmlFor="prefix0" className="mb-0">
             {t('Choose your name')}

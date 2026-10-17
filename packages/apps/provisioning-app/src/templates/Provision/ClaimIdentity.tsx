@@ -53,7 +53,7 @@ const ClaimIdentity = () => {
   const planIdParam = searchParams.get('plan-id');
   const planId = planIdParam || 'free';
 
-  // The invitation code is a field on step 2, prefilled from ?invitation-code=. It lives in the query
+  // The invitation code is a field on step 1, prefilled from ?invitation-code=. It lives in the query
   // string, so a reload or a region redirect keeps what was typed. The server checks it when the name is
   // claimed, and says so if it is not valid.
   const invitationCode = searchParams.get('invitation-code') ?? '';
@@ -139,6 +139,9 @@ const ClaimIdentity = () => {
           domainPrefix={domainPrefix}
           apexesError={errorManagedDomainApexes}
           autoClaimDomain={resumeClaim}
+          invitationCode={invitationCode}
+          invitationCodeNeeded={invitationCodeNeeded}
+          onInvitationCodeChange={setInvitationCode}
           onClaim={() => {
             setResumeClaim(null);
             setStep('Confirm');
@@ -157,9 +160,7 @@ const ClaimIdentity = () => {
           region={region}
           regionSource={regionSource}
           onRegionChange={onRegionChange}
-          invitationCode={invitationCode}
-          invitationCodeNeeded={invitationCodeNeeded}
-          onInvitationCodeChange={setInvitationCode}
+          invitationCode={invitationCode.trim() || null}
           onBack={() => setStep('ClaimName')}
           onCreated={() => setStep('Provisioning')}
         />

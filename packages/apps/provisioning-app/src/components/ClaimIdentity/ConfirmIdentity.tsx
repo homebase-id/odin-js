@@ -17,10 +17,7 @@ interface ConfirmIdentityProps {
   regionSource: RegionSource | null;
   // Absent on a host that does not route regions: nothing to show, nothing to pick
   onRegionChange?: (region: Region) => void;
-  invitationCode: string;
-  // Off on a host that takes signups without a code: then there is no field
-  invitationCodeNeeded: boolean;
-  onInvitationCodeChange: (code: string) => void;
+  invitationCode: string | null;
   onBack: () => void;
   onCreated: () => void;
 }
@@ -34,8 +31,6 @@ const ConfirmIdentity = ({
   regionSource,
   onRegionChange,
   invitationCode,
-  invitationCodeNeeded,
-  onInvitationCodeChange,
   onBack,
   onCreated,
 }: ConfirmIdentityProps) => {
@@ -44,7 +39,6 @@ const ConfirmIdentity = ({
   } = useCreateManagedDomain();
 
   const needsRegion = !!onRegionChange && !region;
-  const needsInvitationCode = invitationCodeNeeded && !invitationCode.trim();
 
   return (
     <>
@@ -54,10 +48,9 @@ const ConfirmIdentity = ({
         className="w-full"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!e.currentTarget.reportValidity() || needsRegion || needsInvitationCode || isPending)
-            return;
+          if (!e.currentTarget.reportValidity() || needsRegion || isPending) return;
           createManagedDomain(
-            { domainPrefix, domainApex, invitationCode: invitationCode.trim() || null, region },
+            { domainPrefix, domainApex, invitationCode, region },
             { onSuccess: onCreated }
           );
         }}
@@ -107,30 +100,13 @@ const ConfirmIdentity = ({
           </p>
         </div>
 
-        {invitationCodeNeeded ? (
-          <div className="mt-8">
-            <Label htmlFor="invitationCode">{t('Your invitation code')}</Label>
-            <Input
-              id="invitationCode"
-              name="invitation-code"
-              required
-              autoComplete="off"
-              autoCapitalize="characters"
-              spellCheck={false}
-              value={invitationCode}
-              placeholder="K7QX-M2PD-9FHW"
-              onChange={(e) => onInvitationCodeChange(e.target.value)}
-            />
-          </div>
-        ) : null}
-
         <div className="mt-8 flex flex-col gap-3">
           <ActionButton
             className="justify-center"
             size="large"
             icon={Arrow}
             buttonType="submit"
-            isDisabled={needsRegion || needsInvitationCode || !email || isPending}
+            isDisabled={needsRegion || !email || isPending}
             state={isPending ? 'loading' : undefined}
           >
             {region
