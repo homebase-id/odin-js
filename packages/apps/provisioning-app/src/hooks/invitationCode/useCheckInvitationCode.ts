@@ -13,7 +13,7 @@ export const useCheckInvitationCode = (code?: string) => {
     if (!code) return false;
 
     const response = await axios
-      .get(`${root}/registration/is-valid-invitation-code/${code}`)
+      .get(`${root}/registration/is-valid-invitation-code/${encodeURIComponent(code)}`)
       .catch((err) => ({ status: err.status }));
 
     return response.status === 200;

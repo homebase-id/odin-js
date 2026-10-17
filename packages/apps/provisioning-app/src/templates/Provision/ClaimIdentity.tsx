@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader, Times } from '@homebase-id/common-app/icons';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import ClaimName from '../../components/ClaimIdentity/ClaimName';
@@ -7,7 +7,7 @@ import ConfirmIdentity from '../../components/ClaimIdentity/ConfirmIdentity';
 import CreateIdentityView from '../../components/CreateIdentityView/CreateIdentityView';
 import { config } from '../../app/config';
 import { t } from '../../helpers/i18n/dictionary';
-import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
+import { useConfiguration } from '../../hooks/configuration/useConfiguration';
 import {
   ManagedDomainApex,
   useFetchManagedDomainsApexes,
@@ -51,18 +51,26 @@ const ClaimIdentity = () => {
   const [resumeClaim, setResumeClaim] = useState<string | null>(null);
 
   const planIdParam = searchParams.get('plan-id');
-  const invitationCode = searchParams.get('invitation-code');
   const planId = planIdParam || 'free';
+
+  // The invitation code is a field on step 1, prefilled from ?invitation-code=. It lives in the query
+  // string, so a reload or a region redirect keeps what was typed. The server checks it when the name is
+  // claimed, and says so if it is not valid.
+  const invitationCode = searchParams.get('invitation-code') ?? '';
+  const setInvitationCode = (code: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (code) params.set('invitation-code', code);
+    else params.delete('invitation-code');
+    setSearchParams(params, { replace: true });
+  };
+  const { data: configuration } = useConfiguration();
+  const invitationCodeNeeded = configuration?.invitationCodeEnabled === true;
 
   const { region, source: regionSource, chooseRegion } = useRegionChoice();
 
   const {
     fetchManagedDomainApexes: { data: managedDomainApexes, error: errorManagedDomainApexes },
   } = useFetchManagedDomainsApexes();
-
-  const { data: isValidInvitationCode } = useCheckInvitationCode(
-    invitationCode || undefined
-  ).checkInvitationCode;
 
   useEffect(() => {
     if (domainApex || !managedDomainApexes?.length) return;
@@ -117,8 +125,6 @@ const ClaimIdentity = () => {
     navigate(`../own-domain${query ? `?${query}` : ''}`);
   };
 
-  if (isValidInvitationCode === false) return <Navigate to={`/${window.location.search}`} />;
-
   const stepView = (() => {
     if (!domainApex) return <Loader className="mx-auto mb-10 h-20 w-20" />;
 
@@ -133,6 +139,9 @@ const ClaimIdentity = () => {
           domainPrefix={domainPrefix}
           apexesError={errorManagedDomainApexes}
           autoClaimDomain={resumeClaim}
+          invitationCode={invitationCode}
+          invitationCodeNeeded={invitationCodeNeeded}
+          onInvitationCodeChange={setInvitationCode}
           onClaim={() => {
             setResumeClaim(null);
             setStep('Confirm');
@@ -151,7 +160,7 @@ const ClaimIdentity = () => {
           region={region}
           regionSource={regionSource}
           onRegionChange={onRegionChange}
-          invitationCode={invitationCode}
+          invitationCode={invitationCode.trim() || null}
           onBack={() => setStep('ClaimName')}
           onCreated={() => setStep('Provisioning')}
         />
@@ -163,7 +172,7 @@ const ClaimIdentity = () => {
           domain={domain}
           email={email}
           planId={planId}
-          invitationCode={invitationCode}
+          invitationCode={invitationCode.trim() || null}
           region={region}
         />
       );
