@@ -6,6 +6,7 @@ import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { StatusLine, StatusTone } from '../ui/StatusLine/StatusLine';
 import { IdentityPreviewCard } from './IdentityPreviewCard';
 import { t } from '../../helpers/i18n/dictionary';
+import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { config } from '../../app/config';
 import {
   ManagedDomainApex,
@@ -75,9 +76,35 @@ const ClaimName = ({
   // Until the debounce catches up the result belongs to a name the user has
   // already moved on from
   const isSettled = debouncedPrefix === domainPrefix;
-  const needsInvitationCode = invitationCodeNeeded && !invitationCode.trim();
+
+  // The invitation code is checked with the server as it is typed, debounced like the name, and the
+  // name cannot be claimed until it is accepted
+  const trimmedCode = invitationCode.trim();
+  const [debouncedCode, setDebouncedCode] = useState<string>(trimmedCode);
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedCode(trimmedCode), 500);
+    return () => clearTimeout(timeout);
+  }, [trimmedCode]);
+
+  const {
+    checkInvitationCode: { data: isCodeValid, status: codeStatus },
+  } = useCheckInvitationCode(invitationCodeNeeded && debouncedCode ? debouncedCode : undefined);
+
+  const isCodeSettled = debouncedCode === trimmedCode;
+  const isCodeAccepted =
+    !invitationCodeNeeded ||
+    (!!trimmedCode && isCodeSettled && codeStatus === 'success' && isCodeValid === true);
+
+  const codeStatusLine = ((): { tone: StatusTone; text: string } => {
+    if (!trimmedCode) return { tone: 'idle', text: t('Enter the code from your invitation') };
+    if (!isCodeSettled || codeStatus === 'pending')
+      return { tone: 'checking', text: t('Checking your invitation code …') };
+    if (isCodeValid) return { tone: 'ok', text: t('Invitation code accepted') };
+    return { tone: 'bad', text: t(`That code isn't valid (anymore)`) };
+  })();
+
   const canClaim =
-    !!domainPrefix && isSettled && status === 'success' && isAvailable === true && !needsInvitationCode;
+    !!domainPrefix && isSettled && status === 'success' && isAvailable === true && isCodeAccepted;
   const isTaken = !!domainPrefix && isSettled && status === 'success' && isAvailable === false;
 
   // Gated on domainPrefix: the query is disabled until there is one, and a
@@ -152,6 +179,9 @@ const ClaimName = ({
               placeholder="K7QX-M2PD-9FHW"
               onChange={(e) => onInvitationCodeChange(e.target.value)}
             />
+            <StatusLine tone={codeStatusLine.tone} className="min-h-[1.5rem]">
+              {codeStatusLine.text}
+            </StatusLine>
           </div>
         ) : null}
 
