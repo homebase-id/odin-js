@@ -1,4 +1,10 @@
-import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
@@ -340,4 +346,37 @@ export const updateDriveCache = (
   } else {
     console.warn(`[owner-app:useDrive] ${label}: no cached drive found to update`);
   }
+};
+
+/**
+ * The size of each of a set of drives, and their total. A request per drive; the query key is the one
+ * useDrive's fetchStatus uses, so the drive status dialog and this share an answer, and emptying a
+ * drive (invalidatePurgedDrive) refreshes both.
+ */
+export const useDriveSizes = (drives: DriveDefinition[]) => {
+  const dotYouClient = useDotYouClientContext();
+
+  const results = useQueries({
+    queries: drives.map((drive) => ({
+      queryKey: ['drive-status', `${drive.targetDriveInfo.alias}_${drive.targetDriveInfo.type}`],
+      queryFn: () => getDriveStatus(dotYouClient, drive.targetDriveInfo),
+      refetchOnWindowFocus: false,
+    })),
+  });
+
+  const sizes = results.map((result) => result.data?.sizeInfo);
+  const isLoading = results.some((result) => result.isLoading);
+
+  return {
+    sizes,
+    total: isLoading
+      ? undefined
+      : sizes.reduce<{ fileCount: number; size: number }>(
+          (sum, size) => ({
+            fileCount: sum.fileCount + (size?.fileCount ?? 0),
+            size: sum.size + (size?.size ?? 0),
+          }),
+          { fileCount: 0, size: 0 }
+        ),
+  };
 };

@@ -42,7 +42,11 @@ import {
   OWNERSHIP_HINTS,
   formatTimestamp,
 } from '../../../components/Apps/AppOverviewParts';
-import { DriveView } from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import {
+  DriveSize,
+  DriveView,
+} from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import { useDriveSizes } from '../../../hooks/drives/useDrive';
 
 /**
  * How many devices to show before the list is cut short. Five is enough to recognise the machines
@@ -101,6 +105,7 @@ const AppDetails = () => {
   const ownedDrives = (drives ?? []).filter((drive) =>
     stringGuidsEqual(decodedAppKey, drive.appId ?? undefined)
   );
+  const ownedDriveSizes = useDriveSizes(ownedDrives);
 
   const authorizedCircleDefs = (app?.authorizedCircles ?? [])
     .map((circleId) => (circles ?? []).find((circle) => stringGuidsEqual(circle.id, circleId)))
@@ -265,6 +270,12 @@ const AppDetails = () => {
           title={
             <>
               {`${t('Drives it owns')} (${ownedDrives.length})`}
+              {ownedDrives.length && ownedDriveSizes.total ? (
+                <DriveSize
+                  {...ownedDriveSizes.total}
+                  className="block text-sm font-normal text-slate-500 dark:text-slate-400"
+                />
+              ) : null}
               <small className="block max-w-prose text-sm font-normal text-slate-400">
                 {t(
                   'Drives this app created and names. Owning one does not by itself let the app read or write it -- that comes from the grants below.'
@@ -275,9 +286,10 @@ const AppDetails = () => {
         >
           {ownedDrives.length ? (
             <div className="-my-4">
-              {ownedDrives.map((drive) => (
+              {ownedDrives.map((drive, index) => (
                 <DriveView
                   drive={drive}
+                  sizeInfo={ownedDriveSizes.sizes[index]}
                   className="my-4"
                   key={`${drive.targetDriveInfo.alias}-${drive.targetDriveInfo.type}`}
                 />

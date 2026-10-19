@@ -1,6 +1,6 @@
-import { DriveDefinition, TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
+import { DriveDefinition, DriveStatus, TRANSIENT_TEMP_DRIVE_ALIAS } from '@homebase-id/js-lib/core';
 import { Link } from 'react-router-dom';
-import { getOwnerDrivePath, t } from '@homebase-id/common-app';
+import { bytesToSize, getOwnerDrivePath, t } from '@homebase-id/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
@@ -85,7 +85,15 @@ const DrivePermissionView = ({
   );
 };
 
-export const DriveView = ({ drive, className }: { drive: DriveDefinition; className?: string }) => {
+export const DriveView = ({
+  drive,
+  sizeInfo,
+  className,
+}: {
+  drive: DriveDefinition;
+  sizeInfo?: DriveStatus['sizeInfo'];
+  className?: string;
+}) => {
   return (
     <div
       key={`${drive.targetDriveInfo?.alias}-${drive.targetDriveInfo?.type}`}
@@ -98,11 +106,23 @@ export const DriveView = ({ drive, className }: { drive: DriveDefinition; classN
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <p className={`my-auto`}>{drive?.name}</p>
+          {sizeInfo ? <DriveSize {...sizeInfo} className="text-sm text-slate-400" /> : null}
         </div>
         <Arrow className="my-auto ml-auto h-5 w-5" />
       </Link>
     </div>
   );
 };
+
+/** A drive's (or several drives') file count and bytes, as one line */
+export const DriveSize = ({
+  fileCount,
+  size,
+  className,
+}: DriveStatus['sizeInfo'] & { className?: string }) => (
+  <p className={className}>
+    {fileCount} {fileCount === 1 ? t('file') : t('files')} · {bytesToSize(size)}
+  </p>
+);
 
 export default DrivePermissionView;
