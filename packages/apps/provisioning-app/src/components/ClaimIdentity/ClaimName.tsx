@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Label } from '@homebase-id/common-app';
+import { Input, Label } from '@homebase-id/common-app';
 import { Arrow, Globe } from '@homebase-id/common-app/icons';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { StatusLine, StatusTone } from '../ui/StatusLine/StatusLine';
 import { IdentityPreviewCard } from './IdentityPreviewCard';
 import { t } from '../../helpers/i18n/dictionary';
+import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { config } from '../../app/config';
 import {
   ManagedDomainApex,
@@ -33,6 +34,10 @@ interface ClaimNameProps {
   // itself once this cluster's registry says it is free, and stays put with the
   // usual "taken" line when it is not.
   autoClaimDomain: string | null;
+  invitationCode: string;
+  // Off on a host that takes signups without a code: then there is no field
+  invitationCodeNeeded: boolean;
+  onInvitationCodeChange: (code: string) => void;
   onClaim: () => void;
   onUseOwnDomain: () => void;
 }
@@ -46,6 +51,9 @@ const ClaimName = ({
   domainPrefix,
   apexesError,
   autoClaimDomain,
+  invitationCode,
+  invitationCodeNeeded,
+  onInvitationCodeChange,
   onClaim,
   onUseOwnDomain,
 }: ClaimNameProps) => {
@@ -68,7 +76,35 @@ const ClaimName = ({
   // Until the debounce catches up the result belongs to a name the user has
   // already moved on from
   const isSettled = debouncedPrefix === domainPrefix;
-  const canClaim = !!domainPrefix && isSettled && status === 'success' && isAvailable === true;
+
+  // The invitation code is checked with the server as it is typed, debounced like the name, and the
+  // name cannot be claimed until it is accepted
+  const trimmedCode = invitationCode.trim();
+  const [debouncedCode, setDebouncedCode] = useState<string>(trimmedCode);
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedCode(trimmedCode), 500);
+    return () => clearTimeout(timeout);
+  }, [trimmedCode]);
+
+  const {
+    checkInvitationCode: { data: isCodeValid, status: codeStatus },
+  } = useCheckInvitationCode(invitationCodeNeeded && debouncedCode ? debouncedCode : undefined);
+
+  const isCodeSettled = debouncedCode === trimmedCode;
+  const isCodeAccepted =
+    !invitationCodeNeeded ||
+    (!!trimmedCode && isCodeSettled && codeStatus === 'success' && isCodeValid === true);
+
+  const codeStatusLine = ((): { tone: StatusTone; text: string } => {
+    if (!trimmedCode) return { tone: 'idle', text: t('Enter the code from your invitation') };
+    if (!isCodeSettled || codeStatus === 'pending')
+      return { tone: 'checking', text: t('Checking your invitation code …') };
+    if (isCodeValid) return { tone: 'ok', text: t('Invitation code accepted') };
+    return { tone: 'bad', text: t(`That code isn't valid (anymore)`) };
+  })();
+
+  const canClaim =
+    !!domainPrefix && isSettled && status === 'success' && isAvailable === true && isCodeAccepted;
   const isTaken = !!domainPrefix && isSettled && status === 'success' && isAvailable === false;
 
   // Gated on domainPrefix: the query is disabled until there is one, and a
@@ -129,6 +165,26 @@ const ClaimName = ({
           if (canClaim) onClaim();
         }}
       >
+        {invitationCodeNeeded ? (
+          <div className="mb-8">
+            <Label htmlFor="invitationCode">{t('Your invitation code')}</Label>
+            <Input
+              id="invitationCode"
+              name="invitation-code"
+              required
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              value={invitationCode}
+              placeholder="K7QX-M2PD-9FHW"
+              onChange={(e) => onInvitationCodeChange(e.target.value)}
+            />
+            <StatusLine tone={codeStatusLine.tone} className="min-h-[1.5rem]">
+              {codeStatusLine.text}
+            </StatusLine>
+          </div>
+        ) : null}
+
         <div className="flex flex-row flex-wrap items-baseline justify-between gap-2">
           <Label htmlFor="prefix0" className="mb-0">
             {t('Choose your name')}
