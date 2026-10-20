@@ -1,13 +1,32 @@
-import { t, Label, bytesToSize } from '@homebase-id/common-app';
+import { t, Label, bytesToSize, Alert } from '@homebase-id/common-app';
+import { Link, useSearchParams } from 'react-router-dom';
 import Section from '../../components/ui/Sections/Section';
 import { usePlan } from '../../hooks/settings/usePlan';
 import { StorageUsage } from '../../provider/system/PlanProvider';
 
 export const PlanSettings = () => {
   const { data: plan, isLoading, error } = usePlan();
+  // The apps link here with ?upgrade=1 when the owner asks how to get more space
+  const [searchParams] = useSearchParams();
+  const askedToUpgrade = searchParams.get('upgrade') === '1';
 
   return (
     <Section title={t('Plan & storage')}>
+      {askedToUpgrade && (
+        <Alert type="info" title={t('Get more space')} className="mb-5">
+          <p>
+            {t(
+              'Your plan is set by your hosting provider. To get more storage, or a public home page, contact them and ask to move your identity to a larger plan.'
+            )}
+          </p>
+          <p className="mt-2">
+            {t('Until then, you can free up space by deleting photos, videos and files.')}{' '}
+            <Link to="/owner/apps" className="underline">
+              {t('See what each app stores')}
+            </Link>
+          </p>
+        </Alert>
+      )}
       {isLoading && <p className="text-slate-400">{t('Loading...')}</p>}
       {error && <p className="text-red-600">{t('Your plan could not be loaded')}</p>}
       {!isLoading && !error && !plan && (
