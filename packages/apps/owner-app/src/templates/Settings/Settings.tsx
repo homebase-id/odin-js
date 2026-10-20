@@ -8,6 +8,7 @@ import {ReactionSettings} from './ReactionSettings';
 import {DeleteAccountSettings} from './DeleteAccountSettings';
 import {Cog} from '@homebase-id/common-app/icons';
 import {VersionInfoSettings} from "./VersionInfoSettings";
+import {PlanSettings} from "./PlanSettings";
 
 const Settings = () => {
     const {sectionId} = useParams();
@@ -25,6 +26,10 @@ const Settings = () => {
                         path: `/owner/settings/reactions`,
                     },
                     {
+                        title: `Plan & storage`,
+                        path: `/owner/settings/plan`,
+                    },
+                    {
                         title: `Version Info`,
                         path: `/owner/settings/version-info`,
                     },
@@ -37,6 +42,7 @@ const Settings = () => {
             />
             {(sectionId === 'privacy' || !sectionId) && <NetworkVisibilitySettings/>}
             {sectionId === 'reactions' && <ReactionSettings/>}
+            {sectionId === 'plan' && <PlanSettings/>}
             {sectionId === 'version-info' && <VersionInfoSettings/>}
             {sectionId === 'delete' && <DeleteAccountSettings/>}
         </>

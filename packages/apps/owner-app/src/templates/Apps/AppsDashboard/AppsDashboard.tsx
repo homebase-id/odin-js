@@ -20,6 +20,8 @@ import CardLink from '../../../components/ui/Buttons/CardLink';
 import { DrivePurgeStatus } from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useDrives } from '../../../hooks/drives/useDrives';
+import { useDriveSizes } from '../../../hooks/drives/useDrive';
+import { DriveSize } from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { isOwnerConsoleApp } from '../../../hooks/apps/useOwnerAppName';
 import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
 
@@ -118,6 +120,7 @@ const AppCard = ({
         label={t('circles authorized')}
       />
     </dl>
+    <DrivesUsage drives={drives} />
 
     {/* The app's half of every drive address it owns. Absent on hosts without the column, and on
         apps that own nothing addressable -- shown only when it is real. */}
@@ -145,8 +148,23 @@ const OwnerConsoleCard = ({
         label={t('circles owned')}
       />
     </dl>
+    <DrivesUsage drives={drives} />
   </CardLink>
 );
+
+/** What the drives store, together: the same per-drive status requests as the app's own page, so the two
+    share cached answers. A line while they load, so the cards do not jump; greyed when nothing is stored. */
+const DrivesUsage = ({ drives }: { drives: DriveDefinition[] }) => {
+  const { total } = useDriveSizes(drives);
+  if (!total) return <p className="mt-3 text-sm text-slate-400">…</p>;
+
+  return (
+    <DriveSize
+      {...total}
+      className={`mt-3 text-sm ${total.size === 0 ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}
+    />
+  );
+};
 
 /** Zero is greyed rather than hidden: "owns no drives" is an answer, and dropping the row would
     make cards differ in height for a reason the reader cannot see. */
