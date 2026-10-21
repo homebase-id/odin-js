@@ -1,4 +1,5 @@
-import { t, Label, bytesToSize, Alert } from '@homebase-id/common-app';
+import { useEffect } from 'react';
+import { t, Label, bytesToSize, Alert, ActionLink } from '@homebase-id/common-app';
 import { Link, useSearchParams } from 'react-router-dom';
 import Section from '../../components/ui/Sections/Section';
 import { usePlan } from '../../hooks/settings/usePlan';
@@ -9,10 +10,26 @@ export const PlanSettings = () => {
   // The apps link here with ?upgrade=1 when the owner asks how to get more space
   const [searchParams] = useSearchParams();
   const askedToUpgrade = searchParams.get('upgrade') === '1';
+  // Only ever the address the server has configured, never one from the link
+  const upgradeUrl = plan?.upgradeUrl?.startsWith('https://') ? plan.upgradeUrl : undefined;
+  const redirecting = askedToUpgrade && !!upgradeUrl;
+
+  useEffect(() => {
+    // replace, so Back from the provider's page does not land here and bounce straight back
+    if (redirecting && upgradeUrl) window.location.replace(upgradeUrl);
+  }, [redirecting, upgradeUrl]);
+
+  if (redirecting) {
+    return (
+      <Section title={t('Plan & storage')}>
+        <p className="text-slate-400">{t('Taking you to your hosting provider...')}</p>
+      </Section>
+    );
+  }
 
   return (
     <Section title={t('Plan & storage')}>
-      {askedToUpgrade && (
+      {askedToUpgrade && !isLoading && (
         <Alert type="info" title={t('Get more space')} className="mb-5">
           <p>
             {t(
@@ -38,6 +55,11 @@ export const PlanSettings = () => {
           <div className="mb-5">
             <Label>{t('Plan')}</Label>
             <p className="text-slate-400">{plan.id ?? t('No plan')}</p>
+            {upgradeUrl && (
+              <ActionLink href={upgradeUrl} type="secondary" className="mt-2 w-fit">
+                {t('Get more space')}
+              </ActionLink>
+            )}
           </div>
 
           <div className="mb-5">
