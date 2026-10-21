@@ -17,6 +17,8 @@ export interface IdentityPlan {
   /** Whether the identity has a public home page */
   publicWebPresence: boolean;
   storage: StorageUsage;
+  /** The hosting provider's page for a bigger plan, for this identity (?id= added); null when it has none */
+  upgradeUrl?: string | null;
 }
 
 /** GET /api/v2/plan. Null on a server from before hosting plans, which answers 404. */
