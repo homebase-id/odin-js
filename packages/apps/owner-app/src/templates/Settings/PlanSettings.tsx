@@ -50,16 +50,20 @@ export const PlanSettings = () => {
         <p className="text-slate-400">{t('This server does not have hosting plans')}</p>
       )}
 
+      {/* Always there: the hosting provider's upgrade page when it has one, otherwise how to reach them */}
+      {!isLoading && !askedToUpgrade && (
+        <div className="mb-5">
+          <ActionLink href={upgradeUrl ?? '/owner/settings/plan?upgrade=1'} className="w-fit">
+            {t('See plans and upgrade')}
+          </ActionLink>
+        </div>
+      )}
+
       {plan && (
         <>
           <div className="mb-5">
             <Label>{t('Plan')}</Label>
             <p className="text-slate-400">{plan.id ?? t('No plan')}</p>
-            {upgradeUrl && (
-              <ActionLink href={upgradeUrl} type="secondary" className="mt-2 w-fit">
-                {t('Get more space')}
-              </ActionLink>
-            )}
           </div>
 
           <div className="mb-5">
