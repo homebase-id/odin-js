@@ -9,8 +9,11 @@ import {
   changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { ApiType } from '@homebase-id/js-lib/core';
+import { ensureZeroKnowledgeKeys } from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   HOME_SHARED_SECRET,
+  OwnerClient,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
   logoutOwnerAndAllApps,
@@ -105,6 +108,15 @@ export const useAuth = () => {
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     invalidateVerifyToken(queryClient);
+
+    // The only moment the browser has the password: make or open the zero-knowledge keys. Never
+    // blocks the login; the next login tries again.
+    try {
+      const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
+      await ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys);
+    } catch (error) {
+      console.error('Zero-knowledge keys', error);
+    }
 
     checkRedirectToReturn();
     return true;

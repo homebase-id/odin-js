@@ -1,10 +1,20 @@
 import {base64ToUint8Array} from '@homebase-id/js-lib/helpers';
 import {OwnerClient} from '@homebase-id/common-app';
-import {NonceData, encryptRecoveryKey, prepareAuthPassword} from './AuthenticationHelper';
+import {
+  NonceData,
+  deriveLoginKeys,
+  encryptRecoveryKey,
+  prepareAuthPassword,
+  prepareAuthReply,
+} from './AuthenticationHelper';
 import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
+import {LoginKeys} from '@homebase-id/js-lib/auth';
+import {relockZkKeysForNewPassword} from './ZeroKnowledgeProvider';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;
+  // Kept for the zero-knowledge keys made right after login
+  loginKeys: LoginKeys;
 }
 
 // Authenticate the owner
@@ -14,7 +24,8 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   });
 
   const noncePackage = await getNonce(dotYouClient);
-  const reply = await prepareAuthPassword(password, noncePackage);
+  const loginKeys = await deriveLoginKeys(password, noncePackage);
+  const reply = await prepareAuthReply(loginKeys, noncePackage);
 
   const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = '/authentication';
@@ -24,6 +35,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   if (response.status === 200) {
     const authResponse: AuthenticationResponse = {
       sharedSecret: base64ToUint8Array(response.data.sharedSecret),
+      loginKeys,
     };
     return authResponse;
   }
@@ -112,11 +124,21 @@ export const changePassword = async (
   const currentAuthenticationPasswordReply = await prepareAuthPassword(oldPassword, noncePackage);
 
   const salts = await getSalts(dotYouClient);
-  const newPasswordReply = await prepareAuthPassword(newPassword, salts);
+  const newLoginKeys = await deriveLoginKeys(newPassword, salts);
+  const newPasswordReply = await prepareAuthReply(newLoginKeys, salts);
+
+  // Re-locked in the same request, so the keys are never left locked by the old password
+  let zkKeys;
+  try {
+    zkKeys = await relockZkKeysForNewPassword(dotYouClient, oldPassword, newPassword, newLoginKeys);
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 
   return dotYouClient
     .createAxiosClient({overrideEncryption: false})
-    .post('/security/resetpasswd', {currentAuthenticationPasswordReply, newPasswordReply})
+    .post('/security/resetpasswd', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
     .then((response) => {
       return response.status === 200;
     })
