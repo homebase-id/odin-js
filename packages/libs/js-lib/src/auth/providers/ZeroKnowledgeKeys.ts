@@ -2,6 +2,7 @@ import { cbcEncrypt, gcmDecrypt, gcmEncrypt } from '../../helpers/AesEncrypt';
 import {
   base64ToUint8Array,
   getRandom16ByteArray,
+  isAGuidId,
   mergeByteArrays,
   stringToUint8Array,
   uint8ArrayToBase64,
@@ -20,12 +21,7 @@ const KEY_LENGTH = 16;
 const IV_LENGTH = 12;
 
 /** pbkdf2 with HMAC-SHA256, as the owner login works out the password hash and the KEK. */
-export const pbkdf2HmacSha256 = async (
-  password: string,
-  salt: Uint8Array,
-  iterations = PBKDF2_ITERATIONS,
-  length = KEY_LENGTH
-): Promise<Uint8Array> => {
+export const pbkdf2HmacSha256 = async (password: string, salt: Uint8Array): Promise<Uint8Array> => {
   const passwordKey = await crypto.subtle.importKey(
     'raw',
     stringToUint8Array(password),
@@ -34,9 +30,9 @@ export const pbkdf2HmacSha256 = async (
     ['deriveBits']
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations },
+    { name: 'PBKDF2', hash: 'SHA-256', salt, iterations: PBKDF2_ITERATIONS },
     passwordKey,
-    length * 8
+    KEY_LENGTH * 8
   );
 
   return new Uint8Array(bits);
@@ -71,8 +67,7 @@ export interface ZkKeysRequest {
 export interface ZkStatus {
   zkSaltKek64?: string | null;
   zkKekEncryptedZkMasterKey?: string | null;
-  hasLoginKeys: boolean;
-  shardRecoveryDriveIsZeroKnowledge: boolean;
+  /** Null until the Shard Recovery drive is converted. */
   shardRecoveryDriveZkMasterKeyEncryptedStorageKey?: string | null;
 }
 
@@ -109,8 +104,8 @@ export const openZkMasterKey = async (password: string, status: ZkStatus): Promi
 
 /** A GUID's bytes in .NET's `Guid.ToByteArray()` order, as the server encrypts a drive id. */
 export const guidToDotNetBytes = (guid: string): Uint8Array => {
+  if (!isAGuidId(guid)) throw new Error(`Not a GUID: ${guid}`);
   const hex = guid.replace(/-/g, '');
-  if (!/^[0-9a-fA-F]{32}$/.test(hex)) throw new Error(`Not a GUID: ${guid}`);
 
   const bytes = new Uint8Array(16);
   for (let i = 0; i < 16; i++) bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);

@@ -9,12 +9,11 @@ import {
   openZkMasterKey,
   zkOpen,
 } from '@homebase-id/js-lib/auth';
+import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
 
 // The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md). The browser makes
 // and opens every key; the identity server only stores the locked copies. The password is needed
 // only at login and at a password change.
-
-const SHARD_RECOVERY_DRIVE_ALIAS = '46242d0d67604b2aa683f05cd48d4aef';
 
 const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
   dotYouClient
@@ -33,8 +32,7 @@ const convertShardRecoveryDrive = async (
 // Converted, and with a key the current master key opens. After a reset with the recovery key the
 // master key is new, so the drive is converted again.
 const shardRecoveryDriveOpens = async (status: ZkStatus, masterKey: Uint8Array) => {
-  if (!status.shardRecoveryDriveIsZeroKnowledge || !status.shardRecoveryDriveZkMasterKeyEncryptedStorageKey)
-    return false;
+  if (!status.shardRecoveryDriveZkMasterKeyEncryptedStorageKey) return false;
 
   try {
     await zkOpen(status.shardRecoveryDriveZkMasterKeyEncryptedStorageKey, masterKey);
@@ -65,7 +63,7 @@ export const ensureZeroKnowledgeKeys = async (
   }
 
   if (!(await shardRecoveryDriveOpens(status, masterKey))) {
-    const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE_ALIAS, masterKey);
+    const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE.alias, masterKey);
     await convertShardRecoveryDrive(dotYouClient, request);
   }
 };

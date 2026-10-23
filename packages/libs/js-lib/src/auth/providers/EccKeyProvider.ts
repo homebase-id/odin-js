@@ -1,3 +1,4 @@
+import { gcmEncrypt } from '../../helpers/AesEncrypt';
 import { isLocalStorageAvailable } from '../../helpers/BrowserUtil';
 import {
   base64ToUint8Array,
@@ -104,19 +105,8 @@ export const throwAwayTheECCKey = () => {
   if (isLocalStorageAvailable()) localStorage.removeItem(STORAGE_KEY);
 };
 
-export const aesGcmEncryptWithEccSharedSecret = async (
+export const aesGcmEncryptWithEccSharedSecret = (
   exchangedSharedSecret: Uint8Array,
   iv: Uint8Array,
   data: Uint8Array
-) => {
-  const aesGcmKey = await crypto.subtle.importKey('raw', exchangedSharedSecret, 'AES-GCM', true, [
-    'encrypt',
-  ]);
-  const encryptedGcm = await window.crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: iv.slice(0, 12) },
-    aesGcmKey,
-    data
-  );
-
-  return new Uint8Array(encryptedGcm);
-};
+) => gcmEncrypt(data, iv, exchangedSharedSecret);

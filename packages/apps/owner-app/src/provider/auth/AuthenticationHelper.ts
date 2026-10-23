@@ -40,10 +40,13 @@ interface AuthenticationPayload {
 }
 
 /** The password hash and KEK the login sends, from the password and the identity's salts. */
-export const deriveLoginKeys = async (password: string, nonceData: NonceData): Promise<LoginKeys> => ({
-  hpwd64: await pbkdf2Base64(password, nonceData.saltPassword64),
-  kek64: await pbkdf2Base64(password, nonceData.saltKek64),
-});
+export const deriveLoginKeys = async (password: string, nonceData: NonceData): Promise<LoginKeys> => {
+  const [hpwd64, kek64] = await Promise.all([
+    pbkdf2Base64(password, nonceData.saltPassword64),
+    pbkdf2Base64(password, nonceData.saltKek64),
+  ]);
+  return { hpwd64, kek64 };
+};
 
 export const prepareAuthPassword = async (
   password: string,

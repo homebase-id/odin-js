@@ -22,8 +22,6 @@ const LOCKED_MASTER_KEY = 'ICEiIyQlJicoKSorjWGICGzIuJPS3SPnEBWvlaM3EZ0jd9msGp8vJ
 const status = (salt: string, locked: string) => ({
   zkSaltKek64: salt,
   zkKekEncryptedZkMasterKey: locked,
-  hasLoginKeys: true,
-  shardRecoveryDriveIsZeroKnowledge: false,
 });
 
 test('the second password key is pbkdf2 like the KEK, UTF-8 password included', async () => {
@@ -52,9 +50,10 @@ test('a password change keeps the master key', async () => {
   const loginKeys = { hpwd64: 'aHB3ZA==', kek64: 'a2Vr' };
   const first = await makeZkKeys(PASSWORD, loginKeys);
   const relocked = await makeZkKeys('new password', loginKeys, first.masterKey);
-  const opened = await openZkMasterKey('new password', {
-    ...status(relocked.request.zkSaltKek64, relocked.request.zkKekEncryptedZkMasterKey),
-  });
+  const opened = await openZkMasterKey(
+    'new password',
+    status(relocked.request.zkSaltKek64, relocked.request.zkKekEncryptedZkMasterKey)
+  );
   expect(opened).toEqual(first.masterKey);
 });
 
