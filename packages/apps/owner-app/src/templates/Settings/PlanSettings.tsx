@@ -1,4 +1,4 @@
-import { t, Label, bytesToSize, ActionLink } from '@homebase-id/common-app';
+import { t, Label, bytesToSize, ActionLink, planStorageText } from '@homebase-id/common-app';
 import { Link } from 'react-router-dom';
 import Section from '../../components/ui/Sections/Section';
 import { usePlan } from '../../hooks/settings/usePlan';
@@ -53,7 +53,9 @@ export const PlanSettings = () => {
 
 const UpgradeBox = ({ hostingProvider }: { hostingProvider?: HostingProvider | null }) => {
   // Only ever the address the server gives, and only https
-  const upgradeUrl = hostingProvider?.upgradeUrl?.startsWith('https://') ? hostingProvider.upgradeUrl : undefined;
+  const upgradeUrl = hostingProvider?.upgradeUrl?.startsWith('https://')
+    ? hostingProvider.upgradeUrl
+    : undefined;
 
   return (
     <div className="mt-2 max-w-2xl rounded-lg border border-indigo-300 bg-indigo-50 p-5 dark:border-indigo-700 dark:bg-indigo-950">
@@ -94,18 +96,25 @@ const StorageBar = ({ usedBytes, quotaBytes, isOverQuota }: StorageUsage) => {
     );
   }
 
-  const percent = quotaBytes > 0 ? Math.min(100, (usedBytes / quotaBytes) * 100) : 100;
+  // "12% of 500 GB used", then what is used and free in the plan's own unit: no MB against GB to convert
+  const text = planStorageText(usedBytes, quotaBytes);
+  const width = quotaBytes > 0 ? Math.min(100, (usedBytes / quotaBytes) * 100) : 100;
   return (
     <div className="max-w-lg">
-      <p className="mb-2 text-slate-400">
-        {bytesToSize(usedBytes)} {t('of')} {bytesToSize(quotaBytes)} {t('used')}
+      <p className="mb-2">
+        {text.percent === null ? t('Less than 1%') : `${text.percent}%`} {t('of')} {text.size}{' '}
+        {t('used')}
       </p>
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
         <div
           className={`h-full ${isOverQuota ? 'bg-red-600' : 'bg-indigo-500'}`}
-          style={{ width: `${percent}%` }}
+          style={{ width: `${width}%` }}
         />
       </div>
+      <p className="mt-2 text-sm text-slate-400">
+        {text.used.under ? `${t('Under')} ${text.used.amount}` : text.used.amount} {t('used')} ·{' '}
+        {text.free} {t('free')}
+      </p>
     </div>
   );
 };
