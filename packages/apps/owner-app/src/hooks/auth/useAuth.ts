@@ -22,6 +22,8 @@ import {
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
+const ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS = 10_000;
+
 export const SETUP_PATH = '/owner/setup';
 
 export const LOGIN_PATH = '/owner/login';
@@ -110,10 +112,16 @@ export const useAuth = () => {
     invalidateVerifyToken(queryClient);
 
     // The only moment the browser has the password: make or open the zero-knowledge keys. The
-    // redirect waits for it, but a failure never fails the login; the next login tries again.
+    // redirect waits for it, but never for long, and a failure never fails the login; the next
+    // login tries again. Each step is safe to cut off: nothing is used until it is saved.
     try {
       const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
-      await ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys);
+      await Promise.race([
+        ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
+        ),
+      ]);
     } catch (error) {
       console.error('Zero-knowledge keys', error);
     }
