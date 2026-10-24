@@ -22,6 +22,7 @@ import {
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
+import { forgetRecoveryKey } from '../../provider/auth/SecurityRecoveryProvider';
 
 const ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS = 10_000;
 
@@ -108,6 +109,9 @@ export const useAuth = () => {
 
     const response = await authenticateOwner(password);
     if (!response) return false;
+
+    // A login ends recovery mode on the server, so a recovering browser's throwaway key is spent
+    forgetRecoveryKey();
 
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));

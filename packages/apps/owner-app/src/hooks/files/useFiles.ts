@@ -8,7 +8,7 @@ import {
 import {
   decryptJsonContent,
   decryptKeyHeader,
-  isSealedKeyHeader,
+  isDeposit,
   DeletedHomebaseFile,
   deleteFile,
   HomebaseFile,
@@ -172,10 +172,11 @@ export const useFile = ({
       );
     }
 
+    // A deposit's key header is sealed to the drive's write-only key: its content stays as stored
+    const deposit = isDeposit(result);
     const decryptedJsonContent = await (async () => {
       try {
-        // A deposit's key header is sealed to the drive's write-only key: its content stays as stored
-        if (isSealedKeyHeader(result.sharedSecretEncryptedKeyHeader)) return result.fileMetadata.appData.content;
+        if (deposit) return result.fileMetadata.appData.content;
         return result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
           ? await decryptJsonContent(
               result.fileMetadata,
@@ -194,7 +195,7 @@ export const useFile = ({
         ...result.fileMetadata,
         appData: {
           ...result.fileMetadata.appData,
-          content: tryJsonParse(decryptedJsonContent),
+          content: deposit ? decryptedJsonContent : tryJsonParse(decryptedJsonContent),
         },
       },
       serverMetadata: result.serverMetadata,

@@ -13,9 +13,10 @@ import {
   exitRecoveryMode,
   finalizeRecovery,
   forgetRecoveryKey,
-  getRecoveryStatus,
-  hasRecoveryKey,
+  getRecoveryStatusAndForgetStaleKey,
+  hasStoredRecoveryKey,
   initiateRecoveryMode,
+  isThisBrowsersRecovery,
   recoverWithApprovedFriends,
   ShamirRecoveryState,
   ShamirRecoveryStatusRedacted,
@@ -37,6 +38,10 @@ const ShamirAccountRecovery = () => {
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [thisBrowser, setThisBrowser] = useState<boolean>(false);
+  // A reset with the friends' reset key ends recovery (state None): the page keeps saying it worked
+  const [passwordReset, setPasswordReset] = useState<boolean>(false);
 
   // see if we came here from recovery mode
   const fromVerification = params.get("fv") === "1";
@@ -48,7 +53,8 @@ const ShamirAccountRecovery = () => {
   const startRecoveryMode = async () => {
     try {
       setErrorMessage(null); // clear previous
-      await initiateRecoveryMode(recoveryState !== ShamirRecoveryState.None);
+      setNotice(null);
+      await initiateRecoveryMode(status);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setErrorMessage(error.message || t("An unexpected error occurred."));
@@ -56,15 +62,15 @@ const ShamirAccountRecovery = () => {
     await reloadStatus();
   };
 
+  // Only the email goes out; recovery goes on until the owner confirms with it
   const cancelRecoveryMode = async () => {
     await exitRecoveryMode();
-    await reloadStatus();
+    setNotice(t('Check your email to confirm leaving recovery mode.'));
   }
 
-  // The throwaway key goes once the bundle is opened (recoverWithApprovedFriends); a new recovery gets
-  // a new pair (initiateRecoveryMode), so a stale one is never reused
   const reloadStatus = async () => {
-    getRecoveryStatus().then((result) => {
+    getRecoveryStatusAndForgetStaleKey().then(async (result) => {
+      setThisBrowser(await isThisBrowsersRecovery(result));
       setStatus(result);
       setLoaded(true);
     });
@@ -75,7 +81,7 @@ const ShamirAccountRecovery = () => {
     if (!enterNonceId || entering.current) return;
     entering.current = true;
     enterRecoveryMode(enterNonceId).then((error) => {
-      if (error) setErrorMessage(hasRecoveryKey() ? error : t('Open the link in the browser where you started recovery.'));
+      if (error) setErrorMessage(hasStoredRecoveryKey() ? error : t('Open the link in the browser where you started recovery.'));
       navigate(location.pathname, {replace: true});
       reloadStatus();
     });
@@ -119,7 +125,19 @@ const ShamirAccountRecovery = () => {
                   {errorMessage}
                 </Alert>
               )}
-              {recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode ? (
+              {notice && (
+                <Alert type="info" isCompact={false} className="mb-3">
+                  {notice}
+                </Alert>
+              )}
+              {passwordReset ? (
+                <div className="my-2">
+                  <p>{t('Your password has been changed successfully')}</p>
+                  <div className="flex flex-row-reverse">
+                    <ActionLink href={loginHref(returnUrl)}>{t('Login')}</ActionLink>
+                  </div>
+                </div>
+              ) : recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode ? (
                 <div className="my-2">
                   <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue.')}</p>
                   <p className="mt-3">Email: <b>{status?.email}</b></p>
@@ -159,7 +177,12 @@ const ShamirAccountRecovery = () => {
                   </div>
                 </>
               ) : recoveryState === ShamirRecoveryState.AwaitingRecoveringBrowser ? (
-                <FriendsApproved returnUrl={returnUrl} onCancel={() => cancelRecoveryMode()}/>
+                <FriendsApproved
+                  returnUrl={returnUrl}
+                  thisBrowser={thisBrowser}
+                  onCancel={() => cancelRecoveryMode()}
+                  onPasswordReset={() => setPasswordReset(true)}
+                />
               ) : recoveryState === ShamirRecoveryState.AwaitingOwnerFinalization ? (<>
                   {t('🎉 You are ready to finalize your password recovery!')}
 
@@ -247,13 +270,18 @@ const ShamirAccountRecovery = () => {
  * secret and shows the password, as recovery with the phrase does; or, with no password copy or
  * one that doesn't log in, sets a new password with the friends' reset key.
  */
-function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCancel: () => void}) {
+function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
+  returnUrl: string | null;
+  thisBrowser: boolean;
+  onCancel: () => void;
+  onPasswordReset: () => void;
+}) {
   const [recovered, setRecovered] = useState<PasswordRecovery>();
   const [resetting, setResetting] = useState(false);
   const [state, setState] = useState<'loading' | 'error' | 'idle'>('idle');
 
-  // Once opened, the key is gone and the result lives in this page only
-  if (!recovered && !hasRecoveryKey()) {
+  // Only the browser whose key the friends sealed to can open their shards
+  if (!recovered && !thisBrowser) {
     return (
       <div className="my-2">
         <p>{t('Your friends have approved, but this is not the browser where you started recovery. Open this page there.')}</p>
@@ -309,7 +337,11 @@ function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCan
           returnUrl={returnUrl}
           setNewPassword={async (password) => {
             const done = await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovered, password);
-            if (done) forgetRecoveryKey();
+            if (done) {
+              // The reset ended recovery: the key is spent
+              forgetRecoveryKey();
+              onPasswordReset();
+            }
             return done;
           }}
         />

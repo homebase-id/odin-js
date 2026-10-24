@@ -5,7 +5,7 @@ import {
   PlayerType,
 } from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
-import {getRuleForPlayers} from "./ShamirDistributionDialog";
+import {getRuleForPlayers, MIN_MATCHING_SHARDS} from "./ShamirDistributionDialog";
 
 export const Step3OtherOptions = ({
                                     config,
@@ -22,7 +22,7 @@ export const Step3OtherOptions = ({
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rule = getRuleForPlayers(localPlayers.length);
-    const minAllowed = rule?.minShards ?? 1;
+    const minAllowed = rule?.minShards ?? MIN_MATCHING_SHARDS;
     const maxAllowed = localPlayers.length;
     const value = Math.min(Math.max(Number(e.target.value), minAllowed), maxAllowed);
     onChange(value);
@@ -48,7 +48,7 @@ export const Step3OtherOptions = ({
             value={config.minMatchingShards}
             onChange={handleMinChange}
             className="w-16"
-            min={rule?.minShards ?? 1}
+            min={rule?.minShards ?? MIN_MATCHING_SHARDS}
             max={localPlayers.length}
           />
         </div>

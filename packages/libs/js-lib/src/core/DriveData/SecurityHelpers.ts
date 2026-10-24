@@ -240,6 +240,15 @@ export const decryptChunkedBytesResponse = async (
 export const isSealedKeyHeader = (keyHeader: { type: number | string } | undefined | null) =>
   !!keyHeader && (keyHeader.type === 'sealed' || keyHeader.type === 12);
 
+/**
+ * Whether a file is a deposit: encrypted, with its key header sealed to the drive's write-only key.
+ * Nothing but the drive owner's browser, with that key, can open it.
+ */
+export const isDeposit = (file: {
+  fileMetadata: { isEncrypted: boolean };
+  sharedSecretEncryptedKeyHeader?: { type: number | string } | null;
+}) => file.fileMetadata.isEncrypted && isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader);
+
 export const decryptKeyHeader = async (
   dotYouClient: DotYouClient,
   encryptedKeyHeader: EncryptedKeyHeader | KeyHeader

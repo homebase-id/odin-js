@@ -2,7 +2,7 @@ import {
   DotYouClient,
   getFileHeaderBytesByUniqueId,
   getKnownOdinErrorMessages,
-  isSealedKeyHeader,
+  isDeposit,
 } from '@homebase-id/js-lib/core';
 import {
   FriendToDealTo,
@@ -229,7 +229,7 @@ export const approveShardRequest = async (dotYouClient: DotYouClient, request: S
     getShardRecoveryDrive(dotYouClient),
     getFileHeaderBytesByUniqueId(dotYouClient, SHARD_RECOVERY_DRIVE, request.shardId, {decrypt: false}),
   ]);
-  if (!file || !isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader) || !drive) {
+  if (!file || !isDeposit(file) || !drive) {
     throw new Error(t('This shard is from an older setup; ask them to set up recovery again'));
   }
 

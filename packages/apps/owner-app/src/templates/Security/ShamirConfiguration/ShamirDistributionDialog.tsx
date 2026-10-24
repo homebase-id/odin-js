@@ -15,6 +15,9 @@ import {createPortal} from "react-dom";
 import {WaitForShardConfig} from "./WaitForShardConfig";
 import {Step1SelectConfigurationType} from "./Step1SelectConfigurationType";
 
+/** One shard alone must never be enough: as the server and the split require. */
+export const MIN_MATCHING_SHARDS = 2;
+
 // The friends who release automatically are servers, as is the dealer package, so together they must
 // stay below the minimum: approvals >= players - minShards + 1, and at least one friend approves
 // (odin-core docs/zero-knowledge-recovery-plan.md, F2).
@@ -106,9 +109,8 @@ export const ShamirDistributionDialog = ({
         const rule = getRuleForPlayers(players.length);
         const approvals = players.filter(p => p.type === PlayerType.Delegate).length;
 
-        // As the server and the split require: one shard alone must never be enough
-        if (minShards < 2) {
-            setValidationError(t('Min shards cannot be less than 2'));
+        if (minShards < MIN_MATCHING_SHARDS) {
+            setValidationError(t('Min shards cannot be less than {0}', MIN_MATCHING_SHARDS));
             return;
         }
 

@@ -1,6 +1,6 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {base64ToUint8Array, uint8ArrayToBase64} from '@homebase-id/js-lib/helpers';
-import {PasswordRecovery, createExportedEccPair, recoverWithFriends} from '@homebase-id/js-lib/auth';
+import {PasswordRecovery, createExportedEccPair, recoverWithFriends, sealKeyId} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from "@homebase-id/common-app";
 import {prepareAuthPassword} from "./AuthenticationHelper";
 import {getSalts} from "./AuthenticationProvider";
@@ -14,6 +14,7 @@ export enum ShamirRecoveryState {
    */
   AwaitingOwnerEmailVerificationToEnterRecoveryMode = "awaitingOwnerEmailVerificationToEnterRecoveryMode",
 
+  /** No longer set by the server: asking to exit only sends the email. A status stored before still reads. */
   AwaitingOwnerEmailVerificationToExitRecoveryMode = "awaitingOwnerEmailVerificationToExitRecoveryMode",
 
   /**
@@ -36,6 +37,8 @@ export interface ShamirRecoveryStatusRedacted {
   updated: number; // Unix timestamp (UTC)
   email: string;
   state: ShamirRecoveryState;
+  /** The throwaway key the recovery under way is for (sealKeyId), or null before it is entered. */
+  recoveryKeyId?: number | null;
 }
 
 const root = "/security/recovery"
@@ -78,6 +81,10 @@ export const finalizeRecovery = async (id: string, fk: string, newPassword: stri
 };
 
 
+/**
+ * Asks to leave recovery mode. Only the email goes out: nothing changes until the owner confirms
+ * with it, so the page says so itself.
+ */
 export const exitRecoveryMode = async () => {
   const axiosClient = dotYouClient.createAxiosClient();
   return await axiosClient
@@ -92,13 +99,20 @@ export const exitRecoveryMode = async () => {
 };
 
 // Recovery with friends must finish in the browser that started it: the friends seal their shards to
-// this throwaway key pair, kept here while recovery is under way and forgotten once it ends (the
-// recovery page sees no recovery, or a reset succeeded). The private key never leaves this browser.
+// this throwaway key pair. The private key never leaves this browser. It counts as this browser's
+// only while the server says the recovery under way is for it (status.recoveryKeyId), and it is
+// forgotten when the recovery ends: a status read shows none (or another key), a reset succeeded, or
+// the owner logged in.
 const RECOVERY_KEY_STORAGE = 'shamir-recovery-key';
+
+// A link stays valid for an hour, so a key that young may still be waiting for its email to be clicked
+const PENDING_KEY_MAX_AGE_MS = 60 * 60 * 1000;
 
 interface RecoveryKeyPair {
   publicKeyJwk: string;
   privateKey64: string;
+  /** When this browser made it (ms) */
+  created: number;
 }
 
 const getStoredRecoveryKey = (): RecoveryKeyPair | null => {
@@ -110,23 +124,57 @@ const getStoredRecoveryKey = (): RecoveryKeyPair | null => {
   }
 };
 
+export const forgetRecoveryKey = () => window.localStorage.removeItem(RECOVERY_KEY_STORAGE);
+
+/** Whether this browser holds any throwaway key, for a message only; see isThisBrowsersRecovery. */
+export const hasStoredRecoveryKey = () => !!getStoredRecoveryKey();
+
+const isFor = async (key: RecoveryKeyPair | null, recoveryKeyId: number | null | undefined) =>
+  !!key && recoveryKeyId != null && (await sealKeyId(key.publicKeyJwk)) === recoveryKeyId;
+
+/** Whether the recovery under way is the one this browser started. */
+export const isThisBrowsersRecovery = (status: ShamirRecoveryStatusRedacted | null) =>
+  isFor(getStoredRecoveryKey(), status?.recoveryKeyId);
+
 /**
- * This browser's throwaway key pair. Kept while a recovery is under way, so sending the email again
- * doesn't break the first one; a new recovery gets a new pair.
+ * The status, and the throwaway key forgotten when it shows the recovery is over or is another
+ * browser's. Only a key made before the status was asked for: one made since (a recovery being
+ * started in this or another tab) is newer than what the answer knows.
  */
-const getOrMakeRecoveryKey = async (recoveryUnderWay: boolean): Promise<RecoveryKeyPair> => {
+export const getRecoveryStatusAndForgetStaleKey = async (): Promise<ShamirRecoveryStatusRedacted | null> => {
+  const askedAt = Date.now();
+  const status = await getRecoveryStatus();
+  const key = getStoredRecoveryKey();
+  if (status && key && key.created < askedAt) {
+    const over = status.state === ShamirRecoveryState.None;
+    const anotherBrowsers = status.recoveryKeyId != null && !(await isFor(key, status.recoveryKeyId));
+    if (over || anotherBrowsers) forgetRecoveryKey();
+  }
+  return status;
+};
+
+/**
+ * The key to start or restart recovery with: the stored one while the recovery under way is for it,
+ * or while its email may still be unclicked ("send it again" keeps the first link working);
+ * otherwise a new pair.
+ */
+const getOrMakeRecoveryKey = async (status: ShamirRecoveryStatusRedacted | null): Promise<RecoveryKeyPair> => {
   const stored = getStoredRecoveryKey();
-  if (stored && recoveryUnderWay) return stored;
+  const pending =
+    status?.state === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode &&
+    !!stored &&
+    Date.now() - stored.created < PENDING_KEY_MAX_AGE_MS;
+  if (stored && (pending || (await isFor(stored, status?.recoveryKeyId)))) return stored;
 
   const pair = await createExportedEccPair();
-  const key: RecoveryKeyPair = {publicKeyJwk: pair.publicKeyJwk, privateKey64: uint8ArrayToBase64(pair.privateKeyPkcs8)};
+  const key: RecoveryKeyPair = {
+    publicKeyJwk: pair.publicKeyJwk,
+    privateKey64: uint8ArrayToBase64(pair.privateKeyPkcs8),
+    created: Date.now(),
+  };
   window.localStorage.setItem(RECOVERY_KEY_STORAGE, JSON.stringify(key));
   return key;
 };
-
-export const forgetRecoveryKey = () => window.localStorage.removeItem(RECOVERY_KEY_STORAGE);
-
-export const hasRecoveryKey = () => !!getStoredRecoveryKey();
 
 /**
  * The email link's step: posts its nonce with this browser's public key. Entering recovery with
@@ -144,9 +192,8 @@ export const enterRecoveryMode = async (id: string): Promise<string | null> => {
 };
 
 /**
- * Recovery with friends, once enough approved: the password, rebuilt in this browser only. The
- * throwaway key goes as soon as the bundle opens: whoever later reads it here could open the bundle
- * too. The caller keeps the result in memory for the reset step.
+ * Recovery with friends, once enough approved: the password, rebuilt in this browser only. The key
+ * stays until the recovery ends, so a reload can open the bundle again.
  */
 export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> => {
   const key = getStoredRecoveryKey();
@@ -156,15 +203,13 @@ export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> =>
     .createAxiosClient()
     .get<{ sealedBundle64: string }>(`${root}/recovery-bundle`)
     .then((response) => response.data.sealedBundle64);
-  const recovered = await recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
-  forgetRecoveryKey();
-  return recovered;
+  return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
 };
 
-/** `underWay`: a recovery started here is pending, so its key (and its earlier email) stays valid. */
-export const initiateRecoveryMode = async (underWay: boolean) => {
+/** Starts recovery, or sends the email again, given the status the page shows. */
+export const initiateRecoveryMode = async (status: ShamirRecoveryStatusRedacted | null) => {
   const axiosClient = dotYouClient.createAxiosClient();
-  const {publicKeyJwk} = await getOrMakeRecoveryKey(underWay);
+  const {publicKeyJwk} = await getOrMakeRecoveryKey(status);
   return await axiosClient
     .post(`${root}/initiate-recovery-mode`, {recoveryPublicKeyJwk: publicKeyJwk})
     .then((response) => {
