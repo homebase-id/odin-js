@@ -1,4 +1,5 @@
 import { BIP39_ENGLISH } from './Bip39English';
+import { sha256 } from './HashUtil';
 
 // BIP39 for the owner's recovery phrase: 16 bytes as 12 English words. Same encoding as odin-core's
 // BIP39Util (the standard one, with a 4-bit SHA-256 checksum), so a phrase written down from either
@@ -10,8 +11,6 @@ const CHECKSUM_BITS = 4;
 
 const toBits = (bytes: Uint8Array) =>
   Array.from(bytes, (b) => b.toString(2).padStart(8, '0')).join('');
-
-const sha256 = async (bytes: Uint8Array) => new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
 
 /** 16 bytes as 12 words. */
 export const bip39Encode = async (entropy: Uint8Array): Promise<string> => {

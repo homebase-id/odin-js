@@ -5,8 +5,8 @@ import {
   aesGcmEncryptWithEccSharedSecret,
   exportEccPublicKey,
   pbkdf2HmacSha256,
-  LoginKeys,
 } from '@homebase-id/js-lib/auth';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 import {
   getRandom16ByteArray,
   base64ToUint8Array,
@@ -39,28 +39,28 @@ interface AuthenticationPayload {
   secret: any;
 }
 
-/** The password hash and KEK the login sends, from the password and the identity's salts. */
-export const deriveLoginKeys = async (password: string, nonceData: NonceData): Promise<LoginKeys> => {
-  const [hpwd64, kek64] = await Promise.all([
-    pbkdf2Base64(password, nonceData.saltPassword64),
-    pbkdf2Base64(password, nonceData.saltKek64),
-  ]);
-  return { hpwd64, kek64 };
+export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  return client
+    .get('/authentication/nonce')
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
 };
+
+/** Proof of the password against a fresh nonce, for an endpoint that wants the password itself. */
+export const preparePasswordProof = async (dotYouClient: DotYouClient, password: string) =>
+  prepareAuthPassword(password, await getNonce(dotYouClient));
 
 export const prepareAuthPassword = async (
   password: string,
   nonceData: NonceData
-): Promise<AuthenticationReplyNonce> =>
-  prepareAuthReply(await deriveLoginKeys(password, nonceData), nonceData);
-
-/** The login reply from the login keys. */
-export const prepareAuthReply = async (
-  loginKeys: LoginKeys,
-  nonceData: NonceData
 ): Promise<AuthenticationReplyNonce> => {
-  const hashedPassword64 = loginKeys.hpwd64;
-  const keK64 = loginKeys.kek64;
+  const [hashedPassword64, keK64] = await Promise.all([
+    pbkdf2Base64(password, nonceData.saltPassword64),
+    pbkdf2Base64(password, nonceData.saltKek64),
+  ]);
 
   const hashNoncePassword64 = await pbkdf2Base64(hashedPassword64, nonceData.nonce64);
 

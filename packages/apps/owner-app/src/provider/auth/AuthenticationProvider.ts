@@ -3,6 +3,7 @@ import {OwnerClient} from '@homebase-id/common-app';
 import {
   NonceData,
   encryptRecoveryKey,
+  getNonce,
   prepareAuthPassword,
 } from './AuthenticationHelper';
 import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
@@ -178,15 +179,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client
-    .get('/authentication/nonce')
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};
+export { getNonce } from './AuthenticationHelper';
 
 export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   const client = dotYouClient.createAxiosClient({overrideEncryption: true});

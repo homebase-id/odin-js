@@ -4,7 +4,7 @@ import {openRevealedPhrase} from './ZeroKnowledgeProvider';
 export interface RecoveryKeyResult {
     key: string | null;
     /** Once the browser took the phrase over: the phrase locked by the zero-knowledge master key. */
-    zkMasterKeyEncryptedPhraseKey?: string | null;
+    zkMasterKeyEncryptedPhraseKey: string | null;
     created: number;
     nextViewableDate: number;
     hasInitiallyReviewedKey: boolean
@@ -12,12 +12,12 @@ export interface RecoveryKeyResult {
 
 export interface RequestRecoveryKeyResult {
     key: string | null;
-    zkMasterKeyEncryptedPhraseKey?: string | null;
+    zkMasterKeyEncryptedPhraseKey: string | null;
     nextViewableDate: number;
 }
 
 /** After the takeover the server returns only the locked copy; the words are opened here. */
-const withPhraseOpened = async <T extends { key: string | null; zkMasterKeyEncryptedPhraseKey?: string | null }>(
+const withPhraseOpened = async <T extends { key: string | null; zkMasterKeyEncryptedPhraseKey: string | null }>(
     dotYouClient: DotYouClient,
     result: T
 ): Promise<T> =>

@@ -1,6 +1,7 @@
 import { cbcEncrypt, gcmDecrypt, gcmEncrypt } from '../../helpers/AesEncrypt';
 import {
   base64ToUint8Array,
+  byteArrayToString,
   getRandom16ByteArray,
   isAGuidId,
   mergeByteArrays,
@@ -8,6 +9,7 @@ import {
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
 import { bip39Decode } from '../../helpers/Bip39';
+import { sha256 } from '../../helpers/HashUtil';
 import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 
 // The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md) and recovery in the
@@ -54,12 +56,6 @@ export const zkOpen = async (locked64: string, key: Uint8Array): Promise<Uint8Ar
 export const getSecondPasswordKey = (password: string, salt64: string) =>
   pbkdf2HmacSha256(password, base64ToUint8Array(salt64));
 
-/** The login keys as the owner login sends them. */
-export interface LoginKeys {
-  hpwd64: string;
-  kek64: string;
-}
-
 export interface ZkKeysRequest {
   zkSaltKek64: string;
   zkKekEncryptedZkMasterKey: string;
@@ -74,14 +70,14 @@ export interface ZkStatus {
   zkKekEncryptedZkMasterKey?: string | null;
   /** The password, locked by the zero-knowledge master key; null until a login writes it. */
   zkMasterKeyEncryptedPassword?: string | null;
-  recoveryPhrase?: RecoveryPhraseState;
+  recoveryPhrase: RecoveryPhraseState;
 }
 
 export const lockPassword = async (password: string, zkMasterKey: Uint8Array) =>
   zkLock(stringToUint8Array(password), zkMasterKey);
 
 export const openPassword = async (locked64: string, zkMasterKey: Uint8Array) =>
-  new TextDecoder().decode(await zkOpen(locked64, zkMasterKey));
+  byteArrayToString(await zkOpen(locked64, zkMasterKey));
 
 /**
  * Makes the keys at the first login, or re-locks `masterKey` for a password change. A new salt
@@ -108,7 +104,7 @@ export const makeZkKeys = async (
 export interface ZkPhraseCopiesRequest {
   phraseKeyEncryptedZkMasterKey: string;
   zkMasterKeyEncryptedPhraseKey: string;
-  phraseCheck64?: string;
+  phraseCheck64: string;
 }
 
 export interface ZkPhraseRecovery {
@@ -123,25 +119,22 @@ const PHRASE_CHECK_PREFIX = stringToUint8Array('homebase-recovery-phrase-check')
  * prefix and the phrase's 16 bytes. The bytes are random, so it can't be reversed.
  */
 export const getPhraseCheck = async (phraseKey: Uint8Array) =>
-  uint8ArrayToBase64(
-    new Uint8Array(await crypto.subtle.digest('SHA-256', mergeByteArrays([PHRASE_CHECK_PREFIX, phraseKey])))
-  );
+  uint8ArrayToBase64(await sha256(mergeByteArrays([PHRASE_CHECK_PREFIX, phraseKey])));
 
 /**
  * The two copies the browser makes of the recovery phrase: the zero-knowledge master key locked by
- * it, and the phrase locked by the zero-knowledge master key, to show it again. With the check value
- * when the owner types it in again after a reset.
+ * it, and the phrase locked by the zero-knowledge master key, to show it again. With the check
+ * value, so the server refuses copies made with any other phrase.
  */
 export const makePhraseCopies = async (
   phrase: string,
-  zkMasterKey: Uint8Array,
-  withCheck = false
+  zkMasterKey: Uint8Array
 ): Promise<ZkPhraseCopiesRequest> => {
   const phraseKey = await bip39Decode(phrase);
   return {
     phraseKeyEncryptedZkMasterKey: await zkLock(zkMasterKey, phraseKey),
     zkMasterKeyEncryptedPhraseKey: await zkLock(phraseKey, zkMasterKey),
-    phraseCheck64: withCheck ? await getPhraseCheck(phraseKey) : undefined,
+    phraseCheck64: await getPhraseCheck(phraseKey),
   };
 };
 

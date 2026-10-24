@@ -27,6 +27,7 @@ const LOCKED_MASTER_KEY = 'ICEiIyQlJicoKSorjWGICGzIuJPS3SPnEBWvlaM3EZ0jd9msGp8vJ
 const status = (salt: string, locked: string) => ({
   zkSaltKek64: salt,
   zkKekEncryptedZkMasterKey: locked,
+  recoveryPhrase: 'none' as const,
 });
 
 test('the second password key is pbkdf2 like the KEK, UTF-8 password included', async () => {
@@ -94,7 +95,7 @@ test('the phrase check value is the one odin-core computes (RecoveryPhraseTests)
 test('the phrase copies give back the password, and show the phrase again', async () => {
   const keys = await makeZkKeys(PASSWORD);
   const phrase = BIP39_VECTORS[3][1];
-  const copies = await makePhraseCopies(phrase, keys.masterKey, true);
+  const copies = await makePhraseCopies(phrase, keys.masterKey);
 
   expect(
     await recoverPasswordWithPhrase(phrase, {

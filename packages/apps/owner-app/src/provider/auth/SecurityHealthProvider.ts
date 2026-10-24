@@ -1,8 +1,8 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
-import {encryptRecoveryKey, prepareAuthPassword} from "./AuthenticationHelper";
-import {getRecoveryPhraseState, getTypedPhraseCheck} from "./ZeroKnowledgeProvider";
-import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
+import {prepareAuthPassword} from "./AuthenticationHelper";
+import {getTypedPhraseCheck} from "./ZeroKnowledgeProvider";
+import {getNonce} from "./AuthenticationProvider";
 import {ShamiraPlayer} from "./ShamirProvider";
 
 export interface DealerRecoveryRiskReport {
@@ -179,47 +179,24 @@ export const getShardHealthStatus = async (): Promise<PeriodicSecurityHealthChec
 };
 
 
+/** Only the phrase's check value goes to the server, never the phrase itself. */
 export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
 
-  // Once the browser took the phrase over, only its check value goes to the server.
-  if ((await getRecoveryPhraseState(dotYouClient)) === 'takenOver') {
-    let phraseCheck64: string;
-    try {
-      phraseCheck64 = await getTypedPhraseCheck(recoveryKey);
-    } catch {
-      return false;
-    }
-
-    return dotYouClient
-      .createAxiosClient({overrideEncryption: true})
-      .post(`${root}/verify-recovery-key`, {phraseCheck64})
-      .then((response) => response.status === 200)
-      .catch(() => false);
+  let phraseCheck64: string;
+  try {
+    phraseCheck64 = await getTypedPhraseCheck(recoveryKey);
+  } catch {
+    return false;
   }
 
-  const publicKey = await getPublicKey(dotYouClient);
-  const salts = await getSalts(dotYouClient);
-  const passwordReply = await prepareAuthPassword("some thing to toss away", salts);
-
-  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
-
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = `${root}/verify-recovery-key`;
-
-  return await client.post(url, {encryptedRecoveryKey})
-    .then((response) => {
-      return response.status === 200;
-    })
-    .catch((error) => {
-      if (error.response?.status === 403) {
-        return false;
-      }
-      console.error(error);
-      return false;
-    });
+  return dotYouClient
+    .createAxiosClient({overrideEncryption: true})
+    .post(`${root}/verify-recovery-key`, {phraseCheck64})
+    .then((response) => response.status === 200)
+    .catch(() => false);
 };
 
 // Verifies the password without logging in the owner (i.e. changing cookies, etc.)
