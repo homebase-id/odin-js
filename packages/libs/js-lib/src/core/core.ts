@@ -31,7 +31,7 @@ export * from './DriveData/Upload/DriveFileUploader';
 export { GenerateKeyHeader } from './DriveData/Upload/UploadHelpers';
 export * from './DriveData/Upload/DriveUploadTypes';
 
-export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
+export { decryptJsonContent, decryptKeyHeader, isSealedKeyHeader } from './DriveData/SecurityHelpers';
 
 // WebsocketData
 export * from './WebsocketData/WebsocketProvider';

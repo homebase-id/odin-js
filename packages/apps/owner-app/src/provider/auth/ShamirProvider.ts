@@ -1,8 +1,12 @@
-import {DotYouClient, getFileHeaderBytesByUniqueId, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
+import {
+  DotYouClient,
+  getFileHeaderBytesByUniqueId,
+  getKnownOdinErrorMessages,
+  isSealedKeyHeader,
+} from '@homebase-id/js-lib/core';
 import {
   FriendToDealTo,
   dealToFriends,
-  isSealedKeyHeader,
   openWriteOnlyPrivateKey,
   releaseGatedShard,
 } from '@homebase-id/js-lib/auth';

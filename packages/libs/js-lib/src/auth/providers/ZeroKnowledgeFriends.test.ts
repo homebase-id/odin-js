@@ -1,18 +1,17 @@
 import { expect, test } from 'vitest';
 import { base64ToUint8Array, getRandom16ByteArray, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
-import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
+import { isSealedKeyHeader } from '../../core/DriveData/SecurityHelpers';
 import {
   ShamirRecoveryBundle,
   dealToFriends,
   getShamirResetKey,
-  isSealedKeyHeader,
   openSealedKeyHeader,
   recoverWithFriends,
   releaseGatedShard,
   sealKeyHeader,
 } from './ZeroKnowledgeFriends';
-import { readSealKeyId, sealKeyId, sealPassword, zkSeal } from './ZeroKnowledgeKeys';
+import { createExportedEccPair, readSealKeyId, sealKeyId, sealPassword, zkSeal } from './ZeroKnowledgeKeys';
 
 const shard = (index: number, shard64: string) => ({ index, shard: base64ToUint8Array(shard64) });
 
@@ -43,11 +42,8 @@ test('a split rebuilds, a leading zero byte included', () => {
 });
 
 const makePair = async () => {
-  const pair = await createEccPair();
-  return {
-    publicKeyJwk: await exportEccPublicKey(pair.publicKey),
-    privateKey: new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey)),
-  };
+  const pair = await createExportedEccPair();
+  return { publicKeyJwk: pair.publicKeyJwk, privateKey: pair.privateKeyPkcs8 };
 };
 
 test('a deposit key header is sealed to the drive and opens with its write-only key', async () => {

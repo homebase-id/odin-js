@@ -7,6 +7,7 @@ import {Label} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
+import {RecoveredPassword, loginHref as loginHrefFor} from './RecoveredPassword';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {ApiType} from '@homebase-id/js-lib/core';
@@ -31,7 +32,7 @@ const AccountRecovery = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   const returnSuffix = returnUrl ? `?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}` : '';
-  const loginHref = `/owner/login${returnSuffix}`;
+  const loginHref = loginHrefFor(returnUrl);
   const [recoveryKey, setRecoveryKey] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
@@ -105,25 +106,11 @@ const AccountRecovery = () => {
                   </div>
                 </div>
               ) : step === 'recovered' ? (
-                <div className="my-2">
-                  <p className="mb-3">
-                    {t('This is your password. Only this browser has seen it. You can keep using it, or change it once you are logged in.')}
-                  </p>
-                  <PasswordInput
-                    name="recoveredPassword"
-                    id="recoveredPassword"
-                    type="password"
-                    readOnly
-                    defaultValue={recovered?.password}
-                    autoComplete="off"
-                  />
-                  <div className="mt-5 flex flex-row-reverse justify-between gap-2">
-                    <ActionLink href={loginHref}>{t('Login')}</ActionLink>
-                    <ActionButton type="secondary" onClick={() => setStep('phraseReset')}>
-                      {t('It does not work: set a new password')}
-                    </ActionButton>
-                  </div>
-                </div>
+                <RecoveredPassword
+                  password={recovered?.password}
+                  returnUrl={returnUrl}
+                  onReset={() => setStep('phraseReset')}
+                />
               ) : state === 'success' ? (
                 <div className="my-2">
                   <p>{t('Your password has been changed successfully')}</p>

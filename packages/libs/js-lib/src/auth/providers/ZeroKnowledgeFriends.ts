@@ -1,5 +1,10 @@
 import { cbcDecrypt, cbcEncrypt } from '../../helpers/AesEncrypt';
 import {
+  decryptUsingKeyHeader,
+  encryptWithKeyheader,
+  isSealedKeyHeader,
+} from '../../core/DriveData/SecurityHelpers';
+import {
   base64ToUint8Array,
   byteArrayToString,
   getNewId,
@@ -12,8 +17,15 @@ import {
 } from '../../helpers/DataUtil';
 import { rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
 import { EncryptedKeyHeader, KeyHeader } from '../../core/DriveData/File/DriveFileTypes';
-import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
-import { PasswordRecovery, hkdf16, zkLock, zkOpen, zkSeal, zkUnseal } from './ZeroKnowledgeKeys';
+import {
+  PasswordRecovery,
+  createExportedEccPair,
+  hkdf16,
+  zkLock,
+  zkOpen,
+  zkSeal,
+  zkUnseal,
+} from './ZeroKnowledgeKeys';
 
 // Recovery with friends in the browser (odin-core docs/zero-knowledge-recovery-plan.md, "Building the
 // friends pair"). The browser deals as odin-core's CreateShards does for the automated deal, and
@@ -35,10 +47,6 @@ export interface SealedKeyHeader {
   /** base64: the sealed IV and AES key */
   encryptedAesKey: string;
 }
-
-/** Whether a file's key header (as a query or a read returns it) is a deposit's. */
-export const isSealedKeyHeader = (keyHeader: EncryptedKeyHeader | SealedKeyHeader | undefined | null) =>
-  !!keyHeader && (keyHeader.type === 'sealed' || keyHeader.type === 12);
 
 export const sealKeyHeader = async (keyHeader: KeyHeader, publicKeyJwk: string): Promise<SealedKeyHeader> => ({
   encryptionVersion: 1,
@@ -78,6 +86,11 @@ export const openWriteOnlyPrivateKey = async (drive: ZkDriveKeys, zkMasterKey: U
 
 export type FriendType = 'automatic' | 'delegate';
 
+export interface FriendPlayer {
+  odinId: string;
+  type: FriendType;
+}
+
 export interface FriendToDealTo {
   odinId: string;
   type: FriendType;
@@ -86,7 +99,7 @@ export interface FriendToDealTo {
 }
 
 export interface DealtShard {
-  player: { odinId: string; type: FriendType };
+  player: FriendPlayer;
   shardId: string;
   index: number;
   encryptionKey: string;
@@ -114,7 +127,7 @@ export interface ConfigureShardsRequest {
 export interface GatedShardContent {
   id: string;
   index: number;
-  player: { odinId: string; type: FriendType };
+  player: FriendPlayer;
   /** base64 of the piece locked by the shard's key */
   dealerEncryptedShard: string;
 }
@@ -150,7 +163,7 @@ export const dealToFriends = async (
       const encryptionKey = getRandom16ByteArray();
       const encryptionIv = getRandom16ByteArray();
       const dealerEncryptedShard = uint8ArrayToBase64(await cbcEncrypt(piece.shard, encryptionIv, encryptionKey));
-      const player = { odinId: friend.odinId, type: friend.type };
+      const player: FriendPlayer = { odinId: friend.odinId, type: friend.type };
       const shardId = getNewId();
       const shard: DealtShard = {
         player,
@@ -168,22 +181,21 @@ export const dealToFriends = async (
       return {
         ...shard,
         depositContent: uint8ArrayToBase64(
-          await cbcEncrypt(stringToUint8Array(jsonStringify64(content)), fileKey.iv, fileKey.aesKey)
+          await encryptWithKeyheader(stringToUint8Array(jsonStringify64(content)), fileKey)
         ),
         depositKeyHeader: await sealKeyHeader(fileKey, friend.publicKeyJwk),
       };
     })
   );
 
-  const pair = await createEccPair();
-  const privateKey = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
+  const pair = await createExportedEccPair();
 
   return {
     minMatchingShards,
     shards,
     shamirCopies: {
-      shamirPublicKeyJwk: await exportEccPublicKey(pair.publicKey),
-      shamirKeyEncryptedShamirPrivateKey: await zkLock(privateKey, secret),
+      shamirPublicKeyJwk: pair.publicKeyJwk,
+      shamirKeyEncryptedShamirPrivateKey: await zkLock(pair.privateKeyPkcs8, secret),
       shamirKeyEncryptedZkMasterKey: await zkLock(zkMasterKey, secret),
       resetKey64: uint8ArrayToBase64(await getShamirResetKey(secret)),
     },
@@ -203,7 +215,7 @@ export const releaseGatedShard = async (
   recoveryPublicKeyJwk: string
 ): Promise<{ index: number; sealedShard: string }> => {
   const fileKey = await openSealedKeyHeader(deposit.keyHeader, writeOnlyPrivateKeyPkcs8);
-  const json = byteArrayToString(await cbcDecrypt(base64ToUint8Array(deposit.content), fileKey.iv, fileKey.aesKey));
+  const json = byteArrayToString(await decryptUsingKeyHeader(base64ToUint8Array(deposit.content), fileKey));
   const content = JSON.parse(json) as GatedShardContent;
 
   return {
@@ -217,24 +229,15 @@ export const releaseGatedShard = async (
 export interface ShamirRecoveryBundle {
   minMatchingShards: number;
   envelopes: {
-    player: { odinId: string; type: FriendType };
+    player: FriendPlayer;
     encryptionKey: string;
     encryptionIv: string;
     shardId: string;
     index: number;
   }[];
-  shards: {
-    id: string;
-    index: number;
-    player: { odinId: string; type: FriendType };
-    dealerEncryptedShard: string;
-  }[];
-  copies: {
-    shamirPublicKeyJwk: string;
-    shamirKeyEncryptedShamirPrivateKey: string;
-    shamirKeyEncryptedZkMasterKey: string;
-    shamirPublicKeyEncryptedPassword?: string | null;
-  };
+  /** The collected shards: a gated friend's piece is sealed to this browser first */
+  shards: GatedShardContent[];
+  copies: Omit<ZkShamirCopiesRequest, 'resetKey64'> & { shamirPublicKeyEncryptedPassword?: string | null };
 }
 
 /**
@@ -255,9 +258,10 @@ export const recoverWithFriends = async (
       const envelope = bundle.envelopes.find((e) => stringGuidsEqual(e.shardId, shard.id));
       if (!envelope) throw new Error(`No shard key for shard ${shard.id}`);
 
-      // A gated friend's browser sealed their piece to this browser
+      // A gated friend's browser sealed their piece to this browser; the dealer's own envelope says
+      // which friends are gated
       const locked =
-        shard.player.type === 'delegate'
+        envelope.player.type === 'delegate'
           ? await zkUnseal(shard.dealerEncryptedShard, throwawayPrivateKeyPkcs8)
           : base64ToUint8Array(shard.dealerEncryptedShard);
       const piece = await cbcDecrypt(

@@ -1,6 +1,6 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {base64ToUint8Array, uint8ArrayToBase64} from '@homebase-id/js-lib/helpers';
-import {PasswordRecovery, createEccPair, exportEccPublicKey, recoverWithFriends} from '@homebase-id/js-lib/auth';
+import {PasswordRecovery, createExportedEccPair, recoverWithFriends} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from "@homebase-id/common-app";
 import {prepareAuthPassword} from "./AuthenticationHelper";
 import {getSalts} from "./AuthenticationProvider";
@@ -114,11 +114,8 @@ const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
   const stored = getStoredRecoveryKey();
   if (stored) return stored;
 
-  const pair = await createEccPair();
-  const key: RecoveryKeyPair = {
-    publicKeyJwk: await exportEccPublicKey(pair.publicKey),
-    privateKey64: uint8ArrayToBase64(new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey))),
-  };
+  const pair = await createExportedEccPair();
+  const key: RecoveryKeyPair = {publicKeyJwk: pair.publicKeyJwk, privateKey64: uint8ArrayToBase64(pair.privateKeyPkcs8)};
   window.localStorage.setItem(RECOVERY_KEY_STORAGE, JSON.stringify(key));
   return key;
 };

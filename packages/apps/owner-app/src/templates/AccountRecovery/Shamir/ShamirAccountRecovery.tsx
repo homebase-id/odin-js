@@ -24,6 +24,7 @@ import {resetPasswordWithResetKey} from "../../../provider/auth/ZeroKnowledgePro
 import {PasswordInput} from "../../../components/Password/PasswordInput";
 import {PasswordStrength} from "../../../components/Password/PasswordStrength";
 import {RETURN_URL_PARAM} from "../../../hooks/auth/useAuth";
+import {RecoveredPassword, loginHref} from "../RecoveredPassword";
 
 const ShamirAccountRecovery = () => {
   const location = useLocation();
@@ -42,7 +43,7 @@ const ShamirAccountRecovery = () => {
   const nonceId = params.get("id");
   const token = params.get("token");
   const fromFinalize = nonceId && token;
-  const recoveryState = status?.state ?? "None";
+  const recoveryState = status?.state ?? ShamirRecoveryState.None;
 
   const startRecoveryMode = async () => {
     try {
@@ -111,7 +112,7 @@ const ShamirAccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
-              {errorMessage && recoveryState !== "None" && recoveryState !== ShamirRecoveryState.None && (
+              {errorMessage && recoveryState !== ShamirRecoveryState.None && (
                 <Alert type="critical" isCompact={false} className="mb-3">
                   {errorMessage}
                 </Alert>
@@ -249,10 +250,6 @@ function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCan
   const [resetting, setResetting] = useState(false);
   const [state, setState] = useState<'loading' | 'error' | 'idle'>('idle');
 
-  const loginHref = returnUrl
-    ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
-    : '/owner/login';
-
   if (!hasRecoveryKey()) {
     return (
       <div className="my-2">
@@ -318,25 +315,12 @@ function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCan
   }
 
   return (
-    <div className="my-2">
-      <p className="mb-3">
-        {t('This is your password. Only this browser has seen it. You can keep using it, or change it once you are logged in.')}
-      </p>
-      <PasswordInput
-        name="recoveredPassword"
-        id="recoveredPassword"
-        type="password"
-        readOnly
-        defaultValue={recovered.password}
-        autoComplete="off"
-      />
-      <div className="mt-5 flex flex-row-reverse justify-between gap-2">
-        <ActionLink href={loginHref} onClick={() => forgetRecoveryKey()}>{t('Login')}</ActionLink>
-        <ActionButton type="secondary" onClick={() => setResetting(true)}>
-          {t('It does not work: set a new password')}
-        </ActionButton>
-      </div>
-    </div>
+    <RecoveredPassword
+      password={recovered.password}
+      returnUrl={returnUrl}
+      onLogin={() => forgetRecoveryKey()}
+      onReset={() => setResetting(true)}
+    />
   );
 }
 
@@ -344,10 +328,6 @@ function PasswordReset({returnUrl, setNewPassword}: {
   returnUrl: string | null;
   setNewPassword: (password: string) => Promise<boolean>;
 }) {
-
-  const loginHref = returnUrl
-    ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
-    : '/owner/login';
 
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   const [password, setPassword] = useState('');
@@ -371,7 +351,7 @@ function PasswordReset({returnUrl, setNewPassword}: {
         <div className="my-2">
           <p>{t('Your password has been changed successfully')}</p>
           <div className="flex flex-row-reverse">
-            <ActionLink href={loginHref}>{t('Login')}</ActionLink>
+            <ActionLink href={loginHref(returnUrl)}>{t('Login')}</ActionLink>
           </div>
         </div>
       ) : state === 'error' ? (
@@ -429,7 +409,7 @@ function PasswordReset({returnUrl, setNewPassword}: {
             <ActionButton state={state} disabled={!passwordIsValid}>
               {t('Reset password')}
             </ActionButton>
-            <ActionLink type="secondary" href={loginHref}>
+            <ActionLink type="secondary" href={loginHref(returnUrl)}>
               {t('Cancel')}
             </ActionLink>
           </div>

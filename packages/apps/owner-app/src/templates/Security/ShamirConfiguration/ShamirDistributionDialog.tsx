@@ -19,15 +19,18 @@ import {Step1SelectConfigurationType} from "./Step1SelectConfigurationType";
 // stay below the minimum: approvals >= players - minShards + 1, and at least one friend approves
 // (odin-core docs/zero-knowledge-recovery-plan.md, F2).
 const validationMatrix = [
-    {players: 3, minShards: 2, approvals: 2},
-    {players: 4, minShards: 3, approvals: 2},
-    {players: 5, minShards: 3, approvals: 3},
-    {players: 6, minShards: 4, approvals: 3},
-    {players: 7, minShards: 4, approvals: 4},
-    {players: 8, minShards: 5, approvals: 4},
-    {players: 9, minShards: 5, approvals: 5},
-    {players: 10, minShards: 6, approvals: 5},
+    {players: 3, minShards: 2},
+    {players: 4, minShards: 3},
+    {players: 5, minShards: 3},
+    {players: 6, minShards: 4},
+    {players: 7, minShards: 4},
+    {players: 8, minShards: 5},
+    {players: 9, minShards: 5},
+    {players: 10, minShards: 6},
 ];
+
+/** The fewest friends who must approve for a rule's default minimum. */
+const approvalsFor = (rule: { players: number; minShards: number }) => rule.players - rule.minShards + 1;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function getRuleForPlayers(count: number) {
@@ -91,7 +94,7 @@ export const ShamirDistributionDialog = ({
             // Apply default delegate assignments
             setPlayers(players.map((p, index) => ({
                 ...p,
-                type: index < rule.approvals ? PlayerType.Delegate : PlayerType.Automatic,
+                type: index < approvalsFor(rule) ? PlayerType.Delegate : PlayerType.Automatic,
             })));
         }
 
@@ -124,7 +127,7 @@ export const ShamirDistributionDialog = ({
             return;
         }
 
-        if (rule && approvals < rule.approvals) {
+        if (rule && approvals < approvalsFor(rule)) {
             setValidationError(t('Too few set to Approve — add another for better security'));
             return;
         }

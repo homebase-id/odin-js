@@ -60,7 +60,8 @@ export const zkOpen = async (locked64: string, key: Uint8Array): Promise<Uint8Ar
 const ECDH_P384 = { name: 'ECDH', namedCurve: 'P-384' };
 const SEAL_VERSION = 1;
 const SEAL_PUBLIC_KEY_LENGTH = 97;
-const SEAL_HEADER_LENGTH = 1 + 4 + SEAL_PUBLIC_KEY_LENGTH;
+const SEAL_KEY_ID_END = 1 + 4;
+const SEAL_HEADER_LENGTH = SEAL_KEY_ID_END + SEAL_PUBLIC_KEY_LENGTH;
 const SEAL_INFO = stringToUint8Array('homebase-zk-seal');
 
 /** hkdf-sha256, no salt, 16 bytes: the reset keys and the seal key. */
@@ -83,13 +84,27 @@ export const sealKeyId = async (publicKeyJwk: string): Promise<number> => {
   return crc32(new Uint8Array(await crypto.subtle.exportKey('raw', key)));
 };
 
-/** Which public key a sealed value was sealed to (`sealKeyId`). */
-export const readSealKeyId = (sealed: string | Uint8Array): number => {
+const assertSealed = (sealed: string | Uint8Array): Uint8Array => {
   const bytes = typeof sealed === 'string' ? base64ToUint8Array(sealed) : sealed;
   if (bytes.length < SEAL_HEADER_LENGTH + IV_LENGTH + 16 || bytes[0] !== SEAL_VERSION) {
     throw new Error('Not a sealed value');
   }
+  return bytes;
+};
+
+/** Which public key a sealed value was sealed to (`sealKeyId`). */
+export const readSealKeyId = (sealed: string | Uint8Array): number => {
+  const bytes = assertSealed(sealed);
   return new DataView(bytes.buffer, bytes.byteOffset + 1, 4).getUint32(0, false);
+};
+
+/** A new P-384 key pair as the browser keeps one: the private half PKCS8, the public half a JWK. */
+export const createExportedEccPair = async (): Promise<{ privateKeyPkcs8: Uint8Array; publicKeyJwk: string }> => {
+  const pair = await createEccPair();
+  return {
+    privateKeyPkcs8: new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey)),
+    publicKeyJwk: await exportEccPublicKey(pair.publicKey),
+  };
 };
 
 /** Seals `data` to a P-384 public key (a JWK, as `exportEccPublicKey` makes it). */
@@ -109,12 +124,11 @@ export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<st
 
 /** Opens a sealed value with the private key (PKCS8). */
 export const zkUnseal = async (sealed64: string, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
-  const bytes = base64ToUint8Array(sealed64);
-  readSealKeyId(bytes);
+  const bytes = assertSealed(sealed64);
   const me = await crypto.subtle.importKey('pkcs8', privateKeyPkcs8, ECDH_P384, false, ['deriveBits']);
   const throwaway = await crypto.subtle.importKey(
     'raw',
-    bytes.slice(5, SEAL_HEADER_LENGTH),
+    bytes.slice(SEAL_KEY_ID_END, SEAL_HEADER_LENGTH),
     ECDH_P384,
     false,
     []
@@ -232,13 +246,12 @@ export const makePhraseCopies = async (
   zkMasterKey: Uint8Array
 ): Promise<ZkPhraseCopiesRequest> => {
   const phraseKey = await bip39Decode(phrase);
-  const pair = await createEccPair();
-  const privateKey = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
+  const pair = await createExportedEccPair();
   const copies = {
     phraseKeyEncryptedZkMasterKey: await zkLock(zkMasterKey, phraseKey),
     zkMasterKeyEncryptedPhraseKey: await zkLock(phraseKey, zkMasterKey),
-    phrasePublicKeyJwk: await exportEccPublicKey(pair.publicKey),
-    phraseKeyEncryptedPhrasePrivateKey: await zkLock(privateKey, phraseKey),
+    phrasePublicKeyJwk: pair.publicKeyJwk,
+    phraseKeyEncryptedPhrasePrivateKey: await zkLock(pair.privateKeyPkcs8, phraseKey),
     phraseCheck64: await getPhraseCheck(phraseKey),
     resetKey64: uint8ArrayToBase64(await getResetKey(phraseKey)),
   };
@@ -337,8 +350,7 @@ export const makeZkDriveKeys = async (
   const idIv = getRandom16ByteArray();
   const encryptedId = await cbcEncrypt(guidToDotNetBytes(driveId), idIv, driveKey);
 
-  const pair = await createEccPair();
-  const privateKey = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
+  const pair = await createExportedEccPair();
 
   return {
     driveKey,
@@ -346,8 +358,8 @@ export const makeZkDriveKeys = async (
       zkMasterKeyEncryptedStorageKey: await zkLock(driveKey, zkMasterKey),
       encryptedIdIv64: uint8ArrayToBase64(idIv),
       encryptedIdValue64: uint8ArrayToBase64(encryptedId),
-      writeOnlyPublicKeyJwk: await exportEccPublicKey(pair.publicKey),
-      zkStorageKeyEncryptedWriteOnlyPrivateKey: await zkLock(privateKey, driveKey),
+      writeOnlyPublicKeyJwk: pair.publicKeyJwk,
+      zkStorageKeyEncryptedWriteOnlyPrivateKey: await zkLock(pair.privateKeyPkcs8, driveKey),
     },
   };
 };
