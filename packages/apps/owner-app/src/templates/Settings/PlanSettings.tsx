@@ -1,49 +1,14 @@
-import { useEffect } from 'react';
-import { t, Label, bytesToSize, Alert, ActionLink } from '@homebase-id/common-app';
-import { Link, useSearchParams } from 'react-router-dom';
+import { t, Label, bytesToSize, ActionLink, planStorageText } from '@homebase-id/common-app';
+import { Link } from 'react-router-dom';
 import Section from '../../components/ui/Sections/Section';
 import { usePlan } from '../../hooks/settings/usePlan';
-import { StorageUsage } from '../../provider/system/PlanProvider';
+import { HostingProvider, StorageUsage } from '../../provider/system/PlanProvider';
 
 export const PlanSettings = () => {
   const { data: plan, isLoading, error } = usePlan();
-  // The apps link here with ?upgrade=1 when the owner asks how to get more space
-  const [searchParams] = useSearchParams();
-  const askedToUpgrade = searchParams.get('upgrade') === '1';
-  // Only ever the address the server has configured, never one from the link
-  const upgradeUrl = plan?.upgradeUrl?.startsWith('https://') ? plan.upgradeUrl : undefined;
-  const redirecting = askedToUpgrade && !!upgradeUrl;
-
-  useEffect(() => {
-    // replace, so Back from the provider's page does not land here and bounce straight back
-    if (redirecting && upgradeUrl) window.location.replace(upgradeUrl);
-  }, [redirecting, upgradeUrl]);
-
-  if (redirecting) {
-    return (
-      <Section title={t('Plan & storage')}>
-        <p className="text-slate-400">{t('Taking you to your hosting provider...')}</p>
-      </Section>
-    );
-  }
 
   return (
     <Section title={t('Plan & storage')}>
-      {askedToUpgrade && !isLoading && (
-        <Alert type="info" title={t('Get more space')} className="mb-5">
-          <p>
-            {t(
-              'Your plan is set by your hosting provider. To get more storage, or a public home page, contact them and ask to move your identity to a larger plan.'
-            )}
-          </p>
-          <p className="mt-2">
-            {t('Until then, you can free up space by deleting photos, videos and files.')}{' '}
-            <Link to="/owner/apps" className="underline">
-              {t('See what each app stores')}
-            </Link>
-          </p>
-        </Alert>
-      )}
       {isLoading && <p className="text-slate-400">{t('Loading...')}</p>}
       {error && <p className="text-red-600">{t('Your plan could not be loaded')}</p>}
       {!isLoading && !error && !plan && (
@@ -55,11 +20,6 @@ export const PlanSettings = () => {
           <div className="mb-5">
             <Label>{t('Plan')}</Label>
             <p className="text-slate-400">{plan.id ?? t('No plan')}</p>
-            {upgradeUrl && (
-              <ActionLink href={upgradeUrl} type="secondary" className="mt-2 w-fit">
-                {t('Get more space')}
-              </ActionLink>
-            )}
           </div>
 
           <div className="mb-5">
@@ -84,7 +44,46 @@ export const PlanSettings = () => {
           </div>
         </>
       )}
+
+      {/* Always there: how to get a bigger plan, from the hosting provider when there is one */}
+      {!isLoading && !error && <UpgradeBox hostingProvider={plan?.hostingProvider} />}
     </Section>
+  );
+};
+
+const UpgradeBox = ({ hostingProvider }: { hostingProvider?: HostingProvider | null }) => {
+  // Only ever the address the server gives, and only https
+  const upgradeUrl = hostingProvider?.upgradeUrl?.startsWith('https://')
+    ? hostingProvider.upgradeUrl
+    : undefined;
+
+  return (
+    <div className="mt-2 max-w-2xl rounded-lg border border-indigo-300 bg-indigo-50 p-5 dark:border-indigo-700 dark:bg-indigo-950">
+      <h2 className="mb-1 text-lg font-semibold">{t('Need more space?')}</h2>
+      {hostingProvider && upgradeUrl ? (
+        <>
+          <p className="mb-4 text-slate-600 dark:text-slate-300">
+            {t('Your plan comes from')} {hostingProvider.displayName}.{' '}
+            {t('See the plans they offer, and move to a bigger one in a few steps.')}
+          </p>
+          <ActionLink href={upgradeUrl} type="primary" className="w-full text-base sm:w-auto">
+            {t('See plans at')} {hostingProvider.displayName}
+          </ActionLink>
+        </>
+      ) : (
+        <p className="text-slate-600 dark:text-slate-300">
+          {hostingProvider
+            ? `${t('To get more space, contact')} ${hostingProvider.displayName}.`
+            : t('To get more space, contact whoever runs your Homebase server.')}
+        </p>
+      )}
+      <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+        {t('You can also free up space by deleting photos, videos and files.')}{' '}
+        <Link to="/owner/apps" className="underline">
+          {t('See what each app stores')}
+        </Link>
+      </p>
+    </div>
   );
 };
 
@@ -97,18 +96,25 @@ const StorageBar = ({ usedBytes, quotaBytes, isOverQuota }: StorageUsage) => {
     );
   }
 
-  const percent = quotaBytes > 0 ? Math.min(100, (usedBytes / quotaBytes) * 100) : 100;
+  // "12% of 500 GB used", then what is used and free in the plan's own unit: no MB against GB to convert
+  const text = planStorageText(usedBytes, quotaBytes);
+  const width = quotaBytes > 0 ? Math.min(100, (usedBytes / quotaBytes) * 100) : 100;
   return (
     <div className="max-w-lg">
-      <p className="mb-2 text-slate-400">
-        {bytesToSize(usedBytes)} {t('of')} {bytesToSize(quotaBytes)} {t('used')}
+      <p className="mb-2">
+        {text.percent === null ? t('Less than 1%') : `${text.percent}%`} {t('of')} {text.size}{' '}
+        {t('used')}
       </p>
       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
         <div
           className={`h-full ${isOverQuota ? 'bg-red-600' : 'bg-indigo-500'}`}
-          style={{ width: `${percent}%` }}
+          style={{ width: `${width}%` }}
         />
       </div>
+      <p className="mt-2 text-sm text-slate-400">
+        {text.used.under ? `${t('Under')} ${text.used.amount}` : text.used.amount} {t('used')} ·{' '}
+        {text.free} {t('free')}
+      </p>
     </div>
   );
 };
