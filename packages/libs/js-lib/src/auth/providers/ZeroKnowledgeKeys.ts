@@ -67,8 +67,6 @@ export interface ZkKeysRequest {
 export interface ZkStatus {
   zkSaltKek64?: string | null;
   zkKekEncryptedZkMasterKey?: string | null;
-  /** Null until the Shard Recovery drive is converted. */
-  shardRecoveryDriveZkMasterKeyEncryptedStorageKey?: string | null;
 }
 
 /**

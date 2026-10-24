@@ -1,4 +1,5 @@
-import { DotYouClient } from '@homebase-id/js-lib/core';
+import { DotYouClient, getDrivesByType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
   LoginKeys,
   ZkConvertDriveRequest,
@@ -31,11 +32,15 @@ const convertShardRecoveryDrive = async (
 
 // Converted, and with a key the current master key opens. After a reset with the recovery key the
 // master key is new, so the drive is converted again.
-const shardRecoveryDriveOpens = async (status: ZkStatus, masterKey: Uint8Array) => {
-  if (!status.shardRecoveryDriveZkMasterKeyEncryptedStorageKey) return false;
+const shardRecoveryDriveOpens = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+  const drives = await getDrivesByType(dotYouClient, SHARD_RECOVERY_DRIVE.type, 1, 10);
+  const lockedKey = drives.results.find((drive) =>
+    stringGuidsEqual(drive.targetDriveInfo.alias, SHARD_RECOVERY_DRIVE.alias)
+  )?.zkMasterKeyEncryptedStorageKey;
+  if (!lockedKey) return false;
 
   try {
-    await zkOpen(status.shardRecoveryDriveZkMasterKeyEncryptedStorageKey, masterKey);
+    await zkOpen(lockedKey, masterKey);
     return true;
   } catch {
     return false;
@@ -62,7 +67,7 @@ export const ensureZeroKnowledgeKeys = async (
     masterKey = await openZkMasterKey(password, status);
   }
 
-  if (!(await shardRecoveryDriveOpens(status, masterKey))) {
+  if (!(await shardRecoveryDriveOpens(dotYouClient, masterKey))) {
     const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE.alias, masterKey);
     await convertShardRecoveryDrive(dotYouClient, request);
   }
