@@ -20,7 +20,11 @@ const AccountRecovery = () => {
   // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
   // 'phraseReset': a new password with the phrase's reset key, when there is no recovered password
   // or it doesn't work.
-  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset'>('phrase');
+  // 'needsReentry': another recovery reset the password and the phrase can't recover until it is
+  // typed in again after a login.
+  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset' | 'needsReentry'>(
+    'phrase'
+  );
   const [recovered, setRecovered] = useState<PhraseRecovery>();
 
   const navigate = useNavigate();
@@ -45,8 +49,10 @@ const AccountRecovery = () => {
     setState('loading');
     try {
       const result = await recoverFromPhrase(new OwnerClient({api: ApiType.Owner}), recoveryKey);
-      if (result === undefined) {
+      if (result === 'notTakenOver') {
         setStep('newPassword');
+      } else if (result === 'needsReentry') {
+        setStep('needsReentry');
       } else {
         setRecovered(result);
         setStep(result.password === undefined ? 'phraseReset' : 'recovered');
@@ -88,7 +94,17 @@ const AccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
-              {step === 'recovered' ? (
+              {step === 'needsReentry' ? (
+                <div className="my-2">
+                  <p className="mb-3">
+                    {t('Your password was reset with another recovery method since you last used your recovery key, so it cannot recover your account until you log in and enter it again.')}
+                  </p>
+                  <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+                    <ActionButton onClick={() => enterShamirMode()}>{t('Use another recovery method')}</ActionButton>
+                    <ActionLink type="secondary" href={loginHref}>{t('Cancel')}</ActionLink>
+                  </div>
+                </div>
+              ) : step === 'recovered' ? (
                 <div className="my-2">
                   <p className="mb-3">
                     {t('This is your password. Only this browser has seen it. You can keep using it, or change it once you are logged in.')}
@@ -120,7 +136,9 @@ const AccountRecovery = () => {
                   <Alert type="warning" isCompact={true}>
                     {step === 'phrase'
                       ? t('That recovery key does not open your account, check it and try again')
-                      : t('Failed to set a new password, check your recovery key and try again')}
+                      : step === 'phraseReset'
+                        ? t('Failed to set a new password, try again')
+                        : t('Failed to set a new password, check your recovery key and try again')}
                   </Alert>
                   <div className="mt-5 flex flex-row-reverse">
                     <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
@@ -133,6 +151,14 @@ const AccountRecovery = () => {
                   if (step === 'phrase') doRecoverWithPhrase();
                   else doSetNewPassword();
                 }}>
+                  {step === 'phraseReset' ? (
+                    <p className="mb-2 max-w-md text-slate-400">
+                      {recovered?.password === undefined
+                        ? t('Your recovery key is right, but no password was saved with it. Set a new password.')
+                        : t('Set a new password with your recovery key.')}
+                    </p>
+                  ) : (
+                  <>
                   <div className="mb-2">
                     <p className="max-w-md text-slate-400">
                       {t('To regain access to your account you will need your recovery key.')}{' '}
@@ -153,6 +179,8 @@ const AccountRecovery = () => {
                       autoComplete="off"
                     />
                   </div>
+                  </>
+                  )}
                   {step === 'phrase' ? (
                     <div className="mt-5 flex flex-row-reverse justify-between gap-2">
                       <ActionButton state={state} disabled={recoveryKey.trim() === ''}>

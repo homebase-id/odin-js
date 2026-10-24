@@ -229,20 +229,23 @@ export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: 
 
 /**
  * Recovery with the phrase, with no login: the password, opened in this browser only, and what a
- * reset needs if there is none or it no longer logs in. Undefined when the phrase was not taken
- * over yet; the page then uses the old reset.
+ * reset needs if there is none or it no longer logs in. 'notTakenOver' when the server still holds
+ * the phrase (the page uses the old reset); 'needsReentry' when another recovery reset the password
+ * and forgot the phrase's copies, so it can't recover until the owner logs in and types it again.
  */
 export const recoverFromPhrase = async (
   dotYouClient: DotYouClient,
   phrase: string
-): Promise<PhraseRecovery | undefined> => {
-  const recovery = await dotYouClient
+): Promise<PhraseRecovery | 'notTakenOver' | 'needsReentry'> => {
+  const response = await dotYouClient
     .createAxiosClient()
-    .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', { validateStatus: (s) => s === 200 || s === 404 })
-    .then((response) => (response.status === 200 ? response.data : undefined));
-  if (!recovery) return undefined;
+    .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', {
+      validateStatus: (s) => s === 200 || s === 404 || s === 409,
+    });
+  if (response.status === 404) return 'notTakenOver';
+  if (response.status === 409) return 'needsReentry';
 
-  return recoverWithPhrase(phrase, recovery);
+  return recoverWithPhrase(phrase, response.data);
 };
 
 /**
