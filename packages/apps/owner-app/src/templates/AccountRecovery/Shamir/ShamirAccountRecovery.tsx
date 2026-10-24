@@ -13,10 +13,8 @@ import {
   exitRecoveryMode,
   finalizeRecovery,
   forgetRecoveryKey,
-  getRecoveryStatusAndForgetStaleKey,
-  hasStoredRecoveryKey,
+  getRecoveryStatusForThisBrowser,
   initiateRecoveryMode,
-  isThisBrowsersRecovery,
   recoverWithApprovedFriends,
   ShamirRecoveryState,
   ShamirRecoveryStatusRedacted,
@@ -54,7 +52,7 @@ const ShamirAccountRecovery = () => {
     try {
       setErrorMessage(null); // clear previous
       setNotice(null);
-      await initiateRecoveryMode(status);
+      await initiateRecoveryMode();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setErrorMessage(error.message || t("An unexpected error occurred."));
@@ -64,14 +62,23 @@ const ShamirAccountRecovery = () => {
 
   // Only the email goes out; recovery goes on until the owner confirms with it
   const cancelRecoveryMode = async () => {
-    await exitRecoveryMode();
-    setNotice(t('Check your email to confirm leaving recovery mode.'));
+    setErrorMessage(null);
+    if (await exitRecoveryMode()) {
+      setNotice(t('Check your email to confirm leaving recovery mode.'));
+    } else {
+      setNotice(null);
+      setErrorMessage(t('The email to leave recovery mode could not be sent. Try again.'));
+    }
   }
 
   const reloadStatus = async () => {
-    getRecoveryStatusAndForgetStaleKey().then(async (result) => {
-      setThisBrowser(await isThisBrowsersRecovery(result));
-      setStatus(result);
+    getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser}) => {
+      // A notice belongs to the state it was shown in
+      setStatus((previous) => {
+        if (previous?.state !== result?.state) setNotice(null);
+        return result;
+      });
+      setThisBrowser(isThisBrowser);
       setLoaded(true);
     });
   };
@@ -81,7 +88,7 @@ const ShamirAccountRecovery = () => {
     if (!enterNonceId || entering.current) return;
     entering.current = true;
     enterRecoveryMode(enterNonceId).then((error) => {
-      if (error) setErrorMessage(hasStoredRecoveryKey() ? error : t('Open the link in the browser where you started recovery.'));
+      if (error) setErrorMessage(t(error));
       navigate(location.pathname, {replace: true});
       reloadStatus();
     });
@@ -222,7 +229,7 @@ const ShamirAccountRecovery = () => {
 
                   <div className="flex flex-row-reverse">
                     <ActionButton className="mt-3 mb-3"
-                                  onClick={() => exitRecoveryMode()}>
+                                  onClick={() => cancelRecoveryMode()}>
                       {t('Send it again')}
                       <Arrow className="ml-auto h-5 w-5"/>
                     </ActionButton>

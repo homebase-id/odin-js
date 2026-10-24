@@ -138,6 +138,8 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
     return t('The friends who release automatically must not be enough on their own: at least one friend must approve');
   if (errorCode === 'recoveryNotReady')
     return t('Recovery is not ready: open the link in the browser where you started recovery');
+  if (errorCode === 'recoveryUnderWayElsewhere')
+    return t('Recovery is under way in another browser; finish it there, or exit it by email first');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
   if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
 
