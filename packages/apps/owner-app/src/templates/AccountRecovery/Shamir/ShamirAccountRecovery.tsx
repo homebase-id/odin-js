@@ -16,6 +16,7 @@ import {
   getRecoveryStatusForThisBrowser,
   initiateRecoveryMode,
   recoverWithApprovedFriends,
+  recoveryUnderWayElsewhereMessage,
   ShamirRecoveryState,
   ShamirRecoveryStatusRedacted,
 } from "../../../provider/auth/SecurityRecoveryProvider";
@@ -38,6 +39,8 @@ const ShamirAccountRecovery = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
+  // A recovery under way for another browser's key (an automated deal's carries none)
+  const [elsewhere, setElsewhere] = useState<boolean>(false);
   // A reset with the friends' reset key ends recovery (state None): the page keeps saying it worked
   const [passwordReset, setPasswordReset] = useState<boolean>(false);
 
@@ -53,16 +56,17 @@ const ShamirAccountRecovery = () => {
     try {
       setErrorMessage(null); // clear previous
       setNotice(null);
-      if ((await initiateRecoveryMode()) && sentNotice) setNotice(sentNotice);
+      if (!(await initiateRecoveryMode())) {
+        setErrorMessage(t('The email could not be sent. Try again.'));
+      } else if (sentNotice) {
+        setNotice(sentNotice);
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setErrorMessage(error.message ? t(error.message) : t("An unexpected error occurred."));
     }
     await reloadStatus();
   };
-
-  // A recovery whose throwaway key is another browser's (an automated deal's has none)
-  const anotherBrowsers = status?.recoveryKeyId != null && !thisBrowser;
 
   // Only the email goes out; recovery goes on until the owner confirms with it
   const cancelRecoveryMode = async () => {
@@ -76,13 +80,14 @@ const ShamirAccountRecovery = () => {
   }
 
   const reloadStatus = async () => {
-    getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser}) => {
+    getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       // A notice belongs to the state it was shown in
       setStatus((previous) => {
         if (previous?.state !== result?.state) setNotice(null);
         return result;
       });
       setThisBrowser(isThisBrowser);
+      setElsewhere(isElsewhere);
       setLoaded(true);
     });
   };
@@ -172,14 +177,14 @@ const ShamirAccountRecovery = () => {
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
 
-                  {anotherBrowsers && (
+                  {elsewhere && (
                     <p className="mt-3 text-slate-400">
-                      {t('Recovery is under way in another browser; finish it there, or exit it by email first')}
+                      {t(recoveryUnderWayElsewhereMessage())}
                     </p>
                   )}
 
                   <div className="flex flex-row-reverse justify-between">
-                    {!anotherBrowsers && (
+                    {!elsewhere && (
                       <ActionButton className="mt-3 mb-3"
                                     onClick={() => startRecoveryMode(t('Check your email: the link asks your friends again.'))}>
                         {t('Start over')}

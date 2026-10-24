@@ -124,6 +124,10 @@ const getStoredRecoveryKey = (): RecoveryKeyPair | null => {
   }
 };
 
+/** The 9023 text, from KnownErrors: one source for the page and the refusal here. */
+export const recoveryUnderWayElsewhereMessage = () =>
+  getKnownOdinErrorMessages({errorCode: 'recoveryUnderWayElsewhere'}) as string;
+
 export const forgetRecoveryKey = () => window.localStorage.removeItem(RECOVERY_KEY_STORAGE);
 
 /** Forgets `key` only if it is still the one stored: another tab may have stored a new one since. */
@@ -140,43 +144,44 @@ const isUnderWay = (status: ShamirRecoveryStatusRedacted | null) =>
   status.state !== ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode;
 
 /**
- * The status, and whether the recovery it shows (pending or under way) is this browser's, from one
- * read of the stored key. A key past its grace is forgotten when there is no recovery, or one under
- * way for another browser's key; never for a pending start, which anyone can make.
+ * The status, from one read of the stored key:
+ * - `thisBrowser`: the recovery it shows (pending or under way) is for the stored key;
+ * - `elsewhere`: a recovery is under way for another browser's key (an automated deal's carries
+ *   none, so it is never elsewhere).
+ *
+ * A key past its grace is forgotten when there is no recovery, or one under way elsewhere; never for
+ * a pending start, which anyone can make.
  */
 export const getRecoveryStatusForThisBrowser = async (): Promise<{
   status: ShamirRecoveryStatusRedacted | null;
   thisBrowser: boolean;
+  elsewhere: boolean;
 }> => {
   const status = await getRecoveryStatus();
   const key = getStoredRecoveryKey();
   const thisBrowser = await isFor(key, status?.recoveryKeyId);
+  const elsewhere = !!status && isUnderWay(status) && status.recoveryKeyId != null && !thisBrowser;
   if (status && key && !thisBrowser && Date.now() - key.created > FORGET_GRACE_MS) {
-    const over = status.state === ShamirRecoveryState.None;
-    const anotherBrowsers = isUnderWay(status) && status.recoveryKeyId != null;
-    if (over || anotherBrowsers) forgetIfStillStored(key);
+    if (status.state === ShamirRecoveryState.None || elsewhere) forgetIfStillStored(key);
   }
-  return {status, thisBrowser};
+  return {status, thisBrowser, elsewhere};
 };
 
 /**
- * The key to start or restart recovery with, from a fresh status: the stored one if the recovery
- * (pending or under way) is for it, so "send it again" and "start over" keep this browser's links
- * working; otherwise a new pair. Throws when a recovery is under way in another browser (the server
- * would ignore the start, and replacing the key here would only lose it), and when the status can't
- * be read (a recovery may be under way for the stored key).
+ * The key to start or restart recovery with, from a fresh status: the stored one whenever no
+ * recovery is under way elsewhere, so "send it again" and "start over" keep this browser's earlier
+ * links working, even after someone else started one (a pending start is only the last one); a new
+ * pair when none is stored. Throws when a recovery is under way in another browser (the server would
+ * ignore the start, and replacing the key here would only lose it), and when the status can't be read
+ * (a recovery may be under way for the stored key).
  */
 const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
-  const status = await getRecoveryStatus();
+  const {status, elsewhere} = await getRecoveryStatusForThisBrowser();
   if (!status) throw new Error("Couldn't check the recovery's status; try again");
+  if (elsewhere) throw new Error(recoveryUnderWayElsewhereMessage());
 
   const stored = getStoredRecoveryKey();
-  if (await isFor(stored, status.recoveryKeyId)) return stored!;
-
-  // An automated deal's recovery carries no key, so "start over" goes ahead with any
-  if (isUnderWay(status) && status.recoveryKeyId != null) {
-    throw new Error(getKnownOdinErrorMessages({errorCode: 'recoveryUnderWayElsewhere'}));
-  }
+  if (stored) return stored;
 
   const pair = await createExportedEccPair();
   const key: RecoveryKeyPair = {
