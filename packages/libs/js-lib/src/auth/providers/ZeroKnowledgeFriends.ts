@@ -15,7 +15,7 @@ import {
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
-import { rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
+import { ShamirShard, rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
 import { EncryptedKeyHeader, KeyHeader } from '../../core/DriveData/File/DriveFileTypes';
 import {
   PasswordRecovery,
@@ -305,11 +305,11 @@ const MAX_COMBINATIONS = 500;
  * of `minMatchingShards` pieces in turn, up to `MAX_COMBINATIONS`.
  */
 const rebuildAndOpen = async (
-  pieces: { index: number; shard: Uint8Array }[],
+  pieces: ShamirShard[],
   minMatchingShards: number,
   shamirKeyEncryptedZkMasterKey: string
 ): Promise<{ secret: Uint8Array; zkMasterKey: Uint8Array }> => {
-  const tryOpen = async (subset: { index: number; shard: Uint8Array }[]) => {
+  const tryOpen = async (subset: ShamirShard[]) => {
     try {
       const secret = rebuildSecret(subset, SECRET_LENGTH);
       return { secret, zkMasterKey: await zkOpen(shamirKeyEncryptedZkMasterKey, secret) };

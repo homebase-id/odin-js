@@ -155,10 +155,10 @@ export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> =>
   return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
 };
 
-export const initiateRecoveryMode = async () => {
+/** `underWay`: a recovery started here is pending, so its key (and its earlier email) stays valid. */
+export const initiateRecoveryMode = async (underWay: boolean) => {
   const axiosClient = dotYouClient.createAxiosClient();
-  const status = await getRecoveryStatus();
-  const {publicKeyJwk} = await getOrMakeRecoveryKey(!!status && status.state !== ShamirRecoveryState.None);
+  const {publicKeyJwk} = await getOrMakeRecoveryKey(underWay);
   return await axiosClient
     .post(`${root}/initiate-recovery-mode`, {recoveryPublicKeyJwk: publicKeyJwk})
     .then((response) => {

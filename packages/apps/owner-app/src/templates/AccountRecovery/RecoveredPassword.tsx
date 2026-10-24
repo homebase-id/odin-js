@@ -14,12 +14,10 @@ export const loginHref = (returnUrl: string | null) =>
 export const RecoveredPassword = ({
   password,
   returnUrl,
-  onLogin,
   onReset,
 }: {
   password: string | undefined;
   returnUrl: string | null;
-  onLogin?: () => void;
   onReset: () => void;
 }) => (
   <div className="my-2">
@@ -35,7 +33,7 @@ export const RecoveredPassword = ({
       autoComplete="off"
     />
     <div className="mt-5 flex flex-row-reverse justify-between gap-2">
-      <ActionLink href={loginHref(returnUrl)} onClick={onLogin}>{t('Login')}</ActionLink>
+      <ActionLink href={loginHref(returnUrl)}>{t('Login')}</ActionLink>
       <ActionButton type="secondary" onClick={onReset}>
         {t('It does not work: set a new password')}
       </ActionButton>

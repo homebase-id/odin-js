@@ -50,7 +50,7 @@ const ShamirAccountRecovery = () => {
     initiating.current = true;
     try {
       setErrorMessage(null); // clear previous
-      await initiateRecoveryMode();
+      await initiateRecoveryMode(recoveryState !== ShamirRecoveryState.None);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setErrorMessage(error.message || t("An unexpected error occurred."));
