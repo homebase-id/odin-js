@@ -23,6 +23,7 @@ import {
   TargetDrive,
   decryptJsonContent,
   decryptKeyHeader,
+  isSealedKeyHeader,
 } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
@@ -457,7 +458,10 @@ const FileState = ({
 }) => {
   const [isBroken, setIsBroken] = useState(false);
   const dotYouClient = useDotYouClientContext();
+  // A deposit is sealed to the drive's write-only key: not broken, just not readable here
+  const isDeposit = file.fileMetadata.isEncrypted && isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader);
   useEffect(() => {
+    if (isDeposit) return;
     (async () => {
       try {
         const keyheader = file.fileMetadata.isEncrypted
@@ -478,6 +482,14 @@ const FileState = ({
       }
     })();
   });
+
+  if (isDeposit) {
+    return (
+      <div className={`${className} flex flex-row items-center gap-1`}>
+        <p className="text-slate-500">{t('Sealed deposit')}</p>
+      </div>
+    );
+  }
 
   if (!isBroken) return null;
   return (

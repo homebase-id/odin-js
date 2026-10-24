@@ -106,8 +106,9 @@ export const ShamirDistributionDialog = ({
         const rule = getRuleForPlayers(players.length);
         const approvals = players.filter(p => p.type === PlayerType.Delegate).length;
 
-        if (minShards < 1) {
-            setValidationError(t('Min shards cannot be less than 1'));
+        // As the server and the split require: one shard alone must never be enough
+        if (minShards < 2) {
+            setValidationError(t('Min shards cannot be less than 2'));
             return;
         }
 

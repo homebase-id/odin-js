@@ -15,6 +15,7 @@ import {
   decryptChunkedBytesResponse,
   decryptBytesResponse,
   decryptLocalContent,
+  isSealedKeyHeader,
 } from '../SecurityHelpers';
 import { getCacheKey, getAxiosClient, parseBytesToObject, getRangeHeader } from './DriveFileHelper';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
@@ -375,7 +376,9 @@ export const getContentFromHeaderOrPayload = async <T>(
 
   const contentIsComplete =
     fileMetadata.payloads?.filter((payload) => payload.key === DEFAULT_PAYLOAD_KEY).length === 0;
-  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+  // A deposit's key header is sealed to the drive's write-only key: nothing here can open it
+  if (fileMetadata.isEncrypted && (!sharedSecretEncryptedKeyHeader || isSealedKeyHeader(sharedSecretEncryptedKeyHeader)))
+    return null;
 
   if (contentIsComplete) {
     return getContentFromHeader<T>(

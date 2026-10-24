@@ -143,7 +143,11 @@ export const enterRecoveryMode = async (id: string): Promise<string | null> => {
     });
 };
 
-/** Recovery with friends, once enough approved: the password, rebuilt in this browser only. */
+/**
+ * Recovery with friends, once enough approved: the password, rebuilt in this browser only. The
+ * throwaway key goes as soon as the bundle opens: whoever later reads it here could open the bundle
+ * too. The caller keeps the result in memory for the reset step.
+ */
 export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> => {
   const key = getStoredRecoveryKey();
   if (!key) throw new Error('This browser did not start the recovery');
@@ -152,7 +156,9 @@ export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> =>
     .createAxiosClient()
     .get<{ sealedBundle64: string }>(`${root}/recovery-bundle`)
     .then((response) => response.data.sealedBundle64);
-  return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
+  const recovered = await recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
+  forgetRecoveryKey();
+  return recovered;
 };
 
 /** `underWay`: a recovery started here is pending, so its key (and its earlier email) stays valid. */
