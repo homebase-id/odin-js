@@ -9,6 +9,7 @@ import {
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
 import { bip39Decode } from '../../helpers/Bip39';
+import { crc32 } from '../../helpers/Crc32';
 import { sha256 } from '../../helpers/HashUtil';
 import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 
@@ -17,11 +18,12 @@ import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 // the identity server only stores the locked copies.
 //
 // A locked value is base64 of a 12-byte IV followed by the AES-GCM ciphertext and its 16-byte tag.
-// Keys are 16 bytes, like today's master key and drive keys. A sealed value is base64 of a throwaway
-// P-384 public key (97 bytes, uncompressed) and a value locked by
-// hkdf-sha256(ECDH(throwaway, recipient), "homebase-zk-seal"): anyone with the public key seals,
-// only the private key opens. odin-core's test helper ZkBrowser does the same maths, and both sides
-// check shared vectors.
+// Keys are 16 bytes, like today's master key and drive keys. A sealed value (version 1, odin-core's
+// ZkSeal) is base64 of: 0x01, the recipient key's id (4 bytes, big-endian), a throwaway P-384 public
+// key (97 bytes, uncompressed), and a value locked by hkdf-sha256(ECDH(throwaway, recipient),
+// "homebase-zk-seal"): anyone with the public key seals, only the private key opens. The key id is
+// the CRC-32 of the recipient's uncompressed public key, so a sealed value says which key opens it.
+// odin-core's test helper ZkBrowser does the same maths, and both sides check shared vectors.
 
 const PBKDF2_ITERATIONS = 100000;
 const KEY_LENGTH = 16;
@@ -56,11 +58,13 @@ export const zkOpen = async (locked64: string, key: Uint8Array): Promise<Uint8Ar
 };
 
 const ECDH_P384 = { name: 'ECDH', namedCurve: 'P-384' };
+const SEAL_VERSION = 1;
 const SEAL_PUBLIC_KEY_LENGTH = 97;
+const SEAL_HEADER_LENGTH = 1 + 4 + SEAL_PUBLIC_KEY_LENGTH;
 const SEAL_INFO = stringToUint8Array('homebase-zk-seal');
 
-/** hkdf-sha256, no salt, 16 bytes: the reset key and the seal key. */
-const hkdf16 = async (ikm: Uint8Array, info: Uint8Array): Promise<Uint8Array> => {
+/** hkdf-sha256, no salt, 16 bytes: the reset keys and the seal key. */
+export const hkdf16 = async (ikm: Uint8Array, info: Uint8Array): Promise<Uint8Array> => {
   const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
     { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info },
@@ -73,21 +77,49 @@ const hkdf16 = async (ikm: Uint8Array, info: Uint8Array): Promise<Uint8Array> =>
 const sealKey = async (privateKey: CryptoKey, publicKey: CryptoKey) =>
   hkdf16(new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: publicKey }, privateKey, 384)), SEAL_INFO);
 
+/** The id of a P-384 public key (a JWK), as a value sealed to it carries: CRC-32 of its raw point. */
+export const sealKeyId = async (publicKeyJwk: string): Promise<number> => {
+  const key = await crypto.subtle.importKey('jwk', JSON.parse(publicKeyJwk), ECDH_P384, true, []);
+  return crc32(new Uint8Array(await crypto.subtle.exportKey('raw', key)));
+};
+
+/** Which public key a sealed value was sealed to (`sealKeyId`). */
+export const readSealKeyId = (sealed: string | Uint8Array): number => {
+  const bytes = typeof sealed === 'string' ? base64ToUint8Array(sealed) : sealed;
+  if (bytes.length < SEAL_HEADER_LENGTH + IV_LENGTH + 16 || bytes[0] !== SEAL_VERSION) {
+    throw new Error('Not a sealed value');
+  }
+  return new DataView(bytes.buffer, bytes.byteOffset + 1, 4).getUint32(0, false);
+};
+
 /** Seals `data` to a P-384 public key (a JWK, as `exportEccPublicKey` makes it). */
 export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<string> => {
-  const recipient = await crypto.subtle.importKey('jwk', JSON.parse(publicKeyJwk), ECDH_P384, false, []);
+  const recipient = await crypto.subtle.importKey('jwk', JSON.parse(publicKeyJwk), ECDH_P384, true, []);
+  const recipientPublicKey = new Uint8Array(await crypto.subtle.exportKey('raw', recipient));
   const throwaway = await createEccPair();
   const throwawayPublicKey = new Uint8Array(await crypto.subtle.exportKey('raw', throwaway.publicKey));
   const locked = await zkLock(data, await sealKey(throwaway.privateKey, recipient));
-  return uint8ArrayToBase64(mergeByteArrays([throwawayPublicKey, base64ToUint8Array(locked)]));
+
+  const keyId = new Uint8Array(4);
+  new DataView(keyId.buffer).setUint32(0, crc32(recipientPublicKey), false);
+  return uint8ArrayToBase64(
+    mergeByteArrays([new Uint8Array([SEAL_VERSION]), keyId, throwawayPublicKey, base64ToUint8Array(locked)])
+  );
 };
 
 /** Opens a sealed value with the private key (PKCS8). */
 export const zkUnseal = async (sealed64: string, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
   const bytes = base64ToUint8Array(sealed64);
+  readSealKeyId(bytes);
   const me = await crypto.subtle.importKey('pkcs8', privateKeyPkcs8, ECDH_P384, false, ['deriveBits']);
-  const throwaway = await crypto.subtle.importKey('raw', bytes.slice(0, SEAL_PUBLIC_KEY_LENGTH), ECDH_P384, false, []);
-  return zkOpen(uint8ArrayToBase64(bytes.slice(SEAL_PUBLIC_KEY_LENGTH)), await sealKey(me, throwaway));
+  const throwaway = await crypto.subtle.importKey(
+    'raw',
+    bytes.slice(5, SEAL_HEADER_LENGTH),
+    ECDH_P384,
+    false,
+    []
+  );
+  return zkOpen(uint8ArrayToBase64(bytes.slice(SEAL_HEADER_LENGTH)), await sealKey(me, throwaway));
 };
 
 /** The second password key: the same pbkdf2 as the KEK, with its own salt. */
@@ -99,6 +131,8 @@ export interface ZkKeysRequest {
   zkKekEncryptedZkMasterKey: string;
   /** The password sealed to the phrase's public key, once the phrase was taken over. */
   phrasePublicKeyEncryptedPassword?: string;
+  /** The password sealed to the friends' public key, while there is a friend deal. */
+  shamirPublicKeyEncryptedPassword?: string;
 }
 
 /** Where the owner's recovery phrase is (odin-core `RecoveryPhraseState`). */
@@ -112,21 +146,29 @@ export interface ZkStatus {
   phrasePublicKeyJwk?: string | null;
   /** Whether the password copy exists. The browser can't open it; only the phrase does. */
   hasPasswordCopy: boolean;
+  /** The friends' public key while there is a friend deal: the password is sealed to it too. */
+  shamirPublicKeyJwk?: string | null;
+  /** Whether the friends' password copy exists; only the friends' secret opens it. */
+  hasShamirPasswordCopy?: boolean;
 }
 
-/** The password copy recovery with the phrase gives back: sealed, so only the phrase opens it. */
-export const sealPassword = async (password: string, phrasePublicKeyJwk: string) =>
-  zkSeal(stringToUint8Array(password), phrasePublicKeyJwk);
+/**
+ * A password copy recovery gives back: sealed to the phrase's or the friends' public key, so only the
+ * phrase, or enough friends, open it.
+ */
+export const sealPassword = async (password: string, publicKeyJwk: string) =>
+  zkSeal(stringToUint8Array(password), publicKeyJwk);
 
 /**
  * Makes the keys at the first login, or re-locks `masterKey` for a password change. A new salt
- * each time, as a password change also gets new login salts. With the phrase's public key, the
- * password copy too.
+ * each time, as a password change also gets new login salts. With the phrase's and the friends'
+ * public keys, the password copies too.
  */
 export const makeZkKeys = async (
   password: string,
   masterKey?: Uint8Array,
-  phrasePublicKeyJwk?: string | null
+  phrasePublicKeyJwk?: string | null,
+  shamirPublicKeyJwk?: string | null
 ): Promise<{ masterKey: Uint8Array; request: ZkKeysRequest }> => {
   const salt64 = uint8ArrayToBase64(getRandom16ByteArray());
   const key = masterKey ?? getRandom16ByteArray();
@@ -137,6 +179,7 @@ export const makeZkKeys = async (
       zkSaltKek64: salt64,
       zkKekEncryptedZkMasterKey: await zkLock(key, await getSecondPasswordKey(password, salt64)),
       phrasePublicKeyEncryptedPassword: phrasePublicKeyJwk ? await sealPassword(password, phrasePublicKeyJwk) : undefined,
+      shamirPublicKeyEncryptedPassword: shamirPublicKeyJwk ? await sealPassword(password, shamirPublicKeyJwk) : undefined,
     },
   };
 };
@@ -212,19 +255,21 @@ export const makePhraseCopies = async (
 };
 
 /**
- * Recovery with the phrase: the password, and what a reset needs when it no longer logs in (the
- * zero-knowledge master key, the reset key, the public key to seal the new password to).
+ * Recovery with the phrase or with friends: the password, and what a reset needs when it no longer
+ * logs in (the zero-knowledge master key, the reset key, the public key to seal the new password
+ * to; the other method's copy is written at the next login).
  */
-export interface PhraseRecovery {
+export interface PasswordRecovery {
   /** Undefined when there is no copy, or it doesn't open (someone sealed junk): reset instead. */
   password?: string;
   zkMasterKey: Uint8Array;
   resetKey: Uint8Array;
-  phrasePublicKeyJwk: string;
+  phrasePublicKeyJwk?: string;
+  shamirPublicKeyJwk?: string;
 }
 
 /** Throws when the phrase isn't the owner's: it opens nothing. */
-export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery): Promise<PhraseRecovery> => {
+export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery): Promise<PasswordRecovery> => {
   const phraseKey = await bip39Decode(phrase);
   const zkMasterKey = await zkOpen(recovery.phraseKeyEncryptedZkMasterKey, phraseKey);
   const privateKey = await zkOpen(recovery.phraseKeyEncryptedPhrasePrivateKey, phraseKey);

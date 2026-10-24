@@ -243,6 +243,11 @@ export const decryptKeyHeader = async (
     return encryptedKeyHeader as KeyHeader;
   }
 
+  // A deposit's key header is sealed to the drive's write-only key, not the shared secret
+  if (encryptedKeyHeader.type === 'sealed' || encryptedKeyHeader.type === 12) {
+    throw new Error("A deposit's key header opens only with the drive's write-only private key");
+  }
+
   const ss = dotYouClient.getSharedSecret();
   if (!ss) throw new Error('attempting to decrypt but missing the shared secret');
 

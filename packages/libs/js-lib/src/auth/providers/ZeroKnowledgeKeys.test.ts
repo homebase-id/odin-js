@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { bip39Decode, bip39Encode } from '../../helpers/Bip39';
+import { crc32 } from '../../helpers/Crc32';
 import {
   getPhraseCheck,
   getResetKey,
@@ -10,6 +11,8 @@ import {
   makePhraseCopies,
   makeZkDriveKeys,
   makeZkKeys,
+  readSealKeyId,
+  sealKeyId,
   openZkMasterKey,
   recoverWithPhrase,
   sealPassword,
@@ -77,11 +80,15 @@ test('a password change keeps the master key and seals the new password to the p
   expect(recovered.password).toBe('new password');
 });
 
-// A value sealed by WebCrypto (node 22); odin-core opens it too (RecoveryPhraseTests.TheSharedSealVectorOpens).
+// A version 1 value sealed by WebCrypto (node 22); odin-core opens it too
+// (RecoveryPhraseTests.TheSharedSealVectorOpens), and works out the same key id.
 const SEAL_VECTOR_PRIVATE_KEY =
   'MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAdIBNZdX4cc2HkbmyjAsYLgBCJOD4PKl+19MNegdIFHBNvBHXjKKPd1U43jVFC4W2hZANiAAQh7s8LrEkJbWspBmjbFT45ZclVZc9go3WGP86OB1nf16QB+2o3yNTYCg0YJ4Atpknyf0xxJGe5a/LTuILGNwlUaPDmFSyzZ4ALW18WutsGr8ItoW2/V6/fK5tpF8iT70k=';
+const SEAL_VECTOR_PUBLIC_KEY =
+  '{"kty":"EC","crv":"P-384","x":"Ie7PC6xJCW1rKQZo2xU-OWXJVWXPYKN1hj_OjgdZ39ekAftqN8jU2AoNGCeALaZJ","y":"8n9McSRnuWvy07iCxjcJVGjw5hUss2eAC1tfFrrbBq_CLaFtv1ev3yubaRfIk-9J"}';
+const SEAL_VECTOR_KEY_ID = 0x81ac6ed6;
 const SEAL_VECTOR =
-  'BFh5pt3Zt+toxKHJhaBEzObs6JISMy9PRXysrQl1WZlxLXHjBr3aQBOIgPtcP/zLbBfNNxhine4S1P4nMoVk/V+0iyUdLRuYn8oxTrtDRh4AaT5+dBc6L7BTItOPEL2nSrnmDNy6IVqQmj9D+RNht7ZFesBXLlKvaDwH2Lag5c0jtGmkNNIhuOn3BjImpdbyYQln3FnWhfQo';
+  'AYGsbtYEJzx9/APLDFRU02ky+GZwV8b3H7z+kwGsq61keI1Spr1TwEe4xemX1gXqt4ebsODaFTM9CTX1ZzYz8AEOKmwRfyCxFiAYyUY9XK31wB7oShI/GiQX6RjUGj2KekD+/f9GXM+hXaDl9UqGteiAsqESPMoIVY4iVeGO3GC/P2Dy4Igq2MsVPmZeNSxogKR0ZeC+rPTMjyeOkbM=';
 
 test('a sealed value opens only with its private key', async () => {
   const opened = await zkUnseal(SEAL_VECTOR, base64ToUint8Array(SEAL_VECTOR_PRIVATE_KEY));
@@ -92,6 +99,20 @@ test('a sealed value opens only with its private key', async () => {
   const pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
   expect(Array.from(await zkUnseal(await zkSeal(new Uint8Array([1, 2, 3]), jwk), pkcs8))).toEqual([1, 2, 3]);
   await expect(zkUnseal(SEAL_VECTOR, pkcs8)).rejects.toThrow();
+});
+
+test('a sealed value says which key opens it', async () => {
+  expect(await sealKeyId(SEAL_VECTOR_PUBLIC_KEY)).toBe(SEAL_VECTOR_KEY_ID);
+  expect(readSealKeyId(SEAL_VECTOR)).toBe(SEAL_VECTOR_KEY_ID);
+  expect(readSealKeyId(await zkSeal(new Uint8Array([1]), SEAL_VECTOR_PUBLIC_KEY))).toBe(SEAL_VECTOR_KEY_ID);
+
+  // The phrase pair's unversioned layout is not a sealed value any more
+  const unversioned = base64ToUint8Array(SEAL_VECTOR).slice(5);
+  expect(() => readSealKeyId(unversioned)).toThrow('Not a sealed value');
+});
+
+test('the key id is the IEEE CRC-32 odin-core computes', () => {
+  expect(crc32(new TextEncoder().encode('123456789'))).toBe(0xcbf43926);
 });
 
 // The standard BIP39 vectors odin-core's BIP39 tests check (TestMnemonicsAndSeedEnglish), plus one

@@ -71,6 +71,12 @@ export interface DriveDefinition {
      */
     zkMasterKeyEncryptedStorageKey?: string | null;
 
+    /**
+     * The drive's write-only private key (PKCS8), locked by the drive key: what opens a deposit.
+     * Null until the browser converts the drive. Served to the owner only.
+     */
+    zkStorageKeyEncryptedWriteOnlyPrivateKey?: string | null;
+
     targetDriveInfo: TargetDrive;
     metadata: string;
     allowAnonymousReads: boolean;
