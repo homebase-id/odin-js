@@ -1,5 +1,11 @@
 import { DotYouClient, getDrivesByType } from '@homebase-id/js-lib/core';
-import { bip39Decode, bip39Encode, base64ToUint8Array, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {
+  bip39Decode,
+  bip39Encode,
+  base64ToUint8Array,
+  stringGuidsEqual,
+  uint8ArrayToBase64,
+} from '@homebase-id/js-lib/helpers';
 import {
   ZkConvertDriveRequest,
   ZkKeysRequest,
@@ -7,19 +13,20 @@ import {
   ZkPhraseRecovery,
   ZkStatus,
   getPhraseCheck,
+  getResetKey,
   makePhraseCopies,
   makeZkDriveKeys,
   makeZkKeys,
   openPassword,
   openZkMasterKey,
-  recoverPasswordWithPhrase,
+  recoverWithPhrase,
   lockPassword,
   zkLock,
   zkOpen,
 } from '@homebase-id/js-lib/auth';
 import { OWNER_ZK_MASTER_KEY } from '@homebase-id/common-app';
 import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
-import { preparePasswordProof } from './AuthenticationHelper';
+import { getSalts, prepareAuthPassword, preparePasswordProof } from './AuthenticationHelper';
 
 // The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md) and recovery in the
 // browser (docs/zero-knowledge-recovery-plan.md). The browser makes and opens every key; the
@@ -50,8 +57,11 @@ const handOverPhrase = async (dotYouClient: DotYouClient, password: string) =>
     })
     .then((response) => response.data.phrase);
 
-const takeOverPhrase = async (dotYouClient: DotYouClient, request: ZkPhraseCopiesRequest) =>
-  dotYouClient.createAxiosClient().post('/security/zk/phrase-takeover', request);
+const takeOverPhrase = async (dotYouClient: DotYouClient, password: string, request: ZkPhraseCopiesRequest) =>
+  dotYouClient.createAxiosClient().post('/security/zk/phrase-takeover', {
+    ...request,
+    currentAuthenticationPasswordReply: await preparePasswordProof(dotYouClient, password),
+  });
 
 const getSessionKey = async (dotYouClient: DotYouClient) =>
   dotYouClient
@@ -150,7 +160,7 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
 
   if (status.recoveryPhrase === 'onServer') {
     const phrase = await handOverPhrase(dotYouClient, password);
-    await takeOverPhrase(dotYouClient, await makePhraseCopies(phrase, masterKey));
+    await takeOverPhrase(dotYouClient, password, await makePhraseCopies(phrase, masterKey));
   }
 };
 
@@ -205,18 +215,42 @@ export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: 
 };
 
 /**
- * Recovery with the phrase, with no login: the password, opened in this browser only. Undefined
- * when the phrase was not taken over yet; the page then uses the old reset.
+ * Recovery with the phrase, with no login: the password, opened in this browser only, and the
+ * zero-knowledge master key, for a reset if that password no longer logs in. Undefined when the
+ * phrase was not taken over yet; the page then uses the old reset.
  */
-export const recoverPasswordFromPhrase = async (
+export const recoverFromPhrase = async (
   dotYouClient: DotYouClient,
   phrase: string
-): Promise<string | undefined> => {
+): Promise<{ password: string; zkMasterKey: Uint8Array } | undefined> => {
   const recovery = await dotYouClient
     .createAxiosClient()
     .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', { validateStatus: (s) => s === 200 || s === 404 })
     .then((response) => (response.status === 200 ? response.data : undefined));
   if (!recovery) return undefined;
 
-  return recoverPasswordWithPhrase(phrase, recovery);
+  return recoverWithPhrase(phrase, recovery);
+};
+
+/**
+ * When the recovered password doesn't log in (someone with the password rewrote it): the phrase's
+ * reset key sets a new one, and the recovered zero-knowledge master key is locked by it.
+ */
+export const resetPasswordWithPhrase = async (
+  dotYouClient: DotYouClient,
+  zkMasterKey: Uint8Array,
+  newPassword: string
+): Promise<boolean> => {
+  const passwordReply = await prepareAuthPassword(newPassword, await getSalts(dotYouClient));
+  const zkKeys = (await makeZkKeys(newPassword, zkMasterKey)).request;
+  const resetKey64 = uint8ArrayToBase64(await getResetKey(zkMasterKey));
+
+  return dotYouClient
+    .createAxiosClient({ overrideEncryption: true })
+    .post('/authentication/zk-phrase-reset', { resetKey64, passwordReply, zkKeys })
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
 };

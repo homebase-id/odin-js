@@ -49,6 +49,14 @@ export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> =
     .catch(dotYouClient.handleErrorResponse);
 };
 
+/** Fresh salts, for setting a password. */
+export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  return client.get('/authentication/getsalts').then((response) => {
+    return response.data;
+  });
+};
+
 /** Proof of the password against a fresh nonce, for an endpoint that wants the password itself. */
 export const preparePasswordProof = async (dotYouClient: DotYouClient, password: string) =>
   prepareAuthPassword(password, await getNonce(dotYouClient));

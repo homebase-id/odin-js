@@ -193,7 +193,7 @@ export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> =
   }
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
+    .createAxiosClient()
     .post(`${root}/verify-recovery-key`, {phraseCheck64})
     .then((response) => response.status === 200)
     .catch(() => false);

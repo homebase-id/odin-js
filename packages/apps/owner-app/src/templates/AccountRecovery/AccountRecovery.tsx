@@ -11,14 +11,15 @@ import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {ApiType} from '@homebase-id/js-lib/core';
 import {OwnerClient} from '@homebase-id/common-app';
-import {recoverPasswordFromPhrase} from '../../provider/auth/ZeroKnowledgeProvider';
+import {recoverFromPhrase, resetPasswordWithPhrase} from '../../provider/auth/ZeroKnowledgeProvider';
 
 const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   // 'phrase': the phrase first. 'recovered': it opened the password in this browser.
   // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
-  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword'>('phrase');
-  const [recoveredPassword, setRecoveredPassword] = useState('');
+  // 'phraseReset': a new password with the phrase's reset key, when the recovered one doesn't work.
+  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset'>('phrase');
+  const [recovered, setRecovered] = useState<{ password: string; zkMasterKey: Uint8Array }>();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -41,11 +42,11 @@ const AccountRecovery = () => {
   const doRecoverWithPhrase = async () => {
     setState('loading');
     try {
-      const recovered = await recoverPasswordFromPhrase(new OwnerClient({api: ApiType.Owner}), recoveryKey);
-      if (recovered === undefined) {
+      const result = await recoverFromPhrase(new OwnerClient({api: ApiType.Owner}), recoveryKey);
+      if (result === undefined) {
         setStep('newPassword');
       } else {
-        setRecoveredPassword(recovered);
+        setRecovered(result);
         setStep('recovered');
       }
       setState('idle');
@@ -58,7 +59,10 @@ const AccountRecovery = () => {
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await resetPassword(password, recoveryKey.trim())) {
+    const done = step === 'phraseReset' && recovered
+      ? await resetPasswordWithPhrase(new OwnerClient({api: ApiType.Owner}), recovered.zkMasterKey, password)
+      : await resetPassword(password, recoveryKey.trim());
+    if (done) {
       setState('success');
     } else {
       setState('error');
@@ -92,11 +96,14 @@ const AccountRecovery = () => {
                     id="recoveredPassword"
                     type="password"
                     readOnly
-                    defaultValue={recoveredPassword}
+                    defaultValue={recovered?.password}
                     autoComplete="off"
                   />
-                  <div className="mt-5 flex flex-row-reverse">
+                  <div className="mt-5 flex flex-row-reverse justify-between gap-2">
                     <ActionLink href={loginHref}>{t('Login')}</ActionLink>
+                    <ActionButton type="secondary" onClick={() => setStep('phraseReset')}>
+                      {t('It does not work: set a new password')}
+                    </ActionButton>
                   </div>
                 </div>
               ) : state === 'success' ? (

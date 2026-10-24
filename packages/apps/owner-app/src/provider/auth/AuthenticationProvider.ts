@@ -1,9 +1,9 @@
 import {base64ToUint8Array} from '@homebase-id/js-lib/helpers';
 import {OwnerClient} from '@homebase-id/common-app';
 import {
-  NonceData,
   encryptRecoveryKey,
   getNonce,
+  getSalts,
   prepareAuthPassword,
 } from './AuthenticationHelper';
 import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
@@ -179,14 +179,8 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-export { getNonce } from './AuthenticationHelper';
+export { getNonce, getSalts } from './AuthenticationHelper';
 
-export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client.get('/authentication/getsalts').then((response) => {
-    return response.data;
-  });
-};
 
 export interface PublicKeyData {
   publicKeyJwkBase64Url: string;

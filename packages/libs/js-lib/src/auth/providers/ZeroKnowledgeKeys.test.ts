@@ -4,6 +4,7 @@ import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { bip39Decode, bip39Encode } from '../../helpers/Bip39';
 import {
   getPhraseCheck,
+  getResetKey,
   getSecondPasswordKey,
   guidToDotNetBytes,
   makePhraseCopies,
@@ -11,7 +12,7 @@ import {
   makeZkKeys,
   openPassword,
   openZkMasterKey,
-  recoverPasswordWithPhrase,
+  recoverWithPhrase,
   zkLock,
   zkOpen,
 } from './ZeroKnowledgeKeys';
@@ -87,6 +88,11 @@ test('BIP39 forgives case and spacing but not a wrong word or checksum', async (
   await expect(bip39Decode('abandon about')).rejects.toThrow('12 words');
 });
 
+test('the reset key is the one odin-core derives (RecoveryPhraseTests)', async () => {
+  // Python: hkdf-sha256(ikm=bytes(range(16)), salt=b'', info=b'homebase-recovery-reset-key', 16)
+  expect(uint8ArrayToBase64(await getResetKey(BIP39_VECTORS[3][0]))).toBe('UObib1b+8ABBLhC7sBHNOw==');
+});
+
 test('the phrase check value is the one odin-core computes (RecoveryPhraseTests)', async () => {
   // Python: base64(sha256(b'homebase-recovery-phrase-check' + bytes(range(16))))
   expect(await getPhraseCheck(BIP39_VECTORS[3][0])).toBe('Eo89wt2+AtmPabdl1v7jP8jYb9oHQlRxCiqqpMave6Y=');
@@ -97,12 +103,13 @@ test('the phrase copies give back the password, and show the phrase again', asyn
   const phrase = BIP39_VECTORS[3][1];
   const copies = await makePhraseCopies(phrase, keys.masterKey);
 
-  expect(
-    await recoverPasswordWithPhrase(phrase, {
-      phraseKeyEncryptedZkMasterKey: copies.phraseKeyEncryptedZkMasterKey,
-      zkMasterKeyEncryptedPassword: keys.request.zkMasterKeyEncryptedPassword,
-    })
-  ).toBe(PASSWORD);
+  const recovered = await recoverWithPhrase(phrase, {
+    phraseKeyEncryptedZkMasterKey: copies.phraseKeyEncryptedZkMasterKey,
+    zkMasterKeyEncryptedPassword: keys.request.zkMasterKeyEncryptedPassword,
+  });
+  expect(recovered.password).toBe(PASSWORD);
+  expect(recovered.zkMasterKey).toEqual(keys.masterKey);
+  expect(copies.resetKey64).toBe(uint8ArrayToBase64(await getResetKey(keys.masterKey)));
   expect(await bip39Encode(await zkOpen(copies.zkMasterKeyEncryptedPhraseKey, keys.masterKey))).toBe(phrase);
   expect(copies.phraseCheck64).toBe(await getPhraseCheck(BIP39_VECTORS[3][0]));
 });
