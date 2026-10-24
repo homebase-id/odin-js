@@ -10,9 +10,9 @@ import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {ApiType} from '@homebase-id/js-lib/core';
-import {PhraseRecovery} from '@homebase-id/js-lib/auth';
+import {PasswordRecovery} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from '@homebase-id/common-app';
-import {recoverFromPhrase, resetPasswordWithPhrase} from '../../provider/auth/ZeroKnowledgeProvider';
+import {recoverFromPhrase, resetPasswordWithResetKey} from '../../provider/auth/ZeroKnowledgeProvider';
 
 const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -25,7 +25,7 @@ const AccountRecovery = () => {
   const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset' | 'needsReentry'>(
     'phrase'
   );
-  const [recovered, setRecovered] = useState<PhraseRecovery>();
+  const [recovered, setRecovered] = useState<PasswordRecovery>();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -68,7 +68,7 @@ const AccountRecovery = () => {
     setState('loading');
 
     const done = step === 'phraseReset' && recovered
-      ? await resetPasswordWithPhrase(new OwnerClient({api: ApiType.Owner}), recovered, password)
+      ? await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovered, password)
       : await resetPassword(password, recoveryKey.trim());
     if (done) {
       setState('success');

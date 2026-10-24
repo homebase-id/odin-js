@@ -2,11 +2,11 @@ import {
     SubtleMessage,
     t,
 } from '@homebase-id/common-app';
-import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
+import {ShamirDealPlan} from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
 
 export const DistributeShardsReview = ({config}: {
-    config: ConfigureShardsRequest;
+    config: ShamirDealPlan;
 }) => {
 
     return (

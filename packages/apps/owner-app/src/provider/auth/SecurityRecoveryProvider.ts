@@ -1,4 +1,6 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
+import {base64ToUint8Array, uint8ArrayToBase64} from '@homebase-id/js-lib/helpers';
+import {PasswordRecovery, createEccPair, exportEccPublicKey, recoverWithFriends} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from "@homebase-id/common-app";
 import {prepareAuthPassword} from "./AuthenticationHelper";
 import {getSalts} from "./AuthenticationProvider";
@@ -20,7 +22,13 @@ export enum ShamirRecoveryState {
    */
   AwaitingSufficientDelegateConfirmation = "awaitingSufficientDelegateConfirmation",
 
-  AwaitingOwnerFinalization = "awaitingOwnerFinalization"
+  AwaitingOwnerFinalization = "awaitingOwnerFinalization",
+
+  /**
+   * Recovery with friends: enough friends approved. The browser that started recovery fetches their
+   * shards, sealed to its throwaway key, and rebuilds the secret itself.
+   */
+  AwaitingRecoveringBrowser = "awaitingRecoveringBrowser"
 }
 
 // Status type
@@ -83,10 +91,74 @@ export const exitRecoveryMode = async () => {
     });
 };
 
+// Recovery with friends must finish in the browser that started it: the friends seal their shards to
+// this throwaway key pair, kept here until recovery is done. The private key never leaves this browser.
+const RECOVERY_KEY_STORAGE = 'shamir-recovery-key';
+
+interface RecoveryKeyPair {
+  publicKeyJwk: string;
+  privateKey64: string;
+}
+
+const getStoredRecoveryKey = (): RecoveryKeyPair | null => {
+  try {
+    const stored = window.localStorage.getItem(RECOVERY_KEY_STORAGE);
+    return stored ? (JSON.parse(stored) as RecoveryKeyPair) : null;
+  } catch {
+    return null;
+  }
+};
+
+/** This browser's throwaway key pair; made the first time recovery starts here, then kept. */
+const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
+  const stored = getStoredRecoveryKey();
+  if (stored) return stored;
+
+  const pair = await createEccPair();
+  const key: RecoveryKeyPair = {
+    publicKeyJwk: await exportEccPublicKey(pair.publicKey),
+    privateKey64: uint8ArrayToBase64(new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey))),
+  };
+  window.localStorage.setItem(RECOVERY_KEY_STORAGE, JSON.stringify(key));
+  return key;
+};
+
+export const forgetRecoveryKey = () => window.localStorage.removeItem(RECOVERY_KEY_STORAGE);
+
+export const hasRecoveryKey = () => !!getStoredRecoveryKey();
+
+/**
+ * The email link's step: posts its nonce with this browser's public key. Entering recovery with
+ * friends must come from the browser that started it, so another browser is refused.
+ */
+export const enterRecoveryMode = async (id: string): Promise<string | null> => {
+  return dotYouClient
+    .createAxiosClient()
+    .post(`${root}/verify-enter`, {id, recoveryPublicKeyJwk: getStoredRecoveryKey()?.publicKeyJwk})
+    .then(() => null)
+    .catch((error) => {
+      console.warn(error);
+      return getKnownOdinErrorMessages(error) ?? 'This link has expired or was already used. Start recovery again.';
+    });
+};
+
+/** Recovery with friends, once enough approved: the password, rebuilt in this browser only. */
+export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> => {
+  const key = getStoredRecoveryKey();
+  if (!key) throw new Error('This browser did not start the recovery');
+
+  const sealedBundle64 = await dotYouClient
+    .createAxiosClient()
+    .get<{ sealedBundle64: string }>(`${root}/recovery-bundle`)
+    .then((response) => response.data.sealedBundle64);
+  return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
+};
+
 export const initiateRecoveryMode = async () => {
   const axiosClient = dotYouClient.createAxiosClient();
+  const {publicKeyJwk} = await getOrMakeRecoveryKey();
   return await axiosClient
-    .post(`${root}/initiate-recovery-mode`)
+    .post(`${root}/initiate-recovery-mode`, {recoveryPublicKeyJwk: publicKeyJwk})
     .then((response) => {
       return response.data;
     })

@@ -16,6 +16,7 @@ const ApproveAndReleaseShardsTabs = () => {
   const {getDotYouClient} = useDotYouClient();
   const [requests, setRequests] = useState<ShardApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadRequests = async () => {
     setLoading(true);
@@ -27,7 +28,13 @@ const ApproveAndReleaseShardsTabs = () => {
 
   const handleApprove = async (r: ShardApprovalRequest) => {
     const client = getDotYouClient();
-    await approveShardRequest(client, {odinId: r.dealer, shardId: r.shardId});
+    setError(null);
+    try {
+      await approveShardRequest(client, r);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      setError(e?.message ?? 'The shard could not be released');
+    }
     await loadRequests();
   };
 
@@ -43,6 +50,7 @@ const ApproveAndReleaseShardsTabs = () => {
 
   return (
     <div className="p-4">
+      {error && <div className="mb-3 text-red-600">{error}</div>}
       {loading && <div>Loading shard requests…</div>}
       {!loading && requests.length === 0 && (
         <div>No requests at the moment.</div>

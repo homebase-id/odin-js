@@ -1,6 +1,15 @@
-import {DotYouClient} from '@homebase-id/js-lib/core';
+import {DotYouClient, getFileHeaderBytesByUniqueId, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
+import {
+  FriendToDealTo,
+  dealToFriends,
+  isSealedKeyHeader,
+  openWriteOnlyPrivateKey,
+  releaseGatedShard,
+} from '@homebase-id/js-lib/auth';
 import {t} from "@homebase-id/common-app";
 import {ShardTrustLevel} from "./SecurityHealthProvider";
+import {getShardRecoveryDrive, requireZkMasterKey} from "./ZeroKnowledgeProvider";
+import {SHARD_RECOVERY_DRIVE} from "../app/wellKnownDrives";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
 export const SHAMIR_PLAYER_ENCRYPTED_SHARD_FILE_TYPE = 74829;
@@ -27,7 +36,8 @@ export interface ShamiraPlayer {
   type: PlayerType;
 }
 
-export interface ConfigureShardsRequest {
+/** Who gets a shard and how many must come back; the browser deals it (`configureShards`). */
+export interface ShamirDealPlan {
   players: ShamiraPlayer[];
   minMatchingShards: number;
 }
@@ -42,6 +52,8 @@ export interface RemotePlayerReadinessResult
 {
   isValid: boolean
   trustLevel: ShardTrustLevel
+  /** Whether their Shard Recovery drive is zero knowledge, so they can hold a shard that needs their approval */
+  isZeroKnowledge?: boolean
 }
 
 export interface ShardVerificationResult {
@@ -67,11 +79,6 @@ export interface DealerShardConfig {
   usesAutomaticRecovery: boolean;
 }
 
-export interface ApproveShardRequest {
-  odinId: string;
-  shardId: string;
-}
-
 export interface RejectShardRequest {
   odinId: string;
   shardId: string;
@@ -82,6 +89,8 @@ export interface ShardApprovalRequest {
   shardId: string;
   dealer: string;
   created: number
+  /** The recovering browser's throwaway public key: approving seals the shard to it */
+  recoveryPublicKeyJwk?: string | null
 }
 
 // Assuming OdinId is just a GUID, we'll use string
@@ -106,18 +115,46 @@ export enum PlayerType {
 
 const root = "/security/recovery";
 
-export const configureShards = async (dotYouClient: DotYouClient, request: ConfigureShardsRequest) => {
-  const axiosClient = dotYouClient.createAxiosClient();
-  return await axiosClient
-    .post(`${root}/configure-shards`, request)
-    .then((response) => {
-      return response.data;
+/** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
+const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
+  const key = await dotYouClient
+    .createAxiosClient()
+    .get<{ publicKeyJwk: string; isZeroKnowledge: boolean }>(
+      `${dotYouClient.getRoot()}/api/v2/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
+    )
+    .then((response) => response.data);
+
+  // Until they log in once more, their server holds the private key and could release the shard itself
+  if (!key.isZeroKnowledge) {
+    throw new Error(t(`${odinId} has to log in to Homebase once more before they can hold a shard that needs their approval`));
+  }
+  return key.publicKeyJwk;
+};
+
+/**
+ * Deals the shards in this browser: the secret they rebuild never reaches the server
+ * (odin-core docs/zero-knowledge-recovery-plan.md, "Building the friends pair"). Throws with a
+ * message to show.
+ */
+export const configureShards = async (dotYouClient: DotYouClient, plan: ShamirDealPlan) => {
+  const zkMasterKey = await requireZkMasterKey(dotYouClient, 'set up recovery with friends');
+  const friends: FriendToDealTo[] = await Promise.all(
+    plan.players.map(async (p) => {
+      if (p.type === PlayerType.Delegate) {
+        return {odinId: p.odinId, type: 'delegate', publicKeyJwk: await getGatedFriendPublicKey(dotYouClient, p.odinId)};
+      }
+      if (p.type === PlayerType.Automatic) return {odinId: p.odinId, type: 'automatic'};
+      throw new Error(t('Only friends who approve or release automatically can hold a shard'));
     })
+  );
+  const request = await dealToFriends(friends, plan.minMatchingShards, zkMasterKey);
+
+  await dotYouClient
+    .createAxiosClient()
+    .post(`${root}/configure-shards`, request)
     .catch((error) => {
       console.warn(error);
-      
-      // getOdinErrorDetails(error).
-      return null;
+      throw new Error(getKnownOdinErrorMessages(error) ?? t('Failed to distribute the shards'));
     });
 }
 
@@ -175,18 +212,36 @@ export const getShardRequestList = async (
     });
 };
 
-export const approveShardRequest = async (
-  dotYouClient: DotYouClient,
-  payload: ApproveShardRequest
-) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+/**
+ * Approves a dealer's request: this browser opens the shard (sealed to this identity's Shard
+ * Recovery drive) and seals it again to the recovering browser's key. The piece stays locked by the
+ * dealer's own key, so nothing here learns it. Throws with a message to show.
+ */
+export const approveShardRequest = async (dotYouClient: DotYouClient, request: ShardApprovalRequest) => {
+  if (!request.recoveryPublicKeyJwk) throw new Error(t('This request is from an older version; ask them to start again'));
 
-  return await axiosClient
-    .post(`${root}/approve-shard-request`, payload)
-    .then(() => true)
+  const [zkMasterKey, drive, file] = await Promise.all([
+    requireZkMasterKey(dotYouClient, 'approve a recovery'),
+    getShardRecoveryDrive(dotYouClient),
+    getFileHeaderBytesByUniqueId(dotYouClient, SHARD_RECOVERY_DRIVE, request.shardId, {decrypt: false}),
+  ]);
+  if (!file || !isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader) || !drive) {
+    throw new Error(t('This shard is from an older setup; ask them to set up recovery again'));
+  }
+
+  const writeOnlyPrivateKey = await openWriteOnlyPrivateKey(drive, zkMasterKey);
+  const {index, sealedShard} = await releaseGatedShard(
+    {content: file.fileMetadata.appData.content, keyHeader: file.sharedSecretEncryptedKeyHeader},
+    writeOnlyPrivateKey,
+    request.recoveryPublicKeyJwk
+  );
+
+  await dotYouClient
+    .createAxiosClient()
+    .post(`${root}/approve-shard-request`, {odinId: request.dealer, shardId: request.shardId, index, sealedShard})
     .catch((error) => {
       console.warn(error);
-      return false;
+      throw new Error(getKnownOdinErrorMessages(error) ?? t('The shard could not be released'));
     });
 };
 

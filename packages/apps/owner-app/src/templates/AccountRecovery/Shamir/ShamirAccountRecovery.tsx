@@ -1,26 +1,37 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Helmet} from 'react-helmet-async';
 import {ActionButton, ActionLink, Alert, DomainHighlighter, Label, t} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../../components/ui/Layout/Layout';
 import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import {ApiType} from '@homebase-id/js-lib/core';
+import {PasswordRecovery} from '@homebase-id/js-lib/auth';
+import {OwnerClient} from '@homebase-id/common-app';
 import {
+  enterRecoveryMode,
   exitRecoveryMode,
   finalizeRecovery,
+  forgetRecoveryKey,
   getRecoveryStatus,
+  hasRecoveryKey,
   initiateRecoveryMode,
+  recoverWithApprovedFriends,
   ShamirRecoveryState,
   ShamirRecoveryStatusRedacted,
 } from "../../../provider/auth/SecurityRecoveryProvider";
+import {resetPasswordWithResetKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {PasswordInput} from "../../../components/Password/PasswordInput";
 import {PasswordStrength} from "../../../components/Password/PasswordStrength";
 import {RETURN_URL_PARAM} from "../../../hooks/auth/useAuth";
 
 const ShamirAccountRecovery = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const returnUrl = params.get(RETURN_URL_PARAM);
+  const enterNonceId = params.get("enter");
+  const entering = useRef(false);
 
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -56,6 +67,17 @@ const ShamirAccountRecovery = () => {
     });
   };
 
+  // The email link lands here: this browser posts its nonce back with its throwaway key
+  useEffect(() => {
+    if (!enterNonceId || entering.current) return;
+    entering.current = true;
+    enterRecoveryMode(enterNonceId).then((error) => {
+      if (error) setErrorMessage(hasRecoveryKey() ? error : t('Open the link in the browser where you started recovery.'));
+      navigate(location.pathname, {replace: true});
+      reloadStatus();
+    });
+  }, [enterNonceId]);
+
   useEffect(() => {
     // run immediately on mount
     reloadStatus();
@@ -68,7 +90,7 @@ const ShamirAccountRecovery = () => {
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
 
-  if ((fromVerification || fromFinalize) && !loaded) {
+  if ((fromVerification || fromFinalize || enterNonceId) && !loaded) {
     // we need to wait until we get the status
     return <div>Please wait...</div>
   }
@@ -89,6 +111,11 @@ const ShamirAccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
+              {errorMessage && recoveryState !== "None" && recoveryState !== ShamirRecoveryState.None && (
+                <Alert type="critical" isCompact={false} className="mb-3">
+                  {errorMessage}
+                </Alert>
+              )}
               {recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode ? (
                 <div className="my-2">
                   <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue.')}</p>
@@ -128,11 +155,15 @@ const ShamirAccountRecovery = () => {
                     </ActionButton>
                   </div>
                 </>
+              ) : recoveryState === ShamirRecoveryState.AwaitingRecoveringBrowser ? (
+                <FriendsApproved returnUrl={returnUrl} onCancel={() => cancelRecoveryMode()}/>
               ) : recoveryState === ShamirRecoveryState.AwaitingOwnerFinalization ? (<>
                   {t('🎉 You are ready to finalize your password recovery!')}
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                  {token && nonceId && (<PasswordReset returnUrl={returnUrl}/>)}
+                  {token && nonceId && (
+                    <PasswordReset returnUrl={returnUrl} setNewPassword={(password) => finalizeRecovery(nonceId, token, password)}/>
+                  )}
 
                   {/*user is on the screen but did not click the email*/}
                   {(!token || !nonceId) && (
@@ -208,14 +239,111 @@ const ShamirAccountRecovery = () => {
 };
 
 
-function PasswordReset({returnUrl}: {returnUrl: string | null}) {
+/**
+ * Recovery with friends, once enough approved: this browser opens their shards, rebuilds the
+ * secret and shows the password, as recovery with the phrase does; or, with no password copy or
+ * one that doesn't log in, sets a new password with the friends' reset key.
+ */
+function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCancel: () => void}) {
+  const [recovered, setRecovered] = useState<PasswordRecovery>();
+  const [resetting, setResetting] = useState(false);
+  const [state, setState] = useState<'loading' | 'error' | 'idle'>('idle');
 
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
+  const loginHref = returnUrl
+    ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
+    : '/owner/login';
 
-  // see if we came here from recovery mode
-  const nonceId = params.get("id") ?? "";
-  const token = params.get("token") ?? "";
+  if (!hasRecoveryKey()) {
+    return (
+      <div className="my-2">
+        <p>{t('Your friends have approved, but this is not the browser where you started recovery. Open this page there.')}</p>
+        <div className="mt-5 flex flex-row-reverse">
+          <ActionButton type="secondary" onClick={onCancel}>{t('Exit recovery mode')}</ActionButton>
+        </div>
+      </div>
+    );
+  }
+
+  const open = async () => {
+    setState('loading');
+    try {
+      const result = await recoverWithApprovedFriends();
+      setRecovered(result);
+      setResetting(result.password === undefined);
+      setState('idle');
+    } catch (error) {
+      console.error(error);
+      setState('error');
+    }
+  };
+
+  if (!recovered) {
+    return (
+      <div className="my-2">
+        <p>{t('🎉 Enough of your friends have approved your recovery.')}</p>
+        {state === 'error' && (
+          <Alert type="warning" isCompact={true} className="mt-3">
+            {t('Your friends\' shards did not open your account. Exit recovery mode and start again.')}
+          </Alert>
+        )}
+        <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+          <ActionButton state={state === 'loading' ? 'loading' : undefined} onClick={() => open()}>
+            {t('Show my password')}
+            <Arrow className="ml-auto h-5 w-5"/>
+          </ActionButton>
+          <ActionButton type="secondary" onClick={onCancel}>{t('Exit recovery mode')}</ActionButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (resetting) {
+    return (
+      <>
+        <p className="mb-2 max-w-md text-slate-400">
+          {recovered.password === undefined
+            ? t('Your friends opened your account, but no password was saved with it. Set a new password.')
+            : t('Set a new password with your friends\' approval.')}
+        </p>
+        <PasswordReset
+          returnUrl={returnUrl}
+          setNewPassword={async (password) => {
+            const done = await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovered, password);
+            if (done) forgetRecoveryKey();
+            return done;
+          }}
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="my-2">
+      <p className="mb-3">
+        {t('This is your password. Only this browser has seen it. You can keep using it, or change it once you are logged in.')}
+      </p>
+      <PasswordInput
+        name="recoveredPassword"
+        id="recoveredPassword"
+        type="password"
+        readOnly
+        defaultValue={recovered.password}
+        autoComplete="off"
+      />
+      <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+        <ActionLink href={loginHref} onClick={() => forgetRecoveryKey()}>{t('Login')}</ActionLink>
+        <ActionButton type="secondary" onClick={() => setResetting(true)}>
+          {t('It does not work: set a new password')}
+        </ActionButton>
+      </div>
+    </div>
+  );
+}
+
+function PasswordReset({returnUrl, setNewPassword}: {
+  returnUrl: string | null;
+  setNewPassword: (password: string) => Promise<boolean>;
+}) {
 
   const loginHref = returnUrl
     ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
@@ -229,7 +357,7 @@ function PasswordReset({returnUrl}: {returnUrl: string | null}) {
 
   const doSetNewPassword = async () => {
     setState('loading');
-    const resetResult = await finalizeRecovery(nonceId, token, password);
+    const resetResult = await setNewPassword(password);
     if (resetResult) {
       setState('success');
     } else {

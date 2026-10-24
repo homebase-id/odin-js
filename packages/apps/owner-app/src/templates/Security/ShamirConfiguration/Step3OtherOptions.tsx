@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Input, Label, SubtleMessage, t} from "@homebase-id/common-app";
 import {
-  ConfigureShardsRequest,
+  ShamirDealPlan,
   PlayerType,
 } from "../../../provider/auth/ShamirProvider";
 import {ConfigureTrustedConnections} from "./ConfigureTrustedConnections";
@@ -13,7 +13,7 @@ export const Step3OtherOptions = ({
                                     removePlayer,
                                     updatePlayerType,
                                   }: {
-  config: ConfigureShardsRequest;
+  config: ShamirDealPlan;
   onChange: (minShards: number) => void;
   removePlayer?: (odinId: string) => void;
   updatePlayerType?: (odinId: string, type: PlayerType) => void;

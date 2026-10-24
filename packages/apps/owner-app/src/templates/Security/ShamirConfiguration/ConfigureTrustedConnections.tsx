@@ -34,14 +34,14 @@ export const ConfigureTrustedConnections = ({
     onVerificationComplete?: (
         results: Record<
             string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
+            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
         >
     ) => void;
 }) => {
     const [statuses, setStatuses] = useState<
         Record<
             string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean }
+            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
         >
     >({});
 
@@ -72,6 +72,7 @@ export const ConfigureTrustedConnections = ({
                                 status: res.isValid ? "valid" : "invalid",
                                 trustLevel: res.trustLevel,
                                 isValid: res.isValid,
+                                isZeroKnowledge: res.isZeroKnowledge,
                             }
                             : {status: "error"},
                     }));
@@ -118,6 +119,7 @@ export const ConfigureTrustedConnections = ({
                                     enableVerification ? info.trustLevel : undefined
                                 }
                                 isValid={enableVerification ? info.isValid : true}
+                                canApprove={enableVerification ? info.isZeroKnowledge !== false : true}
                             />
                         );
                     })}
@@ -143,6 +145,7 @@ const SelectedConnectionItem = ({
                                     verificationStatus,
                                     trustLevel,
                                     isValid,
+                                    canApprove = true,
                                 }: {
     player: ShamiraPlayer;
     onRemove: () => void;
@@ -153,6 +156,7 @@ const SelectedConnectionItem = ({
     verificationStatus: Status;
     trustLevel?: ShardTrustLevel;
     isValid?: boolean;
+    canApprove?: boolean;
 }) => {
     // ✅ Use the same color logic as PlayerListItem
     const trustColor =
@@ -193,6 +197,12 @@ const SelectedConnectionItem = ({
                             {t("⚠ Unavailable")}
                         </span>
                     )
+                )}
+
+                {!canApprove && verificationStatus !== "loading" && (
+                    <span className="text-xs text-orange-600">
+                        {t("Can't approve until they log in to Homebase again")}
+                    </span>
                 )}
 
                 {allowUpdatePlayerType ? (

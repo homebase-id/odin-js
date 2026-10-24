@@ -7,7 +7,7 @@ import {
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import {
-  PhraseRecovery,
+  PasswordRecovery,
   ZkConvertDriveRequest,
   ZkKeysRequest,
   ZkPhraseCopiesRequest,
@@ -47,15 +47,24 @@ const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
 const saveZkKeys = async (dotYouClient: DotYouClient, request: ZkKeysRequest) =>
   dotYouClient.createAxiosClient().post('/security/zk/keys', request);
 
-// These want the password itself, not just the session, so the login proves it again.
-const savePasswordCopy = async (dotYouClient: DotYouClient, password: string, phrasePublicKeyJwk: string) => {
-  const [phrasePublicKeyEncryptedPassword, currentAuthenticationPasswordReply] = await Promise.all([
-    sealPassword(password, phrasePublicKeyJwk),
-    preparePasswordProof(dotYouClient, password),
-  ]);
-  return dotYouClient
-    .createAxiosClient()
-    .post('/security/zk/password', { phrasePublicKeyEncryptedPassword, currentAuthenticationPasswordReply });
+// These want the password itself, not just the session, so the login proves it again. Each copy is
+// written only when it's missing: it's sealed, so this browser can't check it.
+const saveMissingPasswordCopies = async (dotYouClient: DotYouClient, password: string, status: ZkStatus) => {
+  const phrasePublicKeyJwk = !status.hasPasswordCopy ? status.phrasePublicKeyJwk : undefined;
+  const shamirPublicKeyJwk = !status.hasShamirPasswordCopy ? status.shamirPublicKeyJwk : undefined;
+  if (!phrasePublicKeyJwk && !shamirPublicKeyJwk) return;
+
+  const [phrasePublicKeyEncryptedPassword, shamirPublicKeyEncryptedPassword, currentAuthenticationPasswordReply] =
+    await Promise.all([
+      phrasePublicKeyJwk ? sealPassword(password, phrasePublicKeyJwk) : undefined,
+      shamirPublicKeyJwk ? sealPassword(password, shamirPublicKeyJwk) : undefined,
+      preparePasswordProof(dotYouClient, password),
+    ]);
+  return dotYouClient.createAxiosClient().post('/security/zk/password', {
+    phrasePublicKeyEncryptedPassword,
+    shamirPublicKeyEncryptedPassword,
+    currentAuthenticationPasswordReply,
+  });
 };
 
 const handOverPhrase = async (dotYouClient: DotYouClient, password: string) =>
@@ -92,10 +101,14 @@ const convertShardRecoveryDrive = async (
   request: ZkConvertDriveRequest
 ) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
-const getShardRecoveryDriveKey = async (dotYouClient: DotYouClient) =>
+/** This identity's Shard Recovery drive, with its zero-knowledge keys (owner only). */
+export const getShardRecoveryDrive = async (dotYouClient: DotYouClient) =>
   (await getDrivesByType(dotYouClient, SHARD_RECOVERY_DRIVE.type, 1, 10)).results.find((drive) =>
     stringGuidsEqual(drive.targetDriveInfo.alias, SHARD_RECOVERY_DRIVE.alias)
-  )?.zkMasterKeyEncryptedStorageKey;
+  );
+
+const getShardRecoveryDriveKey = async (dotYouClient: DotYouClient) =>
+  (await getShardRecoveryDrive(dotYouClient))?.zkMasterKeyEncryptedStorageKey;
 
 // Converted, and with a key the current master key opens. After a reset with the recovery key the
 // master key is new, so the drive is converted again.
@@ -145,8 +158,8 @@ export const getZkMasterKey = async (dotYouClient: DotYouClient): Promise<Uint8A
 
 /**
  * Runs after every owner login, while the browser still has the password: makes the keys the first
- * time, writes the password copy when it is missing, converts the Shard Recovery drive when it
- * needs it, and takes the recovery phrase over. Nobody sees any of it. Each step is safe to cut
+ * time, writes the password copies (the phrase's, the friends') when they are missing, converts the
+ * Shard Recovery drive when it needs it, and takes the recovery phrase over. Nobody sees any of it. Each step is safe to cut
  * off; the next login picks up where this one stopped.
  */
 export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, password: string) => {
@@ -164,11 +177,9 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
     masterKey = keys.masterKey;
   } else {
     masterKey = await openZkMasterKey(password, status);
-    // Sealed to the phrase's key, so this browser can't check it, only write it when it's missing:
-    // a password change writes the new one with the keys.
-    if (status.phrasePublicKeyJwk && !status.hasPasswordCopy) {
-      await savePasswordCopy(dotYouClient, password, status.phrasePublicKeyJwk);
-    }
+    // A password change writes the new ones with the keys; a friend deal or a phrase re-entry
+    // leaves its copy for this login to write.
+    await saveMissingPasswordCopies(dotYouClient, password, status);
   }
 
   await rememberZkMasterKey(dotYouClient, masterKey);
@@ -185,7 +196,8 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
 
 /**
  * For a password change: the keys re-locked with the new password, with the new password sealed
- * to the phrase's key. Undefined while the browser has not made them yet; the next login does.
+ * to the phrase's and the friends' keys. Undefined while the browser has not made them yet; the next
+ * login does.
  */
 export const relockZkKeysForNewPassword = async (
   dotYouClient: DotYouClient,
@@ -196,14 +208,14 @@ export const relockZkKeysForNewPassword = async (
   if (!status.zkSaltKek64) return undefined;
 
   const masterKey = await openZkMasterKey(oldPassword, status);
-  return (await makeZkKeys(newPassword, masterKey, status.phrasePublicKeyJwk)).request;
+  return (await makeZkKeys(newPassword, masterKey, status.phrasePublicKeyJwk, status.shamirPublicKeyJwk)).request;
 };
 
 /** Where the recovery phrase is, for the security screens. */
 export const getRecoveryPhraseState = async (dotYouClient: DotYouClient) =>
   (await getZkStatus(dotYouClient)).recoveryPhrase;
 
-const requireZkMasterKey = async (dotYouClient: DotYouClient, toDo: string) => {
+export const requireZkMasterKey = async (dotYouClient: DotYouClient, toDo: string) => {
   const masterKey = await getZkMasterKey(dotYouClient);
   if (!masterKey) throw new Error(`Log in again with your password to ${toDo}`);
   return masterKey;
@@ -236,7 +248,7 @@ export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: 
 export const recoverFromPhrase = async (
   dotYouClient: DotYouClient,
   phrase: string
-): Promise<PhraseRecovery | 'notTakenOver' | 'needsReentry'> => {
+): Promise<PasswordRecovery | 'notTakenOver' | 'needsReentry'> => {
   const response = await dotYouClient
     .createAxiosClient()
     .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', {
@@ -250,24 +262,27 @@ export const recoverFromPhrase = async (
 
 /**
  * When there is no recovered password, or it doesn't log in (someone with the password sealed
- * junk): the phrase's reset key sets a new one, and the recovered zero-knowledge master key is
- * locked by it. The reset key goes encrypted to the host's key, as the old reset sends the phrase.
+ * junk): the reset key (the phrase's or the friends') sets a new one, and the recovered
+ * zero-knowledge master key is locked by it. The reset key goes encrypted to the host's key, as the
+ * old reset sends the phrase. The other recovery's password copy is written at the next login.
  */
-export const resetPasswordWithPhrase = async (
+export const resetPasswordWithResetKey = async (
   dotYouClient: DotYouClient,
-  recovery: PhraseRecovery,
+  recovery: PasswordRecovery,
   newPassword: string
 ): Promise<boolean> => {
   const [passwordReply, zkKeys, publicKey] = await Promise.all([
     getSalts(dotYouClient).then((salts) => prepareAuthPassword(newPassword, salts)),
-    makeZkKeys(newPassword, recovery.zkMasterKey, recovery.phrasePublicKeyJwk).then((keys) => keys.request),
+    makeZkKeys(newPassword, recovery.zkMasterKey, recovery.phrasePublicKeyJwk, recovery.shamirPublicKeyJwk).then(
+      (keys) => keys.request
+    ),
     getPublicKey(dotYouClient),
   ]);
   const encryptedResetKey = await encryptRecoveryKey(uint8ArrayToBase64(recovery.resetKey), passwordReply, publicKey);
 
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })
-    .post('/authentication/zk-phrase-reset', { encryptedResetKey, passwordReply, zkKeys })
+    .post('/authentication/zk-reset', { encryptedResetKey, passwordReply, zkKeys })
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error(error);
