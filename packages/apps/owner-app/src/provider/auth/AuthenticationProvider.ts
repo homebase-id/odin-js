@@ -180,5 +180,4 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-export { getNonce, getSalts, getPublicKey } from './AuthenticationHelper';
-export type { PublicKeyData } from './AuthenticationHelper';
+export { getNonce, getSalts } from './AuthenticationHelper';

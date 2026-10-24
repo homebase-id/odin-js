@@ -59,16 +59,19 @@ const ECDH_P384 = { name: 'ECDH', namedCurve: 'P-384' };
 const SEAL_PUBLIC_KEY_LENGTH = 97;
 const SEAL_INFO = stringToUint8Array('homebase-zk-seal');
 
-const sealKey = async (privateKey: CryptoKey, publicKey: CryptoKey) => {
-  const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: publicKey }, privateKey, 384);
-  const hkdf = await crypto.subtle.importKey('raw', shared, 'HKDF', false, ['deriveBits']);
+/** hkdf-sha256, no salt, 16 bytes: the reset key and the seal key. */
+const hkdf16 = async (ikm: Uint8Array, info: Uint8Array): Promise<Uint8Array> => {
+  const key = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: SEAL_INFO },
-    hkdf,
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info },
+    key,
     KEY_LENGTH * 8
   );
   return new Uint8Array(bits);
 };
+
+const sealKey = async (privateKey: CryptoKey, publicKey: CryptoKey) =>
+  hkdf16(new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: publicKey }, privateKey, 384)), SEAL_INFO);
 
 /** Seals `data` to a P-384 public key (a JWK, as `exportEccPublicKey` makes it). */
 export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<string> => {
@@ -133,9 +136,7 @@ export const makeZkKeys = async (
     request: {
       zkSaltKek64: salt64,
       zkKekEncryptedZkMasterKey: await zkLock(key, await getSecondPasswordKey(password, salt64)),
-      ...(phrasePublicKeyJwk
-        ? { phrasePublicKeyEncryptedPassword: await sealPassword(password, phrasePublicKeyJwk) }
-        : {}),
+      phrasePublicKeyEncryptedPassword: phrasePublicKeyJwk ? await sealPassword(password, phrasePublicKeyJwk) : undefined,
     },
   };
 };
@@ -174,15 +175,7 @@ const RESET_KEY_INFO = stringToUint8Array('homebase-recovery-reset-key');
  * today's master key with it, so recovery with the phrase can always reset the password. From the
  * phrase, not the zero-knowledge master key: someone who once had the password has that key.
  */
-export const getResetKey = async (phraseKey: Uint8Array): Promise<Uint8Array> => {
-  const key = await crypto.subtle.importKey('raw', phraseKey, 'HKDF', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: RESET_KEY_INFO },
-    key,
-    KEY_LENGTH * 8
-  );
-  return new Uint8Array(bits);
-};
+export const getResetKey = (phraseKey: Uint8Array): Promise<Uint8Array> => hkdf16(phraseKey, RESET_KEY_INFO);
 
 /**
  * What the browser makes from the recovery phrase: the zero-knowledge master key locked by it, the
@@ -241,7 +234,7 @@ export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecove
     try {
       password = byteArrayToString(await zkUnseal(recovery.phrasePublicKeyEncryptedPassword, privateKey));
     } catch {
-      password = undefined;
+      // junk: reset instead
     }
   }
 

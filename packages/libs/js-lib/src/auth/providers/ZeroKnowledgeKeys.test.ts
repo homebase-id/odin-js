@@ -18,6 +18,7 @@ import {
   zkSeal,
   zkUnseal,
 } from './ZeroKnowledgeKeys';
+import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 
 // The vector odin-core checks too (ZeroKnowledgeKeysTests.TheSharedVectorOpens), made with Python's
 // hashlib and cryptography. It pins the browser's formats to the server's test helper.
@@ -86,8 +87,8 @@ test('a sealed value opens only with its private key', async () => {
   const opened = await zkUnseal(SEAL_VECTOR, base64ToUint8Array(SEAL_VECTOR_PRIVATE_KEY));
   expect(new TextDecoder().decode(opened)).toBe('correct horse battery staple');
 
-  const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-384' }, true, ['deriveBits']);
-  const jwk = JSON.stringify(await crypto.subtle.exportKey('jwk', pair.publicKey));
+  const pair = await createEccPair();
+  const jwk = await exportEccPublicKey(pair.publicKey);
   const pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
   expect(Array.from(await zkUnseal(await zkSeal(new Uint8Array([1, 2, 3]), jwk), pkcs8))).toEqual([1, 2, 3]);
   await expect(zkUnseal(SEAL_VECTOR, pkcs8)).rejects.toThrow();
