@@ -173,7 +173,12 @@ export const makePhraseCopies = async (
  * Recovery with the phrase: the zero-knowledge master key, then the password. The master key comes
  * back too, for a reset when the password no longer logs in.
  */
-export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery) => {
+export interface PhraseRecovery {
+  zkMasterKey: Uint8Array;
+  password: string;
+}
+
+export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery): Promise<PhraseRecovery> => {
   const zkMasterKey = await zkOpen(recovery.phraseKeyEncryptedZkMasterKey, await bip39Decode(phrase));
   return { zkMasterKey, password: await openPassword(recovery.zkMasterKeyEncryptedPassword, zkMasterKey) };
 };

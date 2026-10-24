@@ -10,6 +10,7 @@ import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {ApiType} from '@homebase-id/js-lib/core';
+import {PhraseRecovery} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from '@homebase-id/common-app';
 import {recoverFromPhrase, resetPasswordWithPhrase} from '../../provider/auth/ZeroKnowledgeProvider';
 
@@ -19,7 +20,7 @@ const AccountRecovery = () => {
   // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
   // 'phraseReset': a new password with the phrase's reset key, when the recovered one doesn't work.
   const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset'>('phrase');
-  const [recovered, setRecovered] = useState<{ password: string; zkMasterKey: Uint8Array }>();
+  const [recovered, setRecovered] = useState<PhraseRecovery>();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

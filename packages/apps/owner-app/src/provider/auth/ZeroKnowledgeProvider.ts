@@ -7,6 +7,7 @@ import {
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
 import {
+  PhraseRecovery,
   ZkConvertDriveRequest,
   ZkKeysRequest,
   ZkPhraseCopiesRequest,
@@ -222,7 +223,7 @@ export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: 
 export const recoverFromPhrase = async (
   dotYouClient: DotYouClient,
   phrase: string
-): Promise<{ password: string; zkMasterKey: Uint8Array } | undefined> => {
+): Promise<PhraseRecovery | undefined> => {
   const recovery = await dotYouClient
     .createAxiosClient()
     .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', { validateStatus: (s) => s === 200 || s === 404 })
@@ -241,9 +242,11 @@ export const resetPasswordWithPhrase = async (
   zkMasterKey: Uint8Array,
   newPassword: string
 ): Promise<boolean> => {
-  const passwordReply = await prepareAuthPassword(newPassword, await getSalts(dotYouClient));
-  const zkKeys = (await makeZkKeys(newPassword, zkMasterKey)).request;
-  const resetKey64 = uint8ArrayToBase64(await getResetKey(zkMasterKey));
+  const [passwordReply, zkKeys, resetKey64] = await Promise.all([
+    getSalts(dotYouClient).then((salts) => prepareAuthPassword(newPassword, salts)),
+    makeZkKeys(newPassword, zkMasterKey).then((keys) => keys.request),
+    getResetKey(zkMasterKey).then(uint8ArrayToBase64),
+  ]);
 
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })

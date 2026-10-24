@@ -181,7 +181,6 @@ export const isPasswordSet = async (): Promise<boolean> => {
 /// Internal helpers
 export { getNonce, getSalts } from './AuthenticationHelper';
 
-
 export interface PublicKeyData {
   publicKeyJwkBase64Url: string;
   crC32c: number;
