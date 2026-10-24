@@ -7,10 +7,12 @@ import {
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
+import { bip39Decode } from '../../helpers/Bip39';
 import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 
-// The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md). Every key here is
-// made and opened in the browser; the identity server only stores the locked copies.
+// The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md) and recovery in the
+// browser (docs/zero-knowledge-recovery-plan.md). Every key here is made and opened in the browser;
+// the identity server only stores the locked copies.
 //
 // A locked value is base64 of a 12-byte IV followed by the AES-GCM ciphertext and its 16-byte tag.
 // Keys are 16 bytes, like today's master key and drive keys. odin-core's test helper ZkBrowser does
@@ -52,7 +54,7 @@ export const zkOpen = async (locked64: string, key: Uint8Array): Promise<Uint8Ar
 export const getSecondPasswordKey = (password: string, salt64: string) =>
   pbkdf2HmacSha256(password, base64ToUint8Array(salt64));
 
-/** The login keys as the owner login sends them; recovery logs in with these (plan B). */
+/** The login keys as the owner login sends them. */
 export interface LoginKeys {
   hpwd64: string;
   kek64: string;
@@ -61,35 +63,92 @@ export interface LoginKeys {
 export interface ZkKeysRequest {
   zkSaltKek64: string;
   zkKekEncryptedZkMasterKey: string;
-  zkMasterKeyEncryptedLoginKeys: string;
+  zkMasterKeyEncryptedPassword: string;
 }
+
+/** Where the owner's recovery phrase is (odin-core `RecoveryPhraseState`). */
+export type RecoveryPhraseState = 'none' | 'onServer' | 'takenOver' | 'needsReentry';
 
 export interface ZkStatus {
   zkSaltKek64?: string | null;
   zkKekEncryptedZkMasterKey?: string | null;
+  /** The password, locked by the zero-knowledge master key; null until a login writes it. */
+  zkMasterKeyEncryptedPassword?: string | null;
+  recoveryPhrase?: RecoveryPhraseState;
 }
+
+export const lockPassword = async (password: string, zkMasterKey: Uint8Array) =>
+  zkLock(stringToUint8Array(password), zkMasterKey);
+
+export const openPassword = async (locked64: string, zkMasterKey: Uint8Array) =>
+  new TextDecoder().decode(await zkOpen(locked64, zkMasterKey));
 
 /**
  * Makes the keys at the first login, or re-locks `masterKey` for a password change. A new salt
- * each time, as a password change also gets new login salts.
+ * each time, as a password change also gets new login salts. The password copy is what recovery
+ * gives back.
  */
 export const makeZkKeys = async (
   password: string,
-  loginKeys: LoginKeys,
   masterKey?: Uint8Array
 ): Promise<{ masterKey: Uint8Array; request: ZkKeysRequest }> => {
   const salt64 = uint8ArrayToBase64(getRandom16ByteArray());
   const key = masterKey ?? getRandom16ByteArray();
-  const loginKeysJson = JSON.stringify({ hpwd64: loginKeys.hpwd64, kek64: loginKeys.kek64 });
 
   return {
     masterKey: key,
     request: {
       zkSaltKek64: salt64,
       zkKekEncryptedZkMasterKey: await zkLock(key, await getSecondPasswordKey(password, salt64)),
-      zkMasterKeyEncryptedLoginKeys: await zkLock(stringToUint8Array(loginKeysJson), key),
+      zkMasterKeyEncryptedPassword: await lockPassword(password, key),
     },
   };
+};
+
+export interface ZkPhraseCopiesRequest {
+  phraseKeyEncryptedZkMasterKey: string;
+  zkMasterKeyEncryptedPhraseKey: string;
+  phraseCheck64?: string;
+}
+
+export interface ZkPhraseRecovery {
+  phraseKeyEncryptedZkMasterKey: string;
+  zkMasterKeyEncryptedPassword: string;
+}
+
+const PHRASE_CHECK_PREFIX = stringToUint8Array('homebase-recovery-phrase-check');
+
+/**
+ * A recovery phrase's check value, as odin-core's `RecoveryPhraseCheck` computes it: SHA-256 of a
+ * prefix and the phrase's 16 bytes. The bytes are random, so it can't be reversed.
+ */
+export const getPhraseCheck = async (phraseKey: Uint8Array) =>
+  uint8ArrayToBase64(
+    new Uint8Array(await crypto.subtle.digest('SHA-256', mergeByteArrays([PHRASE_CHECK_PREFIX, phraseKey])))
+  );
+
+/**
+ * The two copies the browser makes of the recovery phrase: the zero-knowledge master key locked by
+ * it, and the phrase locked by the zero-knowledge master key, to show it again. With the check value
+ * when the owner types it in again after a reset.
+ */
+export const makePhraseCopies = async (
+  phrase: string,
+  zkMasterKey: Uint8Array,
+  withCheck = false
+): Promise<ZkPhraseCopiesRequest> => {
+  const phraseKey = await bip39Decode(phrase);
+  return {
+    phraseKeyEncryptedZkMasterKey: await zkLock(zkMasterKey, phraseKey),
+    zkMasterKeyEncryptedPhraseKey: await zkLock(phraseKey, zkMasterKey),
+    phraseCheck64: withCheck ? await getPhraseCheck(phraseKey) : undefined,
+  };
+};
+
+/** Recovery with the phrase: the zero-knowledge master key, then the password. */
+export const recoverPasswordWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery) => {
+  const zkMasterKey = await zkOpen(recovery.phraseKeyEncryptedZkMasterKey, await bip39Decode(phrase));
+  return openPassword(recovery.zkMasterKeyEncryptedPassword, zkMasterKey);
 };
 
 export const openZkMasterKey = async (password: string, status: ZkStatus): Promise<Uint8Array> => {

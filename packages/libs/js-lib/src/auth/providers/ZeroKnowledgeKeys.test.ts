@@ -1,12 +1,17 @@
 import { expect, test } from 'vitest';
 import { cbcDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import { bip39Decode, bip39Encode } from '../../helpers/Bip39';
 import {
+  getPhraseCheck,
   getSecondPasswordKey,
   guidToDotNetBytes,
+  makePhraseCopies,
   makeZkDriveKeys,
   makeZkKeys,
+  openPassword,
   openZkMasterKey,
+  recoverPasswordWithPhrase,
   zkLock,
   zkOpen,
 } from './ZeroKnowledgeKeys';
@@ -46,15 +51,59 @@ test('lock and open round trip, with a fresh IV each time', async () => {
   expect(Array.from(await zkOpen(a, key))).toEqual([1, 2, 3, 4, 5]);
 });
 
-test('a password change keeps the master key', async () => {
-  const loginKeys = { hpwd64: 'aHB3ZA==', kek64: 'a2Vr' };
-  const first = await makeZkKeys(PASSWORD, loginKeys);
-  const relocked = await makeZkKeys('new password', loginKeys, first.masterKey);
+test('a password change keeps the master key and re-locks the password copy', async () => {
+  const first = await makeZkKeys(PASSWORD);
+  const relocked = await makeZkKeys('new password', first.masterKey);
   const opened = await openZkMasterKey(
     'new password',
     status(relocked.request.zkSaltKek64, relocked.request.zkKekEncryptedZkMasterKey)
   );
   expect(opened).toEqual(first.masterKey);
+  expect(await openPassword(relocked.request.zkMasterKeyEncryptedPassword, opened)).toBe('new password');
+});
+
+// The standard BIP39 vectors odin-core's BIP39 tests check (TestMnemonicsAndSeedEnglish), plus one
+// made with Python's hashlib from the same word list.
+const BIP39_VECTORS: [Uint8Array, string][] = [
+  [new Uint8Array(16), 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'],
+  [new Uint8Array(16).fill(0x7f), 'legal winner thank year wave sausage worth useful legal winner thank yellow'],
+  [new Uint8Array(16).fill(0xff), 'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'],
+  [Uint8Array.from({ length: 16 }, (_, i) => i), 'abandon amount liar amount expire adjust cage candy arch gather drum buyer'],
+];
+
+test('BIP39 encodes and decodes the shared vectors', async () => {
+  for (const [entropy, phrase] of BIP39_VECTORS) {
+    expect(await bip39Encode(entropy)).toBe(phrase);
+    expect(await bip39Decode(phrase)).toEqual(entropy);
+  }
+});
+
+test('BIP39 forgives case and spacing but not a wrong word or checksum', async () => {
+  const [entropy, phrase] = BIP39_VECTORS[3];
+  expect(await bip39Decode(`  ${phrase.toUpperCase().replace(/ /g, '   ')} `)).toEqual(entropy);
+  await expect(bip39Decode(phrase.replace('buyer', 'notaword'))).rejects.toThrow('not a recovery phrase word');
+  await expect(bip39Decode(phrase.replace('buyer', 'zoo'))).rejects.toThrow('does not check out');
+  await expect(bip39Decode('abandon about')).rejects.toThrow('12 words');
+});
+
+test('the phrase check value is the one odin-core computes (RecoveryPhraseTests)', async () => {
+  // Python: base64(sha256(b'homebase-recovery-phrase-check' + bytes(range(16))))
+  expect(await getPhraseCheck(BIP39_VECTORS[3][0])).toBe('Eo89wt2+AtmPabdl1v7jP8jYb9oHQlRxCiqqpMave6Y=');
+});
+
+test('the phrase copies give back the password, and show the phrase again', async () => {
+  const keys = await makeZkKeys(PASSWORD);
+  const phrase = BIP39_VECTORS[3][1];
+  const copies = await makePhraseCopies(phrase, keys.masterKey, true);
+
+  expect(
+    await recoverPasswordWithPhrase(phrase, {
+      phraseKeyEncryptedZkMasterKey: copies.phraseKeyEncryptedZkMasterKey,
+      zkMasterKeyEncryptedPassword: keys.request.zkMasterKeyEncryptedPassword,
+    })
+  ).toBe(PASSWORD);
+  expect(await bip39Encode(await zkOpen(copies.zkMasterKeyEncryptedPhraseKey, keys.masterKey))).toBe(phrase);
+  expect(copies.phraseCheck64).toBe(await getPhraseCheck(BIP39_VECTORS[3][0]));
 });
 
 test('guids are in .NET Guid.ToByteArray order', () => {

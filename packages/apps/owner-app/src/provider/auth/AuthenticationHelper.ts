@@ -54,7 +54,7 @@ export const prepareAuthPassword = async (
 ): Promise<AuthenticationReplyNonce> =>
   prepareAuthReply(await deriveLoginKeys(password, nonceData), nonceData);
 
-/** The login reply from the login keys alone; recovery logs in this way without the password. */
+/** The login reply from the login keys. */
 export const prepareAuthReply = async (
   loginKeys: LoginKeys,
   nonceData: NonceData

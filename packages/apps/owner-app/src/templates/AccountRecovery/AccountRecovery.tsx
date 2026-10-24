@@ -9,9 +9,16 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
+import {ApiType} from '@homebase-id/js-lib/core';
+import {OwnerClient} from '@homebase-id/common-app';
+import {recoverPasswordFromPhrase} from '../../provider/auth/ZeroKnowledgeProvider';
 
 const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
+  // 'phrase': the phrase first. 'recovered': it opened the password in this browser.
+  // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
+  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword'>('phrase');
+  const [recoveredPassword, setRecoveredPassword] = useState('');
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -30,6 +37,23 @@ const AccountRecovery = () => {
   }
 
   const passwordIsValid = password === retypePassword && password !== '';
+
+  const doRecoverWithPhrase = async () => {
+    setState('loading');
+    try {
+      const recovered = await recoverPasswordFromPhrase(new OwnerClient({api: ApiType.Owner}), recoveryKey);
+      if (recovered === undefined) {
+        setStep('newPassword');
+      } else {
+        setRecoveredPassword(recovered);
+        setStep('recovered');
+      }
+      setState('idle');
+    } catch (error) {
+      console.error(error);
+      setState('error');
+    }
+  };
 
   const doSetNewPassword = async () => {
     setState('loading');
@@ -58,7 +82,24 @@ const AccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
-              {state === 'success' ? (
+              {step === 'recovered' ? (
+                <div className="my-2">
+                  <p className="mb-3">
+                    {t('This is your password. Only this browser has seen it. You can keep using it, or change it once you are logged in.')}
+                  </p>
+                  <PasswordInput
+                    name="recoveredPassword"
+                    id="recoveredPassword"
+                    type="password"
+                    readOnly
+                    defaultValue={recoveredPassword}
+                    autoComplete="off"
+                  />
+                  <div className="mt-5 flex flex-row-reverse">
+                    <ActionLink href={loginHref}>{t('Login')}</ActionLink>
+                  </div>
+                </div>
+              ) : state === 'success' ? (
                 <div className="my-2">
                   <p>{t('Your password has been changed successfully')}</p>
                   <div className="flex flex-row-reverse">
@@ -68,7 +109,9 @@ const AccountRecovery = () => {
               ) : state === 'error' ? (
                 <>
                   <Alert type="warning" isCompact={true}>
-                    {t('Failed to set a new password, check your recovery key and try again')}
+                    {step === 'phrase'
+                      ? t('That recovery key does not open your account, check it and try again')
+                      : t('Failed to set a new password, check your recovery key and try again')}
                   </Alert>
                   <div className="mt-5 flex flex-row-reverse">
                     <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
@@ -78,7 +121,8 @@ const AccountRecovery = () => {
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  doSetNewPassword();
+                  if (step === 'phrase') doRecoverWithPhrase();
+                  else doSetNewPassword();
                 }}>
                   <div className="mb-2">
                     <p className="max-w-md text-slate-400">
@@ -100,6 +144,17 @@ const AccountRecovery = () => {
                       autoComplete="off"
                     />
                   </div>
+                  {step === 'phrase' ? (
+                    <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+                      <ActionButton state={state} disabled={recoveryKey.trim() === ''}>
+                        {t('Continue')}
+                      </ActionButton>
+                      <ActionLink type="secondary" href={loginHref}>
+                        {t('Cancel')}
+                      </ActionLink>
+                    </div>
+                  ) : (
+                  <>
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
@@ -145,6 +200,8 @@ const AccountRecovery = () => {
                       {t('Cancel')}
                     </ActionLink>
                   </div>
+                  </>
+                  )}
                 </form>
               )}
             </div>

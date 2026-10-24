@@ -1,6 +1,7 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
 import {encryptRecoveryKey, prepareAuthPassword} from "./AuthenticationHelper";
+import {getRecoveryPhraseState, getTypedPhraseCheck} from "./ZeroKnowledgeProvider";
 import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
 import {ShamiraPlayer} from "./ShamirProvider";
 
@@ -182,6 +183,22 @@ export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> =
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
+
+  // Once the browser took the phrase over, only its check value goes to the server.
+  if ((await getRecoveryPhraseState(dotYouClient)) === 'takenOver') {
+    let phraseCheck64: string;
+    try {
+      phraseCheck64 = await getTypedPhraseCheck(recoveryKey);
+    } catch {
+      return false;
+    }
+
+    return dotYouClient
+      .createAxiosClient({overrideEncryption: true})
+      .post(`${root}/verify-recovery-key`, {phraseCheck64})
+      .then((response) => response.status === 200)
+      .catch(() => false);
+  }
 
   const publicKey = await getPublicKey(dotYouClient);
   const salts = await getSalts(dotYouClient);

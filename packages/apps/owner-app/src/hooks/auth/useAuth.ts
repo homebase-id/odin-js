@@ -15,6 +15,7 @@ import {
   HOME_SHARED_SECRET,
   OwnerClient,
   OWNER_SHARED_SECRET,
+  OWNER_ZK_MASTER_KEY,
   STORAGE_IDENTITY_KEY,
   logoutOwnerAndAllApps,
   logoutPublicSession,
@@ -103,6 +104,7 @@ export const useAuth = () => {
 
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+    window.localStorage.removeItem(OWNER_ZK_MASTER_KEY);
 
     const response = await authenticateOwner(password);
     if (!response) return false;
@@ -117,7 +119,7 @@ export const useAuth = () => {
     try {
       const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
       await Promise.race([
-        ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys),
+        ensureZeroKnowledgeKeys(ownerClient, password),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
         ),

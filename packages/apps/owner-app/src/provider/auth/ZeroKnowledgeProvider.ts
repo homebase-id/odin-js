@@ -1,20 +1,29 @@
 import { DotYouClient, getDrivesByType } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { bip39Decode, bip39Encode, base64ToUint8Array, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import {
-  LoginKeys,
   ZkConvertDriveRequest,
   ZkKeysRequest,
+  ZkPhraseCopiesRequest,
+  ZkPhraseRecovery,
   ZkStatus,
+  getPhraseCheck,
+  makePhraseCopies,
   makeZkDriveKeys,
   makeZkKeys,
+  openPassword,
   openZkMasterKey,
+  recoverPasswordWithPhrase,
+  lockPassword,
+  zkLock,
   zkOpen,
 } from '@homebase-id/js-lib/auth';
+import { OWNER_ZK_MASTER_KEY } from '@homebase-id/common-app';
 import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
 
-// The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md). The browser makes
-// and opens every key; the identity server only stores the locked copies. The password is needed
-// only at login and at a password change.
+// The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md) and recovery in the
+// browser (docs/zero-knowledge-recovery-plan.md). The browser makes and opens every key; the
+// identity server only stores the locked copies. The password is needed only at login and at a
+// password change.
 
 const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
   dotYouClient
@@ -24,6 +33,24 @@ const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
 
 const saveZkKeys = async (dotYouClient: DotYouClient, request: ZkKeysRequest) =>
   dotYouClient.createAxiosClient().post('/security/zk/keys', request);
+
+const savePasswordCopy = async (dotYouClient: DotYouClient, zkMasterKeyEncryptedPassword: string) =>
+  dotYouClient.createAxiosClient().post('/security/zk/password', { zkMasterKeyEncryptedPassword });
+
+const handOverPhrase = async (dotYouClient: DotYouClient) =>
+  dotYouClient
+    .createAxiosClient()
+    .post<{ phrase: string }>('/security/zk/phrase-handover')
+    .then((response) => response.data.phrase);
+
+const takeOverPhrase = async (dotYouClient: DotYouClient, request: ZkPhraseCopiesRequest) =>
+  dotYouClient.createAxiosClient().post('/security/zk/phrase-takeover', request);
+
+const getSessionKey = async (dotYouClient: DotYouClient) =>
+  dotYouClient
+    .createAxiosClient()
+    .get<{ sessionKey64: string }>('/security/zk/session-key')
+    .then((response) => base64ToUint8Array(response.data.sessionKey64));
 
 const convertShardRecoveryDrive = async (
   dotYouClient: DotYouClient,
@@ -47,45 +74,129 @@ const shardRecoveryDriveOpens = async (dotYouClient: DotYouClient, masterKey: Ui
   }
 };
 
+// The session key comes only from the server, to a request carrying the owner's cookie, and stays
+// in memory; localStorage holds the master key locked by it. Either half alone opens nothing.
+let sessionKey: Uint8Array | undefined;
+
+const getSessionKeyOnce = async (dotYouClient: DotYouClient) =>
+  (sessionKey ??= await getSessionKey(dotYouClient));
+
+const rememberZkMasterKey = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+  const locked = await zkLock(masterKey, await getSessionKeyOnce(dotYouClient));
+  window.localStorage.setItem(OWNER_ZK_MASTER_KEY, locked);
+};
+
+/**
+ * The zero-knowledge master key for this owner session, with no password. Undefined when this
+ * session has none (it began before this shipped, or the login could not open the keys): the next
+ * login stores it.
+ */
+export const getZkMasterKey = async (dotYouClient: DotYouClient): Promise<Uint8Array | undefined> => {
+  const locked = window.localStorage.getItem(OWNER_ZK_MASTER_KEY);
+  if (!locked) return undefined;
+
+  try {
+    return await zkOpen(locked, await getSessionKeyOnce(dotYouClient));
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Runs after every owner login, while the browser still has the password: makes the keys the first
- * time, and converts the Shard Recovery drive when it needs it. Nobody sees any of it.
+ * time, keeps the password copy current, converts the Shard Recovery drive when it needs it, and
+ * takes the recovery phrase over. Nobody sees any of it. Each step is safe to cut off; the next
+ * login picks up where this one stopped.
  */
-export const ensureZeroKnowledgeKeys = async (
-  dotYouClient: DotYouClient,
-  password: string,
-  loginKeys: LoginKeys
-) => {
+export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, password: string) => {
   const status = await getZkStatus(dotYouClient);
 
   let masterKey: Uint8Array;
   if (!status.zkSaltKek64) {
-    const keys = await makeZkKeys(password, loginKeys);
+    const keys = await makeZkKeys(password);
     await saveZkKeys(dotYouClient, keys.request);
     masterKey = keys.masterKey;
   } else {
     masterKey = await openZkMasterKey(password, status);
+    if (!(await passwordCopyMatches(status, masterKey, password))) {
+      await savePasswordCopy(dotYouClient, await lockPassword(password, masterKey));
+    }
   }
+
+  await rememberZkMasterKey(dotYouClient, masterKey);
 
   if (!(await shardRecoveryDriveOpens(dotYouClient, masterKey))) {
     const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE.alias, masterKey);
     await convertShardRecoveryDrive(dotYouClient, request);
   }
+
+  if (status.recoveryPhrase === 'onServer') {
+    const phrase = await handOverPhrase(dotYouClient);
+    await takeOverPhrase(dotYouClient, await makePhraseCopies(phrase, masterKey));
+  }
+};
+
+const passwordCopyMatches = async (status: ZkStatus, masterKey: Uint8Array, password: string) => {
+  if (!status.zkMasterKeyEncryptedPassword) return false;
+  try {
+    return (await openPassword(status.zkMasterKeyEncryptedPassword, masterKey)) === password;
+  } catch {
+    return false;
+  }
 };
 
 /**
- * For a password change: the keys re-locked with the new password, with the new login keys.
+ * For a password change: the keys re-locked with the new password, with the new password copy.
  * Undefined while the browser has not made them yet; the next login does.
  */
 export const relockZkKeysForNewPassword = async (
   dotYouClient: DotYouClient,
   oldPassword: string,
-  newPassword: string,
-  newLoginKeys: LoginKeys
+  newPassword: string
 ): Promise<ZkKeysRequest | undefined> => {
   const status = await getZkStatus(dotYouClient);
   if (!status.zkSaltKek64) return undefined;
 
   const masterKey = await openZkMasterKey(oldPassword, status);
-  return (await makeZkKeys(newPassword, newLoginKeys, masterKey)).request;
+  return (await makeZkKeys(newPassword, masterKey)).request;
+};
+
+/** Where the recovery phrase is, for the security screens. */
+export const getRecoveryPhraseState = async (dotYouClient: DotYouClient) =>
+  (await getZkStatus(dotYouClient)).recoveryPhrase ?? 'none';
+
+/** The phrase from its copy locked by the zero-knowledge master key, as the reveal returns it. */
+export const openRevealedPhrase = async (dotYouClient: DotYouClient, zkMasterKeyEncryptedPhraseKey: string) => {
+  const masterKey = await getZkMasterKey(dotYouClient);
+  if (!masterKey) throw new Error('Log in again with your password to show the recovery phrase');
+  return bip39Encode(await zkOpen(zkMasterKeyEncryptedPhraseKey, masterKey));
+};
+
+/** The check value of a typed phrase, for the health check once the phrase was taken over. */
+export const getTypedPhraseCheck = async (phrase: string) => getPhraseCheck(await bip39Decode(phrase));
+
+/** After a reset forgot the phrase copies: lock the new zero-knowledge master key with the typed phrase. */
+export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: string) => {
+  const masterKey = await getZkMasterKey(dotYouClient);
+  if (!masterKey) throw new Error('Log in again with your password to keep your recovery phrase');
+  await dotYouClient
+    .createAxiosClient()
+    .post('/security/zk/phrase-reentry', await makePhraseCopies(phrase, masterKey, true));
+};
+
+/**
+ * Recovery with the phrase, with no login: the password, opened in this browser only. Undefined
+ * when the phrase was not taken over yet; the page then uses the old reset.
+ */
+export const recoverPasswordFromPhrase = async (
+  dotYouClient: DotYouClient,
+  phrase: string
+): Promise<string | undefined> => {
+  const recovery = await dotYouClient
+    .createAxiosClient()
+    .get<ZkPhraseRecovery>('/authentication/zk-phrase-recovery', { validateStatus: (s) => s === 200 || s === 404 })
+    .then((response) => (response.status === 200 ? response.data : undefined));
+  if (!recovery) return undefined;
+
+  return recoverPasswordWithPhrase(phrase, recovery);
 };

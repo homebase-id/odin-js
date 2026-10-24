@@ -10,3 +10,4 @@ export * from './ImageMerger';
 export * from './PayloadAndThumbnailGenerator';
 export * from './BlobHelpers';
 export * from './SlugHelpers';
+export * from './Bip39';
