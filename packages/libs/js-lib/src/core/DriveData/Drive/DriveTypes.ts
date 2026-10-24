@@ -22,6 +22,8 @@ export interface PermissionSet {
     keys: number[];
 }
 
+export type DriveSharingModel = 'collaborative' | 'private' | 'selectiveShare' | 'unclassified';
+
 export interface DriveDefinition {
     driveId: string;
     name: string;
@@ -55,6 +57,19 @@ export interface DriveDefinition {
      * printing the whole JWK.
      */
     writeOnlyPublicKeyCrc32?: number | null;
+
+    /**
+     * Who holds which key (odin-core docs/zero-knowledge-drives.md). Every drive is Collaborative
+     * until the browser converts it; only a converted drive is Private, so the label can be
+     * trusted. Served to the owner, and not by every identity host, so treat it as optional.
+     */
+    sharingModel?: DriveSharingModel | null;
+
+    /**
+     * The drive key locked by the owner's zero-knowledge master key. Null until the browser converts
+     * the drive. Served to the owner only.
+     */
+    zkMasterKeyEncryptedStorageKey?: string | null;
 
     targetDriveInfo: TargetDrive;
     metadata: string;

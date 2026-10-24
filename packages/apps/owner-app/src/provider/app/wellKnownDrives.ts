@@ -1,6 +1,12 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
 import { drivesEqual } from '@homebase-id/js-lib/helpers';
 
+/** odin-core `WellKnownAppDrives.ShardRecoveryDrive`. */
+export const SHARD_RECOVERY_DRIVE: TargetDrive = {
+  alias: '46242d0d67604b2aa683f05cd48d4aef',
+  type: '43138ae90206480b9ff493580ca147ee',
+};
+
 /**
  * The drives with a fixed alias and type, each with the app that owns it.
  *
@@ -96,7 +102,7 @@ const WELL_KNOWN_DRIVE_OWNERS: { drive: TargetDrive; appId: string }[] = [
 
   // --- Recovery ---
   {
-    drive: { alias: '46242d0d67604b2aa683f05cd48d4aef', type: '43138ae90206480b9ff493580ca147ee' },
+    drive: SHARD_RECOVERY_DRIVE,
     appId: 'bc2fbb10-7574-4792-8db6-23c9b725a1d8',
   },
 

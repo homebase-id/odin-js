@@ -4,6 +4,8 @@ import {
   importRemotePublicEccKey,
   aesGcmEncryptWithEccSharedSecret,
   exportEccPublicKey,
+  pbkdf2HmacSha256,
+  LoginKeys,
 } from '@homebase-id/js-lib/auth';
 import {
   getRandom16ByteArray,
@@ -37,27 +39,30 @@ interface AuthenticationPayload {
   secret: any;
 }
 
+/** The password hash and KEK the login sends, from the password and the identity's salts. */
+export const deriveLoginKeys = async (password: string, nonceData: NonceData): Promise<LoginKeys> => {
+  const [hpwd64, kek64] = await Promise.all([
+    pbkdf2Base64(password, nonceData.saltPassword64),
+    pbkdf2Base64(password, nonceData.saltKek64),
+  ]);
+  return { hpwd64, kek64 };
+};
+
 export const prepareAuthPassword = async (
   password: string,
   nonceData: NonceData
+): Promise<AuthenticationReplyNonce> =>
+  prepareAuthReply(await deriveLoginKeys(password, nonceData), nonceData);
+
+/** The login reply from the login keys alone; recovery logs in this way without the password. */
+export const prepareAuthReply = async (
+  loginKeys: LoginKeys,
+  nonceData: NonceData
 ): Promise<AuthenticationReplyNonce> => {
-  const interations = 100000;
-  const len = 16;
+  const hashedPassword64 = loginKeys.hpwd64;
+  const keK64 = loginKeys.kek64;
 
-  const hashedPassword64 = await wrapPbkdf2HmacSha256(
-    password,
-    nonceData.saltPassword64,
-    interations,
-    len
-  );
-  const keK64 = await wrapPbkdf2HmacSha256(password, nonceData.saltKek64, interations, len);
-
-  const hashNoncePassword64 = await wrapPbkdf2HmacSha256(
-    hashedPassword64,
-    nonceData.nonce64,
-    interations,
-    len
-  );
+  const hashNoncePassword64 = await pbkdf2Base64(hashedPassword64, nonceData.nonce64);
 
   const hostBase64PublicJWK = uint8ArrayToBase64(stringToUint8Array(nonceData.publicJwk));
   const hostEccPublicKey = await importRemotePublicEccKey(hostBase64PublicJWK);
@@ -119,52 +124,5 @@ export const encryptRecoveryKey = async (
   };
 };
 
-// ================== PBKDF ==================
-/**
- * @param {string} strPassword The clear text password
- * @param {Uint8Array} salt    The salt
- * @param {string} hash        The Hash model, e.g. ["SHA-256" | "SHA-512"]
- * @param {int} iterations     Number of iterations
- * @param {int} len            The output length in bytes, e.g. 16
- */
-const pbkdf2 = async (
-  strPassword: string,
-  salt: Uint8Array,
-  hash: string,
-  iterations: number,
-  len: number
-): Promise<Uint8Array> => {
-  const ik = await crypto.subtle.importKey(
-    'raw',
-    stringToUint8Array(strPassword),
-    { name: 'PBKDF2' },
-    false,
-    ['deriveBits']
-  );
-  const dk = await crypto.subtle.deriveBits(
-    {
-      name: 'PBKDF2',
-      hash: hash,
-      salt: salt,
-      iterations: iterations,
-    },
-    ik,
-    len * 8
-  ); // Bytes to bits
-
-  return new Uint8Array(dk);
-};
-
-const wrapPbkdf2HmacSha256 = async (
-  password: string,
-  saltArray64: string,
-  iterations: number,
-  len: number
-): Promise<string> => {
-  const u8salt = Uint8Array.from(atob(saltArray64), (c) => c.charCodeAt(0));
-
-  return pbkdf2(password, u8salt, 'SHA-256', iterations, len).then((hashed) => {
-    const base64 = window.btoa(String.fromCharCode.apply(null, Array.from(hashed)));
-    return base64;
-  });
-};
+const pbkdf2Base64 = async (password: string, salt64: string): Promise<string> =>
+  uint8ArrayToBase64(await pbkdf2HmacSha256(password, base64ToUint8Array(salt64)));

@@ -9,8 +9,11 @@ import {
   changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { ApiType } from '@homebase-id/js-lib/core';
+import { ensureZeroKnowledgeKeys } from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   HOME_SHARED_SECRET,
+  OwnerClient,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
   logoutOwnerAndAllApps,
@@ -18,6 +21,8 @@ import {
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
+
+const ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS = 10_000;
 
 export const SETUP_PATH = '/owner/setup';
 
@@ -105,6 +110,21 @@ export const useAuth = () => {
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     invalidateVerifyToken(queryClient);
+
+    // The only moment the browser has the password: make or open the zero-knowledge keys. The
+    // redirect waits for it, but never for long, and a failure never fails the login; the next
+    // login tries again. Each step is safe to cut off: nothing is used until it is saved.
+    try {
+      const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
+      await Promise.race([
+        ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
+        ),
+      ]);
+    } catch (error) {
+      console.error('Zero-knowledge keys', error);
+    }
 
     checkRedirectToReturn();
     return true;

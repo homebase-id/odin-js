@@ -79,6 +79,27 @@ export const gcmDecrypt = async (
   return new Uint8Array(decrypted);
 };
 
+/**
+ * Seals with `aes-gcm`: the counterpart of `gcmDecrypt`, with the 16-byte tag appended to the
+ * ciphertext. Only the first 12 bytes of `iv` are used as the nonce.
+ */
+export const gcmEncrypt = async (
+  data: Uint8Array,
+  iv: Uint8Array,
+  key: Uint8Array
+): Promise<Uint8Array> => {
+  const importedKey = await crypto.subtle.importKey('raw', key, { name: 'AES-GCM' }, false, [
+    'encrypt',
+  ]);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv.slice(0, 12) },
+    importedKey,
+    data
+  );
+
+  return new Uint8Array(encrypted);
+};
+
 export const streamEncryptWithCbc = async (
   dataStream: ReadableStream<Uint8Array>,
   key: Uint8Array,
