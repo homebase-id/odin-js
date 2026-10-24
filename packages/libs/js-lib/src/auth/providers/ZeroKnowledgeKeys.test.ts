@@ -10,11 +10,13 @@ import {
   makePhraseCopies,
   makeZkDriveKeys,
   makeZkKeys,
-  openPassword,
   openZkMasterKey,
   recoverWithPhrase,
+  sealPassword,
   zkLock,
   zkOpen,
+  zkSeal,
+  zkUnseal,
 } from './ZeroKnowledgeKeys';
 
 // The vector odin-core checks too (ZeroKnowledgeKeysTests.TheSharedVectorOpens), made with Python's
@@ -29,6 +31,7 @@ const status = (salt: string, locked: string) => ({
   zkSaltKek64: salt,
   zkKekEncryptedZkMasterKey: locked,
   recoveryPhrase: 'none' as const,
+  hasPasswordCopy: false,
 });
 
 test('the second password key is pbkdf2 like the KEK, UTF-8 password included', async () => {
@@ -53,15 +56,41 @@ test('lock and open round trip, with a fresh IV each time', async () => {
   expect(Array.from(await zkOpen(a, key))).toEqual([1, 2, 3, 4, 5]);
 });
 
-test('a password change keeps the master key and re-locks the password copy', async () => {
+test('a password change keeps the master key and seals the new password to the phrase key', async () => {
   const first = await makeZkKeys(PASSWORD);
-  const relocked = await makeZkKeys('new password', first.masterKey);
+  expect(first.request.phrasePublicKeyEncryptedPassword).toBeUndefined();
+
+  const phrase = BIP39_VECTORS[3][1];
+  const copies = await makePhraseCopies(phrase, first.masterKey);
+  const relocked = await makeZkKeys('new password', first.masterKey, copies.phrasePublicKeyJwk);
   const opened = await openZkMasterKey(
     'new password',
     status(relocked.request.zkSaltKek64, relocked.request.zkKekEncryptedZkMasterKey)
   );
   expect(opened).toEqual(first.masterKey);
-  expect(await openPassword(relocked.request.zkMasterKeyEncryptedPassword, opened)).toBe('new password');
+
+  const recovered = await recoverWithPhrase(phrase, {
+    ...copies,
+    phrasePublicKeyEncryptedPassword: relocked.request.phrasePublicKeyEncryptedPassword,
+  });
+  expect(recovered.password).toBe('new password');
+});
+
+// A value sealed by WebCrypto (node 22); odin-core opens it too (RecoveryPhraseTests.TheSharedSealVectorOpens).
+const SEAL_VECTOR_PRIVATE_KEY =
+  'MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAdIBNZdX4cc2HkbmyjAsYLgBCJOD4PKl+19MNegdIFHBNvBHXjKKPd1U43jVFC4W2hZANiAAQh7s8LrEkJbWspBmjbFT45ZclVZc9go3WGP86OB1nf16QB+2o3yNTYCg0YJ4Atpknyf0xxJGe5a/LTuILGNwlUaPDmFSyzZ4ALW18WutsGr8ItoW2/V6/fK5tpF8iT70k=';
+const SEAL_VECTOR =
+  'BFh5pt3Zt+toxKHJhaBEzObs6JISMy9PRXysrQl1WZlxLXHjBr3aQBOIgPtcP/zLbBfNNxhine4S1P4nMoVk/V+0iyUdLRuYn8oxTrtDRh4AaT5+dBc6L7BTItOPEL2nSrnmDNy6IVqQmj9D+RNht7ZFesBXLlKvaDwH2Lag5c0jtGmkNNIhuOn3BjImpdbyYQln3FnWhfQo';
+
+test('a sealed value opens only with its private key', async () => {
+  const opened = await zkUnseal(SEAL_VECTOR, base64ToUint8Array(SEAL_VECTOR_PRIVATE_KEY));
+  expect(new TextDecoder().decode(opened)).toBe('correct horse battery staple');
+
+  const pair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-384' }, true, ['deriveBits']);
+  const jwk = JSON.stringify(await crypto.subtle.exportKey('jwk', pair.publicKey));
+  const pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
+  expect(Array.from(await zkUnseal(await zkSeal(new Uint8Array([1, 2, 3]), jwk), pkcs8))).toEqual([1, 2, 3]);
+  await expect(zkUnseal(SEAL_VECTOR, pkcs8)).rejects.toThrow();
 });
 
 // The standard BIP39 vectors odin-core's BIP39 tests check (TestMnemonicsAndSeedEnglish), plus one
@@ -88,7 +117,7 @@ test('BIP39 forgives case and spacing but not a wrong word or checksum', async (
   await expect(bip39Decode('abandon about')).rejects.toThrow('12 words');
 });
 
-test('the reset key is the one odin-core derives (RecoveryPhraseTests)', async () => {
+test('the reset key of a phrase is the one odin-core derives (RecoveryPhraseTests)', async () => {
   // Python: hkdf-sha256(ikm=bytes(range(16)), salt=b'', info=b'homebase-recovery-reset-key', 16)
   expect(uint8ArrayToBase64(await getResetKey(BIP39_VECTORS[3][0]))).toBe('UObib1b+8ABBLhC7sBHNOw==');
 });
@@ -100,18 +129,46 @@ test('the phrase check value is the one odin-core computes (RecoveryPhraseTests)
 
 test('the phrase copies give back the password, and show the phrase again', async () => {
   const keys = await makeZkKeys(PASSWORD);
-  const phrase = BIP39_VECTORS[3][1];
+  const [phraseKey, phrase] = BIP39_VECTORS[3];
   const copies = await makePhraseCopies(phrase, keys.masterKey);
 
   const recovered = await recoverWithPhrase(phrase, {
-    phraseKeyEncryptedZkMasterKey: copies.phraseKeyEncryptedZkMasterKey,
-    zkMasterKeyEncryptedPassword: keys.request.zkMasterKeyEncryptedPassword,
+    ...copies,
+    phrasePublicKeyEncryptedPassword: await sealPassword(PASSWORD, copies.phrasePublicKeyJwk),
   });
   expect(recovered.password).toBe(PASSWORD);
   expect(recovered.zkMasterKey).toEqual(keys.masterKey);
-  expect(copies.resetKey64).toBe(uint8ArrayToBase64(await getResetKey(keys.masterKey)));
+  expect(recovered.resetKey).toEqual(await getResetKey(phraseKey));
+  expect(copies.resetKey64).toBe(uint8ArrayToBase64(await getResetKey(phraseKey)));
   expect(await bip39Encode(await zkOpen(copies.zkMasterKeyEncryptedPhraseKey, keys.masterKey))).toBe(phrase);
-  expect(copies.phraseCheck64).toBe(await getPhraseCheck(BIP39_VECTORS[3][0]));
+  expect(copies.phraseCheck64).toBe(await getPhraseCheck(phraseKey));
+});
+
+test('a missing or junk password copy still recovers what a reset needs', async () => {
+  const keys = await makeZkKeys(PASSWORD);
+  const phrase = BIP39_VECTORS[3][1];
+  const copies = await makePhraseCopies(phrase, keys.masterKey);
+
+  const missing = await recoverWithPhrase(phrase, { ...copies, phrasePublicKeyEncryptedPassword: null });
+  expect(missing.password).toBeUndefined();
+  expect(missing.zkMasterKey).toEqual(keys.masterKey);
+
+  // Sealed to another key, as someone who only had the password might write it
+  const other = await makePhraseCopies(phrase, keys.masterKey);
+  const junk = await recoverWithPhrase(phrase, {
+    ...copies,
+    phrasePublicKeyEncryptedPassword: await sealPassword('junk', other.phrasePublicKeyJwk),
+  });
+  expect(junk.password).toBeUndefined();
+
+  await expect(recoverWithPhrase(BIP39_VECTORS[0][1], copies)).rejects.toThrow();
+});
+
+test('the zero-knowledge master key opens neither the phrase private key nor the reset key', async () => {
+  const keys = await makeZkKeys(PASSWORD);
+  const copies = await makePhraseCopies(BIP39_VECTORS[3][1], keys.masterKey);
+  await expect(zkOpen(copies.phraseKeyEncryptedPhrasePrivateKey, keys.masterKey)).rejects.toThrow();
+  expect(copies.resetKey64).not.toBe(uint8ArrayToBase64(await getResetKey(keys.masterKey)));
 });
 
 test('guids are in .NET Guid.ToByteArray order', () => {

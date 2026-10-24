@@ -3,6 +3,7 @@ import {OwnerClient} from '@homebase-id/common-app';
 import {
   encryptRecoveryKey,
   getNonce,
+  getPublicKey,
   getSalts,
   prepareAuthPassword,
 } from './AuthenticationHelper';
@@ -179,19 +180,5 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-export { getNonce, getSalts } from './AuthenticationHelper';
-
-export interface PublicKeyData {
-  publicKeyJwkBase64Url: string;
-  crC32c: number;
-  expiration: number;
-}
-
-export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client
-    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
-    .then((response) => {
-      return response.data;
-    });
-};
+export { getNonce, getSalts, getPublicKey } from './AuthenticationHelper';
+export type { PublicKeyData } from './AuthenticationHelper';

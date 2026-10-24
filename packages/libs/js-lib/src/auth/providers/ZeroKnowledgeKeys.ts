@@ -17,8 +17,11 @@ import { createEccPair, exportEccPublicKey } from './EccKeyProvider';
 // the identity server only stores the locked copies.
 //
 // A locked value is base64 of a 12-byte IV followed by the AES-GCM ciphertext and its 16-byte tag.
-// Keys are 16 bytes, like today's master key and drive keys. odin-core's test helper ZkBrowser does
-// the same maths, and both sides check one shared vector.
+// Keys are 16 bytes, like today's master key and drive keys. A sealed value is base64 of a throwaway
+// P-384 public key (97 bytes, uncompressed) and a value locked by
+// hkdf-sha256(ECDH(throwaway, recipient), "homebase-zk-seal"): anyone with the public key seals,
+// only the private key opens. odin-core's test helper ZkBrowser does the same maths, and both sides
+// check shared vectors.
 
 const PBKDF2_ITERATIONS = 100000;
 const KEY_LENGTH = 16;
@@ -52,6 +55,38 @@ export const zkOpen = async (locked64: string, key: Uint8Array): Promise<Uint8Ar
   return gcmDecrypt(bytes.slice(IV_LENGTH), bytes.slice(0, IV_LENGTH), key);
 };
 
+const ECDH_P384 = { name: 'ECDH', namedCurve: 'P-384' };
+const SEAL_PUBLIC_KEY_LENGTH = 97;
+const SEAL_INFO = stringToUint8Array('homebase-zk-seal');
+
+const sealKey = async (privateKey: CryptoKey, publicKey: CryptoKey) => {
+  const shared = await crypto.subtle.deriveBits({ name: 'ECDH', public: publicKey }, privateKey, 384);
+  const hkdf = await crypto.subtle.importKey('raw', shared, 'HKDF', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: SEAL_INFO },
+    hkdf,
+    KEY_LENGTH * 8
+  );
+  return new Uint8Array(bits);
+};
+
+/** Seals `data` to a P-384 public key (a JWK, as `exportEccPublicKey` makes it). */
+export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<string> => {
+  const recipient = await crypto.subtle.importKey('jwk', JSON.parse(publicKeyJwk), ECDH_P384, false, []);
+  const throwaway = await createEccPair();
+  const throwawayPublicKey = new Uint8Array(await crypto.subtle.exportKey('raw', throwaway.publicKey));
+  const locked = await zkLock(data, await sealKey(throwaway.privateKey, recipient));
+  return uint8ArrayToBase64(mergeByteArrays([throwawayPublicKey, base64ToUint8Array(locked)]));
+};
+
+/** Opens a sealed value with the private key (PKCS8). */
+export const zkUnseal = async (sealed64: string, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
+  const bytes = base64ToUint8Array(sealed64);
+  const me = await crypto.subtle.importKey('pkcs8', privateKeyPkcs8, ECDH_P384, false, ['deriveBits']);
+  const throwaway = await crypto.subtle.importKey('raw', bytes.slice(0, SEAL_PUBLIC_KEY_LENGTH), ECDH_P384, false, []);
+  return zkOpen(uint8ArrayToBase64(bytes.slice(SEAL_PUBLIC_KEY_LENGTH)), await sealKey(me, throwaway));
+};
+
 /** The second password key: the same pbkdf2 as the KEK, with its own salt. */
 export const getSecondPasswordKey = (password: string, salt64: string) =>
   pbkdf2HmacSha256(password, base64ToUint8Array(salt64));
@@ -59,7 +94,8 @@ export const getSecondPasswordKey = (password: string, salt64: string) =>
 export interface ZkKeysRequest {
   zkSaltKek64: string;
   zkKekEncryptedZkMasterKey: string;
-  zkMasterKeyEncryptedPassword: string;
+  /** The password sealed to the phrase's public key, once the phrase was taken over. */
+  phrasePublicKeyEncryptedPassword?: string;
 }
 
 /** Where the owner's recovery phrase is (odin-core `RecoveryPhraseState`). */
@@ -68,25 +104,26 @@ export type RecoveryPhraseState = 'none' | 'onServer' | 'takenOver' | 'needsReen
 export interface ZkStatus {
   zkSaltKek64?: string | null;
   zkKekEncryptedZkMasterKey?: string | null;
-  /** The password, locked by the zero-knowledge master key; null until a login writes it. */
-  zkMasterKeyEncryptedPassword?: string | null;
   recoveryPhrase: RecoveryPhraseState;
+  /** The phrase's public key once taken over: the password is sealed to it. */
+  phrasePublicKeyJwk?: string | null;
+  /** Whether the password copy exists. The browser can't open it; only the phrase does. */
+  hasPasswordCopy: boolean;
 }
 
-export const lockPassword = async (password: string, zkMasterKey: Uint8Array) =>
-  zkLock(stringToUint8Array(password), zkMasterKey);
-
-export const openPassword = async (locked64: string, zkMasterKey: Uint8Array) =>
-  byteArrayToString(await zkOpen(locked64, zkMasterKey));
+/** The password copy recovery with the phrase gives back: sealed, so only the phrase opens it. */
+export const sealPassword = async (password: string, phrasePublicKeyJwk: string) =>
+  zkSeal(stringToUint8Array(password), phrasePublicKeyJwk);
 
 /**
  * Makes the keys at the first login, or re-locks `masterKey` for a password change. A new salt
- * each time, as a password change also gets new login salts. The password copy is what recovery
- * gives back.
+ * each time, as a password change also gets new login salts. With the phrase's public key, the
+ * password copy too.
  */
 export const makeZkKeys = async (
   password: string,
-  masterKey?: Uint8Array
+  masterKey?: Uint8Array,
+  phrasePublicKeyJwk?: string | null
 ): Promise<{ masterKey: Uint8Array; request: ZkKeysRequest }> => {
   const salt64 = uint8ArrayToBase64(getRandom16ByteArray());
   const key = masterKey ?? getRandom16ByteArray();
@@ -96,7 +133,9 @@ export const makeZkKeys = async (
     request: {
       zkSaltKek64: salt64,
       zkKekEncryptedZkMasterKey: await zkLock(key, await getSecondPasswordKey(password, salt64)),
-      zkMasterKeyEncryptedPassword: await lockPassword(password, key),
+      ...(phrasePublicKeyJwk
+        ? { phrasePublicKeyEncryptedPassword: await sealPassword(password, phrasePublicKeyJwk) }
+        : {}),
     },
   };
 };
@@ -104,13 +143,18 @@ export const makeZkKeys = async (
 export interface ZkPhraseCopiesRequest {
   phraseKeyEncryptedZkMasterKey: string;
   zkMasterKeyEncryptedPhraseKey: string;
+  phrasePublicKeyJwk: string;
+  phraseKeyEncryptedPhrasePrivateKey: string;
   phraseCheck64: string;
   resetKey64: string;
 }
 
 export interface ZkPhraseRecovery {
   phraseKeyEncryptedZkMasterKey: string;
-  zkMasterKeyEncryptedPassword: string;
+  phraseKeyEncryptedPhrasePrivateKey: string;
+  phrasePublicKeyJwk: string;
+  /** Null until a password login wrote it. */
+  phrasePublicKeyEncryptedPassword?: string | null;
 }
 
 const PHRASE_CHECK_PREFIX = stringToUint8Array('homebase-recovery-phrase-check');
@@ -125,13 +169,13 @@ export const getPhraseCheck = async (phraseKey: Uint8Array) =>
 const RESET_KEY_INFO = stringToUint8Array('homebase-recovery-reset-key');
 
 /**
- * The reset key: hkdf-sha256 of the zero-knowledge master key, no salt, 16 bytes, as odin-core's
- * test helper ZkBrowser.ResetKey. One way: it can't be turned back into the master key. The server
- * locks today's master key with it at the takeover, so recovery with the phrase can always reset
- * the password.
+ * The reset key: hkdf-sha256 of the recovery phrase's 16 bytes, no salt, 16 bytes, as odin-core's
+ * test helper ZkBrowser.ResetKey. One way: it can't be turned back into the phrase. The server locks
+ * today's master key with it, so recovery with the phrase can always reset the password. From the
+ * phrase, not the zero-knowledge master key: someone who once had the password has that key.
  */
-export const getResetKey = async (zkMasterKey: Uint8Array): Promise<Uint8Array> => {
-  const key = await crypto.subtle.importKey('raw', zkMasterKey, 'HKDF', false, ['deriveBits']);
+export const getResetKey = async (phraseKey: Uint8Array): Promise<Uint8Array> => {
+  const key = await crypto.subtle.importKey('raw', phraseKey, 'HKDF', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits(
     { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: RESET_KEY_INFO },
     key,
@@ -141,21 +185,26 @@ export const getResetKey = async (zkMasterKey: Uint8Array): Promise<Uint8Array> 
 };
 
 /**
- * The two copies the browser makes of the recovery phrase: the zero-knowledge master key locked by
- * it, and the phrase locked by the zero-knowledge master key, to show it again. With the check
- * value, so the server refuses copies made with any other phrase, and the reset key. Both copies
- * are opened again before they go: the server can't check them, so the browser does.
+ * What the browser makes from the recovery phrase: the zero-knowledge master key locked by it, the
+ * phrase locked by the zero-knowledge master key (to show it again), and a new key pair whose
+ * private half the phrase locks (the password is sealed to its public half). With the check value,
+ * so the server refuses copies made with any other phrase, and the reset key. The two copies are
+ * opened again before they go: the server can't check them, so the browser does.
  */
 export const makePhraseCopies = async (
   phrase: string,
   zkMasterKey: Uint8Array
 ): Promise<ZkPhraseCopiesRequest> => {
   const phraseKey = await bip39Decode(phrase);
+  const pair = await createEccPair();
+  const privateKey = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
   const copies = {
     phraseKeyEncryptedZkMasterKey: await zkLock(zkMasterKey, phraseKey),
     zkMasterKeyEncryptedPhraseKey: await zkLock(phraseKey, zkMasterKey),
+    phrasePublicKeyJwk: await exportEccPublicKey(pair.publicKey),
+    phraseKeyEncryptedPhrasePrivateKey: await zkLock(privateKey, phraseKey),
     phraseCheck64: await getPhraseCheck(phraseKey),
-    resetKey64: uint8ArrayToBase64(await getResetKey(zkMasterKey)),
+    resetKey64: uint8ArrayToBase64(await getResetKey(phraseKey)),
   };
 
   const sameBytes = (a: Uint8Array, b: Uint8Array) => a.length === b.length && a.every((x, i) => x === b[i]);
@@ -170,17 +219,38 @@ export const makePhraseCopies = async (
 };
 
 /**
- * Recovery with the phrase: the zero-knowledge master key, then the password. The master key comes
- * back too, for a reset when the password no longer logs in.
+ * Recovery with the phrase: the password, and what a reset needs when it no longer logs in (the
+ * zero-knowledge master key, the reset key, the public key to seal the new password to).
  */
 export interface PhraseRecovery {
+  /** Undefined when there is no copy, or it doesn't open (someone sealed junk): reset instead. */
+  password?: string;
   zkMasterKey: Uint8Array;
-  password: string;
+  resetKey: Uint8Array;
+  phrasePublicKeyJwk: string;
 }
 
+/** Throws when the phrase isn't the owner's: it opens nothing. */
 export const recoverWithPhrase = async (phrase: string, recovery: ZkPhraseRecovery): Promise<PhraseRecovery> => {
-  const zkMasterKey = await zkOpen(recovery.phraseKeyEncryptedZkMasterKey, await bip39Decode(phrase));
-  return { zkMasterKey, password: await openPassword(recovery.zkMasterKeyEncryptedPassword, zkMasterKey) };
+  const phraseKey = await bip39Decode(phrase);
+  const zkMasterKey = await zkOpen(recovery.phraseKeyEncryptedZkMasterKey, phraseKey);
+  const privateKey = await zkOpen(recovery.phraseKeyEncryptedPhrasePrivateKey, phraseKey);
+
+  let password: string | undefined;
+  if (recovery.phrasePublicKeyEncryptedPassword) {
+    try {
+      password = byteArrayToString(await zkUnseal(recovery.phrasePublicKeyEncryptedPassword, privateKey));
+    } catch {
+      password = undefined;
+    }
+  }
+
+  return {
+    password,
+    zkMasterKey,
+    resetKey: await getResetKey(phraseKey),
+    phrasePublicKeyJwk: recovery.phrasePublicKeyJwk,
+  };
 };
 
 export const openZkMasterKey = async (password: string, status: ZkStatus): Promise<Uint8Array> => {

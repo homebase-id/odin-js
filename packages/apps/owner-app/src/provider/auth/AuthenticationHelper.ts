@@ -13,7 +13,19 @@ import {
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { PublicKeyData } from './AuthenticationProvider';
+
+export interface PublicKeyData {
+  publicKeyJwkBase64Url: string;
+  crC32c: number;
+  expiration: number;
+}
+
+/** The host's offline ECC key, which a reset encrypts its recovery secret to. */
+export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> =>
+  dotYouClient
+    .createAxiosClient({ overrideEncryption: true })
+    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
+    .then((response) => response.data);
 
 export interface NonceData {
   crc: number;

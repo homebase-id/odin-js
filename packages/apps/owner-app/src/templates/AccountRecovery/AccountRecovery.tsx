@@ -18,7 +18,8 @@ const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
   // 'phrase': the phrase first. 'recovered': it opened the password in this browser.
   // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
-  // 'phraseReset': a new password with the phrase's reset key, when the recovered one doesn't work.
+  // 'phraseReset': a new password with the phrase's reset key, when there is no recovered password
+  // or it doesn't work.
   const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset'>('phrase');
   const [recovered, setRecovered] = useState<PhraseRecovery>();
 
@@ -48,7 +49,7 @@ const AccountRecovery = () => {
         setStep('newPassword');
       } else {
         setRecovered(result);
-        setStep('recovered');
+        setStep(result.password === undefined ? 'phraseReset' : 'recovered');
       }
       setState('idle');
     } catch (error) {
@@ -61,7 +62,7 @@ const AccountRecovery = () => {
     setState('loading');
 
     const done = step === 'phraseReset' && recovered
-      ? await resetPasswordWithPhrase(new OwnerClient({api: ApiType.Owner}), recovered.zkMasterKey, password)
+      ? await resetPasswordWithPhrase(new OwnerClient({api: ApiType.Owner}), recovered, password)
       : await resetPassword(password, recoveryKey.trim());
     if (done) {
       setState('success');
