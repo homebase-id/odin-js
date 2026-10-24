@@ -48,17 +48,21 @@ const ShamirAccountRecovery = () => {
   const fromFinalize = nonceId && token;
   const recoveryState = status?.state ?? ShamirRecoveryState.None;
 
-  const startRecoveryMode = async () => {
+  /** `sentNotice`: what to say once the email is on its way, if anything. */
+  const startRecoveryMode = async (sentNotice?: string) => {
     try {
       setErrorMessage(null); // clear previous
       setNotice(null);
-      await initiateRecoveryMode();
+      if ((await initiateRecoveryMode()) && sentNotice) setNotice(sentNotice);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      setErrorMessage(error.message || t("An unexpected error occurred."));
+      setErrorMessage(error.message ? t(error.message) : t("An unexpected error occurred."));
     }
     await reloadStatus();
   };
+
+  // A recovery whose throwaway key is another browser's (an automated deal's has none)
+  const anotherBrowsers = status?.recoveryKeyId != null && !thisBrowser;
 
   // Only the email goes out; recovery goes on until the owner confirms with it
   const cancelRecoveryMode = async () => {
@@ -168,12 +172,20 @@ const ShamirAccountRecovery = () => {
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
 
+                  {anotherBrowsers && (
+                    <p className="mt-3 text-slate-400">
+                      {t('Recovery is under way in another browser; finish it there, or exit it by email first')}
+                    </p>
+                  )}
+
                   <div className="flex flex-row-reverse justify-between">
-                    <ActionButton className="mt-3 mb-3"
-                                  onClick={() => startRecoveryMode()}>
-                      {t('Start over')}
-                      <Arrow className="ml-auto h-5 w-5"/>
-                    </ActionButton>
+                    {!anotherBrowsers && (
+                      <ActionButton className="mt-3 mb-3"
+                                    onClick={() => startRecoveryMode(t('Check your email: the link asks your friends again.'))}>
+                        {t('Start over')}
+                        <Arrow className="ml-auto h-5 w-5"/>
+                      </ActionButton>
+                    )}
 
                     <ActionButton
                       type="secondary"

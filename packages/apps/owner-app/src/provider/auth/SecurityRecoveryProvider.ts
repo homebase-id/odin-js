@@ -99,8 +99,9 @@ export const exitRecoveryMode = async (): Promise<boolean> => {
 // Recovery with friends must finish in the browser that started it: the friends seal their shards to
 // this throwaway key pair. The private key never leaves this browser. It is this browser's only while
 // the server says the recovery (pending or under way) is for it: status.recoveryKeyId. It is
-// forgotten when a status read shows the recovery is over or another browser's, after a reset, and
-// at the owner's login.
+// forgotten when a status read shows no recovery, or one under way for another browser's key, after
+// a reset, and at the owner's login. A pending start never makes it go: its key id is only the last
+// start's, and anyone can start one.
 const RECOVERY_KEY_STORAGE = 'shamir-recovery-key';
 
 // A key this young may belong to a start whose status the server hasn't written yet (a poll answered
@@ -140,8 +141,8 @@ const isUnderWay = (status: ShamirRecoveryStatusRedacted | null) =>
 
 /**
  * The status, and whether the recovery it shows (pending or under way) is this browser's, from one
- * read of the stored key. A key past its grace is forgotten when the recovery is over or another
- * browser's.
+ * read of the stored key. A key past its grace is forgotten when there is no recovery, or one under
+ * way for another browser's key; never for a pending start, which anyone can make.
  */
 export const getRecoveryStatusForThisBrowser = async (): Promise<{
   status: ShamirRecoveryStatusRedacted | null;
@@ -152,7 +153,7 @@ export const getRecoveryStatusForThisBrowser = async (): Promise<{
   const thisBrowser = await isFor(key, status?.recoveryKeyId);
   if (status && key && !thisBrowser && Date.now() - key.created > FORGET_GRACE_MS) {
     const over = status.state === ShamirRecoveryState.None;
-    const anotherBrowsers = status.recoveryKeyId != null;
+    const anotherBrowsers = isUnderWay(status) && status.recoveryKeyId != null;
     if (over || anotherBrowsers) forgetIfStillStored(key);
   }
   return {status, thisBrowser};
@@ -161,16 +162,20 @@ export const getRecoveryStatusForThisBrowser = async (): Promise<{
 /**
  * The key to start or restart recovery with, from a fresh status: the stored one if the recovery
  * (pending or under way) is for it, so "send it again" and "start over" keep this browser's links
- * working; otherwise a new pair. Throws when a recovery is under way in another browser: the server
- * would ignore the start, and replacing the key here would only lose it.
+ * working; otherwise a new pair. Throws when a recovery is under way in another browser (the server
+ * would ignore the start, and replacing the key here would only lose it), and when the status can't
+ * be read (a recovery may be under way for the stored key).
  */
 const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
   const status = await getRecoveryStatus();
-  const stored = getStoredRecoveryKey();
-  if (await isFor(stored, status?.recoveryKeyId)) return stored!;
+  if (!status) throw new Error("Couldn't check the recovery's status; try again");
 
-  if (isUnderWay(status) && status!.recoveryKeyId != null) {
-    throw new Error('Recovery is under way in another browser; finish it there, or exit it by email first');
+  const stored = getStoredRecoveryKey();
+  if (await isFor(stored, status.recoveryKeyId)) return stored!;
+
+  // An automated deal's recovery carries no key, so "start over" goes ahead with any
+  if (isUnderWay(status) && status.recoveryKeyId != null) {
+    throw new Error(getKnownOdinErrorMessages({errorCode: 'recoveryUnderWayElsewhere'}));
   }
 
   const pair = await createExportedEccPair();
@@ -216,15 +221,16 @@ export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> =>
   return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
 };
 
-/** Starts recovery, or sends the email again ("send it again", "start over"). */
-export const initiateRecoveryMode = async () => {
+/**
+ * Starts recovery, or sends the email again ("send it again", "start over"). True when the email
+ * was asked for; throws with a message to show (translation key) when refused.
+ */
+export const initiateRecoveryMode = async (): Promise<boolean> => {
   const axiosClient = dotYouClient.createAxiosClient();
   const {publicKeyJwk} = await getOrMakeRecoveryKey();
   return await axiosClient
     .post(`${root}/initiate-recovery-mode`, {recoveryPublicKeyJwk: publicKeyJwk})
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true)
     .catch((error) => {
 
       if (error.response?.status === 400) {
@@ -238,6 +244,6 @@ export const initiateRecoveryMode = async () => {
 
       }
       console.error("Failed to initiate recovery mode:", error);
-      return null;
+      return false;
     });
 };
