@@ -119,7 +119,14 @@ export const ConfigureTrustedConnections = ({
                                     enableVerification ? info.trustLevel : undefined
                                 }
                                 isValid={enableVerification ? info.isValid : true}
-                                canApprove={enableVerification ? info.isZeroKnowledge !== false : true}
+                                // Only a friend who must approve needs a zero-knowledge drive, and only a check
+                                // that reached them can say theirs isn't; a failed check shows as unavailable
+                                canApprove={
+                                    !enableVerification ||
+                                    player.type !== PlayerType.Delegate ||
+                                    info.status !== "valid" ||
+                                    info.isZeroKnowledge !== false
+                                }
                             />
                         );
                     })}

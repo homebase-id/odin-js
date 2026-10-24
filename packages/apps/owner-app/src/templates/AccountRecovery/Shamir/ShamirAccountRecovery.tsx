@@ -33,6 +33,7 @@ const ShamirAccountRecovery = () => {
   const returnUrl = params.get(RETURN_URL_PARAM);
   const enterNonceId = params.get("enter");
   const entering = useRef(false);
+  const initiating = useRef(false);
 
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -46,14 +47,17 @@ const ShamirAccountRecovery = () => {
   const recoveryState = status?.state ?? ShamirRecoveryState.None;
 
   const startRecoveryMode = async () => {
+    initiating.current = true;
     try {
       setErrorMessage(null); // clear previous
       await initiateRecoveryMode();
-      await reloadStatus();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setErrorMessage(error.message || t("An unexpected error occurred."));
+    } finally {
+      initiating.current = false;
     }
+    await reloadStatus();
   };
 
   const cancelRecoveryMode = async () => {
@@ -61,8 +65,11 @@ const ShamirAccountRecovery = () => {
     await reloadStatus();
   }
 
+  // Once no recovery is under way (the owner logged in, or confirmed the exit), this browser's
+  // throwaway key has done its job; not while a new recovery is being started here
   const reloadStatus = async () => {
     getRecoveryStatus().then((result) => {
+      if (result && result.state === ShamirRecoveryState.None && !initiating.current) forgetRecoveryKey();
       setStatus(result);
       setLoaded(true);
     });
@@ -318,7 +325,6 @@ function FriendsApproved({returnUrl, onCancel}: {returnUrl: string | null; onCan
     <RecoveredPassword
       password={recovered.password}
       returnUrl={returnUrl}
-      onLogin={() => forgetRecoveryKey()}
       onReset={() => setResetting(true)}
     />
   );

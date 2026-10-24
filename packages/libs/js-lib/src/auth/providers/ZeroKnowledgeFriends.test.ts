@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { cbcEncrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, getRandom16ByteArray, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
 import { isSealedKeyHeader } from '../../core/DriveData/SecurityHelpers';
@@ -152,11 +153,41 @@ test('a deal is recovered with one gated friend and the automatic friend', async
   expect(junk.password).toBeUndefined();
   expect(junk.zkMasterKey).toEqual(zkMasterKey);
 
-  // A wrong piece rebuilds a secret that opens nothing
-  const wrong = { ...bundle.shards[0], index: 4 };
-  const wrongBundle = await zkSeal(
-    new TextEncoder().encode(JSON.stringify({ ...bundle, shards: [wrong, bundle.shards[1]] })),
-    recovering.publicKeyJwk
+  const sealBundle = (shards: ShamirRecoveryBundle['shards']) =>
+    zkSeal(new TextEncoder().encode(JSON.stringify({ ...bundle, shards })), recovering.publicKeyJwk);
+
+  // The index a friend's server passes on doesn't count: the dealer's own envelope says where each piece sits
+  const wrongIndex = await sealBundle([{ ...bundle.shards[0], index: 0 }, bundle.shards[1]]);
+  expect((await recoverWithFriends(wrongIndex, recovering.privateKey)).zkMasterKey).toEqual(zkMasterKey);
+
+  // Bob's server posts junk as his shard, sealed to the recovering browser; the other two still recover
+  const bobShard = deal.shards[1];
+  const junkShard = {
+    id: bobShard.shardId,
+    index: bobShard.index,
+    player: bobShard.player,
+    dealerEncryptedShard: await zkSeal(getRandom16ByteArray(), recovering.publicKeyJwk),
+  };
+  const withJunk = await recoverWithFriends(await sealBundle([bundle.shards[0], junkShard, bundle.shards[1]]), recovering.privateKey);
+  expect(withJunk.zkMasterKey).toEqual(zkMasterKey);
+  expect(withJunk.password).toBe(password);
+
+  // Junk that opens as a piece (locked by Bob's own shard key) is found by trying the combinations
+  const bobEnvelope = bundle.envelopes[1];
+  const lockedJunk = await cbcEncrypt(
+    getRandom16ByteArray(),
+    base64ToUint8Array(bobEnvelope.encryptionIv),
+    base64ToUint8Array(bobEnvelope.encryptionKey)
   );
-  await expect(recoverWithFriends(wrongBundle, recovering.privateKey)).rejects.toThrow();
+  const decodableJunk = { ...junkShard, dealerEncryptedShard: await zkSeal(lockedJunk, recovering.publicKeyJwk) };
+  const withDecodableJunk = await recoverWithFriends(
+    await sealBundle([bundle.shards[0], decodableJunk, bundle.shards[1]]),
+    recovering.privateKey
+  );
+  expect(withDecodableJunk.zkMasterKey).toEqual(zkMasterKey);
+
+  // Below the threshold of good pieces nothing opens
+  await expect(recoverWithFriends(await sealBundle([decodableJunk, bundle.shards[1]]), recovering.privateKey)).rejects.toThrow(
+    "Your friends' shards don't rebuild the secret"
+  );
 });

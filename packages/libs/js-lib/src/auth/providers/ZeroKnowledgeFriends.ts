@@ -253,13 +253,14 @@ export const recoverWithFriends = async (
     byteArrayToString(await zkUnseal(sealedBundle64, throwawayPrivateKeyPkcs8))
   ) as ShamirRecoveryBundle;
 
-  const pieces = await Promise.all(
+  // A shard that doesn't open (a friend's server posted junk) is left out rather than spoiling the rest
+  const opened = await Promise.allSettled(
     bundle.shards.map(async (shard) => {
       const envelope = bundle.envelopes.find((e) => stringGuidsEqual(e.shardId, shard.id));
       if (!envelope) throw new Error(`No shard key for shard ${shard.id}`);
 
       // A gated friend's browser sealed their piece to this browser; the dealer's own envelope says
-      // which friends are gated
+      // which friends are gated, and where each piece sits in the split
       const locked =
         envelope.player.type === 'delegate'
           ? await zkUnseal(shard.dealerEncryptedShard, throwawayPrivateKeyPkcs8)
@@ -269,14 +270,14 @@ export const recoverWithFriends = async (
         base64ToUint8Array(envelope.encryptionIv),
         base64ToUint8Array(envelope.encryptionKey)
       );
-      return { index: shard.index, shard: piece };
+      return { index: envelope.index, shard: piece };
     })
   );
+  const pieces = opened.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
 
-  const secret = rebuildSecret(pieces, SECRET_LENGTH);
   const { copies } = bundle;
+  const { secret, zkMasterKey } = await rebuildAndOpen(pieces, bundle.minMatchingShards, copies.shamirKeyEncryptedZkMasterKey);
   const privateKey = await zkOpen(copies.shamirKeyEncryptedShamirPrivateKey, secret);
-  const zkMasterKey = await zkOpen(copies.shamirKeyEncryptedZkMasterKey, secret);
 
   let password: string | undefined;
   if (copies.shamirPublicKeyEncryptedPassword) {
@@ -294,3 +295,48 @@ export const recoverWithFriends = async (
     shamirPublicKeyJwk: copies.shamirPublicKeyJwk,
   };
 };
+
+/** How many combinations of shards `rebuildAndOpen` tries before it gives up. */
+const MAX_COMBINATIONS = 500;
+
+/**
+ * The secret from `pieces`, checked by opening the zero-knowledge master key with it (AES-GCM fails on
+ * a wrong secret). All of them first; if that fails, a junk piece is among them, so each combination
+ * of `minMatchingShards` pieces in turn, up to `MAX_COMBINATIONS`.
+ */
+const rebuildAndOpen = async (
+  pieces: { index: number; shard: Uint8Array }[],
+  minMatchingShards: number,
+  shamirKeyEncryptedZkMasterKey: string
+): Promise<{ secret: Uint8Array; zkMasterKey: Uint8Array }> => {
+  const tryOpen = async (subset: { index: number; shard: Uint8Array }[]) => {
+    try {
+      const secret = rebuildSecret(subset, SECRET_LENGTH);
+      return { secret, zkMasterKey: await zkOpen(shamirKeyEncryptedZkMasterKey, secret) };
+    } catch {
+      return undefined;
+    }
+  };
+
+  const all = await tryOpen(pieces);
+  if (all) return all;
+
+  let tried = 0;
+  for (const subset of combinations(pieces, minMatchingShards)) {
+    if (++tried > MAX_COMBINATIONS) break;
+    const opened = await tryOpen(subset);
+    if (opened) return opened;
+  }
+
+  throw new Error("Your friends' shards don't rebuild the secret");
+};
+
+function* combinations<T>(items: T[], size: number, start = 0, chosen: T[] = []): Generator<T[]> {
+  if (chosen.length === size) {
+    yield chosen;
+    return;
+  }
+  for (let i = start; i <= items.length - (size - chosen.length); i++) {
+    yield* combinations(items, size, i + 1, [...chosen, items[i]]);
+  }
+}
