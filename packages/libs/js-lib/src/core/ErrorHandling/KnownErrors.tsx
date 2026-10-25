@@ -144,7 +144,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
     return t('This link no longer works: a newer email replaced it, it expired, or the holder no longer has this piece. Use the newest email, or start over; the other holders may be enough');
   if (errorCode === 'shardHolderUnreachable')
     return t('The holder could not be reached; try the same link again in a minute');
-  if (errorCode === 'recoveryBusy') return t('Busy with another piece just now; try again in a moment');
+  if (errorCode === 'recoveryBusy') return t('Busy just now; try again in a moment');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
   if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
 

@@ -62,9 +62,10 @@ const ShamirAccountRecovery = () => {
     setError(text ? {text, forState, after: lastSent.current} : null);
   const setNotice = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
     setNoticeMessage(text ? {text, forState, after: lastSent.current} : null);
-  // While a link's own request runs, reads show the state from before it: "Please wait" until the
-  // link's read is in
-  const linkPending = useRef(!!enterNonceId || !!(fillShardId && fillCode));
+  // While a link's own request runs, reads show the state from before it: "Please wait" until a read
+  // sent after the link's request is in. Kept in state: the link's params leave the URL before then.
+  const [arrivedByLink] = useState(!!enterNonceId || !!(fillShardId && fillCode));
+  const linkReadsFrom = useRef(arrivedByLink ? Number.POSITIVE_INFINITY : 0);
   const lastApplied = useRef(0);
   const lastRead = useRef<{ state: ShamirRecoveryState; thisBrowser: boolean } | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
@@ -121,8 +122,9 @@ const ShamirAccountRecovery = () => {
     const read = ++lastSent.current;
     return getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       if (read < lastApplied.current) return lastRead.current;
+      // A failed read ends the wait too, so a page whose reads fail isn't stuck on it
+      if (read >= linkReadsFrom.current) setLoaded(true);
       if (!result) return null;
-      if (!linkPending.current) setLoaded(true);
 
       lastApplied.current = read;
       lastRead.current = {state: result.state, thisBrowser: isThisBrowser};
@@ -149,7 +151,7 @@ const ShamirAccountRecovery = () => {
     enterRecoveryMode(enterNonceId).then(async (enterError) => {
       navigate(location.pathname, {replace: true});
       // The message belongs to the state the link leads to, read after it (not read: a later read pins it)
-      linkPending.current = false;
+      linkReadsFrom.current = lastSent.current + 1;
       const read = await reloadStatus().catch(() => null);
       if (enterError) setErrorMessage(t(enterError), read?.state ?? null);
     });
@@ -163,7 +165,7 @@ const ShamirAccountRecovery = () => {
       navigate(location.pathname, {replace: true});
       // The message belongs to the state the click leads to: the one that fills the last slot moves it
       // (not read: a later read pins it)
-      linkPending.current = false;
+      linkReadsFrom.current = lastSent.current + 1;
       const read = await reloadStatus().catch(() => null);
       if (fillError) {
         setErrorMessage(t(fillError), read?.state ?? null);
@@ -189,7 +191,7 @@ const ShamirAccountRecovery = () => {
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
 
-  if ((fromVerification || enterNonceId || fillShardId) && !loaded) {
+  if ((fromVerification || arrivedByLink) && !loaded) {
     // we need to wait until we get the status
     return <div>Please wait...</div>
   }
