@@ -28,6 +28,11 @@ import {PasswordStrength} from "../../../components/Password/PasswordStrength";
 import {RETURN_URL_PARAM} from "../../../hooks/auth/useAuth";
 import {RecoveredPassword, loginHref} from "../RecoveredPassword";
 
+interface Message {
+  text: string;
+  forState: ShamirRecoveryState;
+}
+
 const ShamirAccountRecovery = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,8 +47,14 @@ const ShamirAccountRecovery = () => {
 
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  // A message belongs to the recovery state it was shown in: another state hides it
+  const [error, setError] = useState<Message | null>(null);
+  const [noticeMessage, setNoticeMessage] = useState<Message | null>(null);
+  const stateRef = useRef<ShamirRecoveryState>(ShamirRecoveryState.None);
+  const setErrorMessage = (text: string | null, forState = stateRef.current) =>
+    setError(text ? {text, forState} : null);
+  const setNotice = (text: string | null, forState = stateRef.current) =>
+    setNoticeMessage(text ? {text, forState} : null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
   // A recovery under way for another browser's key
   const [elsewhere, setElsewhere] = useState<boolean>(false);
@@ -55,6 +66,9 @@ const ShamirAccountRecovery = () => {
   // see if we came here from recovery mode
   const fromVerification = params.get("fv") === "1";
   const recoveryState = status?.state ?? ShamirRecoveryState.None;
+  stateRef.current = recoveryState;
+  const errorMessage = error?.forState === recoveryState ? error.text : null;
+  const notice = noticeMessage?.forState === recoveryState ? noticeMessage.text : null;
 
   /** `sentNotice`: what to say once the email is on its way, if anything. */
   const startRecoveryMode = async (sentNotice?: string) => {
@@ -84,30 +98,27 @@ const ShamirAccountRecovery = () => {
     }
   }
 
+  /** The state read, or null when the read failed: that is no news about the recovery, so nothing changes. */
   const reloadStatus = () =>
     getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
-      // A notice belongs to the state it was shown in
-      setStatus((previous) => {
-        if (previous?.state !== result?.state) {
-          setNotice(null);
-          setErrorMessage(null);
-        }
-        return result;
-      });
+      setLoaded(true);
+      if (!result) return null;
+      setStatus(result);
       setThisBrowser(isThisBrowser);
       setElsewhere(isElsewhere);
       openSlots(isThisBrowser ? result : null).then(setSlots);
-      setLoaded(true);
+      return result.state;
     });
 
   // The email link lands here: this browser posts its nonce back with its throwaway key
   useEffect(() => {
     if (!enterNonceId || entering.current) return;
     entering.current = true;
-    enterRecoveryMode(enterNonceId).then((error) => {
-      if (error) setErrorMessage(t(error));
+    enterRecoveryMode(enterNonceId).then(async (enterError) => {
       navigate(location.pathname, {replace: true});
-      reloadStatus();
+      // The message belongs to the state the link leads to, read after it
+      const forState = (await reloadStatus().catch(() => null)) ?? stateRef.current;
+      if (enterError) setErrorMessage(t(enterError), forState);
     });
   }, [enterNonceId]);
 
@@ -115,14 +126,14 @@ const ShamirAccountRecovery = () => {
   useEffect(() => {
     if (!fillShardId || !fillCode || filling.current) return;
     filling.current = true;
-    fillSlot(fillShardId, fillCode).then(async (error) => {
+    fillSlot(fillShardId, fillCode).then(async (fillError) => {
       navigate(location.pathname, {replace: true});
-      // After the status: the click that fills the last slot moves the state, which clears notices
-      await reloadStatus();
-      if (error) {
-        setErrorMessage(t(error));
+      // The message belongs to the state the click leads to: the one that fills the last slot moves it
+      const forState = (await reloadStatus().catch(() => null)) ?? stateRef.current;
+      if (fillError) {
+        setErrorMessage(t(fillError), forState);
       } else {
-        setNotice(t('This piece is in. Finish in the browser where you started recovery.'));
+        setNotice(t('This piece is in. Finish in the browser where you started recovery.'), forState);
       }
     });
   }, [fillShardId, fillCode]);
@@ -236,21 +247,6 @@ const ShamirAccountRecovery = () => {
                   onCancel={() => cancelRecoveryMode()}
                   onPasswordReset={() => setPasswordReset(true)}
                 />
-              ) : recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToExitRecoveryMode ? (
-                <div className="my-2">
-                  <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue ' +
-                    'exiting recovery mode.')}</p>
-                  <p className="mt-3">Email: <b>{status?.email}</b></p>
-                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
-
-                  <div className="flex flex-row-reverse">
-                    <ActionButton className="mt-3 mb-3"
-                                  onClick={() => cancelRecoveryMode()}>
-                      {t('Send it again')}
-                      <Arrow className="ml-auto h-5 w-5"/>
-                    </ActionButton>
-                  </div>
-                </div>
               ) : (
                 <form onSubmit={(e) => {
                   e.preventDefault();

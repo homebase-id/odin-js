@@ -21,9 +21,6 @@ export enum ShamirRecoveryState {
    */
   AwaitingOwnerEmailVerificationToEnterRecoveryMode = "awaitingOwnerEmailVerificationToEnterRecoveryMode",
 
-  /** No longer set by the server: asking to exit only sends the email. A status stored before still reads. */
-  AwaitingOwnerEmailVerificationToExitRecoveryMode = "awaitingOwnerEmailVerificationToExitRecoveryMode",
-
   /**
    * Players have been notified this owner needs their shards.
    * We are waiting for enough players to send their shard to this owner
