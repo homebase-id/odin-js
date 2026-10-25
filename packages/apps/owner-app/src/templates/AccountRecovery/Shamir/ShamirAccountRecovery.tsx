@@ -30,7 +30,8 @@ import {RecoveredPassword, loginHref} from "../RecoveredPassword";
 
 interface Message {
   text: string;
-  forState: ShamirRecoveryState;
+  /** Undefined: not known yet (the status couldn't be read); the next good read settles it. */
+  forState?: ShamirRecoveryState;
 }
 
 const ShamirAccountRecovery = () => {
@@ -51,10 +52,13 @@ const ShamirAccountRecovery = () => {
   const [error, setError] = useState<Message | null>(null);
   const [noticeMessage, setNoticeMessage] = useState<Message | null>(null);
   const stateRef = useRef<ShamirRecoveryState>(ShamirRecoveryState.None);
-  const setErrorMessage = (text: string | null, forState = stateRef.current) =>
-    setError(text ? {text, forState} : null);
-  const setNotice = (text: string | null, forState = stateRef.current) =>
-    setNoticeMessage(text ? {text, forState} : null);
+  // `pinned`: the state the message is for, undefined when not known yet; the current one without it
+  const message = (text: string | null, pinned?: { forState?: ShamirRecoveryState }): Message | null =>
+    text ? {text, forState: pinned ? pinned.forState : stateRef.current} : null;
+  const setErrorMessage = (text: string | null, pinned?: { forState?: ShamirRecoveryState }) =>
+    setError(message(text, pinned));
+  const setNotice = (text: string | null, pinned?: { forState?: ShamirRecoveryState }) =>
+    setNoticeMessage(message(text, pinned));
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
   // A recovery under way for another browser's key
   const [elsewhere, setElsewhere] = useState<boolean>(false);
@@ -67,8 +71,10 @@ const ShamirAccountRecovery = () => {
   const fromVerification = params.get("fv") === "1";
   const recoveryState = status?.state ?? ShamirRecoveryState.None;
   stateRef.current = recoveryState;
-  const errorMessage = error?.forState === recoveryState ? error.text : null;
-  const notice = noticeMessage?.forState === recoveryState ? noticeMessage.text : null;
+  const shown = (message: Message | null) =>
+    message && (message.forState === undefined || message.forState === recoveryState) ? message.text : null;
+  const errorMessage = shown(error);
+  const notice = shown(noticeMessage);
 
   /** `sentNotice`: what to say once the email is on its way, if anything. */
   const startRecoveryMode = async (sentNotice?: string) => {
@@ -98,16 +104,25 @@ const ShamirAccountRecovery = () => {
     }
   }
 
-  /** The state read, or null when the read failed: that is no news about the recovery, so nothing changes. */
+  /**
+   * The state read and whether this browser started the recovery, or null when the read failed: that
+   * is no news about the recovery, so nothing changes. A message from another state goes; one not yet
+   * pinned to a state is pinned to this one.
+   */
   const reloadStatus = () =>
     getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       setLoaded(true);
       if (!result) return null;
+      const settle = (message: Message | null) =>
+        !message ? null : message.forState === undefined ? {...message, forState: result.state}
+          : message.forState === result.state ? message : null;
+      setError(settle);
+      setNoticeMessage(settle);
       setStatus(result);
       setThisBrowser(isThisBrowser);
       setElsewhere(isElsewhere);
       openSlots(isThisBrowser ? result : null).then(setSlots);
-      return result.state;
+      return {state: result.state, thisBrowser: isThisBrowser};
     });
 
   // The email link lands here: this browser posts its nonce back with its throwaway key
@@ -117,8 +132,9 @@ const ShamirAccountRecovery = () => {
     enterRecoveryMode(enterNonceId).then(async (enterError) => {
       navigate(location.pathname, {replace: true});
       // The message belongs to the state the link leads to, read after it
-      const forState = (await reloadStatus().catch(() => null)) ?? stateRef.current;
-      if (enterError) setErrorMessage(t(enterError), forState);
+      // Not read: the next good read pins it
+      const read = await reloadStatus().catch(() => null);
+      if (enterError) setErrorMessage(t(enterError), {forState: read?.state});
     });
   }, [enterNonceId]);
 
@@ -129,11 +145,14 @@ const ShamirAccountRecovery = () => {
     fillSlot(fillShardId, fillCode).then(async (fillError) => {
       navigate(location.pathname, {replace: true});
       // The message belongs to the state the click leads to: the one that fills the last slot moves it
-      const forState = (await reloadStatus().catch(() => null)) ?? stateRef.current;
+      // Not read: the next good read pins it
+      const read = await reloadStatus().catch(() => null);
       if (fillError) {
-        setErrorMessage(t(fillError), forState);
+        setErrorMessage(t(fillError), {forState: read?.state});
       } else {
-        setNotice(t('This piece is in. Finish in the browser where you started recovery.'), forState);
+        setNotice(read?.thisBrowser
+          ? t('This piece is in.')
+          : t('This piece is in. Finish in the browser where you started recovery.'), {forState: read?.state});
       }
     });
   }, [fillShardId, fillCode]);
