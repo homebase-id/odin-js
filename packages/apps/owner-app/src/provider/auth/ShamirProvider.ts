@@ -238,6 +238,10 @@ export const approveShardRequest = async (dotYouClient: DotYouClient, request: S
     .post(`${root}/approve-shard-request`, {odinId: request.dealer, shardId: request.shardId, index, sealedShard})
     .catch((error) => {
       console.warn(error);
+      // The shared text is for the recovering owner's link; this is the friend approving
+      if (error?.response?.data?.errorCode === 'shardLinkNoLongerValid') {
+        throw new Error(t('{0} has ended or started over their recovery; this request is gone', request.dealer));
+      }
       throw new Error(getKnownOdinErrorMessages(error) ?? t('The shard could not be released'));
     });
 };
