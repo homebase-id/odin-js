@@ -30,9 +30,6 @@ export enum ShamirRecoveryState {
    */
   AwaitingSufficientDelegateConfirmation = "awaitingSufficientDelegateConfirmation",
 
-  /** No longer set by the server; a status stored before reads as no recovery. */
-  AwaitingOwnerFinalization = "awaitingOwnerFinalization",
-
   /**
    * Enough shards are in. The browser that started recovery fetches them, sealed to its throwaway
    * key, and rebuilds the secret itself.

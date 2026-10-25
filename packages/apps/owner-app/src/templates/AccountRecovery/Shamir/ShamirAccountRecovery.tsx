@@ -54,10 +54,7 @@ const ShamirAccountRecovery = () => {
 
   // see if we came here from recovery mode
   const fromVerification = params.get("fv") === "1";
-  // A status stored by an older server, which no recovery reaches now, reads as none
-  const recoveryState = status?.state === ShamirRecoveryState.AwaitingOwnerFinalization
-    ? ShamirRecoveryState.None
-    : status?.state ?? ShamirRecoveryState.None;
+  const recoveryState = status?.state ?? ShamirRecoveryState.None;
 
   /** `sentNotice`: what to say once the email is on its way, if anything. */
   const startRecoveryMode = async (sentNotice?: string) => {

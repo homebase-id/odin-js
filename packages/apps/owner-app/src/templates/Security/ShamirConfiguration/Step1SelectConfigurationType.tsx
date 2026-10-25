@@ -2,11 +2,7 @@ import {ActionButtonState, Alert, t, useDotYouClient} from "@homebase-id/common-
 import {ActionButton} from "@homebase-id/common-app";
 import {Person} from "@homebase-id/common-app/icons";
 import {ShamirConfigurationType} from "../../../provider/auth/ShamirProvider";
-import {
-    dealAutomatedRecovery,
-    getAutomatedRecoveryPlayers,
-    requireZkMasterKey
-} from "../../../provider/auth/ZeroKnowledgeProvider";
+import {dealAutomatedRecovery, requireZkMasterKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {useState} from "react"; // adjust import if needed
 
 export const Step1SelectConfigurationType = ({
@@ -39,17 +35,11 @@ export const Step1SelectConfigurationType = ({
         try {
             setState("loading");
             setErrorMessage(null);
-            if (!(await getAutomatedRecoveryPlayers(client))) {
-                setShowAutoRecoveryNotEnabled(true);
-                setShowAutoEnabledFinalized(true);
-                setState("error");
-                return;
-            }
-
             // Dealt in this browser, as a deal to friends is
-            await dealAutomatedRecovery(client, await requireZkMasterKey(client, 'set up automatic recovery'));
+            const dealt = await dealAutomatedRecovery(client, await requireZkMasterKey(client, 'set up automatic recovery'));
+            setShowAutoRecoveryNotEnabled(!dealt);
             setShowAutoEnabledFinalized(true);
-            setState("success");
+            setState(dealt ? "success" : "error");
         }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         catch (error: any) {

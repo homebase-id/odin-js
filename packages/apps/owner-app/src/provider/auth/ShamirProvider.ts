@@ -12,7 +12,7 @@ import {
 } from '@homebase-id/js-lib/auth';
 import {t} from "@homebase-id/common-app";
 import {ShardTrustLevel} from "./SecurityHealthProvider";
-import {getShardRecoveryDrive, requireZkMasterKey} from "./ZeroKnowledgeProvider";
+import {getShardRecoveryDrive, postDeal, requireZkMasterKey} from "./ZeroKnowledgeProvider";
 import {SHARD_RECOVERY_DRIVE} from "../app/wellKnownDrives";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
@@ -152,14 +152,7 @@ export const configureShards = async (dotYouClient: DotYouClient, plan: ShamirDe
     })
   );
   const request = await dealToFriends(friends, plan.minMatchingShards, zkMasterKey);
-
-  await dotYouClient
-    .createAxiosClient()
-    .post(`${root}/configure-shards`, request)
-    .catch((error) => {
-      console.warn(error);
-      throw new Error(getKnownOdinErrorMessages(error) ?? t('Failed to distribute the shards'));
-    });
+  await postDeal(dotYouClient, request, t('Failed to distribute the shards'));
 }
 
 export const verifyRemotePlayerReadiness = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerReadinessRequest): Promise<RemotePlayerReadinessResult | null> => {

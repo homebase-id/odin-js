@@ -241,13 +241,11 @@ export interface ShamirRecoveryBundle {
   }[];
   /** The collected shards, each piece sealed to this browser by its holder */
   shards: GatedShardContent[];
-  /** Null for a server-made deal */
-  copies?: (Omit<ZkShamirCopiesRequest, 'resetKey64'> & { shamirPublicKeyEncryptedPassword?: string | null }) | null;
   /**
-   * The deal was made by the server, before the browser dealt every deal: its secret opens only
+   * Null for a deal the server made, before the browser dealt every deal: its secret opens only
    * today's master key, so this browser sends it with a new password (`finalize`).
    */
-  isServerMadeDeal?: boolean;
+  copies?: (Omit<ZkShamirCopiesRequest, 'resetKey64'> & { shamirPublicKeyEncryptedPassword?: string | null }) | null;
 }
 
 /**
@@ -278,22 +276,20 @@ export const recoverFromBundle = async (
       if (!envelope) throw new Error(`No shard key for shard ${shard.id}`);
 
       // Every holder sealed its piece to this browser. The dealer's own envelope says where each
-      // piece sits in the split: a holder could send any index. A server-made deal's envelopes kept
-      // the position instead, so it is rebuilt with the shard's, as the server rebuilt it.
+      // piece sits in the split: a holder could send any index.
       const locked = await zkUnseal(shard.dealerEncryptedShard, throwawayPrivateKeyPkcs8);
       const piece = await cbcDecrypt(
         locked,
         base64ToUint8Array(envelope.encryptionIv),
         base64ToUint8Array(envelope.encryptionKey)
       );
-      return { index: bundle.isServerMadeDeal ? shard.index : envelope.index, shard: piece };
+      return { index: envelope.index, shard: piece };
     })
   );
   const pieces = opened.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
 
-  // Nothing here can check a server-made deal's secret: the server does, when it opens the master key
-  if (bundle.isServerMadeDeal || !bundle.copies) {
-    if (!bundle.isServerMadeDeal) throw new Error('Password recovery is not set up');
+  // A server-made deal. Nothing here can check its secret: the server does, when it opens the master key
+  if (!bundle.copies) {
     return { serverMade: true, secret: rebuildSecret(pieces, SECRET_LENGTH) };
   }
 

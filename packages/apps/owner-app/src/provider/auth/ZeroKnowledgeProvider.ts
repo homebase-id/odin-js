@@ -12,6 +12,7 @@ import {
   ZkKeysRequest,
   ZkPhraseCopiesRequest,
   ZkPhraseRecovery,
+  ConfigureShardsRequest,
   ZkStatus,
   dealToFriends,
   getPhraseCheck,
@@ -26,6 +27,7 @@ import {
 } from '@homebase-id/js-lib/auth';
 import { OWNER_ZK_MASTER_KEY } from '@homebase-id/common-app';
 import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
+import type { ShamirDealPlan } from './ShamirProvider';
 import {
   encryptRecoveryKey,
   getPublicKey,
@@ -102,24 +104,31 @@ const convertShardRecoveryDrive = async (
   request: ZkConvertDriveRequest
 ) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
-/** This host's automated identities and the threshold, which the automated deal goes to; null when it has none. */
-export const getAutomatedRecoveryPlayers = async (dotYouClient: DotYouClient) =>
+/** Sends a deal this browser made; throws with a message to show. */
+export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsRequest, failure: string) =>
   dotYouClient
     .createAxiosClient()
-    .get<{ players: { odinId: string }[]; minMatchingShards: number }>('/security/recovery/automated-recovery-players', {
-      validateStatus: (s) => s === 200 || s === 404,
-    })
-    .then((response) => (response.status === 200 ? response.data : null));
+    .post('/security/recovery/configure-shards', request)
+    .catch((error) => {
+      console.warn(error);
+      throw new Error(getKnownOdinErrorMessages(error) ?? failure);
+    });
 
 /**
  * The automated deal, dealt in this browser as a friend deal is, to this host's automated identities
  * (odin-core docs/zero-knowledge-recovery-plan.md, "Building the automated deal"): it gives back the
  * password, and each holder emails the owner a link before it releases its shard. The password copy
- * is written at a password login. Throws with a message to show.
+ * is written at a password login. False when this host has no automated recovery; throws with a
+ * message to show.
  */
 export const dealAutomatedRecovery = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
-  const automated = await getAutomatedRecoveryPlayers(dotYouClient);
-  if (!automated) throw new Error('This host has no automatic recovery');
+  const automated = await dotYouClient
+    .createAxiosClient()
+    .get<ShamirDealPlan>('/security/recovery/automated-recovery-players', {
+      validateStatus: (s) => s === 200 || s === 404,
+    })
+    .then((response) => (response.status === 200 ? response.data : null));
+  if (!automated) return false;
 
   const request = await dealToFriends(
     automated.players.map((p) => ({ odinId: p.odinId, type: 'automatic' as const })),
@@ -127,13 +136,8 @@ export const dealAutomatedRecovery = async (dotYouClient: DotYouClient, masterKe
     masterKey,
     { automated: true }
   );
-  await dotYouClient
-    .createAxiosClient()
-    .post('/security/recovery/configure-shards', request)
-    .catch((error) => {
-      console.warn(error);
-      throw new Error(getKnownOdinErrorMessages(error) ?? 'Failed to set up automatic recovery');
-    });
+  await postDeal(dotYouClient, request, 'Failed to set up automatic recovery');
+  return true;
 };
 
 /** This identity's Shard Recovery drive, with its zero-knowledge keys (owner only). */

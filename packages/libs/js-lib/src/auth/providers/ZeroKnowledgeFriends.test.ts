@@ -90,11 +90,10 @@ test('the automated deal reaches the minimum with automatic holders by design', 
 });
 
 /**
- * A deal the server made, before the browser dealt every deal: its envelopes kept the position
- * (0-based), not the piece's index, and its secret opens only today's master key, so the browser
- * gets the secret back to send with a new password.
+ * A deal the server made, before the browser dealt every deal: it has no copies, and its secret
+ * opens only today's master key, so the browser gets the secret back to send with a new password.
  */
-test('a server-made deal gives back its secret, rebuilt with the shards own index', async () => {
+test('a server-made deal gives back its secret', async () => {
   const secret = getRandom16ByteArray();
   const pieces = splitSecret(4, 3, secret);
   const recovering = await makePair();
@@ -107,8 +106,9 @@ test('a server-made deal gives back its secret, rebuilt with the shards own inde
       const player = { odinId: `p${i}.dotyou.cloud`, type: 'automatic' as const };
       const sealed = await zkSeal(await cbcEncrypt(piece.shard, iv, key), recovering.publicKeyJwk);
       return {
-        envelope: { player, encryptionKey: uint8ArrayToBase64(key), encryptionIv: uint8ArrayToBase64(iv), shardId, index: i },
-        shard: { id: shardId, index: piece.index, player, dealerEncryptedShard: sealed },
+        envelope: { player, encryptionKey: uint8ArrayToBase64(key), encryptionIv: uint8ArrayToBase64(iv), shardId, index: piece.index },
+        // the index a holder sends doesn't count
+        shard: { id: shardId, index: 0, player, dealerEncryptedShard: sealed },
       };
     })
   );
@@ -117,7 +117,6 @@ test('a server-made deal gives back its secret, rebuilt with the shards own inde
     envelopes: dealt.map((d) => d.envelope),
     shards: dealt.slice(1).map((d) => d.shard),
     copies: null,
-    isServerMadeDeal: true,
   };
 
   const recovered = await recoverFromBundle(

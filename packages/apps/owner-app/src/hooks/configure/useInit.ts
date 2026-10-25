@@ -42,8 +42,10 @@ export const useInit = () => {
 
     if (data?.enableAutomatedPasswordRecovery === true) {
       try {
-        // Dealt in this browser; the login that follows writes its password copy
-        await dealAutomatedRecovery(dotYouClient, await requireZkMasterKey(dotYouClient, 'set up automatic recovery'));
+        // Dealt in this browser; the next password login writes its password copy
+        if (!(await dealAutomatedRecovery(dotYouClient, await requireZkMasterKey(dotYouClient, 'set up automatic recovery')))) {
+          console.warn('This host has no automatic recovery');
+        }
 
       } catch (error) {
         console.error(error);
