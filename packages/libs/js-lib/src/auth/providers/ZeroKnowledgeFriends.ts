@@ -288,8 +288,10 @@ export const recoverFromBundle = async (
   );
   const pieces = opened.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
 
-  // A server-made deal. Nothing here can check its secret: the server does, when it opens the master key
+  // A server-made deal. Nothing here can check its secret: the server does, when it opens the master
+  // key. Too few pieces can only give a wrong one.
   if (!bundle.copies) {
+    if (pieces.length < bundle.minMatchingShards) throw new Error("The shards don't rebuild the secret");
     return { serverMade: true, secret: rebuildSecret(pieces, SECRET_LENGTH) };
   }
 

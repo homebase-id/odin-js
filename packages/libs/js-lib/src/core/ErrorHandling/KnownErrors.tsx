@@ -141,7 +141,9 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'recoveryUnderWayElsewhere')
     return t('Recovery is under way in another browser; finish it there, or exit it by email first');
   if (errorCode === 'shardLinkNoLongerValid')
-    return t('This link no longer works: it was used, or a newer email replaced it. Use the newest email, or start over');
+    return t('This link no longer works: a newer email replaced it, or it expired. Use the newest email, or start over');
+  if (errorCode === 'shardHolderUnreachable')
+    return t('The holder could not be reached; try the same link again in a minute');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
   if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
 

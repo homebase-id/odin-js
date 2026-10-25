@@ -84,7 +84,7 @@ const ShamirAccountRecovery = () => {
     }
   }
 
-  const reloadStatus = async () => {
+  const reloadStatus = () =>
     getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       // A notice belongs to the state it was shown in
       setStatus((previous) => {
@@ -99,7 +99,6 @@ const ShamirAccountRecovery = () => {
       openSlots(isThisBrowser ? result : null).then(setSlots);
       setLoaded(true);
     });
-  };
 
   // The email link lands here: this browser posts its nonce back with its throwaway key
   useEffect(() => {
@@ -116,14 +115,15 @@ const ShamirAccountRecovery = () => {
   useEffect(() => {
     if (!fillShardId || !fillCode || filling.current) return;
     filling.current = true;
-    fillSlot(fillShardId, fillCode).then((error) => {
+    fillSlot(fillShardId, fillCode).then(async (error) => {
+      navigate(location.pathname, {replace: true});
+      // After the status: the click that fills the last slot moves the state, which clears notices
+      await reloadStatus();
       if (error) {
         setErrorMessage(t(error));
       } else {
         setNotice(t('This piece is in. Finish in the browser where you started recovery.'));
       }
-      navigate(location.pathname, {replace: true});
-      reloadStatus();
     });
   }, [fillShardId, fillCode]);
 
