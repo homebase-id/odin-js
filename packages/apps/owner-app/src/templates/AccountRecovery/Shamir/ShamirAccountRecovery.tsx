@@ -30,8 +30,10 @@ import {RecoveredPassword, loginHref} from "../RecoveredPassword";
 
 interface Message {
   text: string;
-  /** Null: not known yet (the status couldn't be read); the next good read settles it. */
+  /** Null: not known yet (the status couldn't be read); a read sent after it settles it. */
   forState: ShamirRecoveryState | null;
+  /** The last status read sent when the message was set: only a later one may settle it. */
+  after: number;
 }
 
 const ShamirAccountRecovery = () => {
@@ -53,13 +55,16 @@ const ShamirAccountRecovery = () => {
   const [noticeMessage, setNoticeMessage] = useState<Message | null>(null);
   const stateRef = useRef<ShamirRecoveryState>(ShamirRecoveryState.None);
   // `forState`: the state the message is for (null: not known yet); the current one by default
-  const setErrorMessage = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
-    setError(text ? {text, forState} : null);
-  const setNotice = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
-    setNoticeMessage(text ? {text, forState} : null);
   // Status reads can come back out of order (the poll, a link's own read): one older than the newest
   // applied is dropped, and gives back what the newest applied read
   const lastSent = useRef(0);
+  const setErrorMessage = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
+    setError(text ? {text, forState, after: lastSent.current} : null);
+  const setNotice = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
+    setNoticeMessage(text ? {text, forState, after: lastSent.current} : null);
+  // While a link's own request runs, reads show the state from before it: "Please wait" until the
+  // link's read is in
+  const linkPending = useRef(!!enterNonceId || !!(fillShardId && fillCode));
   const lastApplied = useRef(0);
   const lastRead = useRef<{ state: ShamirRecoveryState; thisBrowser: boolean } | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
@@ -116,13 +121,15 @@ const ShamirAccountRecovery = () => {
     const read = ++lastSent.current;
     return getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       if (read < lastApplied.current) return lastRead.current;
-      setLoaded(true);
       if (!result) return null;
+      if (!linkPending.current) setLoaded(true);
 
       lastApplied.current = read;
       lastRead.current = {state: result.state, thisBrowser: isThisBrowser};
       const settle = (m: Message | null) =>
-        !m ? null : m.forState === null ? {...m, forState: result.state} : m.forState === result.state ? m : null;
+        !m ? null
+          : m.forState === null ? (read > m.after ? {...m, forState: result.state} : m)
+            : m.forState === result.state ? m : null;
       setError(settle);
       setNoticeMessage(settle);
       setStatus(result);
@@ -141,8 +148,8 @@ const ShamirAccountRecovery = () => {
     entering.current = true;
     enterRecoveryMode(enterNonceId).then(async (enterError) => {
       navigate(location.pathname, {replace: true});
-      // The message belongs to the state the link leads to, read after it
-      // Not read: the next good read pins it
+      // The message belongs to the state the link leads to, read after it (not read: a later read pins it)
+      linkPending.current = false;
       const read = await reloadStatus().catch(() => null);
       if (enterError) setErrorMessage(t(enterError), read?.state ?? null);
     });
@@ -155,7 +162,8 @@ const ShamirAccountRecovery = () => {
     fillSlot(fillShardId, fillCode).then(async (fillError) => {
       navigate(location.pathname, {replace: true});
       // The message belongs to the state the click leads to: the one that fills the last slot moves it
-      // Not read: the next good read pins it
+      // (not read: a later read pins it)
+      linkPending.current = false;
       const read = await reloadStatus().catch(() => null);
       if (fillError) {
         setErrorMessage(t(fillError), read?.state ?? null);
