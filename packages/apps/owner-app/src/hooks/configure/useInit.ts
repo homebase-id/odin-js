@@ -1,7 +1,8 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 
 import {WelcomeData} from '../../templates/Setup/Setup';
-import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
+import {DriveDefinitionParam, initialize} from '../../provider/system/SystemProvider';
+import {dealAutomatedRecovery, requireZkMasterKey} from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   SetupAutoFollow,
   SetupBlog,
@@ -41,7 +42,8 @@ export const useInit = () => {
 
     if (data?.enableAutomatedPasswordRecovery === true) {
       try {
-        await enableAutoPasswordRecovery(dotYouClient);
+        // Dealt in this browser; the login that follows writes its password copy
+        await dealAutomatedRecovery(dotYouClient, await requireZkMasterKey(dotYouClient, 'set up automatic recovery'));
 
       } catch (error) {
         console.error(error);

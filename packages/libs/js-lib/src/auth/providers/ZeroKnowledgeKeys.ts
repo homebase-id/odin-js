@@ -164,6 +164,11 @@ export interface ZkStatus {
   shamirPublicKeyJwk?: string | null;
   /** Whether the friends' password copy exists; only the friends' secret opens it. */
   hasShamirPasswordCopy?: boolean;
+  /**
+   * The automated deal gives nothing back in the browser (server-made, or its copies forgotten by a
+   * reset): a password login deals it again, then writes the password copy.
+   */
+  automatedDealNeedsDealing?: boolean;
 }
 
 /**

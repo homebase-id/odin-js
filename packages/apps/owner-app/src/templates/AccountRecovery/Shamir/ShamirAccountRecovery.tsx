@@ -6,16 +6,18 @@ import UrlNotifier from '../../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {Arrow} from "@homebase-id/common-app/icons";
 import {useLocation, useNavigate} from "react-router-dom";
 import {ApiType} from '@homebase-id/js-lib/core';
-import {PasswordRecovery} from '@homebase-id/js-lib/auth';
+import {BundleRecovery, RecoverySlot} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from '@homebase-id/common-app';
 import {
   enterRecoveryMode,
   exitRecoveryMode,
+  fillSlot,
   finalizeRecovery,
   forgetRecoveryKey,
   getRecoveryStatusForThisBrowser,
   initiateRecoveryMode,
-  recoverWithApprovedFriends,
+  openSlots,
+  recoverInThisBrowser,
   recoveryUnderWayElsewhereMessage,
   ShamirRecoveryState,
   ShamirRecoveryStatusRedacted,
@@ -33,23 +35,29 @@ const ShamirAccountRecovery = () => {
   const returnUrl = params.get(RETURN_URL_PARAM);
   const enterNonceId = params.get("enter");
   const entering = useRef(false);
+  // An automatic holder's email link: its shard and code
+  const fillShardId = params.get("fill");
+  const fillCode = params.get("code");
+  const filling = useRef(false);
 
   const [status, setStatus] = useState<ShamirRecoveryStatusRedacted | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
-  // A recovery under way for another browser's key (an automated deal's carries none)
+  // A recovery under way for another browser's key
   const [elsewhere, setElsewhere] = useState<boolean>(false);
+  // The holders and which are in, when this browser started the recovery
+  const [slots, setSlots] = useState<RecoverySlot[] | null>(null);
   // A reset with the friends' reset key ends recovery (state None): the page keeps saying it worked
   const [passwordReset, setPasswordReset] = useState<boolean>(false);
 
   // see if we came here from recovery mode
   const fromVerification = params.get("fv") === "1";
-  const nonceId = params.get("id");
-  const token = params.get("token");
-  const fromFinalize = nonceId && token;
-  const recoveryState = status?.state ?? ShamirRecoveryState.None;
+  // A status stored by an older server, which no recovery reaches now, reads as none
+  const recoveryState = status?.state === ShamirRecoveryState.AwaitingOwnerFinalization
+    ? ShamirRecoveryState.None
+    : status?.state ?? ShamirRecoveryState.None;
 
   /** `sentNotice`: what to say once the email is on its way, if anything. */
   const startRecoveryMode = async (sentNotice?: string) => {
@@ -91,6 +99,7 @@ const ShamirAccountRecovery = () => {
       });
       setThisBrowser(isThisBrowser);
       setElsewhere(isElsewhere);
+      openSlots(isThisBrowser ? result : null).then(setSlots);
       setLoaded(true);
     });
   };
@@ -106,6 +115,21 @@ const ShamirAccountRecovery = () => {
     });
   }, [enterNonceId]);
 
+  // A holder's email link lands here, on any device: its piece is sealed to the browser that started
+  useEffect(() => {
+    if (!fillShardId || !fillCode || filling.current) return;
+    filling.current = true;
+    fillSlot(fillShardId, fillCode).then((error) => {
+      if (error) {
+        setErrorMessage(t(error));
+      } else {
+        setNotice(t('This piece is in. Finish in the browser where you started recovery.'));
+      }
+      navigate(location.pathname, {replace: true});
+      reloadStatus();
+    });
+  }, [fillShardId, fillCode]);
+
   useEffect(() => {
     // run immediately on mount
     reloadStatus();
@@ -118,7 +142,7 @@ const ShamirAccountRecovery = () => {
     return () => clearInterval(intervalId); // cleanup on unmount
   }, []);
 
-  if ((fromVerification || fromFinalize || enterNonceId) && !loaded) {
+  if ((fromVerification || enterNonceId || fillShardId) && !loaded) {
     // we need to wait until we get the status
     return <div>Please wait...</div>
   }
@@ -171,12 +195,17 @@ const ShamirAccountRecovery = () => {
                   </div>
                 </div>
               ) : recoveryState === ShamirRecoveryState.AwaitingSufficientDelegateConfirmation ? (<>
-                  {t('We notified your trusted connections that you are in recovery mode.  Forget who they were?  ' +
-                    'Check the email we sent when you entered recovery mode.')}
+                  {t('We asked everyone who holds a piece of your recovery. Friends who must approve do so in their ' +
+                    'Homebase; the others each email you a link to click. Forget who they were? Check the email we ' +
+                    'sent when you started.')}
 
                   <Alert type="warning" isCompact={false} className="mt-3">
-                    {t('We are waiting for a sufficient number of your delegates to confirm')}
+                    {status?.needed
+                      ? `${t('Pieces in')}: ${status.filled ?? 0} / ${status.needed}`
+                      : t('We are waiting for enough pieces to come in')}
                   </Alert>
+
+                  {slots && <Slots slots={slots}/>}
 
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
 
@@ -189,7 +218,7 @@ const ShamirAccountRecovery = () => {
                   <div className="flex flex-row-reverse justify-between">
                     {!elsewhere && (
                       <ActionButton className="mt-3 mb-3"
-                                    onClick={() => startRecoveryMode(t('Check your email: the link asks your friends again.'))}>
+                                    onClick={() => startRecoveryMode(t('Check your email: the link asks everyone who holds a piece again.'))}>
                         {t('Start over')}
                         <Arrow className="ml-auto h-5 w-5"/>
                       </ActionButton>
@@ -204,42 +233,12 @@ const ShamirAccountRecovery = () => {
                   </div>
                 </>
               ) : recoveryState === ShamirRecoveryState.AwaitingRecoveringBrowser ? (
-                <FriendsApproved
+                <RecoveryReady
                   returnUrl={returnUrl}
                   thisBrowser={thisBrowser}
                   onCancel={() => cancelRecoveryMode()}
                   onPasswordReset={() => setPasswordReset(true)}
                 />
-              ) : recoveryState === ShamirRecoveryState.AwaitingOwnerFinalization ? (<>
-                  {t('🎉 You are ready to finalize your password recovery!')}
-
-                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                  {token && nonceId && (
-                    <PasswordReset returnUrl={returnUrl} setNewPassword={(password) => finalizeRecovery(nonceId, token, password)}/>
-                  )}
-
-                  {/*user is on the screen but did not click the email*/}
-                  {(!token || !nonceId) && (
-                    <>
-                      <div className="my-2">
-                        <p>{t('We sent an email including your final recovery link.  Click the link in this email to continue.')}</p>
-                        <p className="mt-3">Email: <b>{status?.email}</b></p>
-                        <hr className="mb-5 mt-7 dark:border-slate-700"/>
-                      </div>
-
-                      <div className="my-2">
-                        <ActionButton
-                          type="secondary"
-                          className="mt-3 mb-3"
-                          onClick={() => cancelRecoveryMode()}>
-                          {t('Exit recovery mode')}
-                        </ActionButton>
-                      </div>
-                    </>
-                  )}
-
-
-                </>
               ) : recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToExitRecoveryMode ? (
                 <div className="my-2">
                   <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue ' +
@@ -292,26 +291,47 @@ const ShamirAccountRecovery = () => {
 };
 
 
+/** Who holds a piece, and which are in: shown only in the browser that started. */
+function Slots({slots}: { slots: RecoverySlot[] }) {
+  return (
+    <ul className="mt-3">
+      {slots.map((slot) => (
+        <li key={slot.player.odinId} className="flex flex-row justify-between py-1">
+          <span>{slot.player.odinId}</span>
+          <span className={slot.filled ? 'text-green-600' : 'text-slate-400'}>
+            {slot.filled
+              ? t('In')
+              : slot.player.type === 'automatic'
+                ? t('Click the link in its email')
+                : t('Ask them to approve')}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
- * Recovery with friends, once enough approved: this browser opens their shards, rebuilds the
- * secret and shows the password, as recovery with the phrase does; or, with no password copy or
- * one that doesn't log in, sets a new password with the friends' reset key.
+ * Once enough shards are in: this browser opens them, rebuilds the secret and shows the password,
+ * as recovery with the phrase does; or, with no password copy or one that doesn't log in, sets a new
+ * password with the deal's reset key. A server-made deal gives back only its secret, which sets a new
+ * password; the data only this browser could open is lost with the old one.
  */
-function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
+function RecoveryReady({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
   returnUrl: string | null;
   thisBrowser: boolean;
   onCancel: () => void;
   onPasswordReset: () => void;
 }) {
-  const [recovered, setRecovered] = useState<PasswordRecovery>();
+  const [recovered, setRecovered] = useState<BundleRecovery>();
   const [resetting, setResetting] = useState(false);
   const [state, setState] = useState<'loading' | 'error' | 'idle'>('idle');
 
-  // Only the browser whose key the friends sealed to can open their shards
+  // Only the browser whose key the holders sealed to can open their shards
   if (!recovered && !thisBrowser) {
     return (
       <div className="my-2">
-        <p>{t('Your friends have approved, but this is not the browser where you started recovery. Open this page there.')}</p>
+        <p>{t('Enough pieces of your recovery are in, but this is not the browser where you started recovery. Open this page there.')}</p>
         <div className="mt-5 flex flex-row-reverse">
           <ActionButton type="secondary" onClick={onCancel}>{t('Exit recovery mode')}</ActionButton>
         </div>
@@ -322,9 +342,9 @@ function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
   const open = async () => {
     setState('loading');
     try {
-      const result = await recoverWithApprovedFriends();
+      const result = await recoverInThisBrowser();
       setRecovered(result);
-      setResetting(result.password === undefined);
+      setResetting(result.serverMade || result.recovery.password === undefined);
       setState('idle');
     } catch (error) {
       console.error(error);
@@ -335,10 +355,10 @@ function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
   if (!recovered) {
     return (
       <div className="my-2">
-        <p>{t('🎉 Enough of your friends have approved your recovery.')}</p>
+        <p>{t('🎉 Enough pieces of your recovery are in.')}</p>
         {state === 'error' && (
           <Alert type="warning" isCompact={true} className="mt-3">
-            {t('Your friends\' shards did not open your account. Exit recovery mode and start again.')}
+            {t('The pieces did not open your account. Exit recovery mode and start again.')}
           </Alert>
         )}
         <div className="mt-5 flex flex-row-reverse justify-between gap-2">
@@ -352,18 +372,41 @@ function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
     );
   }
 
-  if (resetting) {
+  if (recovered.serverMade) {
     return (
       <>
         <p className="mb-2 max-w-md text-slate-400">
-          {recovered.password === undefined
-            ? t('Your friends opened your account, but no password was saved with it. Set a new password.')
-            : t('Set a new password with your friends\' approval.')}
+          {t('Your recovery was set up before your password could be saved with it. Set a new password. ' +
+            'Data that only your browser could open stays locked with the old password.')}
         </p>
         <PasswordReset
           returnUrl={returnUrl}
           setNewPassword={async (password) => {
-            const done = await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovered, password);
+            const done = await finalizeRecovery(recovered.secret, password);
+            if (done) {
+              forgetRecoveryKey();
+              onPasswordReset();
+            }
+            return done;
+          }}
+        />
+      </>
+    );
+  }
+
+  const recovery = recovered.recovery;
+  if (resetting) {
+    return (
+      <>
+        <p className="mb-2 max-w-md text-slate-400">
+          {recovery.password === undefined
+            ? t('Your account opened, but no password was saved with it. Set a new password.')
+            : t('Set a new password with your recovery.')}
+        </p>
+        <PasswordReset
+          returnUrl={returnUrl}
+          setNewPassword={async (password) => {
+            const done = await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovery, password);
             if (done) {
               // The reset ended recovery: the key is spent
               forgetRecoveryKey();
@@ -378,7 +421,7 @@ function FriendsApproved({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
 
   return (
     <RecoveredPassword
-      password={recovered.password}
+      password={recovery.password}
       returnUrl={returnUrl}
       onReset={() => setResetting(true)}
     />

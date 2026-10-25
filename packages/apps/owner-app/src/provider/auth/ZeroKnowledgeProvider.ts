@@ -1,4 +1,4 @@
-import { DotYouClient, getDrivesByType } from '@homebase-id/js-lib/core';
+import { DotYouClient, getDrivesByType, getKnownOdinErrorMessages } from '@homebase-id/js-lib/core';
 import {
   bip39Decode,
   bip39Encode,
@@ -13,6 +13,7 @@ import {
   ZkPhraseCopiesRequest,
   ZkPhraseRecovery,
   ZkStatus,
+  dealToFriends,
   getPhraseCheck,
   makePhraseCopies,
   makeZkDriveKeys,
@@ -101,6 +102,40 @@ const convertShardRecoveryDrive = async (
   request: ZkConvertDriveRequest
 ) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
+/** This host's automated identities and the threshold, which the automated deal goes to; null when it has none. */
+export const getAutomatedRecoveryPlayers = async (dotYouClient: DotYouClient) =>
+  dotYouClient
+    .createAxiosClient()
+    .get<{ players: { odinId: string }[]; minMatchingShards: number }>('/security/recovery/automated-recovery-players', {
+      validateStatus: (s) => s === 200 || s === 404,
+    })
+    .then((response) => (response.status === 200 ? response.data : null));
+
+/**
+ * The automated deal, dealt in this browser as a friend deal is, to this host's automated identities
+ * (odin-core docs/zero-knowledge-recovery-plan.md, "Building the automated deal"): it gives back the
+ * password, and each holder emails the owner a link before it releases its shard. The password copy
+ * is written at a password login. Throws with a message to show.
+ */
+export const dealAutomatedRecovery = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+  const automated = await getAutomatedRecoveryPlayers(dotYouClient);
+  if (!automated) throw new Error('This host has no automatic recovery');
+
+  const request = await dealToFriends(
+    automated.players.map((p) => ({ odinId: p.odinId, type: 'automatic' as const })),
+    automated.minMatchingShards,
+    masterKey,
+    { automated: true }
+  );
+  await dotYouClient
+    .createAxiosClient()
+    .post('/security/recovery/configure-shards', request)
+    .catch((error) => {
+      console.warn(error);
+      throw new Error(getKnownOdinErrorMessages(error) ?? 'Failed to set up automatic recovery');
+    });
+};
+
 /** This identity's Shard Recovery drive, with its zero-knowledge keys (owner only). */
 export const getShardRecoveryDrive = async (dotYouClient: DotYouClient) =>
   (await getDrivesByType(dotYouClient, SHARD_RECOVERY_DRIVE.type, 1, 10)).results.find((drive) =>
@@ -159,8 +194,9 @@ export const getZkMasterKey = async (dotYouClient: DotYouClient): Promise<Uint8A
 /**
  * Runs after every owner login, while the browser still has the password: makes the keys the first
  * time, writes the password copies (the phrase's, the friends') when they are missing, converts the
- * Shard Recovery drive when it needs it, and takes the recovery phrase over. Nobody sees any of it. Each step is safe to cut
- * off; the next login picks up where this one stopped.
+ * Shard Recovery drive when it needs it, deals the automated deal again when the server made it (or
+ * a reset forgot its copies), and takes the recovery phrase over. Nobody sees any of it. Each step is
+ * safe to cut off; the next login picks up where this one stopped.
  */
 export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, password: string) => {
   // The reads don't depend on each other: one round trip instead of three.
@@ -187,6 +223,13 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   if (!(await shardRecoveryDriveOpens(shardRecoveryDriveKey, masterKey))) {
     const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE.alias, masterKey);
     await convertShardRecoveryDrive(dotYouClient, request);
+  }
+
+  // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move it
+  if (status.automatedDealNeedsDealing) {
+    await dealAutomatedRecovery(dotYouClient, masterKey);
+    // The deal leaves its password copy to write, and this login has the password
+    await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
   }
 
   if (status.recoveryPhrase === 'onServer') {

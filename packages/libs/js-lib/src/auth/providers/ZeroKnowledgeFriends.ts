@@ -27,11 +27,12 @@ import {
   zkUnseal,
 } from './ZeroKnowledgeKeys';
 
-// Recovery with friends in the browser (odin-core docs/zero-knowledge-recovery-plan.md, "Building the
-// friends pair"). The browser deals as odin-core's CreateShards does for the automated deal, and
-// seals each gated friend's shard to them as a deposit; the friend's browser opens it and seals it
-// again to the recovering browser's throwaway key; that browser rebuilds the secret. The server sees
-// none of the secret.
+// Recovery in the browser (odin-core docs/zero-knowledge-recovery-plan.md, "Building the friends
+// pair" and "Building the automated deal"). The browser deals, to friends or to the host's automated
+// identities, as odin-core's CreateShards did on the server, and seals each gated friend's shard to
+// them as a deposit. Every holder's shard comes back sealed to the recovering browser's throwaway
+// key: a gated friend's browser seals it when they approve, an automatic holder when the owner clicks
+// the link it emailed. That browser rebuilds the secret. The server sees none of the secret.
 
 /// Deposits
 
@@ -142,15 +143,18 @@ export const getShamirResetKey = (secret: Uint8Array) => hkdf16(secret, SHAMIR_R
  * Deals to `friends`: a new secret, split into one piece per friend, each locked by its own shard
  * key (kept in the dealer package); a gated friend's shard sealed to them as a deposit. The secret
  * locks the zero-knowledge master key and a new key pair's private half; the password is sealed to
- * the public half at the next password login.
+ * the public half at the next password login. `automated`: the automated deal, to the host's
+ * automated identities, whose automatic shards reach the threshold by design (the owner's inbox
+ * then recovers the account).
  */
 export const dealToFriends = async (
   friends: FriendToDealTo[],
   minMatchingShards: number,
-  zkMasterKey: Uint8Array
+  zkMasterKey: Uint8Array,
+  options?: { automated?: boolean }
 ): Promise<ConfigureShardsRequest> => {
   const automatic = friends.filter((f) => f.type === 'automatic').length;
-  if (automatic >= minMatchingShards) {
+  if (!options?.automated && automatic >= minMatchingShards) {
     throw new Error('Automatic friends alone must not reach the minimum: at least one friend must approve');
   }
 
@@ -235,45 +239,63 @@ export interface ShamirRecoveryBundle {
     shardId: string;
     index: number;
   }[];
-  /** The collected shards: a gated friend's piece is sealed to this browser first */
+  /** The collected shards, each piece sealed to this browser by its holder */
   shards: GatedShardContent[];
-  copies: Omit<ZkShamirCopiesRequest, 'resetKey64'> & { shamirPublicKeyEncryptedPassword?: string | null };
+  /** Null for a server-made deal */
+  copies?: (Omit<ZkShamirCopiesRequest, 'resetKey64'> & { shamirPublicKeyEncryptedPassword?: string | null }) | null;
+  /**
+   * The deal was made by the server, before the browser dealt every deal: its secret opens only
+   * today's master key, so this browser sends it with a new password (`finalize`).
+   */
+  isServerMadeDeal?: boolean;
 }
 
 /**
- * Recovery with friends: opens the bundle sealed to this browser's throwaway key, rebuilds the
- * secret from the collected shards and the dealer's shard keys, and opens the password and the
- * zero-knowledge master key. Throws when the shards don't rebuild the secret.
+ * What the bundle gives back: the password (a deal made in the browser), or, for a server-made deal,
+ * the secret to send with a new password.
  */
-export const recoverWithFriends = async (
+export type BundleRecovery =
+  | { serverMade: false; recovery: PasswordRecovery }
+  | { serverMade: true; secret: Uint8Array };
+
+/**
+ * Recovery once enough shards are in: opens the bundle sealed to this browser's throwaway key,
+ * rebuilds the secret from the collected shards and the dealer's shard keys, and opens the password
+ * and the zero-knowledge master key. Throws when the shards don't rebuild the secret.
+ */
+export const recoverFromBundle = async (
   sealedBundle64: string,
   throwawayPrivateKeyPkcs8: Uint8Array
-): Promise<PasswordRecovery> => {
+): Promise<BundleRecovery> => {
   const bundle = JSON.parse(
     byteArrayToString(await zkUnseal(sealedBundle64, throwawayPrivateKeyPkcs8))
   ) as ShamirRecoveryBundle;
 
-  // A shard that doesn't open (a friend's server posted junk) is left out rather than spoiling the rest
+  // A shard that doesn't open (a holder's server posted junk) is left out rather than spoiling the rest
   const opened = await Promise.allSettled(
     bundle.shards.map(async (shard) => {
       const envelope = bundle.envelopes.find((e) => stringGuidsEqual(e.shardId, shard.id));
       if (!envelope) throw new Error(`No shard key for shard ${shard.id}`);
 
-      // A gated friend's browser sealed their piece to this browser; the dealer's own envelope says
-      // which friends are gated, and where each piece sits in the split
-      const locked =
-        envelope.player.type === 'delegate'
-          ? await zkUnseal(shard.dealerEncryptedShard, throwawayPrivateKeyPkcs8)
-          : base64ToUint8Array(shard.dealerEncryptedShard);
+      // Every holder sealed its piece to this browser. The dealer's own envelope says where each
+      // piece sits in the split: a holder could send any index. A server-made deal's envelopes kept
+      // the position instead, so it is rebuilt with the shard's, as the server rebuilt it.
+      const locked = await zkUnseal(shard.dealerEncryptedShard, throwawayPrivateKeyPkcs8);
       const piece = await cbcDecrypt(
         locked,
         base64ToUint8Array(envelope.encryptionIv),
         base64ToUint8Array(envelope.encryptionKey)
       );
-      return { index: envelope.index, shard: piece };
+      return { index: bundle.isServerMadeDeal ? shard.index : envelope.index, shard: piece };
     })
   );
   const pieces = opened.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+
+  // Nothing here can check a server-made deal's secret: the server does, when it opens the master key
+  if (bundle.isServerMadeDeal || !bundle.copies) {
+    if (!bundle.isServerMadeDeal) throw new Error('Password recovery is not set up');
+    return { serverMade: true, secret: rebuildSecret(pieces, SECRET_LENGTH) };
+  }
 
   const { copies } = bundle;
   const { secret, zkMasterKey } = await rebuildAndOpen(pieces, bundle.minMatchingShards, copies.shamirKeyEncryptedZkMasterKey);
@@ -289,10 +311,13 @@ export const recoverWithFriends = async (
   }
 
   return {
-    password,
-    zkMasterKey,
-    resetKey: await getShamirResetKey(secret),
-    shamirPublicKeyJwk: copies.shamirPublicKeyJwk,
+    serverMade: false,
+    recovery: {
+      password,
+      zkMasterKey,
+      resetKey: await getShamirResetKey(secret),
+      shamirPublicKeyJwk: copies.shamirPublicKeyJwk,
+    },
   };
 };
 
@@ -328,7 +353,7 @@ const rebuildAndOpen = async (
     if (opened) return opened;
   }
 
-  throw new Error("Your friends' shards don't rebuild the secret");
+  throw new Error("The shards don't rebuild the secret");
 };
 
 function* combinations<T>(items: T[], size: number, start = 0, chosen: T[] = []): Generator<T[]> {
@@ -340,3 +365,19 @@ function* combinations<T>(items: T[], size: number, start = 0, chosen: T[] = [])
     yield* combinations(items, size, i + 1, [...chosen, items[i]]);
   }
 }
+
+/** One holder of the recovery, and whether its shard is in. */
+export interface RecoverySlot {
+  player: FriendPlayer;
+  filled: boolean;
+}
+
+/**
+ * The slots the recovery status seals to the browser that started: the status needs no login, so
+ * the holders' names go only there.
+ */
+export const openRecoverySlots = async (
+  sealedSlots64: string,
+  throwawayPrivateKeyPkcs8: Uint8Array
+): Promise<RecoverySlot[]> =>
+  JSON.parse(byteArrayToString(await zkUnseal(sealedSlots64, throwawayPrivateKeyPkcs8))) as RecoverySlot[];

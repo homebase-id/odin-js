@@ -7,8 +7,9 @@ import {
   ShamirRecoveryBundle,
   dealToFriends,
   getShamirResetKey,
+  openRecoverySlots,
   openSealedKeyHeader,
-  recoverWithFriends,
+  recoverFromBundle,
   releaseGatedShard,
   sealKeyHeader,
 } from './ZeroKnowledgeFriends';
@@ -42,6 +43,13 @@ test('a split rebuilds, a leading zero byte included', () => {
   expect(rebuildSecret([shards[4], shards[0], shards[2]], 16)).toEqual(secret);
 });
 
+/** A deal made in the browser gives back the password; a server-made one only the secret. */
+const recoverWithFriends = async (sealedBundle64: string, privateKey: Uint8Array) => {
+  const recovered = await recoverFromBundle(sealedBundle64, privateKey);
+  if (recovered.serverMade) throw new Error('a deal made in the browser gives back the password');
+  return recovered.recovery;
+};
+
 const makePair = async () => {
   const pair = await createExportedEccPair();
   return { publicKeyJwk: pair.publicKeyJwk, privateKey: pair.privateKeyPkcs8 };
@@ -73,6 +81,59 @@ test('a deal can not let the automatic friends reach the minimum alone', async (
     { odinId: 'c.dotyou.cloud', type: 'delegate' as const, publicKeyJwk: (await makePair()).publicKeyJwk },
   ];
   await expect(dealToFriends(friends, 2, getRandom16ByteArray())).rejects.toThrow('at least one friend must approve');
+});
+
+test('the automated deal reaches the minimum with automatic holders by design', async () => {
+  const holders = ['na.dotyou.cloud', 'eu.dotyou.cloud', 'us.dotyou.cloud'].map((odinId) => ({ odinId, type: 'automatic' as const }));
+  const deal = await dealToFriends(holders, 2, getRandom16ByteArray(), { automated: true });
+  expect(deal.shards.every((s) => s.dealerEncryptedShard && !s.depositKeyHeader)).toBe(true);
+});
+
+/**
+ * A deal the server made, before the browser dealt every deal: its envelopes kept the position
+ * (0-based), not the piece's index, and its secret opens only today's master key, so the browser
+ * gets the secret back to send with a new password.
+ */
+test('a server-made deal gives back its secret, rebuilt with the shards own index', async () => {
+  const secret = getRandom16ByteArray();
+  const pieces = splitSecret(4, 3, secret);
+  const recovering = await makePair();
+
+  const dealt = await Promise.all(
+    pieces.map(async (piece, i) => {
+      const key = getRandom16ByteArray();
+      const iv = getRandom16ByteArray();
+      const shardId = `0000000${i}-0000-0000-0000-000000000000`;
+      const player = { odinId: `p${i}.dotyou.cloud`, type: 'automatic' as const };
+      const sealed = await zkSeal(await cbcEncrypt(piece.shard, iv, key), recovering.publicKeyJwk);
+      return {
+        envelope: { player, encryptionKey: uint8ArrayToBase64(key), encryptionIv: uint8ArrayToBase64(iv), shardId, index: i },
+        shard: { id: shardId, index: piece.index, player, dealerEncryptedShard: sealed },
+      };
+    })
+  );
+  const bundle: ShamirRecoveryBundle = {
+    minMatchingShards: 3,
+    envelopes: dealt.map((d) => d.envelope),
+    shards: dealt.slice(1).map((d) => d.shard),
+    copies: null,
+    isServerMadeDeal: true,
+  };
+
+  const recovered = await recoverFromBundle(
+    await zkSeal(new TextEncoder().encode(JSON.stringify(bundle)), recovering.publicKeyJwk),
+    recovering.privateKey
+  );
+  expect(recovered.serverMade && recovered.secret).toEqual(secret);
+});
+
+test('the status slots open only in the browser that started', async () => {
+  const recovering = await makePair();
+  const slots = [{ player: { odinId: 'na.dotyou.cloud', type: 'automatic' as const }, filled: true }];
+  const sealed = await zkSeal(new TextEncoder().encode(JSON.stringify(slots)), recovering.publicKeyJwk);
+
+  expect(await openRecoverySlots(sealed, recovering.privateKey)).toEqual(slots);
+  await expect(openRecoverySlots(sealed, (await makePair()).privateKey)).rejects.toThrow();
 });
 
 /**
@@ -128,7 +189,13 @@ test('a deal is recovered with one gated friend and the automatic friend', async
     })),
     shards: [
       { id: annShard.shardId, index: released.index, player: annShard.player, dealerEncryptedShard: released.sealedShard },
-      { id: catShard.shardId, index: catShard.index, player: catShard.player, dealerEncryptedShard: catShard.dealerEncryptedShard! },
+      // Cat's server seals the piece to the recovering browser once the owner clicks its email's link
+      {
+        id: catShard.shardId,
+        index: catShard.index,
+        player: catShard.player,
+        dealerEncryptedShard: await zkSeal(base64ToUint8Array(catShard.dealerEncryptedShard!), recovering.publicKeyJwk),
+      },
     ],
     copies: { ...deal.shamirCopies, shamirPublicKeyEncryptedPassword: passwordCopy },
   };
@@ -188,6 +255,6 @@ test('a deal is recovered with one gated friend and the automatic friend', async
 
   // Below the threshold of good pieces nothing opens
   await expect(recoverWithFriends(await sealBundle([decodableJunk, bundle.shards[1]]), recovering.privateKey)).rejects.toThrow(
-    "Your friends' shards don't rebuild the secret"
+    "The shards don't rebuild the secret"
   );
 });

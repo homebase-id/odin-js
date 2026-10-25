@@ -140,6 +140,8 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
     return t('Recovery is not ready: open the link in the browser where you started recovery');
   if (errorCode === 'recoveryUnderWayElsewhere')
     return t('Recovery is under way in another browser; finish it there, or exit it by email first');
+  if (errorCode === 'shardLinkNoLongerValid')
+    return t('This link no longer works: it was used, or a newer email replaced it. Use the newest email, or start over');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
   if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
 

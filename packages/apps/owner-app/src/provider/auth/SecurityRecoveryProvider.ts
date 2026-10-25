@@ -1,6 +1,13 @@
 import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {base64ToUint8Array, uint8ArrayToBase64} from '@homebase-id/js-lib/helpers';
-import {PasswordRecovery, createExportedEccPair, recoverWithFriends, sealKeyId} from '@homebase-id/js-lib/auth';
+import {
+  BundleRecovery,
+  RecoverySlot,
+  createExportedEccPair,
+  openRecoverySlots,
+  recoverFromBundle,
+  sealKeyId,
+} from '@homebase-id/js-lib/auth';
 import {OwnerClient} from "@homebase-id/common-app";
 import {prepareAuthPassword} from "./AuthenticationHelper";
 import {getSalts} from "./AuthenticationProvider";
@@ -23,11 +30,12 @@ export enum ShamirRecoveryState {
    */
   AwaitingSufficientDelegateConfirmation = "awaitingSufficientDelegateConfirmation",
 
+  /** No longer set by the server; a status stored before reads as no recovery. */
   AwaitingOwnerFinalization = "awaitingOwnerFinalization",
 
   /**
-   * Recovery with friends: enough friends approved. The browser that started recovery fetches their
-   * shards, sealed to its throwaway key, and rebuilds the secret itself.
+   * Enough shards are in. The browser that started recovery fetches them, sealed to its throwaway
+   * key, and rebuilds the secret itself.
    */
   AwaitingRecoveringBrowser = "awaitingRecoveringBrowser"
 }
@@ -39,6 +47,11 @@ export interface ShamirRecoveryStatusRedacted {
   state: ShamirRecoveryState;
   /** The throwaway key the recovery is for, pending or under way (sealKeyId), or null when none. */
   recoveryKeyId?: number | null;
+  /** While shards are collected: how many the recovery needs, and how many are in. */
+  needed?: number | null;
+  filled?: number | null;
+  /** While shards are collected: the holders and which are in, sealed to the browser that started. */
+  sealedSlots64?: string | null;
 }
 
 const root = "/security/recovery"
@@ -59,7 +72,11 @@ export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted>
     });
 };
 
-export const finalizeRecovery = async (id: string, fk: string, newPassword: string): Promise<boolean> => {
+/**
+ * A server-made deal's recovery (dealt before the browser dealt every deal): the secret this browser
+ * rebuilt, with a new password. True when the password was set.
+ */
+export const finalizeRecovery = async (secret: Uint8Array, newPassword: string): Promise<boolean> => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   const salts = await getSalts(dotYouClient);
@@ -67,8 +84,7 @@ export const finalizeRecovery = async (id: string, fk: string, newPassword: stri
 
   return await axiosClient
     .post(`${root}/finalize`, {
-      id: id,
-      finalKey: fk,
+      secret64: uint8ArrayToBase64(secret),
       passwordReply: passwordReply
     })
     .then((response) => {
@@ -96,8 +112,8 @@ export const exitRecoveryMode = async (): Promise<boolean> => {
     });
 };
 
-// Recovery with friends must finish in the browser that started it: the friends seal their shards to
-// this throwaway key pair. The private key never leaves this browser. It is this browser's only while
+// Recovery must finish in the browser that started it: every holder seals its shard to this
+// throwaway key pair. The private key never leaves this browser. It is this browser's only while
 // the server says the recovery (pending or under way) is for it: status.recoveryKeyId. It is
 // forgotten when a status read shows no recovery, or one under way for another browser's key, after
 // a reset, and at the owner's login. A pending start never makes it go: its key id is only the last
@@ -146,8 +162,7 @@ const isUnderWay = (status: ShamirRecoveryStatusRedacted | null) =>
 /**
  * The status, from one read of the stored key:
  * - `thisBrowser`: the recovery it shows (pending or under way) is for the stored key;
- * - `elsewhere`: a recovery is under way for another browser's key (an automated deal's carries
- *   none, so it is never elsewhere).
+ * - `elsewhere`: a recovery is under way for another browser's key.
  *
  * A key past its grace is forgotten when there is no recovery, or one under way elsewhere; never for
  * a pending start, which anyone can make.
@@ -194,8 +209,8 @@ const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
 };
 
 /**
- * The email link's step: posts its nonce with this browser's public key. Entering recovery with
- * friends must come from the browser that started it, so another browser is refused.
+ * The email link's step: posts its nonce with this browser's public key. Entering recovery must come
+ * from the browser that started it, so another browser is refused.
  */
 export const enterRecoveryMode = async (id: string): Promise<string | null> => {
   const key = getStoredRecoveryKey();
@@ -205,17 +220,18 @@ export const enterRecoveryMode = async (id: string): Promise<string | null> => {
     .then(() => null)
     .catch((error) => {
       console.warn(error);
-      // With no key here this can't be the browser that started it (an automated recovery needs none)
+      // With no key here this can't be the browser that started it
       if (!key) return 'Open the link in the browser where you started recovery.';
       return getKnownOdinErrorMessages(error) ?? 'This link has expired or was already used. Start recovery again.';
     });
 };
 
 /**
- * Recovery with friends, once enough approved: the password, rebuilt in this browser only. The key
- * stays until the recovery ends, so a reload can open the bundle again.
+ * Once enough shards are in: the password, rebuilt in this browser only (or, for a server-made deal,
+ * the secret to set a new one with). The key stays until the recovery ends, so a reload can open the
+ * bundle again.
  */
-export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> => {
+export const recoverInThisBrowser = async (): Promise<BundleRecovery> => {
   const key = getStoredRecoveryKey();
   if (!key) throw new Error('This browser did not start the recovery');
 
@@ -223,8 +239,38 @@ export const recoverWithApprovedFriends = async (): Promise<PasswordRecovery> =>
     .createAxiosClient()
     .get<{ sealedBundle64: string }>(`${root}/recovery-bundle`)
     .then((response) => response.data.sealedBundle64);
-  return recoverWithFriends(sealedBundle64, base64ToUint8Array(key.privateKey64));
+  return recoverFromBundle(sealedBundle64, base64ToUint8Array(key.privateKey64));
 };
+
+/** The holders and which are in, when this browser started the recovery; null otherwise. */
+export const openSlots = async (status: ShamirRecoveryStatusRedacted | null): Promise<RecoverySlot[] | null> => {
+  const key = getStoredRecoveryKey();
+  if (!key || !status?.sealedSlots64) return null;
+
+  try {
+    return await openRecoverySlots(status.sealedSlots64, base64ToUint8Array(key.privateKey64));
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * The link from an automatic holder's email, clicked on any device: hands its code to the holder,
+ * which releases its shard sealed to the browser that started. Null when it worked; otherwise the
+ * message to show.
+ */
+export const fillSlot = async (shardId: string, code: string): Promise<string | null> =>
+  dotYouClient
+    .createAxiosClient()
+    .post(`${root}/fill-slot`, {shardId, code})
+    .then(() => null)
+    .catch((error) => {
+      console.warn(error);
+      if (error?.response?.data?.errorCode === 'recoveryNotReady') {
+        return 'There is no recovery under way any more. Start over to get new emails.';
+      }
+      return getKnownOdinErrorMessages(error) ?? 'This link did not work. Use the newest email, or start over.';
+    });
 
 /**
  * Starts recovery, or sends the email again ("send it again", "start over"). True when the email
