@@ -124,6 +124,15 @@ const isAutomatedDealPending = () => {
   }
 };
 
+const forgetAutomatedDealPending = () => {
+  try {
+    window.localStorage.removeItem(AUTOMATED_DEAL_PENDING);
+  } catch {
+    // nothing stored
+  }
+};
+
+// Not getShamirConfiguration: that reads a failure as "no deal", which would deal over one
 const hasDeal = (dotYouClient: DotYouClient) =>
   dotYouClient
     .createAxiosClient()
@@ -259,13 +268,13 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login
   // deals again.
   try {
-    const pending = isAutomatedDealPending() && !(await hasDeal(dotYouClient));
-    if (status.automatedDealNeedsDealing || pending) {
+    const pending = isAutomatedDealPending();
+    if (status.automatedDealNeedsDealing || (pending && !(await hasDeal(dotYouClient)))) {
       await dealAutomatedRecovery(dotYouClient, masterKey);
       // The deal leaves its password copy to write, and this login has the password
       await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
     }
-    window.localStorage.removeItem(AUTOMATED_DEAL_PENDING);
+    if (pending) forgetAutomatedDealPending();
   } catch (error) {
     console.warn('The automated recovery could not be dealt; the next login tries again', error);
   }
