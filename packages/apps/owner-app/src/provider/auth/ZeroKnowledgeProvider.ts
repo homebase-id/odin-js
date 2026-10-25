@@ -104,6 +104,32 @@ const convertShardRecoveryDrive = async (
   request: ZkConvertDriveRequest
 ) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
+// Set when first run couldn't deal the automated deal (no zero-knowledge master key in the session
+// yet, say): the next password login deals it, if there is still no deal by then.
+const AUTOMATED_DEAL_PENDING = 'automated-recovery-pending';
+
+export const rememberAutomatedDealPending = () => {
+  try {
+    window.localStorage.setItem(AUTOMATED_DEAL_PENDING, 'true');
+  } catch {
+    // nothing to remember it in: the security page offers it
+  }
+};
+
+const isAutomatedDealPending = () => {
+  try {
+    return window.localStorage.getItem(AUTOMATED_DEAL_PENDING) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const hasDeal = (dotYouClient: DotYouClient) =>
+  dotYouClient
+    .createAxiosClient()
+    .get('/security/recovery/config')
+    .then((response) => !!response.data);
+
 /** Sends a deal this browser made; throws with a message to show. */
 export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsRequest, failure: string) =>
   dotYouClient
@@ -229,11 +255,19 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
     await convertShardRecoveryDrive(dotYouClient, request);
   }
 
-  // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move it
-  if (status.automatedDealNeedsDealing) {
-    await dealAutomatedRecovery(dotYouClient, masterKey);
-    // The deal leaves its password copy to write, and this login has the password
-    await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
+  // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move
+  // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login
+  // deals again.
+  try {
+    const pending = isAutomatedDealPending() && !(await hasDeal(dotYouClient));
+    if (status.automatedDealNeedsDealing || pending) {
+      await dealAutomatedRecovery(dotYouClient, masterKey);
+      // The deal leaves its password copy to write, and this login has the password
+      await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
+    }
+    window.localStorage.removeItem(AUTOMATED_DEAL_PENDING);
+  } catch (error) {
+    console.warn('The automated recovery could not be dealt; the next login tries again', error);
   }
 
   if (status.recoveryPhrase === 'onServer') {
