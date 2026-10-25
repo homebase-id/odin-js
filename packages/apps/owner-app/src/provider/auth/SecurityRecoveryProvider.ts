@@ -263,7 +263,7 @@ export const fillSlot = async (shardId: string, code: string): Promise<string | 
       if (error?.response?.data?.errorCode === 'recoveryNotReady') {
         return 'There is no recovery under way any more. Start over to get new emails.';
       }
-      return getKnownOdinErrorMessages(error) ?? 'This link did not work. Use the newest email, or start over.';
+      return getKnownOdinErrorMessages(error) ?? 'This link did not work just now. Try it again, or use the newest email.';
     });
 
 /**

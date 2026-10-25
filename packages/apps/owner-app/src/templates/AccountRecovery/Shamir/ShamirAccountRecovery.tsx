@@ -57,8 +57,11 @@ const ShamirAccountRecovery = () => {
     setError(text ? {text, forState} : null);
   const setNotice = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
     setNoticeMessage(text ? {text, forState} : null);
-  // Status reads can come back out of order (the poll, a link's own read): only the newest counts
-  const lastRead = useRef(0);
+  // Status reads can come back out of order (the poll, a link's own read): one older than the newest
+  // applied is dropped, and gives back what the newest applied read
+  const lastSent = useRef(0);
+  const lastApplied = useRef(0);
+  const lastRead = useRef<{ state: ShamirRecoveryState; thisBrowser: boolean } | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
   // A recovery under way for another browser's key
   const [elsewhere, setElsewhere] = useState<boolean>(false);
@@ -106,14 +109,18 @@ const ShamirAccountRecovery = () => {
 
   /**
    * The state read and whether this browser started the recovery, or null when the read failed: that
-   * is no news about the recovery, so nothing changes. A message from another state goes; one not yet
-   * pinned to a state is pinned to this one.
+   * is no news about the recovery, so nothing changes. A read older than one already applied gives
+   * back the newer one. A message from another state goes; one not yet pinned is pinned to this one.
    */
   const reloadStatus = () => {
-    const read = ++lastRead.current;
+    const read = ++lastSent.current;
     return getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
+      if (read < lastApplied.current) return lastRead.current;
       setLoaded(true);
-      if (!result || read !== lastRead.current) return null;
+      if (!result) return null;
+
+      lastApplied.current = read;
+      lastRead.current = {state: result.state, thisBrowser: isThisBrowser};
       const settle = (m: Message | null) =>
         !m ? null : m.forState === null ? {...m, forState: result.state} : m.forState === result.state ? m : null;
       setError(settle);
@@ -121,8 +128,10 @@ const ShamirAccountRecovery = () => {
       setStatus(result);
       setThisBrowser(isThisBrowser);
       setElsewhere(isElsewhere);
-      openSlots(isThisBrowser ? result : null).then(setSlots);
-      return {state: result.state, thisBrowser: isThisBrowser};
+      openSlots(isThisBrowser ? result : null).then((slots) => {
+        if (read === lastApplied.current) setSlots(slots);
+      });
+      return lastRead.current;
     });
   };
 
