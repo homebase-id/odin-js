@@ -83,7 +83,10 @@ const ShamirAccountRecovery = () => {
     getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
       // A notice belongs to the state it was shown in
       setStatus((previous) => {
-        if (previous?.state !== result?.state) setNotice(null);
+        if (previous?.state !== result?.state) {
+          setNotice(null);
+          setErrorMessage(null);
+        }
         return result;
       });
       setThisBrowser(isThisBrowser);

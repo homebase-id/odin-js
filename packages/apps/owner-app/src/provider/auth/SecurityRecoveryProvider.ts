@@ -160,7 +160,7 @@ export const getRecoveryStatusForThisBrowser = async (): Promise<{
   const status = await getRecoveryStatus();
   const key = getStoredRecoveryKey();
   const thisBrowser = await isFor(key, status?.recoveryKeyId);
-  const elsewhere = !!status && isUnderWay(status) && status.recoveryKeyId != null && !thisBrowser;
+  const elsewhere = isUnderWay(status) && status?.recoveryKeyId != null && !thisBrowser;
   if (status && key && !thisBrowser && Date.now() - key.created > FORGET_GRACE_MS) {
     if (status.state === ShamirRecoveryState.None || elsewhere) forgetIfStillStored(key);
   }
@@ -173,7 +173,7 @@ export const getRecoveryStatusForThisBrowser = async (): Promise<{
  * links working, even after someone else started one (a pending start is only the last one); a new
  * pair when none is stored. Throws when a recovery is under way in another browser (the server would
  * ignore the start, and replacing the key here would only lose it), and when the status can't be read
- * (a recovery may be under way for the stored key).
+ * (it can't tell whether a recovery is under way elsewhere).
  */
 const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
   const {status, elsewhere} = await getRecoveryStatusForThisBrowser();
