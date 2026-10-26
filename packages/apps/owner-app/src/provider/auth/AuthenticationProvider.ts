@@ -1,20 +1,17 @@
 import {base64ToUint8Array} from '@homebase-id/js-lib/helpers';
 import {OwnerClient} from '@homebase-id/common-app';
 import {
-  NonceData,
-  deriveLoginKeys,
   encryptRecoveryKey,
+  getNonce,
+  getPublicKey,
+  getSalts,
   prepareAuthPassword,
-  prepareAuthReply,
 } from './AuthenticationHelper';
 import {ApiType, DotYouClient} from '@homebase-id/js-lib/core';
-import {LoginKeys} from '@homebase-id/js-lib/auth';
 import {relockZkKeysForNewPassword} from './ZeroKnowledgeProvider';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;
-  // Kept for the zero-knowledge keys made right after login
-  loginKeys: LoginKeys;
 }
 
 // Authenticate the owner
@@ -24,8 +21,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   });
 
   const noncePackage = await getNonce(dotYouClient);
-  const loginKeys = await deriveLoginKeys(password, noncePackage);
-  const reply = await prepareAuthReply(loginKeys, noncePackage);
+  const reply = await prepareAuthPassword(password, noncePackage);
 
   const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = '/authentication';
@@ -35,7 +31,6 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   if (response.status === 200) {
     const authResponse: AuthenticationResponse = {
       sharedSecret: base64ToUint8Array(response.data.sharedSecret),
-      loginKeys,
     };
     return authResponse;
   }
@@ -124,13 +119,12 @@ export const changePassword = async (
   const currentAuthenticationPasswordReply = await prepareAuthPassword(oldPassword, noncePackage);
 
   const salts = await getSalts(dotYouClient);
-  const newLoginKeys = await deriveLoginKeys(newPassword, salts);
-  const newPasswordReply = await prepareAuthReply(newLoginKeys, salts);
+  const newPasswordReply = await prepareAuthPassword(newPassword, salts);
 
   // Re-locked in the same request, so the keys are never left locked by the old password
   let zkKeys;
   try {
-    zkKeys = await relockZkKeysForNewPassword(dotYouClient, oldPassword, newPassword, newLoginKeys);
+    zkKeys = await relockZkKeysForNewPassword(dotYouClient, oldPassword, newPassword);
   } catch (error) {
     console.error(error);
     return false;
@@ -186,34 +180,4 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client
-    .get('/authentication/nonce')
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};
-
-export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client.get('/authentication/getsalts').then((response) => {
-    return response.data;
-  });
-};
-
-export interface PublicKeyData {
-  publicKeyJwkBase64Url: string;
-  crC32c: number;
-  expiration: number;
-}
-
-export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  return client
-    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
-    .then((response) => {
-      return response.data;
-    });
-};
+export { getNonce, getSalts } from './AuthenticationHelper';

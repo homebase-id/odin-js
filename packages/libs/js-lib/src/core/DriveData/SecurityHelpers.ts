@@ -233,6 +233,22 @@ export const decryptChunkedBytesResponse = async (
   }
 };
 
+/**
+ * Whether a file's key header, as a read or a query returns it, is a deposit's: sealed to the drive's
+ * write-only public key (11/'aes' otherwise). The identity server returns the type as a string.
+ */
+export const isSealedKeyHeader = (keyHeader: { type: number | string } | undefined | null) =>
+  !!keyHeader && (keyHeader.type === 'sealed' || keyHeader.type === 12);
+
+/**
+ * Whether a file is a deposit: encrypted, with its key header sealed to the drive's write-only key.
+ * Nothing but the drive owner's browser, with that key, can open it.
+ */
+export const isDeposit = (file: {
+  fileMetadata: { isEncrypted: boolean };
+  sharedSecretEncryptedKeyHeader?: { type: number | string } | null;
+}) => file.fileMetadata.isEncrypted && isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader);
+
 export const decryptKeyHeader = async (
   dotYouClient: DotYouClient,
   encryptedKeyHeader: EncryptedKeyHeader | KeyHeader
@@ -241,6 +257,11 @@ export const decryptKeyHeader = async (
     'iv' in encryptedKeyHeader && 'aesKey' in encryptedKeyHeader;
   if (encryptedKeyHeaderIsAlreadyDecrypted) {
     return encryptedKeyHeader as KeyHeader;
+  }
+
+  // A deposit's key header is sealed to the drive's write-only key, not the shared secret
+  if (isSealedKeyHeader(encryptedKeyHeader)) {
+    throw new Error("A deposit's key header opens only with the drive's write-only private key");
   }
 
   const ss = dotYouClient.getSharedSecret();

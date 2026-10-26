@@ -1,4 +1,4 @@
-import { t, LoadingBlock } from '@homebase-id/common-app';
+import { t, LoadingBlock, useDotYouClient } from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,8 @@ import { ChangeRecoveryEmailDialog } from './Dialog/ChangeRecoveryEmailDialog';
 import { DealerRecoveryRiskHeadline } from './DealerRecoveryRiskHeadline';
 import { Check, Exclamation } from '@homebase-id/common-app/icons';
 import { SettingsRow } from './SettingsRow';
+import { getDealNeedsDealing } from '../../provider/auth/ZeroKnowledgeProvider';
+import { loginHref } from '../../hooks/auth/useAuth';
 
 export const SecurityOverview = () => {
   const [openDialog, setOpenDialog] = useState<
@@ -23,13 +25,19 @@ export const SecurityOverview = () => {
   const [statusLoading, setStatusLoading] = useState(false);
   const [info, setInfo] = useState<RecoveryInfo | null>();
   const [monthlyStatusReportEnabled, setMonthlyStatusReportEnabled] = useState(false);
+  // After a recovery email change the holders refuse the deal until a password login deals it again
+  const [dealNeedsDealing, setDealNeedsDealing] = useState(false);
+  const { getDotYouClient } = useDotYouClient();
 
   const reset = async () => {
     setStatusLoading(true);
-    const status = await getRecoveryInfo();
+    const [status, needsDealing, reportEnabled] = await Promise.all([
+      getRecoveryInfo(),
+      getDealNeedsDealing(getDotYouClient()).catch(() => false),
+      getMonthlyReportSetting(),
+    ]);
     setInfo(status);
-
-    const reportEnabled = await getMonthlyReportSetting();
+    setDealNeedsDealing(needsDealing);
     setMonthlyStatusReportEnabled(reportEnabled);
     setStatusLoading(false);
   };
@@ -60,6 +68,17 @@ export const SecurityOverview = () => {
   return (
     <>
       {/*<ErrorNotification error={updateFlagError}/>*/}
+      {dealNeedsDealing ? (
+        <div className="mb-4 rounded-lg bg-orange-100 p-4 dark:bg-orange-900">
+          {t('Your recovery needs your password once more, so it uses your recovery email.')}{' '}
+          <a
+            className="underline"
+            href={loginHref('/owner/security/overview', { redeal: true })}
+          >
+            {t('Log in again')}
+          </a>
+        </div>
+      ) : null}
 
       <>
         <Section
@@ -122,28 +141,6 @@ export const SecurityOverview = () => {
 
                   {info?.isConfigured && info?.recoveryRisk && (
                     <DealerRecoveryRiskHeadline report={info.recoveryRisk} />
-                  )}
-
-                  {info?.isConfigured && info?.rotationPending && (
-                    <span className="flex items-center text-red-600">
-                      <Exclamation className="mr-1 h-4 w-4" />
-                      {t(
-                        'Your recovery shards were not refreshed after your password changed.'
-                      )}{' '}
-                      {info.usesAutomaticRecovery
-                        ? t(
-                            'The automated recovery shards from before the change can still recover your account.'
-                          )
-                        : t(
-                            'Trusted connections you are still connected to can use the shards they held before the change to recover your account.'
-                          )}
-                      <Link
-                        to="/owner/security/password-recovery?gs=1"
-                        className="ml-2 text-blue-600 underline hover:text-blue-800"
-                      >
-                        {t('Set up again')}
-                      </Link>
-                    </span>
                   )}
                 </SettingsRow>
 

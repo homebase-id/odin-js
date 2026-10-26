@@ -6,6 +6,11 @@ import { OWNER_APPS_ROOT, OWNER_ROOT } from '../../constants';
 
 export const HOME_SHARED_SECRET = 'HSS';
 export const OWNER_SHARED_SECRET = 'SS';
+/**
+ * The owner's zero-knowledge master key, locked by the session key the server keeps with the owner
+ * session (odin-core docs/zero-knowledge-recovery-plan.md, decision 8). Useless on its own.
+ */
+export const OWNER_ZK_MASTER_KEY = 'ZKMK';
 export const STORAGE_IDENTITY_KEY = 'identity';
 
 export const APP_AUTH_TOKEN = window.location.pathname.startsWith(OWNER_APPS_ROOT)

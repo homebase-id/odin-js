@@ -7,17 +7,33 @@ import {Label} from '@homebase-id/common-app';
 import {MinimalLayout} from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import {PasswordInput} from '../../components/Password/PasswordInput';
+import {RecoveredPassword} from './RecoveredPassword';
+import {loginHref as loginHrefFor} from '../../hooks/auth/useAuth';
 import {PasswordStrength} from '../../components/Password/PasswordStrength';
 import {useNavigate, useSearchParams} from "react-router-dom";
+import {ApiType} from '@homebase-id/js-lib/core';
+import {PasswordRecovery} from '@homebase-id/js-lib/auth';
+import {OwnerClient} from '@homebase-id/common-app';
+import {recoverFromPhrase, resetPasswordWithResetKey} from '../../provider/auth/ZeroKnowledgeProvider';
 
 const AccountRecovery = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
+  // 'phrase': the phrase first. 'recovered': it opened the password in this browser.
+  // 'newPassword': the phrase was not taken over yet, so today's reset with a new password.
+  // 'phraseReset': a new password with the phrase's reset key, when there is no recovered password
+  // or it doesn't work.
+  // 'needsReentry': another recovery reset the password and the phrase can't recover until it is
+  // typed in again after a login.
+  const [step, setStep] = useState<'phrase' | 'recovered' | 'newPassword' | 'phraseReset' | 'needsReentry'>(
+    'phrase'
+  );
+  const [recovered, setRecovered] = useState<PasswordRecovery>();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   const returnSuffix = returnUrl ? `?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}` : '';
-  const loginHref = `/owner/login${returnSuffix}`;
+  const loginHref = loginHrefFor(returnUrl);
   const [recoveryKey, setRecoveryKey] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
@@ -31,10 +47,32 @@ const AccountRecovery = () => {
 
   const passwordIsValid = password === retypePassword && password !== '';
 
+  const doRecoverWithPhrase = async () => {
+    setState('loading');
+    try {
+      const result = await recoverFromPhrase(new OwnerClient({api: ApiType.Owner}), recoveryKey);
+      if (result === 'notTakenOver') {
+        setStep('newPassword');
+      } else if (result === 'needsReentry') {
+        setStep('needsReentry');
+      } else {
+        setRecovered(result);
+        setStep(result.password === undefined ? 'phraseReset' : 'recovered');
+      }
+      setState('idle');
+    } catch (error) {
+      console.error(error);
+      setState('error');
+    }
+  };
+
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await resetPassword(password, recoveryKey.trim())) {
+    const done = step === 'phraseReset' && recovered
+      ? await resetPasswordWithResetKey(new OwnerClient({api: ApiType.Owner}), recovered, password)
+      : await resetPassword(password, recoveryKey.trim());
+    if (done) {
       setState('success');
     } else {
       setState('error');
@@ -58,7 +96,23 @@ const AccountRecovery = () => {
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
-              {state === 'success' ? (
+              {step === 'needsReentry' ? (
+                <div className="my-2">
+                  <p className="mb-3">
+                    {t('Your password was reset with another recovery method since you last used your recovery key, so it cannot recover your account until you log in and enter it again.')}
+                  </p>
+                  <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+                    <ActionButton onClick={() => enterShamirMode()}>{t('Use another recovery method')}</ActionButton>
+                    <ActionLink type="secondary" href={loginHref}>{t('Cancel')}</ActionLink>
+                  </div>
+                </div>
+              ) : step === 'recovered' ? (
+                <RecoveredPassword
+                  password={recovered?.password}
+                  returnUrl={returnUrl}
+                  onReset={() => setStep('phraseReset')}
+                />
+              ) : state === 'success' ? (
                 <div className="my-2">
                   <p>{t('Your password has been changed successfully')}</p>
                   <div className="flex flex-row-reverse">
@@ -68,7 +122,11 @@ const AccountRecovery = () => {
               ) : state === 'error' ? (
                 <>
                   <Alert type="warning" isCompact={true}>
-                    {t('Failed to set a new password, check your recovery key and try again')}
+                    {step === 'phrase'
+                      ? t('That recovery key does not open your account, check it and try again')
+                      : step === 'phraseReset'
+                        ? t('Failed to set a new password, try again')
+                        : t('Failed to set a new password, check your recovery key and try again')}
                   </Alert>
                   <div className="mt-5 flex flex-row-reverse">
                     <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
@@ -78,15 +136,28 @@ const AccountRecovery = () => {
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  doSetNewPassword();
+                  if (step === 'phrase') doRecoverWithPhrase();
+                  else doSetNewPassword();
                 }}>
+                  {step === 'phraseReset' ? (
+                    <p className="mb-2 max-w-md text-slate-400">
+                      {recovered?.password === undefined
+                        ? t('Your recovery key is right, but no password was saved with it. Set a new password.')
+                        : t('Set a new password with your recovery key.')}
+                    </p>
+                  ) : (
+                  <>
                   <div className="mb-2">
                     <p className="max-w-md text-slate-400">
                       {t('To regain access to your account you will need your recovery key.')}{' '}
                       {t('You received your recovery key when you first signed up')}{' '}
                     </p>
+                    {/* Inside the phrase form: not a submit, or the browser asks for the empty phrase first */}
                     <ActionButton className="mt-3 mb-3"
-                                  onClick={() => enterShamirMode()}>{t('Click here if you forgot your recovery key')}</ActionButton>
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    enterShamirMode();
+                                  }}>{t('Click here if you forgot your recovery key')}</ActionButton>
                   </div>
                   <div className="mb-2">
                     <Label>{t('Your recovery key')}</Label>
@@ -100,6 +171,19 @@ const AccountRecovery = () => {
                       autoComplete="off"
                     />
                   </div>
+                  </>
+                  )}
+                  {step === 'phrase' ? (
+                    <div className="mt-5 flex flex-row-reverse justify-between gap-2">
+                      <ActionButton state={state} disabled={recoveryKey.trim() === ''}>
+                        {t('Continue')}
+                      </ActionButton>
+                      <ActionLink type="secondary" href={loginHref}>
+                        {t('Cancel')}
+                      </ActionLink>
+                    </div>
+                  ) : (
+                  <>
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
@@ -145,6 +229,8 @@ const AccountRecovery = () => {
                       {t('Cancel')}
                     </ActionLink>
                   </div>
+                  </>
+                  )}
                 </form>
               )}
             </div>

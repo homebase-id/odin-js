@@ -1,7 +1,12 @@
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 
 import {WelcomeData} from '../../templates/Setup/Setup';
-import {DriveDefinitionParam, enableAutoPasswordRecovery, initialize} from '../../provider/system/SystemProvider';
+import {DriveDefinitionParam, initialize} from '../../provider/system/SystemProvider';
+import {
+  dealAutomatedRecovery,
+  rememberAutomatedDealPending,
+  requireZkMasterKey,
+} from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   SetupAutoFollow,
   SetupBlog,
@@ -41,12 +46,15 @@ export const useInit = () => {
 
     if (data?.enableAutomatedPasswordRecovery === true) {
       try {
-        await enableAutoPasswordRecovery(dotYouClient);
+        // Dealt in this browser; the next password login writes its password copy
+        if (!(await dealAutomatedRecovery(dotYouClient, await requireZkMasterKey(dotYouClient, 'set up automatic recovery')))) {
+          console.warn('This host has no automatic recovery');
+        }
 
       } catch (error) {
+        // The next password login deals it, if there is still no deal then
         console.error(error);
-        // alert(t("This hosting provider does not have auto-password recovery enabled.  You can manually configure " +
-        //   "this after you have added connections"));
+        rememberAutomatedDealPending();
       }
     }
 

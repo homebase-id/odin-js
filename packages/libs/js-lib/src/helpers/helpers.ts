@@ -10,3 +10,6 @@ export * from './ImageMerger';
 export * from './PayloadAndThumbnailGenerator';
 export * from './BlobHelpers';
 export * from './SlugHelpers';
+export * from './Bip39';
+export * from './Crc32';
+export * from './ShamirSecretSharing';

@@ -254,7 +254,8 @@ export interface KeyHeader {
 
 export interface EncryptedKeyHeader {
   encryptionVersion: number;
-  type: number; //value is always 11
+  /** 11 (or 'aes' as the identity server returns it); 12 or 'sealed' for a deposit (ZeroKnowledgeFriends) */
+  type: number | string;
   iv: Uint8Array;
   encryptedAesKey: Uint8Array;
 }

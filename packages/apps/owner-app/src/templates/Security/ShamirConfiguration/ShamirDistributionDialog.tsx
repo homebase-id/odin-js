@@ -6,7 +6,7 @@ import {Step3OtherOptions} from "./Step3OtherOptions";
 import {DistributeShardsReview} from "./DistributeShardsReview";
 import {
     configureShards,
-    ConfigureShardsRequest,
+    ShamirDealPlan,
     PlayerType,
     ShamiraPlayer,
     ShamirConfigurationType
@@ -15,16 +15,25 @@ import {createPortal} from "react-dom";
 import {WaitForShardConfig} from "./WaitForShardConfig";
 import {Step1SelectConfigurationType} from "./Step1SelectConfigurationType";
 
+/** One shard alone must never be enough: as the server and the split require. */
+export const MIN_MATCHING_SHARDS = 2;
+
+// The friends who release automatically are servers, as is the dealer package, so together they must
+// stay below the minimum: approvals >= players - minShards + 1, and at least one friend approves
+// (odin-core docs/zero-knowledge-recovery-plan.md, F2).
 const validationMatrix = [
-    {players: 3, minShards: 2, approvals: 2},
-    {players: 4, minShards: 3, approvals: 2},
-    {players: 5, minShards: 3, approvals: 2},
-    {players: 6, minShards: 4, approvals: 3},
-    {players: 7, minShards: 4, approvals: 3},
-    {players: 8, minShards: 5, approvals: 3},
-    {players: 9, minShards: 5, approvals: 4},
-    {players: 10, minShards: 6, approvals: 4},
+    {players: 3, minShards: 2},
+    {players: 4, minShards: 3},
+    {players: 5, minShards: 3},
+    {players: 6, minShards: 4},
+    {players: 7, minShards: 4},
+    {players: 8, minShards: 5},
+    {players: 9, minShards: 5},
+    {players: 10, minShards: 6},
 ];
+
+/** The fewest friends who must approve for a rule's default minimum. */
+const approvalsFor = (rule: { players: number; minShards: number }) => rule.players - rule.minShards + 1;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function getRuleForPlayers(count: number) {
@@ -51,7 +60,7 @@ export const ShamirDistributionDialog = ({
     const [minShards, setMinShards] = useState(3);
     const client = useDotYouClient().getDotYouClient();
     const [validationError, setValidationError] = useState<string | null>(null);
-    const [awaitConfigureShardsRequest, setAwaitConfigureShardsRequest] = useState<ConfigureShardsRequest | null>(null);
+    const [awaitConfigureShardsRequest, setAwaitConfigureShardsRequest] = useState<ShamirDealPlan | null>(null);
     const [allPlayersVerified, setAllPlayersVerified] = useState<boolean>(false);
 
     const reset = () => {
@@ -88,7 +97,7 @@ export const ShamirDistributionDialog = ({
             // Apply default delegate assignments
             setPlayers(players.map((p, index) => ({
                 ...p,
-                type: index < rule.approvals ? PlayerType.Delegate : PlayerType.Automatic,
+                type: index < approvalsFor(rule) ? PlayerType.Delegate : PlayerType.Automatic,
             })));
         }
 
@@ -100,8 +109,8 @@ export const ShamirDistributionDialog = ({
         const rule = getRuleForPlayers(players.length);
         const approvals = players.filter(p => p.type === PlayerType.Delegate).length;
 
-        if (minShards < 1) {
-            setValidationError(t('Min shards cannot be less than 1'));
+        if (minShards < MIN_MATCHING_SHARDS) {
+            setValidationError(t('Min shards cannot be less than {0}', MIN_MATCHING_SHARDS));
             return;
         }
 
@@ -112,12 +121,17 @@ export const ShamirDistributionDialog = ({
             return;
         }
 
-        // Only enforce the approval minimum if *some* are delegates, but fewer than the suggested rule.
-        // If all are automatic (approvals === 0), allow it.
-        if (rule && approvals > 0 && approvals < rule.approvals) {
+        // The automatic friends alone must never reach the minimum: their servers would release
+        // enough shards with no human, and the server would refuse the deal.
+        if (players.length - approvals >= minShards) {
             setValidationError(
-                t('Too few set to Approve — add another for better security or make them all automatic')
+                t('Too few set to Approve — the friends who release automatically must not be enough on their own')
             );
+            return;
+        }
+
+        if (rule && approvals < approvalsFor(rule)) {
+            setValidationError(t('Too few set to Approve — add another for better security'));
             return;
         }
 
@@ -130,7 +144,7 @@ export const ShamirDistributionDialog = ({
 
         setValidationError(null);
 
-        const request: ConfigureShardsRequest = {
+        const request: ShamirDealPlan = {
             players: players.map(p => {
                 return {
                     odinId: p.odinId,
@@ -140,8 +154,13 @@ export const ShamirDistributionDialog = ({
             minMatchingShards: minShards
         };
 
-        setAwaitConfigureShardsRequest(request);
-        await configureShards(client, request);
+        try {
+            await configureShards(client, request);
+            setAwaitConfigureShardsRequest(request);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            setValidationError(error?.message || t('Failed to distribute the shards'));
+        }
     }
 
     const close = () => {
@@ -169,7 +188,7 @@ export const ShamirDistributionDialog = ({
 
     if (!isOpen) return null;
 
-    const cfg: ConfigureShardsRequest =
+    const cfg: ShamirDealPlan =
         {
             players: players.map(p => {
                 return {

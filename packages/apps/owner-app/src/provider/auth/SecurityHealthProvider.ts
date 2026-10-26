@@ -1,7 +1,8 @@
-import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
+import {ApiType, DotYouClient, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
-import {encryptRecoveryKey, prepareAuthPassword} from "./AuthenticationHelper";
-import {getNonce, getPublicKey, getSalts} from "./AuthenticationProvider";
+import {prepareAuthPassword} from "./AuthenticationHelper";
+import {getTypedPhraseCheck} from "./ZeroKnowledgeProvider";
+import {getNonce} from "./AuthenticationProvider";
 import {ShamiraPlayer} from "./ShamirProvider";
 
 export interface DealerRecoveryRiskReport {
@@ -90,11 +91,6 @@ export interface RecoveryInfo {
   status: VerificationStatus,
   hasRecoveryKeyBeenViewed: boolean,
   recoveryRisk: DealerRecoveryRiskReport,
-
-  // The shards predate the current password and could not be rotated; until recovery is set up
-  // again, delegates still connected (or automated players) can release the shards from before
-  // the change (odin-core #1885)
-  rotationPending: boolean
 }
 
 export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInfo | null> => {
@@ -178,31 +174,23 @@ export const getShardHealthStatus = async (): Promise<PeriodicSecurityHealthChec
 };
 
 
-export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
+/**
+ * Only the phrase's check value goes to the server, never the phrase itself. An ordinary encrypted
+ * owner request: `dotYouClient` must be the session's, with its shared secret.
+ */
+export const verifyRecoveryKey = async (dotYouClient: DotYouClient, recoveryKey: string): Promise<boolean> => {
+  let phraseCheck64: string;
+  try {
+    phraseCheck64 = await getTypedPhraseCheck(recoveryKey);
+  } catch {
+    return false;
+  }
 
-  const publicKey = await getPublicKey(dotYouClient);
-  const salts = await getSalts(dotYouClient);
-  const passwordReply = await prepareAuthPassword("some thing to toss away", salts);
-
-  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
-
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = `${root}/verify-recovery-key`;
-
-  return await client.post(url, {encryptedRecoveryKey})
-    .then((response) => {
-      return response.status === 200;
-    })
-    .catch((error) => {
-      if (error.response?.status === 403) {
-        return false;
-      }
-      console.error(error);
-      return false;
-    });
+  return dotYouClient
+    .createAxiosClient()
+    .post(`${root}/verify-recovery-key`, {phraseCheck64})
+    .then((response) => response.status === 200)
+    .catch(() => false);
 };
 
 // Verifies the password without logging in the owner (i.e. changing cookies, etc.)

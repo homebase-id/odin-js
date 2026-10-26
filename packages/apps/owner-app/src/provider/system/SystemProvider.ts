@@ -40,27 +40,6 @@ export const initialize = async (
         });
 };
 
-export const enableAutoPasswordRecovery = async (dotYouClient: DotYouClient) => {
-
-    const client = dotYouClient.createAxiosClient();
-    const url = root + '/enable-auto-password-recovery?';
-    const data = {};
-
-    return client
-        .post(url, data, {
-            timeout: 120 * 1000, // 120s
-        })
-        .then((response) => {
-            return response.status === 200;
-        }).catch((error) => {
-            error.response = error.response || {};
-            if(error.response.status === 400) {
-                // hosting environment does not have auto password recovery enabled
-                throw "Hosting environment does not have auto-password recovery enabled";
-            }
-      });
-}
-
 export const isConfigured = async (dotYouClient: DotYouClient) => {
     const client = dotYouClient.createAxiosClient();
     const url = root + '/isconfigured';

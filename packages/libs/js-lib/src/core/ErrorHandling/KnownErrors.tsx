@@ -131,6 +131,23 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if(errorCode === 'passwordRecoveryNotConfigured')
     return t('Password recovery not configured');
 
+  // Recovery with friends (odin-core docs/zero-knowledge-recovery-plan.md)
+  if (errorCode === 'shardHolderNotZeroKnowledge')
+    return t('A friend who must approve has to log in to Homebase once more before they can hold your shard');
+  if (errorCode === 'automaticShardsReachThreshold')
+    return t('The friends who release automatically must not be enough on their own: at least one friend must approve');
+  if (errorCode === 'recoveryNotReady')
+    return t('Recovery is not ready: open the link in the browser where you started recovery');
+  if (errorCode === 'recoveryUnderWayElsewhere')
+    return t('Recovery is under way in another browser; finish it there, or exit it by email first');
+  if (errorCode === 'shardLinkNoLongerValid')
+    return t('This link no longer works: a newer email replaced it, it expired, or the holder no longer has this piece. Use the newest email, or start over; the other holders may be enough');
+  if (errorCode === 'shardHolderUnreachable')
+    return t('The holder could not be reached; try the same link again in a minute');
+  if (errorCode === 'recoveryBusy') return t('Busy just now; try again in a moment');
+  if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
+  if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
+
   console.error('[KnownErrors] Unknown error code', errorCode);
   return undefined;
 };

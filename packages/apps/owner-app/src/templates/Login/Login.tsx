@@ -1,6 +1,6 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { RETURN_URL_PARAM, useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
+import { REDEAL_PARAM, RETURN_URL_PARAM, useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
 import { useVerifyToken } from '../../hooks/auth/useVerifyToken';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
@@ -25,6 +25,9 @@ const Login = () => {
   const { authenticate, setFirstPassword, isPasswordSet, checkRedirectToReturn } = useAuth();
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
+  // After a recovery email change (the verify link lands here): the login deals the recovery again,
+  // which needs the password, so the form shows even to an owner who is logged in
+  const redeal = searchParams.get(REDEAL_PARAM) === '1';
   const recoveryHref = returnUrl
     ? `/owner/account-recovery?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
     : '/owner/account-recovery';
@@ -62,10 +65,10 @@ const Login = () => {
 
   const { data: hasValidToken, isFetched } = useVerifyToken();
   useEffect(() => {
-    if (isFetched && hasValidToken) checkRedirectToReturn();
+    if (isFetched && hasValidToken && !redeal) checkRedirectToReturn();
   }, [isFetched, hasValidToken]);
 
-  if (passwordState === 'unknown' || passwordState === 'pending' || isAuthenticated) {
+  if (passwordState === 'unknown' || passwordState === 'pending' || (isAuthenticated && !redeal)) {
     return (
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <ErrorNotification error={error} />
@@ -98,6 +101,11 @@ const Login = () => {
                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                   </small>
                 </h1>
+                {redeal ? (
+                  <p className="mb-4 text-slate-600 dark:text-slate-400">
+                    {t('Your recovery email changed. Log in once more so your recovery uses the new address.')}
+                  </p>
+                ) : null}
                 <div className="mb-4">
                   <Label htmlFor="password" className="text-sm leading-7 dark:text-gray-400">
                     Password

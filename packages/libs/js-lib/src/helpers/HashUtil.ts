@@ -1,5 +1,7 @@
 import { stringToUint8Array } from './DataUtil';
 
+export const sha256 = async (bytes: Uint8Array) => new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+
 const reduceSha256Hash = async (buffer: Uint8Array) => {
   const hash = await crypto.subtle.digest('SHA-256', buffer);
 

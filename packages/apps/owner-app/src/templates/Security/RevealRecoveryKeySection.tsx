@@ -15,6 +15,8 @@ import {
 } from "../../provider/auth/RecoveryProvider";
 import Section from "../../components/ui/Sections/Section";
 import {VerifyRecoveryKeyDialog} from "./Dialog/VerifyRecoveryKeyDialog";
+import {getRecoveryPhraseState, reenterRecoveryPhrase} from "../../provider/auth/ZeroKnowledgeProvider";
+import {PasswordInput} from "../../components/Password/PasswordInput";
 
 type Status = "loading" | "prompt-view-initial-key" | "prompt" | "waiting" | "success" | "failure";
 
@@ -27,6 +29,14 @@ export function RevealRecoveryKeySection() {
   const [recoveryKey, setRecoveryKey] = useState<RecoveryKeyResult | null>(null);
   const [recoveryKeyRequest, setRecoveryKeyRequest] = useState<RequestRecoveryKeyResult | null>(null);
   const [status, setStatus] = useState<Status>("loading");
+
+  const [needsReentry, setNeedsReentry] = useState(false);
+
+  useEffect(() => {
+    getRecoveryPhraseState(dotYouClient)
+      .then((state) => setNeedsReentry(state === 'needsReentry'))
+      .catch((error) => console.warn(error));
+  }, [dotYouClient]);
 
   useEffect(() => {
     const loadRecoveryKey = async () => {
@@ -93,7 +103,9 @@ export function RevealRecoveryKeySection() {
   };
 
   let content;
-  if (status === "loading") {
+  if (needsReentry) {
+    content = <ReenterRecoveryPhrase onDone={() => setNeedsReentry(false)}/>;
+  } else if (status === "loading") {
     content = <div>{t("Loading...")}</div>;
 
   } else if (status === "waiting") {
@@ -192,6 +204,57 @@ export function RevealRecoveryKeySection() {
     </Section>
   )
 }
+
+/**
+ * After a password reset that did not use the phrase (automated recovery), this browser no longer
+ * holds a copy of the phrase. It is still valid; typing it once locks the new keys with it.
+ */
+const ReenterRecoveryPhrase = ({onDone}: { onDone: () => void }) => {
+  const dotYouClient = useDotYouClientContext();
+  const [phrase, setPhrase] = useState('');
+  const [state, setState] = useState<ActionButtonState>('idle');
+
+  const handleSave = async () => {
+    setState('pending');
+    try {
+      await reenterRecoveryPhrase(dotYouClient, phrase);
+      setState('success');
+      onDone();
+    } catch (error) {
+      console.warn(error);
+      setState('error');
+    }
+  };
+
+  return (
+    <form className="flex flex-col gap-4" onSubmit={(e) => {
+      e.preventDefault();
+      handleSave();
+    }}>
+      <p>
+        {t("Your password was reset without your recovery phrase. It still works: type it in once so it can recover your account again.")}
+      </p>
+      <PasswordInput
+        required
+        name="reenterRecoveryPhrase"
+        id="reenterRecoveryPhrase"
+        type="password"
+        onChange={(e) => setPhrase(e.target.value)}
+        autoComplete="off"
+      />
+      {state === 'error' && (
+        <Alert type="critical" isCompact={true}>
+          {t("That is not your recovery phrase, check it and try again")}
+        </Alert>
+      )}
+      <div className="flex flex-row-reverse">
+        <ActionButton type="primary" state={state} disabled={phrase.trim() === ''}>
+          {t("Keep my recovery phrase")}
+        </ActionButton>
+      </div>
+    </form>
+  );
+};
 
 const GenerateNewRecoveryKeySection = () => {
   type Status2 = "loading" | "prompt" | "waiting" | "success" | "failure";

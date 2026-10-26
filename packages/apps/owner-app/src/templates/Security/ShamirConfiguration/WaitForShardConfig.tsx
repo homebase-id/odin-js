@@ -1,11 +1,11 @@
 import {getRecoveryInfo, RecoveryInfo, ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
 import {PlayerListItem, Status} from "./PlayerListItem";
-import {ConfigureShardsRequest} from "../../../provider/auth/ShamirProvider";
+import {ShamirDealPlan} from "../../../provider/auth/ShamirProvider";
 import {useEffect, useState} from "react";
 import {Label, t} from "@homebase-id/common-app";
 import {DealerRecoveryRiskDetails} from "../DealerRecoveryRiskDetails";
 
-export function WaitForShardConfig({ request }: { request: ConfigureShardsRequest }) {
+export function WaitForShardConfig({ request }: { request: ShamirDealPlan }) {
     const [recoveryInfo, setRecoveryInfo] = useState<RecoveryInfo | null>(null);
     const [elapsed, setElapsed] = useState(0);
 

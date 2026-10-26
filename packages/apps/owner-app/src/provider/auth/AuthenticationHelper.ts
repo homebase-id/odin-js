@@ -5,15 +5,27 @@ import {
   aesGcmEncryptWithEccSharedSecret,
   exportEccPublicKey,
   pbkdf2HmacSha256,
-  LoginKeys,
 } from '@homebase-id/js-lib/auth';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 import {
   getRandom16ByteArray,
   base64ToUint8Array,
   stringToUint8Array,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
-import { PublicKeyData } from './AuthenticationProvider';
+
+export interface PublicKeyData {
+  publicKeyJwkBase64Url: string;
+  crC32c: number;
+  expiration: number;
+}
+
+/** The host's offline ECC key, which a reset encrypts its recovery secret to. */
+export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> =>
+  dotYouClient
+    .createAxiosClient({ overrideEncryption: true })
+    .get<PublicKeyData>('/authentication/publickey_ecc?keyType=offlineKey')
+    .then((response) => response.data);
 
 export interface NonceData {
   crc: number;
@@ -39,28 +51,36 @@ interface AuthenticationPayload {
   secret: any;
 }
 
-/** The password hash and KEK the login sends, from the password and the identity's salts. */
-export const deriveLoginKeys = async (password: string, nonceData: NonceData): Promise<LoginKeys> => {
-  const [hpwd64, kek64] = await Promise.all([
-    pbkdf2Base64(password, nonceData.saltPassword64),
-    pbkdf2Base64(password, nonceData.saltKek64),
-  ]);
-  return { hpwd64, kek64 };
+export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  return client
+    .get('/authentication/nonce')
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
 };
+
+/** Fresh salts, for setting a password. */
+export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  return client.get('/authentication/getsalts').then((response) => {
+    return response.data;
+  });
+};
+
+/** Proof of the password against a fresh nonce, for an endpoint that wants the password itself. */
+export const preparePasswordProof = async (dotYouClient: DotYouClient, password: string) =>
+  prepareAuthPassword(password, await getNonce(dotYouClient));
 
 export const prepareAuthPassword = async (
   password: string,
   nonceData: NonceData
-): Promise<AuthenticationReplyNonce> =>
-  prepareAuthReply(await deriveLoginKeys(password, nonceData), nonceData);
-
-/** The login reply from the login keys alone; recovery logs in this way without the password. */
-export const prepareAuthReply = async (
-  loginKeys: LoginKeys,
-  nonceData: NonceData
 ): Promise<AuthenticationReplyNonce> => {
-  const hashedPassword64 = loginKeys.hpwd64;
-  const keK64 = loginKeys.kek64;
+  const [hashedPassword64, keK64] = await Promise.all([
+    pbkdf2Base64(password, nonceData.saltPassword64),
+    pbkdf2Base64(password, nonceData.saltKek64),
+  ]);
 
   const hashNoncePassword64 = await pbkdf2Base64(hashedPassword64, nonceData.nonce64);
 

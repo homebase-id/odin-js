@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
-import { STORAGE_IDENTITY_KEY, HOME_SHARED_SECRET, OWNER_SHARED_SECRET } from '../../hooks';
+import { STORAGE_IDENTITY_KEY, HOME_SHARED_SECRET, OWNER_SHARED_SECRET, OWNER_ZK_MASTER_KEY } from '../../hooks';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidPublicToken = async (): Promise<boolean> => {
@@ -45,6 +45,7 @@ export const logoutPublic = async (): Promise<void> => {
   window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
   window.localStorage.removeItem(HOME_SHARED_SECRET);
   window.localStorage.removeItem(OWNER_SHARED_SECRET);
+  window.localStorage.removeItem(OWNER_ZK_MASTER_KEY);
 
   // Caches
   localStorage.removeItem(`OWNER_REACT_QUERY_OFFLINE_CACHE`);

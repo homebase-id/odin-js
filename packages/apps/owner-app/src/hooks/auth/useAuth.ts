@@ -15,12 +15,14 @@ import {
   HOME_SHARED_SECRET,
   OwnerClient,
   OWNER_SHARED_SECRET,
+  OWNER_ZK_MASTER_KEY,
   STORAGE_IDENTITY_KEY,
   logoutOwnerAndAllApps,
   logoutPublicSession,
   useDotYouClient,
 } from '@homebase-id/common-app';
 import { useQueryClient } from '@tanstack/react-query';
+import { forgetRecoveryKey } from '../../provider/auth/SecurityRecoveryProvider';
 
 const ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS = 10_000;
 
@@ -33,7 +35,24 @@ export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
 
 
 export const RETURN_URL_PARAM = 'returnUrl';
+/**
+ * Set by the server's verify link after a recovery email change (odin-core
+ * SecurityVerificationController.VerifyRecoveryEmail): the login deals the recovery again.
+ */
+export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
+
+/**
+ * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
+ * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM).
+ */
+export const loginHref = (returnUrl: string | null, options?: { redeal?: boolean }) => {
+  const query = new URLSearchParams();
+  if (options?.redeal) query.set(REDEAL_PARAM, '1');
+  if (returnUrl) query.set(RETURN_URL_PARAM, returnUrl);
+  const search = query.toString();
+  return search ? `${LOGIN_PATH}?${search}` : LOGIN_PATH;
+};
 
 const AUTH_FLOW_PATHS = [
   LOGIN_PATH,
@@ -106,6 +125,12 @@ export const useAuth = () => {
 
     const response = await authenticateOwner(password);
     if (!response) return false;
+    // Only now: a wrong password on the redeal login (shown to an owner who is logged in) must leave
+    // that session's key alone
+    window.localStorage.removeItem(OWNER_ZK_MASTER_KEY);
+
+    // A login ends recovery mode on the server, so a recovering browser's throwaway key is spent
+    forgetRecoveryKey();
 
     // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
@@ -117,7 +142,7 @@ export const useAuth = () => {
     try {
       const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
       await Promise.race([
-        ensureZeroKnowledgeKeys(ownerClient, password, response.loginKeys),
+        ensureZeroKnowledgeKeys(ownerClient, password),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
         ),

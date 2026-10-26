@@ -1,8 +1,8 @@
-import {ActionButtonState, t, useDotYouClient} from "@homebase-id/common-app";
+import {ActionButtonState, Alert, t, useDotYouClient} from "@homebase-id/common-app";
 import {ActionButton} from "@homebase-id/common-app";
 import {Person} from "@homebase-id/common-app/icons";
 import {ShamirConfigurationType} from "../../../provider/auth/ShamirProvider";
-import {enableAutoPasswordRecovery} from "../../../provider/system/SystemProvider";
+import {dealAutomatedRecovery, requireZkMasterKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {useState} from "react"; // adjust import if needed
 
 export const Step1SelectConfigurationType = ({
@@ -17,6 +17,7 @@ export const Step1SelectConfigurationType = ({
     const [state, setState] = useState<ActionButtonState>()
     const [showAutoEnabledFinalized, setShowAutoEnabledFinalized] = useState<boolean>(false);
     const [showAutoRecoveryNotEnabled, setShowAutoRecoveryNotEnabled] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const client = useDotYouClient().getDotYouClient();
 
@@ -33,14 +34,16 @@ export const Step1SelectConfigurationType = ({
 
         try {
             setState("loading");
-            await enableAutoPasswordRecovery(client);
+            setErrorMessage(null);
+            // Dealt in this browser, as a deal to friends is
+            const dealt = await dealAutomatedRecovery(client, await requireZkMasterKey(client, 'set up automatic recovery'));
+            setShowAutoRecoveryNotEnabled(!dealt);
             setShowAutoEnabledFinalized(true);
-            setState("success");
+            setState(dealt ? "success" : "error");
         }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        catch (error) {
-            setShowAutoRecoveryNotEnabled(true);
-            setShowAutoEnabledFinalized(true);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        catch (error: any) {
+            setErrorMessage(error?.message ? t(error.message) : t('Failed to set up automatic recovery'));
             setState("error");
         }
     }
@@ -80,7 +83,7 @@ export const Step1SelectConfigurationType = ({
                                     </h3>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    {t("Your password recovery will be handled automatically by the system. Your recovery details have be divided among multiple managed identities for safekeeping.")}
+                                    {t("Your password recovery will be handled automatically by the system. Your recovery details have been divided among multiple managed identities, and each emails you a link when you recover.")}
                                 </p>
                                 <div className="mt-4">
                                     <ActionButton onClick={() => close()}>
@@ -108,10 +111,15 @@ export const Step1SelectConfigurationType = ({
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                     {t(
-                        "Your password recovery will be handled automatically by the system. Your recovery details will be divided among multiple managed identities for safekeeping. " +
-                        "This method is more convenient but less secure — for extra security we recommend the Manual Recovery below."
+                        "Your password recovery will be handled automatically by the system. Your recovery details will be divided among multiple managed identities, and each emails you a link when you recover. " +
+                        "It trusts your email: anyone who gets into your email can recover your account. For extra security choose the Manual Recovery below, with at least one friend who must approve."
                     )}
                 </p>
+                {errorMessage && (
+                    <Alert type="critical" isCompact={true}>
+                        {errorMessage}
+                    </Alert>
+                )}
                 <div className="mt-4">
                     <ActionButton type="primary" state={state} onClick={() => handleAutoClick()}>
                         {t("Use Automatic Recovery")}
