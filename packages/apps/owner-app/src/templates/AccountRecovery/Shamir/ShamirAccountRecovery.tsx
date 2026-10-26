@@ -183,7 +183,7 @@ const ShamirAccountRecovery = () => {
     // run immediately on mount
     reloadStatus();
 
-    // then run every 10 seconds
+    // then every 5 seconds
     const intervalId = setInterval(() => {
       reloadStatus();
     }, 5 * 1000);
@@ -231,7 +231,7 @@ const ShamirAccountRecovery = () => {
                 </div>
               ) : recoveryState === ShamirRecoveryState.AwaitingOwnerEmailVerificationToEnterRecoveryMode ? (
                 <div className="my-2">
-                  <p>{t('We sent an email to the one you used during signup.  Click the link in this email to continue.')}</p>
+                  <p>{t('We sent an email to your recovery email address. Click the link in it to continue.')}</p>
                   <p className="mt-3">Email: <b>{status?.email}</b></p>
                   <hr className="mb-5 mt-7 dark:border-slate-700"/>
 
@@ -296,7 +296,7 @@ const ShamirAccountRecovery = () => {
                   <div className="mb-2">
                     <p className="max-w-md text-slate-400">
                       {t('To regain access you will need to initiate recovery mode.')}{' '}
-                      {t('Click the button below to send an email to the email address you used during signup.')}{' '}
+                      {t('Click the button below to send an email to your recovery email address.')}{' '}
                     </p>
 
                     {errorMessage && (
