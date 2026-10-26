@@ -1,7 +1,14 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { invalidateDriveRemoval } from '../drives/useDrive';
-import { DotYouClient, ensureDrive } from '@homebase-id/js-lib/core';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import {
+  DotYouClient,
+  editDriveAllowSubscriptions,
+  editDriveAttributes,
+  ensureDrive,
+  getDrives,
+  getRequestedDriveChanges,
+} from '@homebase-id/js-lib/core';
+import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 import { getWellKnownDriveOwningAppId } from '../../provider/app/wellKnownDrives';
@@ -93,6 +100,38 @@ const ensureAppOwnedDrives = async (
   );
 };
 
+/**
+ * Applies what each grant asks for to its drive when the drive already exists: turns on
+ * subscriptions and merges in the requested attributes (see `getRequestedDriveChanges`). A drive
+ * created by `ensureAppOwnedDrives` already has them, so it is left alone.
+ *
+ * `ownedByAppId` limits this to the drives that app owns. Install passes it, because there the owner
+ * approves an app rather than drive settings; the pages where an app asks for drive settings show
+ * each change and leave it out.
+ */
+export const applyRequestedDriveChanges = async (
+  dotYouClient: DotYouClient,
+  drives: (DriveGrantRequest | DriveGrant)[],
+  ownedByAppId?: string
+) => {
+  const existingDrives = (await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 })).results;
+
+  await Promise.all(
+    drives.map(async (driveGrant) => {
+      const targetDrive = driveGrant.permissionedDrive.drive;
+      const drive = existingDrives.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
+      if (!drive) return;
+      if (ownedByAppId && !stringGuidsEqual(drive.appId ?? undefined, ownedByAppId)) return;
+
+      const changes = getRequestedDriveChanges(drive, (driveGrant as DriveGrantRequest).driveMeta);
+      if (changes.attributes)
+        await editDriveAttributes(dotYouClient, targetDrive, changes.attributes);
+      if (changes.allowSubscriptions)
+        await editDriveAllowSubscriptions(dotYouClient, targetDrive, true);
+    })
+  );
+};
+
 export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
@@ -113,6 +152,9 @@ export const useApp = ({ appId }: { appId?: string }) => {
           })
         : [],
     });
+
+    if (appRegRequest.drives)
+      await applyRequestedDriveChanges(dotYouClient, appRegRequest.drives, appRegRequest.appId);
   };
 
   const revokeAppInternal = async ({ appId }: { appId: string }) => {
@@ -162,6 +204,9 @@ export const useApp = ({ appId }: { appId?: string }) => {
       drives: drives || [],
     });
   };
+
+  const applyDriveChanges = async (drives: DriveGrantRequest[]) =>
+    await applyRequestedDriveChanges(dotYouClient, drives);
 
   const updatePermissions = async ({ appId, permissionSet, drives }: PermissionUpdateRequest) => {
     return await UpdatePermissions(dotYouClient, {
@@ -250,6 +295,10 @@ export const useApp = ({ appId }: { appId?: string }) => {
       onError: (ex) => {
         console.error(ex);
       },
+    }),
+    applyDriveChanges: useMutation({
+      mutationFn: applyDriveChanges,
+      onSettled: () => queryClient.invalidateQueries({ queryKey: ['drives'] }),
     }),
   };
 };

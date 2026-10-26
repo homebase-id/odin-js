@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest';
 import { DotYouClient } from '../../DotYouClient';
-import { ensureDrive } from './DriveProvider';
+import { ensureDrive, getRequestedDriveChanges } from './DriveProvider';
 import { DriveDefinition } from './DriveTypes';
 
 const targetDrive = {
@@ -66,4 +66,62 @@ test('ensureDrive does not create a drive that already exists', async () => {
 
   expect(await ensure(client, { IsCollaborativeChannel: 'true' })).toBe(true);
   expect(post).not.toHaveBeenCalledWith('/drive/mgmt/create', expect.anything());
+});
+
+test('getRequestedDriveChanges keeps the attributes a drive has, and the requested ones win', () => {
+  const drive = {
+    allowSubscriptions: true,
+    attributes: { Theme: 'dark', IsCollaborativeChannel: 'false' },
+  };
+
+  expect(
+    getRequestedDriveChanges(drive, { attributes: { IsCollaborativeChannel: 'true' } })
+  ).toEqual({
+    attributes: { Theme: 'dark', IsCollaborativeChannel: 'true' },
+  });
+});
+
+test('getRequestedDriveChanges adds attributes to a drive that has none', () => {
+  const drive = {
+    allowSubscriptions: false,
+    attributes: null as unknown as { [key: string]: string },
+  };
+
+  expect(
+    getRequestedDriveChanges(drive, { attributes: { IsCollaborativeChannel: 'true' } })
+  ).toEqual({
+    attributes: { IsCollaborativeChannel: 'true' },
+  });
+});
+
+test('getRequestedDriveChanges is empty when the drive already has what was requested', () => {
+  const drive = {
+    allowSubscriptions: true,
+    attributes: { IsCollaborativeChannel: 'true', Theme: 'dark' },
+  };
+
+  expect(
+    getRequestedDriveChanges(drive, {
+      allowSubscriptions: true,
+      attributes: { IsCollaborativeChannel: 'true' },
+    })
+  ).toEqual({});
+  expect(getRequestedDriveChanges(drive, undefined)).toEqual({});
+});
+
+test('getRequestedDriveChanges turns subscriptions on, never off', () => {
+  expect(
+    getRequestedDriveChanges(
+      { allowSubscriptions: false, attributes: {} },
+      { allowSubscriptions: true }
+    )
+  ).toEqual({
+    allowSubscriptions: true,
+  });
+  expect(
+    getRequestedDriveChanges(
+      { allowSubscriptions: true, attributes: {} },
+      { allowSubscriptions: false }
+    )
+  ).toEqual({});
 });
