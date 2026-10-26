@@ -88,6 +88,9 @@ export const getDrivesByType = async (
  *
  * A slug is immutable once written and is an address other identities resolve against, so whatever
  * is sent here is permanent.
+ *
+ * `attributes` are stored on the drive when it is created (e.g. `IsCollaborativeChannel`). Like the
+ * other settings, they are not applied to a drive that already exists.
  */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
@@ -99,7 +102,8 @@ export const ensureDrive = async (
   allowCdn: boolean,
   appId: string,
   driveSlug: string | undefined,
-  driveTypeSlug: string
+  driveTypeSlug: string,
+  attributes?: { [key: string]: string }
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
@@ -135,6 +139,7 @@ export const ensureDrive = async (
     appId: appId,
     driveSlug: slug,
     driveTypeSlug: driveTypeSlug,
+    attributes: attributes,
   };
 
   return client
