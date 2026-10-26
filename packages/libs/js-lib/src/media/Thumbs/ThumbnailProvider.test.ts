@@ -480,8 +480,12 @@ describe('ThumbnailProvider', () => {
 
 // A browser with createImageBitmap and OffscreenCanvas whose encoder sizes its output like a real one:
 // png ignores quality, webp/jpeg shrink with it. `webp: false` is Safari, which returns png for webp.
-const setupModernBrowser = (natural: { width: number; height: number }, opts: { webp: boolean }) => {
+const setupModernBrowser = (
+  natural: { width: number; height: number },
+  opts: { webp: boolean; sizeOf?: (type: string, pixels: number, quality: number) => number }
+) => {
   const canvases: { width: number; height: number }[] = [];
+  const contextOptions: unknown[] = [];
   const encodes: { type: string; quality: number; width: number }[] = [];
   const bitmapOptions: unknown[] = [];
   let closed = 0;
@@ -495,19 +499,22 @@ const setupModernBrowser = (natural: { width: number; height: number }, opts: { 
     constructor(public width: number, public height: number) {
       canvases.push(this);
     }
-    getContext() {
+    getContext(_id: string, options?: unknown) {
+      contextOptions.push(options);
       return { imageSmoothingEnabled: true, imageSmoothingQuality: 'high', drawImage: () => undefined };
     }
     async convertToBlob({ type, quality }: { type: string; quality: number }) {
       const outType = type === 'image/webp' && !opts.webp ? 'image/png' : type;
       encodes.push({ type: outType, quality, width: this.width });
       const pixels = this.width * this.height;
-      const size = outType === 'image/png' ? pixels * 3 : Math.ceil(pixels * quality * 0.5);
+      const size = opts.sizeOf
+        ? opts.sizeOf(outType, pixels, quality)
+        : outType === 'image/png' ? pixels * 3 : Math.ceil(pixels * quality * 0.5);
       return new Blob([new Uint8Array(size)], { type: outType });
     }
   } as unknown as typeof OffscreenCanvas;
 
-  return { canvases, encodes, bitmapOptions, closed: () => closed };
+  return { canvases, contextOptions, encodes, bitmapOptions, closed: () => closed };
 };
 
 describe('ThumbnailProvider in a modern browser', () => {
@@ -593,6 +600,48 @@ describe('ThumbnailProvider in a modern browser', () => {
     expect(thumb.payload.type).toBe('image/webp');
     // One resize: the canvas probe for webp and the one 1600px canvas
     expect(browser.canvases).toHaveLength(2);
+  });
+
+  it('draws on an sRGB canvas, so no wide-gamut colour profile is embedded', async () => {
+    const browser = setupModernBrowser({ width: 3000, height: 3000 }, { webp: false });
+    const { createThumbnails } = await load();
+
+    await createThumbnails(pngSource(), 'key');
+
+    expect(browser.contextOptions.length).toBeGreaterThan(0);
+    expect(browser.contextOptions.every((o) => (o as { colorSpace?: string })?.colorSpace === 'srgb')).toBe(true);
+  });
+
+  // Safari (iPhone, HEIC photos): its jpeg carries ~900 bytes of headers and colour profile,
+  // over the tiny thumb's 768 bytes at any size or quality; png's headers are small
+  it('makes a png tiny thumb when even a 1x1 jpeg is over maxBytes', async () => {
+    setupModernBrowser({ width: 4032, height: 3024 }, {
+      webp: false,
+      sizeOf: (type, pixels, quality) => (type === 'image/png' ? 60 + pixels * 3 : 900 + Math.ceil(pixels * quality)),
+    });
+    const { createThumbnails, tinyThumbSize } = await load();
+
+    const result = await createThumbnails(pngSource(), 'key');
+
+    expect(result.tinyThumb.contentType).toBe('image/png');
+    const tiny = result.additionalThumbnails[0];
+    expect(tiny.payload.size).toBeLessThanOrEqual(tinyThumbSize.maxBytes);
+    expect(tiny.pixelWidth).toBeLessThan(20);
+    expect(result.additionalThumbnails).toHaveLength(5);
+  });
+
+  it('never throws over the tiny thumb: it keeps the smallest result when nothing fits', async () => {
+    setupModernBrowser({ width: 4032, height: 3024 }, { webp: false, sizeOf: (_type, pixels) => 2000 + pixels });
+    const { createThumbnails, createImageThumbnail, tinyThumbSize } = await load();
+
+    const result = await createThumbnails(pngSource(), 'key');
+    expect(result.tinyThumb.content).toBeTruthy();
+    expect(result.additionalThumbnails[0].payload.size).toBe(2001);
+    expect(result.additionalThumbnails[0].pixelWidth).toBe(1);
+
+    await expect(
+      createImageThumbnail(new Uint8Array(10), 'key', tinyThumbSize, true, 'image/heic')
+    ).resolves.toBeDefined();
   });
 
   it('keeps the original when it is already the target size, format and within maxBytes', async () => {

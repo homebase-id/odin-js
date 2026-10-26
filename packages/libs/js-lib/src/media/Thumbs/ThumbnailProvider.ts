@@ -254,9 +254,8 @@ const thumbnailFromImage = async (
   // Thumbnails are webp whatever the source type (jpeg where the browser can't encode webp)
   const targetFormatType = isTinyThumb ? 'webp' : instruction.type || 'webp';
 
-  let maxDimension = instruction.maxPixelDimension;
   let quality = instruction.quality;
-  let size = getTargetSize(image, maxDimension, maxDimension);
+  const size = getTargetSize(image, instruction.maxPixelDimension, instruction.maxPixelDimension);
 
   // If the image is already the exact target size, in the target format and within maxBytes, keep it as-is
   if (
@@ -270,9 +269,10 @@ const thumbnailFromImage = async (
   }
 
   let canvas = drawImageToCanvas(image, size, isTinyThumb);
-  let blob: Blob;
+  let best: { blob: Blob; size: { width: number; height: number } };
   try {
-    blob = await encodeCanvas(canvas, targetFormatType, quality);
+    let blob = await encodeCanvas(canvas, targetFormatType, quality);
+    best = { blob, size };
 
     // Reduce quality until size <= maxBytes or quality reaches 1, re-encoding the already resized canvas
     for (let round = 0; blob.size > instruction.maxBytes && quality > 1 && round < 20; round++) {
@@ -280,24 +280,28 @@ const thumbnailFromImage = async (
       const qualityDrop = Math.min(40, Math.max(5, Math.round(quality * excessRatio * 0.5)));
       quality = Math.max(1, quality - qualityDrop);
       blob = await encodeCanvas(canvas, targetFormatType, quality);
+      if (blob.size < best.blob.size) best = { blob, size };
+    }
 
-      // For some strange images we cannot fit them into a 20x20 thumb even with quality 1;
-      // in such a case, shrink the tiny thumb
-      if (blob.size > instruction.maxBytes && quality <= 2 && isTinyThumb) {
-        if (maxDimension === 1) {
-          throw new Error('The world has ended. A 1x1 thumb in quality 1 takes up more than MaxBytes bytes...');
-        }
-        maxDimension = Math.max(1, maxDimension - 5);
-        size = getTargetSize(image, maxDimension, maxDimension);
-        releaseCanvas(canvas);
-        canvas = drawImageToCanvas(image, size, isTinyThumb);
-        quality = 2;
-        blob = await encodeCanvas(canvas, targetFormatType, quality);
+    // A tiny thumb that still doesn't fit (a jpeg's headers and colour profile alone can be over
+    // maxBytes, as on Safari, which can't encode webp): shrink it, also trying png, whose headers
+    // are small. Keep the smallest result; never fail the upload over the tiny thumb.
+    for (
+      let dimension = Math.floor(instruction.maxPixelDimension / 2);
+      isTinyThumb && best.blob.size > instruction.maxBytes && dimension >= 1;
+      dimension = dimension === 1 ? 0 : Math.max(1, Math.floor(dimension / 2))
+    ) {
+      const smallerSize = getTargetSize(image, dimension, dimension);
+      releaseCanvas(canvas);
+      canvas = drawImageToCanvas(image, smallerSize, isTinyThumb);
+      for (const [format, formatQuality] of [[targetFormatType, 1], ['png', 100]] as const) {
+        const smaller = await encodeCanvas(canvas, format, formatQuality);
+        if (smaller.size < best.blob.size) best = { blob: smaller, size: smallerSize };
       }
     }
   } finally {
     releaseCanvas(canvas);
   }
 
-  return { pixelWidth: size.width, pixelHeight: size.height, payload: blob, key: payloadKey };
+  return { pixelWidth: best.size.width, pixelHeight: best.size.height, payload: best.blob, key: payloadKey };
 };

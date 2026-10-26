@@ -154,7 +154,11 @@ export const drawImageToCanvas = (
   isTinyThumb: boolean = false
 ): AnyCanvas => {
   const canvas = createCanvas(size.width, size.height);
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+  // sRGB, so the encoder has no reason to embed a wide-gamut (Display P3) colour profile
+  const ctx = canvas.getContext('2d', { colorSpace: 'srgb' }) as
+    | CanvasRenderingContext2D
+    | OffscreenCanvasRenderingContext2D
+    | null;
   if (!ctx) throw new Error('Failed to get canvas context');
 
   // For tiny thumbs, apply some optimization (simplified version of quantization)
