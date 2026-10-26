@@ -107,10 +107,12 @@ export const useAuth = () => {
 
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
-    window.localStorage.removeItem(OWNER_ZK_MASTER_KEY);
 
     const response = await authenticateOwner(password);
     if (!response) return false;
+    // Only now: a wrong password on the redeal login (shown to an owner who is logged in) must leave
+    // that session's key alone
+    window.localStorage.removeItem(OWNER_ZK_MASTER_KEY);
 
     // A login ends recovery mode on the server, so a recovering browser's throwaway key is spent
     forgetRecoveryKey();

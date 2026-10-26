@@ -183,13 +183,13 @@ export const dealToHolders = async (dotYouClient: DotYouClient, plan: ShamirDeal
 };
 
 /**
- * Deals the deal there is again, to the same holders with the same threshold: after a recovery email
- * change every holder refuses it (it hashed the old address), and a server-made automated deal gives
- * nothing back. First run's automated deal when there is none yet and first run couldn't deal it.
+ * Deals the deal there is again, to the same holders with the same threshold (`dealNeedsDealing`):
+ * after a recovery email change every holder refuses it (it hashed the old address), and a
+ * server-made automated deal gives nothing back. False when there is no deal.
  */
-const dealAgain = async (dotYouClient: DotYouClient, masterKey: Uint8Array, automatedPending: boolean) => {
+const dealAgain = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
   const deal = await getDeal(dotYouClient);
-  if (!deal) return automatedPending && (await dealAutomatedRecovery(dotYouClient, masterKey));
+  if (!deal) return false;
   if (deal.usesAutomaticRecovery) return await dealAutomatedRecovery(dotYouClient, masterKey);
 
   await dealToHolders(
@@ -329,12 +329,16 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login
   // deals again.
   try {
+    // First run's automated deal only while there is no deal: one dealt since, here or elsewhere, stands
     const pending = isAutomatedDealPending();
-    if ((status.dealNeedsDealing || pending) && (await dealAgain(dotYouClient, masterKey, pending))) {
+    const dealt = status.dealNeedsDealing
+      ? await dealAgain(dotYouClient, masterKey)
+      : pending && !(await getDeal(dotYouClient)) && (await dealAutomatedRecovery(dotYouClient, masterKey));
+    if (pending) forgetAutomatedDealPending();
+    if (dealt) {
       // The deal leaves its password copy to write, and this login has the password
       await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
     }
-    if (pending) forgetAutomatedDealPending();
   } catch (error) {
     console.warn('The recovery could not be dealt again; the next login tries again', error);
   }
