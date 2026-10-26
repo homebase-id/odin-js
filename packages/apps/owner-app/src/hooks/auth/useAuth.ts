@@ -35,6 +35,8 @@ export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
 
 
 export const RETURN_URL_PARAM = 'returnUrl';
+/** Set by the server's verify link after a recovery email change: the login deals the recovery again. */
+export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
 
 const AUTH_FLOW_PATHS = [

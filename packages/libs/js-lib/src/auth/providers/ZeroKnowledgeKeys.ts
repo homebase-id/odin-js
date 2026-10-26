@@ -165,10 +165,11 @@ export interface ZkStatus {
   /** Whether the friends' password copy exists; only the friends' secret opens it. */
   hasShamirPasswordCopy?: boolean;
   /**
-   * The automated deal gives nothing back in the browser (server-made, or its copies forgotten by a
-   * reset): a password login deals it again, then writes the password copy.
+   * The deal can't recover as it is: an automated deal that gives nothing back in the browser
+   * (server-made, or its copies forgotten by a reset), or any deal dealt for another recovery email
+   * than today's. A password login deals it again, to the same holders, then writes the password copy.
    */
-  automatedDealNeedsDealing?: boolean;
+  dealNeedsDealing?: boolean;
 }
 
 /**

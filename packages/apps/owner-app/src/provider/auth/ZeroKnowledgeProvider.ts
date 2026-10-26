@@ -13,6 +13,7 @@ import {
   ZkPhraseCopiesRequest,
   ZkPhraseRecovery,
   ConfigureShardsRequest,
+  FriendToDealTo,
   ZkStatus,
   dealToFriends,
   getPhraseCheck,
@@ -25,7 +26,7 @@ import {
   zkLock,
   zkOpen,
 } from '@homebase-id/js-lib/auth';
-import { OWNER_ZK_MASTER_KEY } from '@homebase-id/common-app';
+import { OWNER_ZK_MASTER_KEY, t } from '@homebase-id/common-app';
 import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
 import type { ShamirDealPlan } from './ShamirProvider';
 import {
@@ -40,6 +41,10 @@ import {
 // browser (docs/zero-knowledge-recovery-plan.md). The browser makes and opens every key; the
 // identity server only stores the locked copies. The password is needed only at login and at a
 // password change.
+
+/** Whether the deal must be dealt again, which a password login does (`ZkStatus.dealNeedsDealing`). */
+export const getDealNeedsDealing = async (dotYouClient: DotYouClient) =>
+  !!(await getZkStatus(dotYouClient)).dealNeedsDealing;
 
 const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
   dotYouClient
@@ -133,11 +138,67 @@ const forgetAutomatedDealPending = () => {
 };
 
 // Not getShamirConfiguration: that reads a failure as "no deal", which would deal over one
-const hasDeal = (dotYouClient: DotYouClient) =>
+const getDeal = (dotYouClient: DotYouClient) =>
   dotYouClient
     .createAxiosClient()
-    .get('/security/recovery/config')
-    .then((response) => !!response.data);
+    .get<{ minMatchingShards: number; envelopes: { player: ShamirDealPlan['players'][number] }[]; usesAutomaticRecovery: boolean } | ''>(
+      '/security/recovery/config'
+    )
+    .then((response) => response.data || null);
+
+/** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
+const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
+  const key = await dotYouClient
+    .createAxiosClient()
+    .get<{ publicKeyJwk: string; isZeroKnowledge: boolean }>(
+      `${dotYouClient.getRoot()}/api/v2/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
+    )
+    .then((response) => response.data);
+
+  // Until they log in once more, their server holds the private key and could release the shard itself
+  if (!key.isZeroKnowledge) {
+    throw new Error(t(`${odinId} has to log in to Homebase once more before they can hold a shard that needs their approval`));
+  }
+  return key.publicKeyJwk;
+};
+
+/**
+ * Deals the shards to friends in this browser: the secret they rebuild never reaches the server
+ * (odin-core docs/zero-knowledge-recovery-plan.md, "Building the friends pair"). Throws with a
+ * message to show.
+ */
+export const dealToHolders = async (dotYouClient: DotYouClient, plan: ShamirDealPlan, zkMasterKey: Uint8Array) => {
+  const friends: FriendToDealTo[] = await Promise.all(
+    plan.players.map(async (p) => {
+      const type: string = p.type;
+      if (type === 'delegate') {
+        return { odinId: p.odinId, type: 'delegate', publicKeyJwk: await getGatedFriendPublicKey(dotYouClient, p.odinId) };
+      }
+      if (type === 'automatic') return { odinId: p.odinId, type: 'automatic' };
+      throw new Error(t('Only friends who approve or release automatically can hold a shard'));
+    })
+  );
+  const request = await dealToFriends(friends, plan.minMatchingShards, zkMasterKey);
+  await postDeal(dotYouClient, request, t('Failed to distribute the shards'));
+};
+
+/**
+ * Deals the deal there is again, to the same holders with the same threshold: after a recovery email
+ * change every holder refuses it (it hashed the old address), and a server-made automated deal gives
+ * nothing back. First run's automated deal when there is none yet and first run couldn't deal it.
+ */
+const dealAgain = async (dotYouClient: DotYouClient, masterKey: Uint8Array, automatedPending: boolean) => {
+  const deal = await getDeal(dotYouClient);
+  if (!deal) return automatedPending && (await dealAutomatedRecovery(dotYouClient, masterKey));
+  if (deal.usesAutomaticRecovery) return await dealAutomatedRecovery(dotYouClient, masterKey);
+
+  await dealToHolders(
+    dotYouClient,
+    { players: deal.envelopes.map((e) => e.player), minMatchingShards: deal.minMatchingShards },
+    masterKey
+  );
+  return true;
+};
 
 /** Sends a deal this browser made; throws with a message to show. */
 export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsRequest, failure: string) =>
@@ -269,14 +330,13 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   // deals again.
   try {
     const pending = isAutomatedDealPending();
-    if (status.automatedDealNeedsDealing || (pending && !(await hasDeal(dotYouClient)))) {
-      await dealAutomatedRecovery(dotYouClient, masterKey);
+    if ((status.dealNeedsDealing || pending) && (await dealAgain(dotYouClient, masterKey, pending))) {
       // The deal leaves its password copy to write, and this login has the password
       await saveMissingPasswordCopies(dotYouClient, password, await getZkStatus(dotYouClient));
     }
     if (pending) forgetAutomatedDealPending();
   } catch (error) {
-    console.warn('The automated recovery could not be dealt; the next login tries again', error);
+    console.warn('The recovery could not be dealt again; the next login tries again', error);
   }
 
   if (status.recoveryPhrase === 'onServer') {

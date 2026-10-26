@@ -5,14 +5,12 @@ import {
   isDeposit,
 } from '@homebase-id/js-lib/core';
 import {
-  FriendToDealTo,
-  dealToFriends,
   openWriteOnlyPrivateKey,
   releaseGatedShard,
 } from '@homebase-id/js-lib/auth';
 import {t} from "@homebase-id/common-app";
 import {ShardTrustLevel} from "./SecurityHealthProvider";
-import {getShardRecoveryDrive, postDeal, requireZkMasterKey} from "./ZeroKnowledgeProvider";
+import {dealToHolders, getShardRecoveryDrive, requireZkMasterKey} from "./ZeroKnowledgeProvider";
 import {SHARD_RECOVERY_DRIVE} from "../app/wellKnownDrives";
 
 export const SHAMIR_DEALER_SHARD_CONFIG_FILE_TYPE = 44532;
@@ -119,41 +117,9 @@ export enum PlayerType {
 
 const root = "/security/recovery";
 
-/** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
-const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
-  const key = await dotYouClient
-    .createAxiosClient()
-    .get<{ publicKeyJwk: string; isZeroKnowledge: boolean }>(
-      `${dotYouClient.getRoot()}/api/v2/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
-    )
-    .then((response) => response.data);
-
-  // Until they log in once more, their server holds the private key and could release the shard itself
-  if (!key.isZeroKnowledge) {
-    throw new Error(t(`${odinId} has to log in to Homebase once more before they can hold a shard that needs their approval`));
-  }
-  return key.publicKeyJwk;
-};
-
-/**
- * Deals the shards in this browser: the secret they rebuild never reaches the server
- * (odin-core docs/zero-knowledge-recovery-plan.md, "Building the friends pair"). Throws with a
- * message to show.
- */
-export const configureShards = async (dotYouClient: DotYouClient, plan: ShamirDealPlan) => {
-  const zkMasterKey = await requireZkMasterKey(dotYouClient, 'set up recovery with friends');
-  const friends: FriendToDealTo[] = await Promise.all(
-    plan.players.map(async (p) => {
-      if (p.type === PlayerType.Delegate) {
-        return {odinId: p.odinId, type: 'delegate', publicKeyJwk: await getGatedFriendPublicKey(dotYouClient, p.odinId)};
-      }
-      if (p.type === PlayerType.Automatic) return {odinId: p.odinId, type: 'automatic'};
-      throw new Error(t('Only friends who approve or release automatically can hold a shard'));
-    })
-  );
-  const request = await dealToFriends(friends, plan.minMatchingShards, zkMasterKey);
-  await postDeal(dotYouClient, request, t('Failed to distribute the shards'));
-}
+/** Deals the shards in this browser (`dealToHolders`). Throws with a message to show. */
+export const configureShards = async (dotYouClient: DotYouClient, plan: ShamirDealPlan) =>
+  dealToHolders(dotYouClient, plan, await requireZkMasterKey(dotYouClient, 'set up recovery with friends'));
 
 export const verifyRemotePlayerReadiness = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerReadinessRequest): Promise<RemotePlayerReadinessResult | null> => {
   const axiosClient = dotYouClient.createAxiosClient();
