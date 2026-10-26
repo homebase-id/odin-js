@@ -2,6 +2,7 @@ name: 'Release libraries to Github Packages'
 on:
   # release:
   #   types: [published]
+  # A manual run has no push range to diff, so paths-filter sees only the last commit; it releases both libs instead.
   workflow_dispatch:
   push:
     branches:
@@ -39,7 +40,7 @@ jobs:
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - name: Bump js-lib version
-        if: steps.filter.outputs.jslib == 'true'
+        if: steps.filter.outputs.jslib == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -47,7 +48,7 @@ jobs:
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - name: Bump ui-lib version
-        if: steps.filter.outputs.uilib == 'true'
+        if: steps.filter.outputs.uilib == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -62,7 +63,7 @@ jobs:
         run: npm run test -w ./packages/libs/js-lib
 
       - name: Publish JS Lib
-        if: steps.filter.outputs.jslib == 'true'
+        if: steps.filter.outputs.jslib == 'true' || github.event_name == 'workflow_dispatch'
         run: npm publish --w ./packages/libs/js-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +72,7 @@ jobs:
         run: npm run build --w ./packages/libs/ui-lib
 
       - name: Publish UI Lib
-        if: steps.filter.outputs.uilib == 'true'
+        if: steps.filter.outputs.uilib == 'true' || github.event_name == 'workflow_dispatch'
         run: npm publish --w ./packages/libs/ui-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
