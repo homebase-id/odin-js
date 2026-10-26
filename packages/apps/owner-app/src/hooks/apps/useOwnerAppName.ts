@@ -1,10 +1,7 @@
-import { OWNER_APP_ID, t } from '@homebase-id/common-app';
-import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
+import { isOwnerConsoleApp, t } from '@homebase-id/common-app';
 import { useApp } from './useApp';
 
-/** True for the owner console's own id, and for no id at all (an owner drive or circle). */
-export const isOwnerConsoleApp = (appId?: string | null) =>
-  !appId || stringGuidsEqual(appId, OWNER_APP_ID);
+export { isOwnerConsoleApp };
 
 /**
  * The name to show for the app a drive or circle page sits under. The owner console is not a
