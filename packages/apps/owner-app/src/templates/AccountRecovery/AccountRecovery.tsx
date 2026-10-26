@@ -152,8 +152,12 @@ const AccountRecovery = () => {
                       {t('To regain access to your account you will need your recovery key.')}{' '}
                       {t('You received your recovery key when you first signed up')}{' '}
                     </p>
+                    {/* Inside the phrase form: not a submit, or the browser asks for the empty phrase first */}
                     <ActionButton className="mt-3 mb-3"
-                                  onClick={() => enterShamirMode()}>{t('Click here if you forgot your recovery key')}</ActionButton>
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    enterShamirMode();
+                                  }}>{t('Click here if you forgot your recovery key')}</ActionButton>
                   </div>
                   <div className="mb-2">
                     <Label>{t('Your recovery key')}</Label>

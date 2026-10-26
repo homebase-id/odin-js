@@ -233,15 +233,13 @@ const ShamirAccountRecovery = () => {
                 <div className="my-2">
                   <p>{t('We sent an email to your recovery email address. Click the link in it to continue.')}</p>
                   <p className="mt-3">Email: <b>{status?.email}</b></p>
-                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
-
-                  <div className="flex flex-row-reverse">
-                    <ActionButton className="mt-3 mb-3"
-                                  onClick={() => startRecoveryMode()}>
-                      {t('Send it again')}
-                      <Arrow className="ml-auto h-5 w-5"/>
-                    </ActionButton>
-                  </div>
+                  <p className="mt-4 text-sm text-slate-500">
+                    {t("Didn't receive the email? Check your spam folder, or")}{' '}
+                    <button type="button" className="underline" onClick={() => startRecoveryMode()}>
+                      {t('click here to send it again')}
+                    </button>
+                    .
+                  </p>
                 </div>
               ) : recoveryState === ShamirRecoveryState.AwaitingSufficientDelegateConfirmation ? (<>
                   {t('We asked everyone who holds a piece of your recovery. Friends who must approve do so in their ' +
