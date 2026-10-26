@@ -21,7 +21,7 @@ import {
   getStateParam,
 } from '@homebase-id/common-app';
 import { PermissionSet } from '@homebase-id/js-lib/core';
-import { drivesEqual, isValidSlug } from '@homebase-id/js-lib/helpers';
+import { drivesEqual, isValidSlug, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { Arrow } from '@homebase-id/common-app/icons';
 import { useDrives } from '../../hooks/drives/useDrives';
 import {
@@ -289,6 +289,12 @@ const AppRegistration = ({
                   <DrivePermissionRequestView
                     key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                     driveGrant={grant}
+                    // Install changes settings only on a drive this app already owns.
+                    showRequestedChanges={existingDrives?.some(
+                      (drive) =>
+                        drivesEqual(drive.targetDriveInfo, grant.permissionedDrive.drive) &&
+                        stringGuidsEqual(drive.appId ?? undefined, appId)
+                    )}
                   />
                 ))}
               </div>

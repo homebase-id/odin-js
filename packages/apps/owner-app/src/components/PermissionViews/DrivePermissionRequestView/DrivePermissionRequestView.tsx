@@ -4,23 +4,30 @@ import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTy
 import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
 import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
+import { getRequestedDriveChanges } from '@homebase-id/js-lib/core';
 
 const DrivePermissionRequestView = ({
   driveGrant,
   existingGrant,
   permissionTree,
   className,
+  showRequestedChanges,
 }: {
   driveGrant: DriveGrantRequest;
   existingGrant?: DriveGrantRequest;
   permissionTree?: string;
   className?: string;
+  /** Lists what the request will change on this drive, when it already exists. */
+  showRequestedChanges?: boolean;
 }) => {
   const { data: drive, isLoading: driveLoading } = useDrive({
     targetDrive: driveGrant.permissionedDrive.drive,
   }).fetch;
 
   const isNew = !drive?.name;
+  const changes =
+    showRequestedChanges && drive ? getRequestedDriveChanges(drive, driveGrant.driveMeta) : {};
+  const requestedAttributes = driveGrant.driveMeta?.attributes || {};
 
   const totalExistingPermissions = existingGrant?.permissionedDrive.permission.reduce(
     (a, b) => a + b,
@@ -67,7 +74,21 @@ const DrivePermissionRequestView = ({
               ) : null}
             </p>
 
-            {driveGrant.driveMeta?.attributes ? (
+            {changes.allowSubscriptions ? (
+              <p className="pt-2">{t('Allow notifications on this drive')}</p>
+            ) : null}
+            {changes.attributes ? (
+              <p className="pt-2">
+                {t('Set attributes')}:{' '}
+                {Object.keys(requestedAttributes)
+                  .filter((key) => drive?.attributes?.[key] !== requestedAttributes[key])
+                  .map((key) => (
+                    <span key={key} className="mr-1 italic">
+                      {key}: {requestedAttributes[key]}
+                    </span>
+                  ))}
+              </p>
+            ) : driveGrant.driveMeta?.attributes ? (
               <div className="pt-2">
                 <span className="text-slate-400">
                   {t('Attributes')}:{' '}

@@ -88,6 +88,9 @@ export const getDrivesByType = async (
  *
  * A slug is immutable once written and is an address other identities resolve against, so whatever
  * is sent here is permanent.
+ *
+ * `attributes` are stored on the drive when it is created (e.g. `IsCollaborativeChannel`). Like the
+ * other settings, they are not applied to a drive that already exists.
  */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
@@ -99,7 +102,8 @@ export const ensureDrive = async (
   allowCdn: boolean,
   appId: string,
   driveSlug: string | undefined,
-  driveTypeSlug: string
+  driveTypeSlug: string,
+  attributes?: { [key: string]: string }
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
@@ -135,6 +139,7 @@ export const ensureDrive = async (
     appId: appId,
     driveSlug: slug,
     driveTypeSlug: driveTypeSlug,
+    attributes: attributes,
   };
 
   return client
@@ -144,6 +149,32 @@ export const ensureDrive = async (
       console.error('[odin-js:ensureDrive]', error);
       throw error;
     });
+};
+
+/**
+ * What an app's requested drive settings would change on a drive that already exists.
+ *
+ * Requested attributes are merged into the drive's own: attributes the drive already has are kept,
+ * and a requested value wins over an existing one. `attributes` is the full merged set, because
+ * `updateattributes` replaces the drive's attributes with whatever it is sent.
+ *
+ * Subscriptions are only ever turned on: a request that leaves `allowSubscriptions` out or false
+ * says nothing about a drive that already allows them.
+ *
+ * Empty when nothing would change.
+ */
+export const getRequestedDriveChanges = (
+  drive: Pick<DriveDefinition, 'allowSubscriptions' | 'attributes'>,
+  requested: { allowSubscriptions?: boolean; attributes?: { [key: string]: string } } | undefined
+): { allowSubscriptions?: true; attributes?: { [key: string]: string } } => {
+  const changes: { allowSubscriptions?: true; attributes?: { [key: string]: string } } = {};
+  if (requested?.allowSubscriptions && !drive.allowSubscriptions) changes.allowSubscriptions = true;
+
+  const requestedAttributes = requested?.attributes || {};
+  if (Object.entries(requestedAttributes).some(([key, value]) => drive.attributes?.[key] !== value))
+    changes.attributes = { ...drive.attributes, ...requestedAttributes };
+
+  return changes;
 };
 
 export const editDriveMetadata = async (

@@ -21,7 +21,6 @@ import {
 } from './util';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
-import { useDrive } from '../../hooks/drives/useDrive';
 import { InvalidAppRequest } from './InvalidAppRequest';
 
 export const ExtendAppPermissions = () => {
@@ -53,11 +52,10 @@ export const ExtendAppPermissions = () => {
     fetch: { data: appRegistration },
     extendPermissions: { mutateAsync: extendPermission, status: extendPermissionStatus },
     updateAuthorizedCircles: { mutateAsync: updateCircles, status: updateCirclesState },
+    applyDriveChanges: { mutateAsync: applyDriveChanges, status: applyDriveChangesStatus },
   } = useApp({ appId: appId || undefined });
 
   const { data: circles } = useCircles().fetch;
-
-  const { mutateAsync: setAttributes, status: setAttributesStatus } = useDrive().editAttributes;
 
   const doUpdateApp = async () => {
     try {
@@ -117,18 +115,7 @@ export const ExtendAppPermissions = () => {
           circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
         });
 
-      if (driveGrants) {
-        await Promise.all(
-          driveGrants.map(async (grant) => {
-            if (!grant.driveMeta?.attributes) return;
-
-            return await setAttributes({
-              targetDrive: grant.permissionedDrive.drive,
-              newAttributes: grant.driveMeta?.attributes,
-            });
-          })
-        );
-      }
+      if (driveGrants) await applyDriveChanges(driveGrants);
 
       window.location.href = returnUrl || '/';
     } catch (error) {
@@ -191,7 +178,7 @@ export const ExtendAppPermissions = () => {
                 type="primary"
                 state={mergeStates(
                   mergeStates(extendPermissionStatus, updateCirclesState),
-                  setAttributesStatus
+                  applyDriveChangesStatus
                 )}
                 icon={Arrow}
               >
@@ -232,6 +219,7 @@ export const ExtendAppPermissions = () => {
                         <DrivePermissionRequestView
                           key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                           driveGrant={grant}
+                          showRequestedChanges={true}
                           existingGrant={appRegistration?.grant?.driveGrants?.find(
                             (existing) =>
                               stringGuidsEqual(
