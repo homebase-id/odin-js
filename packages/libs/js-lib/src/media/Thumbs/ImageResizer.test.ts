@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { resizeImageFromBlob, getTargetSize } from './ImageResizer';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, extname } from 'path';
@@ -482,5 +482,38 @@ describe('ImageResizer', () => {
         }
       }
     });
+  });
+});
+
+describe('ImageResizer where webp cannot be encoded (Safari)', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    global.Image = MockImage as unknown as typeof Image;
+    global.FileReader = MockFileReader as unknown as typeof FileReader;
+    global.document = {
+      createElement: () => {
+        const canvas = new MockHTMLCanvasElement();
+        // Safari returns png for a webp request
+        canvas.toBlob = (callback, type) =>
+          setTimeout(() => callback(new Blob([new Uint8Array(4)], { type: type === 'image/webp' ? 'image/png' : type })), 0);
+        return canvas as unknown as HTMLCanvasElement;
+      },
+    } as unknown as Document;
+  });
+
+  it('encodes jpeg instead, and labels the blob with the type it really has', async () => {
+    const { resizeImageFromBlob } = await import('./ImageResizer');
+
+    const result = await resizeImageFromBlob(createTestBlob(new Uint8Array([1, 2, 3, 4])), 80, 50, 50, 'webp');
+
+    expect(result.blob.type).toBe('image/jpeg');
+  });
+
+  it('keeps an explicit png request as png', async () => {
+    const { resizeImageFromBlob } = await import('./ImageResizer');
+
+    const result = await resizeImageFromBlob(createTestBlob(new Uint8Array([1, 2, 3, 4])), 80, 50, 50, 'png');
+
+    expect(result.blob.type).toBe('image/png');
   });
 });

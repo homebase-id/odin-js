@@ -1,4 +1,4 @@
-import {describe, it, expect, beforeEach} from 'vitest';
+import {describe, it, expect, beforeEach, afterEach, vi} from 'vitest';
 import {createThumbnails, getRevisedThumbs, baseThumbSizes} from './ThumbnailProvider';
 import {ThumbnailInstruction} from '../MediaTypes';
 import {readFileSync, readdirSync, existsSync} from 'fs';
@@ -475,5 +475,136 @@ describe('ThumbnailProvider', () => {
         console.log('Skipping SVG tiny thumb test - potential issue with mock environment or no SVG data:', error);
       }
     });
+  });
+});
+
+// A browser with createImageBitmap and OffscreenCanvas whose encoder sizes its output like a real one:
+// png ignores quality, webp/jpeg shrink with it. `webp: false` is Safari, which returns png for webp.
+const setupModernBrowser = (natural: { width: number; height: number }, opts: { webp: boolean }) => {
+  const canvases: { width: number; height: number }[] = [];
+  const encodes: { type: string; quality: number; width: number }[] = [];
+  const bitmapOptions: unknown[] = [];
+  let closed = 0;
+
+  global.createImageBitmap = (async (_blob: Blob, options?: unknown) => {
+    bitmapOptions.push(options);
+    return { width: natural.width, height: natural.height, close: () => closed++ };
+  }) as unknown as typeof createImageBitmap;
+
+  global.OffscreenCanvas = class {
+    constructor(public width: number, public height: number) {
+      canvases.push(this);
+    }
+    getContext() {
+      return { imageSmoothingEnabled: true, imageSmoothingQuality: 'high', drawImage: () => undefined };
+    }
+    async convertToBlob({ type, quality }: { type: string; quality: number }) {
+      const outType = type === 'image/webp' && !opts.webp ? 'image/png' : type;
+      encodes.push({ type: outType, quality, width: this.width });
+      const pixels = this.width * this.height;
+      const size = outType === 'image/png' ? pixels * 3 : Math.ceil(pixels * quality * 0.5);
+      return new Blob([new Uint8Array(size)], { type: outType });
+    }
+  } as unknown as typeof OffscreenCanvas;
+
+  return { canvases, encodes, bitmapOptions, closed: () => closed };
+};
+
+describe('ThumbnailProvider in a modern browser', () => {
+  // canEncodeWebp caches its answer per module, so every test loads a fresh one
+  const load = async () => {
+    vi.resetModules();
+    return await import('./ThumbnailProvider');
+  };
+  const pngSource = () => new Blob([new Uint8Array(1000)], { type: 'image/png' });
+
+  beforeEach(() => {
+    global.document = {} as Document;
+  });
+  afterEach(() => {
+    // @ts-expect-error - removing the test globals
+    delete global.createImageBitmap;
+    // @ts-expect-error - removing the test globals
+    delete global.OffscreenCanvas;
+  });
+
+  it('encodes a png source as webp thumbnails, each within its maxBytes', async () => {
+    const browser = setupModernBrowser({ width: 3000, height: 3000 }, { webp: true });
+    const { createThumbnails, baseThumbSizes } = await load();
+
+    const result = await createThumbnails(pngSource(), 'key');
+
+    expect(result.naturalSize).toEqual({ pixelWidth: 3000, pixelHeight: 3000 });
+    expect(result.tinyThumb.contentType).toBe('image/webp');
+    const sized = result.additionalThumbnails.slice(1);
+    expect(sized.map((t) => t.pixelWidth)).toEqual(baseThumbSizes.map((t) => t.maxPixelDimension));
+    sized.forEach((thumb, i) => {
+      expect(thumb.payload.type).toBe('image/webp');
+      expect(thumb.payload.size).toBeLessThanOrEqual(baseThumbSizes[i].maxBytes);
+    });
+
+    // Decoded once, honouring EXIF orientation, then freed; every canvas freed too
+    expect(browser.bitmapOptions).toEqual([{ imageOrientation: 'from-image' }]);
+    expect(browser.closed()).toBe(1);
+    expect(browser.canvases.every((c) => c.width === 0 && c.height === 0)).toBe(true);
+  });
+
+  it('encodes jpeg where the browser cannot encode webp (Safari), within maxBytes', async () => {
+    const browser = setupModernBrowser({ width: 3000, height: 3000 }, { webp: false });
+    const { createThumbnails, baseThumbSizes } = await load();
+
+    const result = await createThumbnails(pngSource(), 'key');
+
+    expect(result.tinyThumb.contentType).toBe('image/jpeg');
+    const sized = result.additionalThumbnails.slice(1);
+    expect(sized).toHaveLength(baseThumbSizes.length);
+    sized.forEach((thumb, i) => {
+      expect(thumb.payload.type).toBe('image/jpeg');
+      expect(thumb.payload.size).toBeLessThanOrEqual(baseThumbSizes[i].maxBytes);
+    });
+    // webp support is probed once, never per thumbnail
+    expect(browser.encodes.filter((e) => e.type === 'image/png')).toHaveLength(1);
+  });
+
+  it('never emits a thumbnail over 1 MiB, whatever maxBytes asks for', async () => {
+    setupModernBrowser({ width: 3000, height: 3000 }, { webp: false });
+    const { createThumbnails, MAX_THUMBNAIL_BYTES } = await load();
+
+    const result = await createThumbnails(pngSource(), 'key', [
+      { quality: 76, maxPixelDimension: 640, maxBytes: 102 * 1024 },
+      { quality: 100, maxPixelDimension: 2000, maxBytes: 8 * 1024 * 1024 },
+    ]);
+
+    expect(result.additionalThumbnails.map((t) => t.pixelWidth)).toEqual([20, 640]);
+    expect(result.additionalThumbnails.every((t) => t.payload.size <= MAX_THUMBNAIL_BYTES)).toBe(true);
+  });
+
+  it('lowers the quality at most 20 times, re-encoding the resized canvas', async () => {
+    const browser = setupModernBrowser({ width: 3000, height: 3000 }, { webp: true });
+    const { createImageThumbnail } = await load();
+
+    const { thumb } = await createImageThumbnail(new Uint8Array(1000), 'key', {
+      quality: 100, maxPixelDimension: 1600, maxBytes: 10,
+    }, false, 'image/png');
+
+    const thumbEncodes = browser.encodes.filter((e) => e.width === 1600);
+    expect(thumbEncodes.length).toBeLessThanOrEqual(21);
+    expect(thumbEncodes.at(-1)?.quality).toBe(0.01);
+    expect(thumb.payload.type).toBe('image/webp');
+    // One resize: the canvas probe for webp and the one 1600px canvas
+    expect(browser.canvases).toHaveLength(2);
+  });
+
+  it('keeps the original when it is already the target size, format and within maxBytes', async () => {
+    setupModernBrowser({ width: 320, height: 200 }, { webp: true });
+    const { createImageThumbnail } = await load();
+    const bytes = new Uint8Array(500);
+
+    const { thumb } = await createImageThumbnail(bytes, 'key', {
+      quality: 84, maxPixelDimension: 320, maxBytes: 26 * 1024,
+    }, false, 'image/webp');
+
+    expect(thumb.payload.size).toBe(500);
+    expect(thumb.payload.type).toBe('image/webp');
   });
 });
