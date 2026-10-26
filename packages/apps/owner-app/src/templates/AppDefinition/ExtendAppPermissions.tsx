@@ -3,15 +3,18 @@ import {
   ActionButton,
   CirclePermissionView,
   ErrorNotification,
+  getDriveAdoptions,
   mergeStates,
   t,
   useCircles,
 } from '@homebase-id/common-app';
+import { isAxiosError } from 'axios';
 import { Arrow, Chevron } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrives } from '../../hooks/drives/useDrives';
+import { useDrive } from '../../hooks/drives/useDrive';
 import { useState } from 'react';
 import {
   circleToCircleIds,
@@ -27,6 +30,7 @@ export const ExtendAppPermissions = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<unknown | undefined>();
+  const [adoptionError, setAdoptionError] = useState<unknown | undefined>();
 
   const appId = searchParams.get('appId');
   const returnUrl = searchParams.get('return');
@@ -56,6 +60,9 @@ export const ExtendAppPermissions = () => {
   } = useApp({ appId: appId || undefined });
 
   const { data: circles } = useCircles().fetch;
+  const {
+    setOwningApp: { mutateAsync: setOwningApp },
+  } = useDrive();
 
   const doUpdateApp = async () => {
     try {
@@ -117,10 +124,30 @@ export const ExtendAppPermissions = () => {
 
       if (driveGrants) await applyDriveChanges(driveGrants);
 
-      window.location.href = returnUrl || '/';
+      // Last, and kept apart: a refused hand-over (its slug already taken, say) leaves the access
+      // granted above in place, and the owner reads why before going back.
+      for (const { drive, driveSlug, driveTypeSlug } of adoptions) {
+        try {
+          await setOwningApp({
+            targetDrive: drive.targetDriveInfo,
+            appId: appRegistration.appId,
+            driveSlug,
+            driveTypeSlug,
+          });
+        } catch (adoptError) {
+          setAdoptionError(adoptError);
+          return;
+        }
+      }
+
+      doRedirectBack();
     } catch (error) {
       setError(error);
     }
+  };
+
+  const doRedirectBack = () => {
+    window.location.href = returnUrl || '/';
   };
 
   const doCancel = async () => {
@@ -142,6 +169,9 @@ export const ExtendAppPermissions = () => {
         drivesEqual(drive.targetDriveInfo, grant.permissionedDrive.drive)
       )
   );
+
+  // Requested drives that no app owns yet: approving hands them to this app, at the address it asks for.
+  const adoptions = getDriveAdoptions(appRegistration?.appId, driveGrants ?? [], existingDrives);
 
   // Checked after the hooks so the hook order never changes; the app built this URL, so a malformed
   // one is its bug, but dropping a drive from the prompt would grant less than was asked for.
@@ -171,23 +201,60 @@ export const ExtendAppPermissions = () => {
               {t('The app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('has requested extra access on your identity')}.
             </p>
-            
-            <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-              <ActionButton
-                onClick={doUpdateApp}
-                type="primary"
-                state={mergeStates(
-                  mergeStates(extendPermissionStatus, updateCirclesState),
-                  applyDriveChangesStatus
-                )}
-                icon={Arrow}
-              >
-                {t('Allow')}
-              </ActionButton>
 
-              <ActionButton type="secondary" onClick={() => doCancel()}>
-                {t('Cancel')}
-              </ActionButton>
+            {adoptions.map(({ drive, driveSlug }) => (
+              <p
+                key={`${drive.targetDriveInfo.alias}-${drive.targetDriveInfo.type}`}
+                className="my-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-950"
+              >
+                {t('{0} will own the drive "{1}"', appRegistration?.name ?? '', drive.name)}
+                {appRegistration?.appSlug ? (
+                  <>
+                    {' '}
+                    ({t('address')}{' '}
+                    <span className="font-mono">
+                      /apps/{appRegistration.appSlug}/drives/{driveSlug}
+                    </span>
+                    )
+                  </>
+                ) : null}
+                . {t("This can't be undone from here.")}
+              </p>
+            ))}
+
+            {adoptionError ? (
+              <p className="my-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm dark:border-red-800 dark:bg-red-950">
+                {t('The drive could not be handed to the app')}:{' '}
+                {(isAxiosError(adoptionError) && adoptionError.response?.data?.title) ||
+                  t('Something went wrong, please try again later')}
+                . {t('The rest of the request was approved.')}
+              </p>
+            ) : null}
+
+            <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
+              {adoptionError ? (
+                <ActionButton onClick={doRedirectBack} type="primary" icon={Arrow}>
+                  {t('Continue')}
+                </ActionButton>
+              ) : (
+                <>
+                  <ActionButton
+                    onClick={doUpdateApp}
+                    type="primary"
+                    state={mergeStates(
+                      mergeStates(extendPermissionStatus, updateCirclesState),
+                      applyDriveChangesStatus
+                    )}
+                    icon={Arrow}
+                  >
+                    {t('Allow')}
+                  </ActionButton>
+
+                  <ActionButton type="secondary" onClick={() => doCancel()}>
+                    {t('Cancel')}
+                  </ActionButton>
+                </>
+              )}
             </div>
 
             <details className="mt-6 group my-6 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
@@ -317,7 +384,6 @@ export const ExtendAppPermissions = () => {
                 ) : null}
               </div>
             </details>
-            
           </div>
         </div>
       </section>

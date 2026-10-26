@@ -45,6 +45,7 @@ import {
   SubtleMessage,
   mergeStates,
   getOwnerAppPath,
+  isOwnerConsoleApp,
 } from '@homebase-id/common-app';
 import {
   Circles,
@@ -229,7 +230,7 @@ const CircleDetails = () => {
       <Section title={t('Details')}>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           <Fact label={t('Owned by')} hint={OWNERSHIP_HINTS.ownedBy}>
-            {circle.appId ? (
+            {!isOwnerConsoleApp(circle.appId) ? (
               owningApp ? (
                 <>
                   <Link
@@ -602,7 +603,7 @@ const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
   } = useEnrollmentCandidates(circle.appId ?? undefined);
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!circle.appId) return null;
+  if (isOwnerConsoleApp(circle.appId)) return null;
 
   const offer = candidates?.find((c) => stringGuidsEqual(c.circleId, circle.id));
   if (!offer?.candidates?.length) return null;

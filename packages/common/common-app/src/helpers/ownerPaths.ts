@@ -1,4 +1,5 @@
 import { TargetDrive } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { OWNER_APP_ID, OWNER_ROOT } from '../constants';
 
 /**
@@ -15,3 +16,10 @@ export const getOwnerDrivePath = (appId: string | null | undefined, targetDrive:
 
 export const getOwnerCirclePath = (appId: string | null | undefined, circleId: string) =>
   `${getOwnerAppPath(appId)}/circles/${encodeURIComponent(circleId)}`;
+
+/**
+ * True for the owner console's own id, and for no id at all: a drive or circle no app owns. The server
+ * stamps those with the owner console's id, so an id alone does not mean an app owns it.
+ */
+export const isOwnerConsoleApp = (appId?: string | null) =>
+  !appId || stringGuidsEqual(appId, OWNER_APP_ID);

@@ -32,6 +32,7 @@ import {
     t,
     useCircles,
   getOwnerAppPath,
+  isOwnerConsoleApp,
 } from '@homebase-id/common-app';
 import {HardDrive, Download, HeartBeat, Pencil, Trash, Archive, Refresh} from '@homebase-id/common-app/icons';
 
@@ -223,11 +224,11 @@ const DriveDetails = () => {
                     <li>Type slug: {driveDef.driveTypeSlug || t('None')}</li>
                     <li>
                         {t('Owned by')}:{' '}
-                        {driveDef.appId ? (
+                        {!isOwnerConsoleApp(driveDef.appId) ? (
                             owningApp ? (
                                 <>
                                     <Link
-                                        to={`/owner/apps/${encodeURIComponent(driveDef.appId)}`}
+                                        to={`/owner/apps/${encodeURIComponent(owningApp.appId)}`}
                                         className="hover:underline"
                                     >
                                         {owningApp.name}
