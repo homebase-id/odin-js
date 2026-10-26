@@ -4,7 +4,6 @@ import { Arrow } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { useDrive } from '../../hooks/drives/useDrive';
 import { drivesParamToDriveGrantRequest, drivesParamProblems } from './util';
 import { InvalidAppRequest } from './InvalidAppRequest';
 
@@ -22,31 +21,21 @@ const UpdateDriveDetailsFromApp = () => {
 
   const {
     fetch: { data: appRegistration },
+    applyDriveChanges: {
+      mutateAsync: applyDriveChanges,
+      status: applyDriveChangesStatus,
+      error: applyDriveChangesError,
+    },
   } = useApp({ appId: appId || undefined });
-
-  const {
-    mutateAsync: setAttributes,
-    status: setAttributesStatus,
-    error: setAttributesError,
-  } = useDrive().editAttributes;
 
   const doUpdateDriveDetails = async () => {
     if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
     if (!driveGrants) throw new Error('No drive grants found');
 
     try {
-      await Promise.all(
-        driveGrants.map(async (grant) => {
-          if (!grant.driveMeta?.attributes) return;
-
-          return await setAttributes({
-            targetDrive: grant.permissionedDrive.drive,
-            newAttributes: grant.driveMeta?.attributes,
-          });
-        })
-      );
+      await applyDriveChanges(driveGrants);
     } catch (error) {
-      console.error('Error updating drive attributes', error);
+      console.error('Error updating drive settings', error);
     }
 
     doRedirectBack();
@@ -70,7 +59,7 @@ const UpdateDriveDetailsFromApp = () => {
 
   return (
     <>
-      <ErrorNotification error={setAttributesError} />
+      <ErrorNotification error={applyDriveChangesError} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -91,6 +80,7 @@ const UpdateDriveDetailsFromApp = () => {
                       <DrivePermissionRequestView
                         key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
                         driveGrant={grant}
+                        showRequestedChanges={true}
                       />
                     ))}
                   </div>
@@ -101,7 +91,7 @@ const UpdateDriveDetailsFromApp = () => {
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               <ActionButton
                 onClick={doUpdateDriveDetails}
-                state={setAttributesStatus}
+                state={applyDriveChangesStatus}
                 type="primary"
                 icon={Arrow}
               >

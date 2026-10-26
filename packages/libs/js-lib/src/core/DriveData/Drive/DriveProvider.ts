@@ -151,6 +151,32 @@ export const ensureDrive = async (
     });
 };
 
+/**
+ * What an app's requested drive settings would change on a drive that already exists.
+ *
+ * Requested attributes are merged into the drive's own: attributes the drive already has are kept,
+ * and a requested value wins over an existing one. `attributes` is the full merged set, because
+ * `updateattributes` replaces the drive's attributes with whatever it is sent.
+ *
+ * Subscriptions are only ever turned on: a request that leaves `allowSubscriptions` out or false
+ * says nothing about a drive that already allows them.
+ *
+ * Empty when nothing would change.
+ */
+export const getRequestedDriveChanges = (
+  drive: Pick<DriveDefinition, 'allowSubscriptions' | 'attributes'>,
+  requested: { allowSubscriptions?: boolean; attributes?: { [key: string]: string } } | undefined
+): { allowSubscriptions?: true; attributes?: { [key: string]: string } } => {
+  const changes: { allowSubscriptions?: true; attributes?: { [key: string]: string } } = {};
+  if (requested?.allowSubscriptions && !drive.allowSubscriptions) changes.allowSubscriptions = true;
+
+  const requestedAttributes = requested?.attributes || {};
+  if (Object.entries(requestedAttributes).some(([key, value]) => drive.attributes?.[key] !== value))
+    changes.attributes = { ...drive.attributes, ...requestedAttributes };
+
+  return changes;
+};
+
 export const editDriveMetadata = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
