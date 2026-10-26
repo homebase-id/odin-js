@@ -47,7 +47,7 @@ const getMimeType = (format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null) => 
  */
 
 export const getTargetSize = (
-  img: HTMLImageElement,
+  img: { naturalWidth: number; naturalHeight: number },
   maxWidth: number | undefined,
   maxHeight: number | undefined
 ) => {
@@ -71,6 +71,144 @@ export const getTargetSize = (
   return { width: Math.ceil(outputWidth), height: Math.ceil(outputHeight) };
 };
 
+type ImageFormat = 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif';
+type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
+
+export interface DecodedImage {
+  source: CanvasImageSource;
+  naturalWidth: number;
+  naturalHeight: number;
+  /** Frees the decoded bitmap; call it once done drawing */
+  close: () => void;
+}
+
+const loadImageElement = (imgBlob: Blob): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(imgBlob);
+    reader.onload = () => {
+      const img = new Image();
+      if (!reader.result || typeof reader.result !== 'string') {
+        reject(new Error('Failed to read image data'));
+        return;
+      }
+      img.src = reader.result;
+      img.onload = () => resolve(img);
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read blob'));
+    };
+  });
+
+/**
+ * Decode an image blob, honouring EXIF orientation. Uses createImageBitmap where available
+ * (it also works in a worker), else an image element.
+ */
+export const decodeImage = async (imgBlob: Blob): Promise<DecodedImage> => {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(imgBlob, { imageOrientation: 'from-image' });
+      return {
+        source: bitmap,
+        naturalWidth: bitmap.width,
+        naturalHeight: bitmap.height,
+        close: () => bitmap.close(),
+      };
+    } catch {
+      // Not decodable as a bitmap (e.g. SVG in Chrome): fall back to an image element
+    }
+  }
+  const img = await loadImageElement(imgBlob);
+  return {
+    source: img,
+    naturalWidth: img.naturalWidth,
+    naturalHeight: img.naturalHeight,
+    close: () => undefined,
+  };
+};
+
+const createCanvas = (width: number, height: number): AnyCanvas => {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(width, height);
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+};
+
+/** Shrinks a canvas to nothing so iOS can reclaim its memory straight away */
+export const releaseCanvas = (canvas: AnyCanvas) => {
+  canvas.width = 0;
+  canvas.height = 0;
+};
+
+/**
+ * Draw an image onto a new canvas of the given size
+ */
+export const drawImageToCanvas = (
+  image: DecodedImage,
+  size: { width: number; height: number },
+  isTinyThumb: boolean = false
+): AnyCanvas => {
+  const canvas = createCanvas(size.width, size.height);
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
+  if (!ctx) throw new Error('Failed to get canvas context');
+
+  // For tiny thumbs, apply some optimization (simplified version of quantization)
+  if (isTinyThumb) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingQuality = 'low';
+  } else {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+  }
+
+  ctx.drawImage(image.source, 0, 0, size.width, size.height);
+  return canvas;
+};
+
+const canvasToBlob = async (canvas: AnyCanvas, mimeType: string, quality: number): Promise<Blob> => {
+  const blob =
+    'convertToBlob' in canvas
+      ? await canvas.convertToBlob({ type: mimeType, quality })
+      : await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mimeType, quality));
+  if (!blob) throw new Error('Failed to create blob from canvas');
+  return blob.type ? blob : new Blob([blob], { type: mimeType });
+};
+
+let webpEncodeSupport: Promise<boolean> | undefined;
+/**
+ * Whether this browser can encode webp; Safari can't and silently returns png instead.
+ * Detected once and cached.
+ */
+export const canEncodeWebp = (): Promise<boolean> =>
+  (webpEncodeSupport ??= (async () => {
+    const canvas = createCanvas(1, 1);
+    try {
+      return (await canvasToBlob(canvas, 'image/webp', 0.8)).type === 'image/webp';
+    } catch {
+      return false;
+    } finally {
+      releaseCanvas(canvas);
+    }
+  })());
+
+/**
+ * Encode a canvas in the given format and quality (1-100).
+ * Webp is encoded as jpeg where the browser can't encode webp, as its png fallback ignores quality.
+ */
+export const encodeCanvas = async (
+  canvas: AnyCanvas,
+  format: ImageFormat,
+  quality: number
+): Promise<Blob> => {
+  const outputFormat = format === 'webp' && !(await canEncodeWebp()) ? 'jpeg' : format;
+  return canvasToBlob(canvas, getMimeType(outputFormat), quality < 1 ? quality : quality / 100);
+};
+
 /**
  * Compress, resize or convert a blob type image
  *
@@ -78,7 +216,7 @@ export const getTargetSize = (
  * @param {number} [quality=100] Image quality for conversion of jpeg and png formats. Default value is 100.
  * @param {(number | string)} [width=0] Desired image width. If empty will use original width. If "auto", will calculate based on height scale
  * @param {(number | string)} [height=0] Desired image height. If empty will use original width. If "auto", will calculate based on width scale
- * @param {string} [format=null] image format [png, webp, bmp, jpeg, gif]. If null will use original format
+ * @param {string} [format=null] image format [png, webp, bmp, jpeg, gif]. If null will use webp (jpeg where the browser can't encode webp)
  * @returns {Promise} Returns promise with compressed, resized and converted image.
  */
 
@@ -87,7 +225,7 @@ export const resizeImageFromBlob = (
   quality = 100,
   width?: number,
   height?: number,
-  format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null = null,
+  format: ImageFormat | null = null,
   isTinyThumb: boolean = false,
   maxBytes?: number
 ): Promise<{
@@ -102,84 +240,30 @@ export const resizeImageFromBlob = (
     throw new RangeError('Quality must be between 1 and 100!');
   }
 
-  return new Promise((resolve, reject) => {
+  return (async () => {
     const outputFormat = format || 'webp';
-    const mimeType = getMimeType(outputFormat);
-    const imgQuality = quality < 1 ? quality : quality / 100;
+    const image = await decodeImage(imgBlob);
+    try {
+      const naturalSize = { width: image.naturalWidth, height: image.naturalHeight };
+      const imageTargetSize = { width: width || naturalSize.width, height: height || naturalSize.height };
+      const targetFinalSize = getTargetSize(image, imageTargetSize.width, imageTargetSize.height);
 
-    const reader = new FileReader();
-    reader.readAsDataURL(imgBlob);
-    reader.onload = () => {
-      const img = new Image();
-      if (!reader.result || typeof reader.result !== 'string') {
-        reject(new Error('Failed to read image data'));
-        return;
+      // Check if we can return original image unmodified
+      if (targetFinalSize.width === naturalSize.width &&
+        targetFinalSize.height === naturalSize.height &&
+        imgBlob.type === getMimeType(outputFormat) &&
+        maxBytes && imgBlob.size <= maxBytes) {
+        return { naturalSize, size: targetFinalSize, blob: imgBlob };
       }
-      img.src = reader.result;
-      img.onload = () => {
-        const naturalSize = { width: img.naturalWidth, height: img.naturalHeight };
-        const imageTargetSize = { width: width || naturalSize.width, height: height || naturalSize.height };
-        const targetFinalSize = getTargetSize(img, imageTargetSize.width, imageTargetSize.height);
 
-        // Check if we can return original image unmodified
-        if (targetFinalSize.width === naturalSize.width &&
-          targetFinalSize.height === naturalSize.height &&
-          imgBlob.type === mimeType &&
-          maxBytes && imgBlob.size <= maxBytes) {
-          resolve({
-            naturalSize,
-            size: targetFinalSize,
-            blob: imgBlob
-          });
-          return;
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = targetFinalSize.width;
-        canvas.height = targetFinalSize.height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Failed to get canvas context'));
-          return;
-        }
-
-        // For tiny thumbs, apply some optimization (simplified version of quantization)
-        if (isTinyThumb) {
-          ctx.imageSmoothingEnabled = false;
-          ctx.imageSmoothingQuality = 'low';
-        } else {
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-        }
-
-        ctx.drawImage(img, 0, 0, targetFinalSize.width, targetFinalSize.height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Failed to create blob from canvas'));
-              return;
-            }
-
-            resolve({
-              naturalSize,
-              size: targetFinalSize,
-              blob: new Blob([blob], { type: mimeType })
-            });
-          },
-          mimeType,
-          imgQuality
-        );
-      };
-
-      img.onerror = () => {
-        reject(new Error('Failed to load image'));
-      };
-    };
-
-    reader.onerror = () => {
-      reject(new Error('Failed to read blob'));
-    };
-  });
+      const canvas = drawImageToCanvas(image, targetFinalSize, isTinyThumb);
+      try {
+        return { naturalSize, size: targetFinalSize, blob: await encodeCanvas(canvas, outputFormat, quality) };
+      } finally {
+        releaseCanvas(canvas);
+      }
+    } finally {
+      image.close();
+    }
+  })();
 };
