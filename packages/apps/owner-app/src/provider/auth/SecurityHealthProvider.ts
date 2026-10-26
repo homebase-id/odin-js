@@ -1,4 +1,4 @@
-import {ApiType, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
+import {ApiType, DotYouClient, getKnownOdinErrorMessages} from '@homebase-id/js-lib/core';
 import {OwnerClient} from "@homebase-id/common-app";
 import {prepareAuthPassword} from "./AuthenticationHelper";
 import {getTypedPhraseCheck} from "./ZeroKnowledgeProvider";
@@ -174,12 +174,11 @@ export const getShardHealthStatus = async (): Promise<PeriodicSecurityHealthChec
 };
 
 
-/** Only the phrase's check value goes to the server, never the phrase itself. */
-export const verifyRecoveryKey = async (recoveryKey: string): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
-
+/**
+ * Only the phrase's check value goes to the server, never the phrase itself. An ordinary encrypted
+ * owner request: `dotYouClient` must be the session's, with its shared secret.
+ */
+export const verifyRecoveryKey = async (dotYouClient: DotYouClient, recoveryKey: string): Promise<boolean> => {
   let phraseCheck64: string;
   try {
     phraseCheck64 = await getTypedPhraseCheck(recoveryKey);

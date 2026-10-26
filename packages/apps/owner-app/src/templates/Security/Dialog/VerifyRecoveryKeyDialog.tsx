@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
-import {ActionButton, DialogWrapper, Label, SubtleMessage, t, usePortal,} from '@homebase-id/common-app';
+import {ActionButton, DialogWrapper, Label, SubtleMessage, t, useDotYouClient, usePortal,} from '@homebase-id/common-app';
 import {Check} from "@homebase-id/common-app/icons";
 import {verifyRecoveryKey} from "../../../provider/auth/SecurityHealthProvider";
 import {MaskedInput} from "../../../components/Password/MaskedInput";
@@ -22,6 +22,7 @@ export const VerifyRecoveryKeyDialog = ({
 }) => {
 
     const target = usePortal('modal-container');
+    const {getDotYouClient} = useDotYouClient();
     const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
     const [validationError, setValidationError] = useState<string | null>(null);
     const [recoveryPhrase, setRecoveryPhrase] = useState<string>('');
@@ -37,7 +38,7 @@ export const VerifyRecoveryKeyDialog = ({
     const doVerify = async () => {
 
         setState('loading');
-        const valid = await verifyRecoveryKey(recoveryPhrase);
+        const valid = await verifyRecoveryKey(getDotYouClient(), recoveryPhrase);
         setState("idle");
         if (valid) {
             setView('valid-phrase');
