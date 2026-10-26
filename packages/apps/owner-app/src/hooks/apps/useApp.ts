@@ -86,7 +86,8 @@ const ensureAppOwnedDrives = async (
         stringGuidsEqual(drive.type, BlogConfig.DriveType),
         appId,
         driveMeta.driveSlug,
-        driveMeta.driveTypeSlug
+        driveMeta.driveTypeSlug,
+        driveMeta.attributes
       );
     })
   );
