@@ -16,7 +16,7 @@ import { DealerRecoveryRiskHeadline } from './DealerRecoveryRiskHeadline';
 import { Check, Exclamation } from '@homebase-id/common-app/icons';
 import { SettingsRow } from './SettingsRow';
 import { getDealNeedsDealing } from '../../provider/auth/ZeroKnowledgeProvider';
-import { LOGIN_PATH, REDEAL_PARAM, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { loginHref } from '../../hooks/auth/useAuth';
 
 export const SecurityOverview = () => {
   const [openDialog, setOpenDialog] = useState<
@@ -31,11 +31,13 @@ export const SecurityOverview = () => {
 
   const reset = async () => {
     setStatusLoading(true);
-    const status = await getRecoveryInfo();
+    const [status, needsDealing, reportEnabled] = await Promise.all([
+      getRecoveryInfo(),
+      getDealNeedsDealing(getDotYouClient()).catch(() => false),
+      getMonthlyReportSetting(),
+    ]);
     setInfo(status);
-    setDealNeedsDealing(await getDealNeedsDealing(getDotYouClient()).catch(() => false));
-
-    const reportEnabled = await getMonthlyReportSetting();
+    setDealNeedsDealing(needsDealing);
     setMonthlyStatusReportEnabled(reportEnabled);
     setStatusLoading(false);
   };
@@ -71,7 +73,7 @@ export const SecurityOverview = () => {
           {t('Your recovery needs your password once more, so it uses your recovery email.')}{' '}
           <a
             className="underline"
-            href={`${LOGIN_PATH}?${REDEAL_PARAM}=1&${RETURN_URL_PARAM}=${encodeURIComponent('/owner/security/overview')}`}
+            href={loginHref('/owner/security/overview', { redeal: true })}
           >
             {t('Log in again')}
           </a>

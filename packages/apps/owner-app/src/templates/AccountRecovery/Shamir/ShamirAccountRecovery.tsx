@@ -25,8 +25,8 @@ import {
 import {resetPasswordWithResetKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {PasswordInput} from "../../../components/Password/PasswordInput";
 import {PasswordStrength} from "../../../components/Password/PasswordStrength";
-import {RETURN_URL_PARAM} from "../../../hooks/auth/useAuth";
-import {RecoveredPassword, loginHref} from "../RecoveredPassword";
+import {RETURN_URL_PARAM, loginHref} from "../../../hooks/auth/useAuth";
+import {RecoveredPassword} from "../RecoveredPassword";
 
 interface Message {
   text: string;
@@ -54,20 +54,21 @@ const ShamirAccountRecovery = () => {
   const [error, setError] = useState<Message | null>(null);
   const [noticeMessage, setNoticeMessage] = useState<Message | null>(null);
   const stateRef = useRef<ShamirRecoveryState>(ShamirRecoveryState.None);
-  // `forState`: the state the message is for (null: not known yet); the current one by default
-  // Status reads can come back out of order (the poll, a link's own read): one older than the newest
-  // applied is dropped, and gives back what the newest applied read
+  // Status reads can come back out of order (the poll, a link's own read). Each is numbered when sent;
+  // one older than the newest applied is dropped, and gives back what that one read.
   const lastSent = useRef(0);
+  const applied = useRef<{ read: number; state: ShamirRecoveryState; thisBrowser: boolean } | null>(null);
+  // `forState`: the state the message is for (null: not known yet); the current one by default
+  const message = (text: string | null, forState: ShamirRecoveryState | null): Message | null =>
+    text ? {text, forState, after: lastSent.current} : null;
   const setErrorMessage = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
-    setError(text ? {text, forState, after: lastSent.current} : null);
+    setError(message(text, forState));
   const setNotice = (text: string | null, forState: ShamirRecoveryState | null = stateRef.current) =>
-    setNoticeMessage(text ? {text, forState, after: lastSent.current} : null);
+    setNoticeMessage(message(text, forState));
   // While a link's own request runs, reads show the state from before it: "Please wait" until a read
   // sent after the link's request is in. Kept in state: the link's params leave the URL before then.
   const [arrivedByLink] = useState(!!enterNonceId || !!(fillShardId && fillCode));
   const linkReadsFrom = useRef(arrivedByLink ? Number.POSITIVE_INFINITY : 0);
-  const lastApplied = useRef(0);
-  const lastRead = useRef<{ state: ShamirRecoveryState; thisBrowser: boolean } | null>(null);
   const [thisBrowser, setThisBrowser] = useState<boolean>(false);
   // A recovery under way for another browser's key
   const [elsewhere, setElsewhere] = useState<boolean>(false);
@@ -121,13 +122,12 @@ const ShamirAccountRecovery = () => {
   const reloadStatus = () => {
     const read = ++lastSent.current;
     return getRecoveryStatusForThisBrowser().then(({status: result, thisBrowser: isThisBrowser, elsewhere: isElsewhere}) => {
-      if (read < lastApplied.current) return lastRead.current;
+      if (applied.current && read < applied.current.read) return applied.current;
       // A failed read ends the wait too, so a page whose reads fail isn't stuck on it
       if (read >= linkReadsFrom.current) setLoaded(true);
       if (!result) return null;
 
-      lastApplied.current = read;
-      lastRead.current = {state: result.state, thisBrowser: isThisBrowser};
+      applied.current = {read, state: result.state, thisBrowser: isThisBrowser};
       const settle = (m: Message | null) =>
         !m ? null
           : m.forState === null ? (read > m.after ? {...m, forState: result.state} : m)
@@ -138,9 +138,9 @@ const ShamirAccountRecovery = () => {
       setThisBrowser(isThisBrowser);
       setElsewhere(isElsewhere);
       openSlots(isThisBrowser ? result : null).then((slots) => {
-        if (read === lastApplied.current) setSlots(slots);
+        if (read === applied.current?.read) setSlots(slots);
       });
-      return lastRead.current;
+      return applied.current;
     });
   };
 

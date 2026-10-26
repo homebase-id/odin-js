@@ -1,11 +1,6 @@
 import {ActionButton, ActionLink, t} from '@homebase-id/common-app';
 import {PasswordInput} from '../../components/Password/PasswordInput';
-import {RETURN_URL_PARAM} from '../../hooks/auth/useAuth';
-
-/** The login page, coming back to `returnUrl` after login when there is one. */
-// eslint-disable-next-line react-refresh/only-export-components
-export const loginHref = (returnUrl: string | null) =>
-  returnUrl ? `/owner/login?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}` : '/owner/login';
+import {loginHref} from '../../hooks/auth/useAuth';
 
 /**
  * The password a recovery gave back, shown only in this browser, with the way out when it doesn't

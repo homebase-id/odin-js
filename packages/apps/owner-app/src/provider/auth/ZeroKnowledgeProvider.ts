@@ -28,7 +28,7 @@ import {
 } from '@homebase-id/js-lib/auth';
 import { OWNER_ZK_MASTER_KEY, t } from '@homebase-id/common-app';
 import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
-import type { ShamirDealPlan } from './ShamirProvider';
+import { PlayerType, type DealerShardConfig, type ShamirDealPlan } from './ShamirProvider';
 import {
   encryptRecoveryKey,
   getPublicKey,
@@ -141,9 +141,7 @@ const forgetAutomatedDealPending = () => {
 const getDeal = (dotYouClient: DotYouClient) =>
   dotYouClient
     .createAxiosClient()
-    .get<{ minMatchingShards: number; envelopes: { player: ShamirDealPlan['players'][number] }[]; usesAutomaticRecovery: boolean } | ''>(
-      '/security/recovery/config'
-    )
+    .get<DealerShardConfig | ''>('/security/recovery/config')
     .then((response) => response.data || null);
 
 /** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
@@ -170,11 +168,10 @@ const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: strin
 export const dealToHolders = async (dotYouClient: DotYouClient, plan: ShamirDealPlan, zkMasterKey: Uint8Array) => {
   const friends: FriendToDealTo[] = await Promise.all(
     plan.players.map(async (p) => {
-      const type: string = p.type;
-      if (type === 'delegate') {
+      if (p.type === PlayerType.Delegate) {
         return { odinId: p.odinId, type: 'delegate', publicKeyJwk: await getGatedFriendPublicKey(dotYouClient, p.odinId) };
       }
-      if (type === 'automatic') return { odinId: p.odinId, type: 'automatic' };
+      if (p.type === PlayerType.Automatic) return { odinId: p.odinId, type: 'automatic' };
       throw new Error(t('Only friends who approve or release automatically can hold a shard'));
     })
   );

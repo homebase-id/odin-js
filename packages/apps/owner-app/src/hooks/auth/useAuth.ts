@@ -35,9 +35,24 @@ export const SHAMIR_RECOVERY_PATH = '/owner/shamir-account-recovery';
 
 
 export const RETURN_URL_PARAM = 'returnUrl';
-/** Set by the server's verify link after a recovery email change: the login deals the recovery again. */
+/**
+ * Set by the server's verify link after a recovery email change (odin-core
+ * SecurityVerificationController.VerifyRecoveryEmail): the login deals the recovery again.
+ */
 export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
+
+/**
+ * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
+ * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM).
+ */
+export const loginHref = (returnUrl: string | null, options?: { redeal?: boolean }) => {
+  const query = new URLSearchParams();
+  if (options?.redeal) query.set(REDEAL_PARAM, '1');
+  if (returnUrl) query.set(RETURN_URL_PARAM, returnUrl);
+  const search = query.toString();
+  return search ? `${LOGIN_PATH}?${search}` : LOGIN_PATH;
+};
 
 const AUTH_FLOW_PATHS = [
   LOGIN_PATH,
