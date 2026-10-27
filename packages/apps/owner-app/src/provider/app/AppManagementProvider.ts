@@ -12,8 +12,9 @@ import {
   AppClientRegistration,
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
+  DriveGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient, PermissionedDrive } from '@homebase-id/js-lib/core';
+import { DotYouClient } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
@@ -99,10 +100,7 @@ export const RegisterApp = async (
   return response.data;
 };
 
-/**
- * The register body as the server reads it: every drive grant through {@link toServerDriveGrant} --
- * the app's own drives, the circle member grant, and the grants of the circles the app declared.
- */
+/** The register body as the server reads it: every drive grant list through toServerDriveGrant. */
 export const toServerAppRegistrationRequest = (request: AppRegistrationRequest) => ({
   ...request,
   drives: request.drives?.map(toServerDriveGrant),
@@ -116,11 +114,8 @@ export const toServerAppRegistrationRequest = (request: AppRegistrationRequest) 
   })),
 });
 
-/**
- * A drive grant as the server reads it (DriveGrantRequest): the permissioned drive alone, its
- * permission the one number of the DrivePermission flags rather than the owner app's list.
- */
-const toServerDriveGrant = (grant: { permissionedDrive: PermissionedDrive }) => ({
+/** A drive grant as the server reads it: the permissioned drive alone, its flags OR-ed into one number. */
+const toServerDriveGrant = (grant: DriveGrantRequest) => ({
   permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
 });
 

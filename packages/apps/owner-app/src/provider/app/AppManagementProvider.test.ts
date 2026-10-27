@@ -12,8 +12,9 @@ const drive = {
 };
 
 describe('toServerAppRegistrationRequest', () => {
-  it("sends a declared circle's grant permission as the one number the server takes", () => {
-    // Homebase Filesync's `ac` on its first install.
+  // From the `ac` param through the parser to the body: the parser keeps the owner app's list, the
+  // body must carry the number. Homebase Filesync's `ac` on its first install.
+  it("sends a declared circle's grant permission, parsed from `ac`, as one number", () => {
     const circles = appCirclesParamToDeclarations(
       JSON.stringify([
         {
