@@ -9,7 +9,8 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "lint": "eslint src",
-    "type": "tsc"
+    "type": "tsc",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",

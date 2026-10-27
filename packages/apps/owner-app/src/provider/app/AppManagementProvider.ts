@@ -12,6 +12,7 @@ import {
   AppClientRegistration,
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
+  DriveGrantRequest,
 } from './AppManagementProviderTypes';
 import { DotYouClient } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
@@ -91,22 +92,37 @@ export const RegisterApp = async (
   request: AppRegistrationRequest
 ): Promise<RedactedAppRegistration> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post<RedactedAppRegistration>('appmanagement/register/app', {
-    ...request,
-    drives: request.drives?.map((driveGrant) => ({
-      ...driveGrant,
-      permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-    })),
-    circleMemberPermissionGrant: {
-      ...request.circleMemberPermissionGrant,
-      drives: request.circleMemberPermissionGrant?.drives?.map((driveGrant) => ({
-        ...driveGrant,
-        permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-      })),
-    },
-  });
+  const response = await client.post<RedactedAppRegistration>(
+    'appmanagement/register/app',
+    toServerAppRegistrationRequest(request)
+  );
 
   return response.data;
+};
+
+/**
+ * The register body as the server reads it: every drive grant's permission summed into the one
+ * number the server's DrivePermission flags enum takes -- the app's own drives, the circle member
+ * grant, and the grants of the circles the app declared.
+ */
+export const toServerAppRegistrationRequest = (request: AppRegistrationRequest) => {
+  const withPermissionNumber = (driveGrant: DriveGrantRequest) => ({
+    ...driveGrant,
+    permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
+  });
+
+  return {
+    ...request,
+    drives: request.drives?.map(withPermissionNumber),
+    circleMemberPermissionGrant: {
+      ...request.circleMemberPermissionGrant,
+      drives: request.circleMemberPermissionGrant?.drives?.map(withPermissionNumber),
+    },
+    circles: request.circles?.map((circle) => ({
+      ...circle,
+      driveGrants: circle.driveGrants.map(withPermissionNumber),
+    })),
+  };
 };
 
 export const GetAppRegistration = async (
