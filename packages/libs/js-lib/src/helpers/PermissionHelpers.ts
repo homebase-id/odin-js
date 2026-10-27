@@ -114,5 +114,5 @@ export const getUniqueDrivesWithHighestPermission = (grants: DriveGrant[]) =>
   }, [] as DriveGrant[]);
 
 export const getPermissionNumberFromDrivePermission = (permission: PermissionedDrive) => {
-  return { ...permission, permission: permission.permission.reduce((a, b) => a + b, 0) };
+  return { ...permission, permission: permission.permission.reduce((a, b) => a | b, 0) };
 };

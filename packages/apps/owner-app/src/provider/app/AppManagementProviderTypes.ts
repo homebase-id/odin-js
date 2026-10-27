@@ -152,12 +152,6 @@ export interface RedactedExchangeGrant {
   hasIcrKey?: boolean;
 }
 
-export enum DrivePermission {
-  None = 0,
-  Read = 1 << 0,
-  Write = 1 << 2,
-}
-
 export enum PermissionFlags {
   None = 0,
 

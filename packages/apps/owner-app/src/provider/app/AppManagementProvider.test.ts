@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { toServerAppRegistrationRequest } from './AppManagementProvider';
+import { appCirclesParamToDeclarations } from '../../templates/AppDefinition/util';
+
+// util.ts takes only `t` from common-app, whose index reads `window` on import.
+vi.mock('@homebase-id/common-app', () => ({ t: (text: string) => text }));
 
 const appId = '00000000-0000-0000-0000-000000000001';
 const drive = {
@@ -8,29 +12,34 @@ const drive = {
 };
 
 describe('toServerAppRegistrationRequest', () => {
-  // Homebase Filesync's `ac` on first install, as appCirclesParamToDeclarations parses it: the
-  // grant's permission arrives as an array, like every other grant in the owner app.
-  it('sends a declared circle grant permission as the one number the server takes', () => {
+  it("sends a declared circle's grant permission as the one number the server takes", () => {
+    // Homebase Filesync's `ac` on its first install.
+    const circles = appCirclesParamToDeclarations(
+      JSON.stringify([
+        {
+          s: 'filesync',
+          n: 'Filesync',
+          d: 'People who can see the files you share through Homebase Filesync',
+          e: '📁',
+          g: [{ a: drive.alias, t: drive.type, p: 1 }],
+        },
+      ])
+    );
+    expect(circles).toBeDefined();
+
     const body = toServerAppRegistrationRequest({
       appId,
       name: 'Homebase Filesync',
       appSlug: 'filesync',
-      circles: [
-        {
-          slug: 'filesync',
-          name: 'Filesync',
-          description: 'People who can see the files you share through Homebase Filesync',
-          emoji: '📁',
-          driveGrants: [{ permissionedDrive: { drive, permission: [1] } }],
-          permissions: { keys: [] },
-        },
-      ],
+      circles,
     });
 
-    expect(body.circles?.[0].driveGrants[0].permissionedDrive).toEqual({ drive, permission: 1 });
+    expect(body.circles?.[0].driveGrants).toEqual([
+      { permissionedDrive: { drive, permission: 1 } },
+    ]);
   });
 
-  it('sums the permissions of the app drives and the circle member grant', () => {
+  it('sends the app drives and the circle member grant the same way', () => {
     const body = toServerAppRegistrationRequest({
       appId,
       name: 'app',
@@ -41,7 +50,9 @@ describe('toServerAppRegistrationRequest', () => {
       },
     });
 
-    expect(body.drives?.[0].permissionedDrive.permission).toBe(3);
-    expect(body.circleMemberPermissionGrant.drives?.[0].permissionedDrive.permission).toBe(5);
+    expect(body.drives).toEqual([{ permissionedDrive: { drive, permission: 3 } }]);
+    expect(body.circleMemberPermissionGrant.drives).toEqual([
+      { permissionedDrive: { drive, permission: 5 } },
+    ]);
   });
 });

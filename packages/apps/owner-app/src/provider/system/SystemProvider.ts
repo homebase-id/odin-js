@@ -1,5 +1,4 @@
 import {DotYouClient, DriveDefinition, TargetDrive} from '@homebase-id/js-lib/core';
-import {CircleDefinition} from '@homebase-id/js-lib/network';
 import {assertValidSlug} from '@homebase-id/js-lib/helpers';
 
 /**
@@ -20,8 +19,7 @@ const root = '/config/system';
 export const initialize = async (
     dotYouClient: DotYouClient,
     firstRunToken: string | null,
-    drives?: DriveDefinitionParam[],
-    circles?: CircleDefinition[]
+    drives?: DriveDefinitionParam[]
 ) => {
     const client = dotYouClient.createAxiosClient();
     const url = root + '/initialize?';
@@ -29,7 +27,7 @@ export const initialize = async (
         assertValidSlug('driveSlug', d.driveSlug);
         assertValidSlug('driveTypeSlug', d.driveTypeSlug);
     });
-    const data = {firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? []};
+    const data = {firstRunToken: firstRunToken, drives: drives ?? []};
 
     return client
         .post<boolean>(url, data, {
