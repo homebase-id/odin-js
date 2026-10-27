@@ -80,9 +80,13 @@ const useSealedAppKey = (
       const masterKey = await getZkMasterKey(dotYouClient);
       if (!masterKey) return settle({ state: 'needsPassword' });
 
+      // A failed one is forgotten, so the effect running again (or a reload) tries again
       const sealing =
         sealings.get(publicKey) ??
-        sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey);
+        sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey).catch((error) => {
+          sealings.delete(publicKey);
+          throw error;
+        });
       sealings.set(publicKey, sealing);
       settle({ state: 'sealed', ...(await sealing) });
     })().catch((error) => {
