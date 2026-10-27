@@ -8,6 +8,9 @@ import {
 } from '@homebase-id/js-lib/helpers';
 import {
   PasswordRecovery,
+  ZkAppKeys,
+  ZkAppKeysRequest,
+  ZkConvertDriveKeepingKeyRequest,
   ZkConvertDriveRequest,
   ZkKeysRequest,
   ZkPhraseCopiesRequest,
@@ -18,16 +21,19 @@ import {
   dealToFriends,
   getPhraseCheck,
   makePhraseCopies,
+  makeAppKeyBackfill,
+  makeConversionKeepingKey,
   makeZkDriveKeys,
   makeZkKeys,
   openZkMasterKey,
   recoverWithPhrase,
+  sealAppKeyToSignIn,
   sealPassword,
   zkLock,
   zkOpen,
 } from '@homebase-id/js-lib/auth';
 import { OWNER_ZK_MASTER_KEY, t } from '@homebase-id/common-app';
-import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
+import { SHARD_RECOVERY_DRIVE, VAULT_DRIVE } from '../app/wellKnownDrives';
 import { PlayerType, type DealerShardConfig, type ShamirDealPlan } from './ShamirProvider';
 import {
   encryptRecoveryKey,
@@ -322,6 +328,15 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
     await convertShardRecoveryDrive(dotYouClient, request);
   }
 
+  // Every app's copy of each zero-knowledge drive it is granted, so a device that already holds its app's key
+  // picks up a drive granted without this browser. Its failure stops nothing: the next login, or the app's next
+  // sign-in, backfills it.
+  try {
+    await backfillAppKeys(dotYouClient, masterKey);
+  } catch (error) {
+    console.warn("The apps' zero-knowledge keys could not be completed; the next login tries again", error);
+  }
+
   // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move
   // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login
   // deals again.
@@ -343,6 +358,80 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   if (status.recoveryPhrase === 'onServer') {
     await takeOverPhrase(dotYouClient, password, masterKey);
   }
+};
+
+// Zero-knowledge app keys (odin-core docs/zero-knowledge-drive-api-plan.md, step 3)
+
+const getZkAppKeys = (dotYouClient: DotYouClient) =>
+  dotYouClient
+    .createAxiosClient()
+    .get<ZkAppKeys[]>('/security/zk/app-keys')
+    .then((response) => response.data);
+
+const saveZkAppKeys = (dotYouClient: DotYouClient, request: ZkAppKeysRequest) =>
+  dotYouClient.createAxiosClient().post('/security/zk/app-keys', request);
+
+/** Saves what each app (or the one named) is missing: its key, and its copy of each zero-knowledge drive it is granted. */
+const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array, onlyApp?: ZkAppKeys) => {
+  const apps = onlyApp ? [onlyApp] : await getZkAppKeys(dotYouClient);
+  for (const app of apps.filter((a) => onlyApp || a.drives.some((d) => d.isZeroKnowledge && !d.hasAppCopy))) {
+    const { request } = await makeAppKeyBackfill(app, masterKey);
+    if (request) await saveZkAppKeys(dotYouClient, request);
+  }
+};
+
+/**
+ * The consent page's part of an app's sign-in that asks for its zero-knowledge key (`zk_app_key=1`): what the app is
+ * missing, backfilled, and its key sealed to the sign-in's public key (`public_key`), for the consent form to post.
+ * The app is named by its client id: its id or its slug.
+ */
+export const sealAppKeyForSignIn = async (
+  dotYouClient: DotYouClient,
+  clientId: string,
+  publicKeyJwkBase64Url: string,
+  masterKey: Uint8Array
+) => {
+  const app = (await getZkAppKeys(dotYouClient)).find(
+    (a) => stringGuidsEqual(a.appId, clientId) || a.appSlug.toLowerCase() === clientId.toLowerCase()
+  );
+  if (!app) throw new Error(t('This app is not registered on your identity'));
+
+  const { appKey, request } = await makeAppKeyBackfill(app, masterKey);
+  if (request) await saveZkAppKeys(dotYouClient, request);
+  return sealAppKeyToSignIn(appKey, publicKeyJwkBase64Url);
+};
+
+const withDashes = (guid: string) =>
+  guid.replace(/-/g, '').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
+
+/** Whether Vault is already zero knowledge ("private"). */
+export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
+  !!(await getDrivesByType(dotYouClient, VAULT_DRIVE.type, 1, 10)).results.find((drive) =>
+    stringGuidsEqual(drive.targetDriveInfo.alias, VAULT_DRIVE.alias)
+  )?.zkMasterKeyEncryptedStorageKey;
+
+/**
+ * Makes Vault private, keeping its key (odin-core docs/zero-knowledge-drive-api-plan.md, 3.3): the server hands the
+ * key over one last time, this browser locks it with the zero-knowledge master key and with the key of each app
+ * granted Vault, and the server drops every copy it could open. A device of an app gets its key at its next sign-in.
+ * The caller asks for the password first.
+ */
+export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: string) => {
+  const masterKey = await openZkMasterKey(password, await getZkStatus(dotYouClient));
+  const vaultId = withDashes(VAULT_DRIVE.alias); // the server reads a Guid from JSON only with dashes
+  const client = dotYouClient.createAxiosClient();
+  const [driveKey, apps] = await Promise.all([
+    client
+      .get<{ storageKey64: string }>(`/security/zk/drives/${vaultId}/key-for-conversion`)
+      .then((response) => base64ToUint8Array(response.data.storageKey64)),
+    getZkAppKeys(dotYouClient),
+  ]);
+
+  const request: ZkConvertDriveKeepingKeyRequest = await makeConversionKeepingKey(vaultId, driveKey, masterKey, apps);
+  await client.post('/security/zk/convert-drive', request).catch((error) => {
+    console.warn(error);
+    throw new Error(getKnownOdinErrorMessages(error) ?? t('Vault could not be made private'));
+  });
 };
 
 /**

@@ -17,6 +17,7 @@ import { Check, Exclamation } from '@homebase-id/common-app/icons';
 import { SettingsRow } from './SettingsRow';
 import { getDealNeedsDealing } from '../../provider/auth/ZeroKnowledgeProvider';
 import { loginHref } from '../../hooks/auth/useAuth';
+import { MakeVaultPrivateSection, SHOW_MAKE_VAULT_PRIVATE } from './MakeVaultPrivateSection';
 
 export const SecurityOverview = () => {
   const [openDialog, setOpenDialog] = useState<
@@ -223,6 +224,8 @@ export const SecurityOverview = () => {
             )}
           </>
         </Section>
+
+        {SHOW_MAKE_VAULT_PRIVATE ? <MakeVaultPrivateSection /> : null}
 
         {/*do this later*/}
         {/*<Section*/}
