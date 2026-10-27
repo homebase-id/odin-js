@@ -58,8 +58,9 @@ test("a sealed key header opens with the drive's write-only private key", async 
 
 test('client-locked: sealed and zkDrive, by name or number; aes is not', () => {
   for (const type of ['sealed', 12, 'zkDrive', 13])
-    expect(isClientLockedKeyHeader({ type })).toBe(true);
-  for (const type of ['aes', 11]) expect(isClientLockedKeyHeader({ type })).toBe(false);
+    expect(isClientLockedKeyHeader({ type }), `type ${type}`).toBe(true);
+  for (const type of ['aes', 11])
+    expect(isClientLockedKeyHeader({ type }), `type ${type}`).toBe(false);
 
   const file = (type: string, isEncrypted = true) => ({
     fileMetadata: { isEncrypted },
