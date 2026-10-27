@@ -23,7 +23,7 @@ import {
   TargetDrive,
   decryptJsonContent,
   decryptKeyHeader,
-  isDeposit,
+  isClientLocked,
 } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
@@ -458,8 +458,9 @@ const FileState = ({
 }) => {
   const [isBroken, setIsBroken] = useState(false);
   const dotYouClient = useDotYouClientContext();
-  // A deposit is sealed to the drive's write-only key: not broken, just not readable here
-  const sealed = isDeposit(file);
+  // A client-locked file (a sealed deposit, a zkDrive file) opens with the drive's keys, not the shared
+  // secret: not broken, just not readable here
+  const sealed = isClientLocked(file);
   useEffect(() => {
     if (sealed) return;
     (async () => {

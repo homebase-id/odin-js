@@ -254,7 +254,7 @@ export interface KeyHeader {
 
 export interface EncryptedKeyHeader {
   encryptionVersion: number;
-  /** 11 (or 'aes' as the identity server returns it); 12 or 'sealed' for a deposit (ZeroKnowledgeFriends) */
+  /** 11 (or 'aes' as the identity server returns it); client-locked: 12/'sealed' (a deposit) or 13/'zkDrive' (SecurityHelpers.openClientLockedKeyHeader) */
   type: number | string;
   iv: Uint8Array;
   encryptedAesKey: Uint8Array;

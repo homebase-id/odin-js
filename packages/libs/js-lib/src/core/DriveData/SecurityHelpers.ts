@@ -8,9 +8,11 @@ import {
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
+  uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 import { getSecuredBlob, streamToByteArray } from '../../helpers/BlobHelpers';
+import { zkUnseal } from '../../auth/providers/ZeroKnowledgeKeys';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -241,13 +243,82 @@ export const isSealedKeyHeader = (keyHeader: { type: number | string } | undefin
   !!keyHeader && (keyHeader.type === 'sealed' || keyHeader.type === 12);
 
 /**
+ * Whether a key header is a zero-knowledge drive's own: the file key locked with the drive's key by an
+ * owner device (13/'zkDrive').
+ */
+export const isZkDriveKeyHeader = (keyHeader: { type: number | string } | undefined | null) =>
+  !!keyHeader && (keyHeader.type === 'zkDrive' || keyHeader.type === 13);
+
+/**
+ * Whether a key header is client-locked: sealed (a deposit) or zkDrive. The identity server returns it
+ * as stored, not shared-secret encrypted, so `decryptKeyHeader` can't open it; `openClientLockedKeyHeader`
+ * does, with the drive's keys (odin-core docs/zero-knowledge-drive-api-plan.md, step 2).
+ */
+export const isClientLockedKeyHeader = (keyHeader: { type: number | string } | undefined | null) =>
+  isSealedKeyHeader(keyHeader) || isZkDriveKeyHeader(keyHeader);
+
+type FileWithKeyHeader = {
+  fileMetadata: { isEncrypted: boolean };
+  sharedSecretEncryptedKeyHeader?: { type: number | string } | null;
+};
+
+/**
  * Whether a file is a deposit: encrypted, with its key header sealed to the drive's write-only key.
  * Nothing but the drive owner's browser, with that key, can open it.
  */
-export const isDeposit = (file: {
-  fileMetadata: { isEncrypted: boolean };
-  sharedSecretEncryptedKeyHeader?: { type: number | string } | null;
-}) => file.fileMetadata.isEncrypted && isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader);
+export const isDeposit = (file: FileWithKeyHeader) =>
+  file.fileMetadata.isEncrypted && isSealedKeyHeader(file.sharedSecretEncryptedKeyHeader);
+
+/** Whether a file is client-locked: encrypted, with a sealed or zkDrive key header. */
+export const isClientLocked = (file: FileWithKeyHeader) =>
+  file.fileMetadata.isEncrypted && isClientLockedKeyHeader(file.sharedSecretEncryptedKeyHeader);
+
+/** The drive's keys that open a client-locked key header; a header needs only its own. */
+export interface ClientLockKeys {
+  /** The drive's write-only private key (PKCS8): opens a sealed key header */
+  writeOnlyPrivateKey?: Uint8Array;
+  /** The drive's key (DrvK): opens a zkDrive key header */
+  driveKey?: Uint8Array;
+}
+
+const asBytes = (value: string | Uint8Array) =>
+  typeof value === 'string' ? base64ToUint8Array(value) : value;
+
+/**
+ * Opens a client-locked key header: a sealed one with the drive's write-only private key, a zkDrive
+ * one with the drive's key. Either way it holds the file's IV and AES key, which open the content and
+ * every payload as for any other file.
+ */
+export const openClientLockedKeyHeader = async (
+  keyHeader: {
+    type: number | string;
+    iv: string | Uint8Array;
+    encryptedAesKey: string | Uint8Array;
+  },
+  keys: ClientLockKeys
+): Promise<KeyHeader> => {
+  let bytes: Uint8Array;
+  if (isSealedKeyHeader(keyHeader)) {
+    if (!keys.writeOnlyPrivateKey)
+      throw new Error("A sealed key header opens only with the drive's write-only private key");
+    const sealed = keyHeader.encryptedAesKey;
+    bytes = await zkUnseal(
+      typeof sealed === 'string' ? sealed : uint8ArrayToBase64(sealed),
+      keys.writeOnlyPrivateKey
+    );
+  } else if (isZkDriveKeyHeader(keyHeader)) {
+    if (!keys.driveKey) throw new Error("A zkDrive key header opens only with the drive's key");
+    bytes = await cbcDecrypt(
+      asBytes(keyHeader.encryptedAesKey),
+      asBytes(keyHeader.iv),
+      keys.driveKey
+    );
+  } else {
+    throw new Error('Not a client-locked key header');
+  }
+
+  return { iv: bytes.slice(0, 16), aesKey: bytes.slice(16) };
+};
 
 export const decryptKeyHeader = async (
   dotYouClient: DotYouClient,
@@ -259,9 +330,11 @@ export const decryptKeyHeader = async (
     return encryptedKeyHeader as KeyHeader;
   }
 
-  // A deposit's key header is sealed to the drive's write-only key, not the shared secret
-  if (isSealedKeyHeader(encryptedKeyHeader)) {
-    throw new Error("A deposit's key header opens only with the drive's write-only private key");
+  // A client-locked key header is locked with the drive's keys, not the shared secret
+  if (isClientLockedKeyHeader(encryptedKeyHeader)) {
+    throw new Error(
+      "A client-locked key header opens only with the drive's keys (openClientLockedKeyHeader)"
+    );
   }
 
   const ss = dotYouClient.getSharedSecret();

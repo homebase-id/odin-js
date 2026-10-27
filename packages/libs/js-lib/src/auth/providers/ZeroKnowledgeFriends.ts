@@ -2,7 +2,7 @@ import { cbcDecrypt, cbcEncrypt } from '../../helpers/AesEncrypt';
 import {
   decryptUsingKeyHeader,
   encryptWithKeyheader,
-  isSealedKeyHeader,
+  openClientLockedKeyHeader,
 } from '../../core/DriveData/SecurityHelpers';
 import {
   base64ToUint8Array,
@@ -55,18 +55,6 @@ export const sealKeyHeader = async (keyHeader: KeyHeader, publicKeyJwk: string):
   iv: uint8ArrayToBase64(keyHeader.iv),
   encryptedAesKey: await zkSeal(mergeByteArrays([keyHeader.iv, keyHeader.aesKey]), publicKeyJwk),
 });
-
-const asBase64 = (value: string | Uint8Array) => (typeof value === 'string' ? value : uint8ArrayToBase64(value));
-
-/** Opens a deposit's key header with the drive's write-only private key (PKCS8). */
-export const openSealedKeyHeader = async (
-  keyHeader: EncryptedKeyHeader | SealedKeyHeader,
-  writeOnlyPrivateKeyPkcs8: Uint8Array
-): Promise<KeyHeader> => {
-  if (!isSealedKeyHeader(keyHeader)) throw new Error('Not a sealed key header');
-  const bytes = await zkUnseal(asBase64(keyHeader.encryptedAesKey), writeOnlyPrivateKeyPkcs8);
-  return { iv: bytes.slice(0, 16), aesKey: bytes.slice(16) };
-};
 
 /** A zero-knowledge drive's keys, as owner drive info returns them. */
 export interface ZkDriveKeys {
@@ -218,7 +206,7 @@ export const releaseGatedShard = async (
   writeOnlyPrivateKeyPkcs8: Uint8Array,
   recoveryPublicKeyJwk: string
 ): Promise<{ index: number; sealedShard: string }> => {
-  const fileKey = await openSealedKeyHeader(deposit.keyHeader, writeOnlyPrivateKeyPkcs8);
+  const fileKey = await openClientLockedKeyHeader(deposit.keyHeader, { writeOnlyPrivateKey: writeOnlyPrivateKeyPkcs8 });
   const json = byteArrayToString(await decryptUsingKeyHeader(base64ToUint8Array(deposit.content), fileKey));
   const content = JSON.parse(json) as GatedShardContent;
 
