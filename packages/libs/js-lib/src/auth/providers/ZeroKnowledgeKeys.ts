@@ -6,6 +6,7 @@ import {
   isAGuidId,
   mergeByteArrays,
   stringToUint8Array,
+  toUint8Array,
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
 import { bip39Decode } from '../../helpers/Bip39';
@@ -85,7 +86,7 @@ export const sealKeyId = async (publicKeyJwk: string): Promise<number> => {
 };
 
 const assertSealed = (sealed: string | Uint8Array): Uint8Array => {
-  const bytes = typeof sealed === 'string' ? base64ToUint8Array(sealed) : sealed;
+  const bytes = toUint8Array(sealed);
   if (bytes.length < SEAL_HEADER_LENGTH + IV_LENGTH + 16 || bytes[0] !== SEAL_VERSION) {
     throw new Error('Not a sealed value');
   }
@@ -123,8 +124,8 @@ export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<st
 };
 
 /** Opens a sealed value with the private key (PKCS8). */
-export const zkUnseal = async (sealed64: string, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
-  const bytes = assertSealed(sealed64);
+export const zkUnseal = async (sealed: string | Uint8Array, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
+  const bytes = assertSealed(sealed);
   const me = await crypto.subtle.importKey('pkcs8', privateKeyPkcs8, ECDH_P384, false, ['deriveBits']);
   const throwaway = await crypto.subtle.importKey(
     'raw',

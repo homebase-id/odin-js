@@ -2,13 +2,12 @@ import { expect, test } from 'vitest';
 import { cbcEncrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, getRandom16ByteArray, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { rebuildSecret, splitSecret } from '../../helpers/ShamirSecretSharing';
-import { isSealedKeyHeader } from '../../core/DriveData/SecurityHelpers';
+import { isSealedKeyHeader, openClientLockedKeyHeader } from '../../core/DriveData/SecurityHelpers';
 import {
   ShamirRecoveryBundle,
   dealToFriends,
   getShamirResetKey,
   openRecoverySlots,
-  openSealedKeyHeader,
   recoverFromBundle,
   releaseGatedShard,
   sealKeyHeader,
@@ -64,8 +63,8 @@ test('a deposit key header is sealed to the drive and opens with its write-only 
   expect(isSealedKeyHeader({ ...sealed, type: 12 } as never)).toBe(true);
   expect(isSealedKeyHeader({ ...sealed, type: 11 } as never)).toBe(false);
   expect(readSealKeyId(sealed.encryptedAesKey)).toBe(await sealKeyId(drive.publicKeyJwk));
-  expect(await openSealedKeyHeader(sealed, drive.privateKey)).toEqual(keyHeader);
-  await expect(openSealedKeyHeader(sealed, (await makePair()).privateKey)).rejects.toThrow();
+  expect(await openClientLockedKeyHeader(sealed, { writeOnlyPrivateKey: drive.privateKey })).toEqual(keyHeader);
+  await expect(openClientLockedKeyHeader(sealed, { writeOnlyPrivateKey: (await makePair()).privateKey })).rejects.toThrow();
 });
 
 test('the friends reset key is hkdf of the secret with its own label', async () => {

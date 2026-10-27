@@ -8,7 +8,7 @@ import {
 import {
   decryptJsonContent,
   decryptKeyHeader,
-  isDeposit,
+  isClientLocked,
   DeletedHomebaseFile,
   deleteFile,
   HomebaseFile,
@@ -172,11 +172,11 @@ export const useFile = ({
       );
     }
 
-    // A deposit's key header is sealed to the drive's write-only key: its content stays as stored
-    const deposit = isDeposit(result);
+    // A client-locked key header (sealed or zkDrive) opens with the drive's keys: its content stays as stored
+    const clientLocked = isClientLocked(result);
     const decryptedJsonContent = await (async () => {
       try {
-        if (deposit) return result.fileMetadata.appData.content;
+        if (clientLocked) return result.fileMetadata.appData.content;
         return result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
           ? await decryptJsonContent(
               result.fileMetadata,
@@ -195,7 +195,7 @@ export const useFile = ({
         ...result.fileMetadata,
         appData: {
           ...result.fileMetadata.appData,
-          content: deposit ? decryptedJsonContent : tryJsonParse(decryptedJsonContent),
+          content: clientLocked ? decryptedJsonContent : tryJsonParse(decryptedJsonContent),
         },
       },
       serverMetadata: result.serverMetadata,
