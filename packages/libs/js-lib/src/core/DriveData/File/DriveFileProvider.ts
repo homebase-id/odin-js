@@ -415,6 +415,8 @@ export const getLocalContentFromHeader = async <T>(
   if (!fileId || !fileMetadata) {
     throw new Error('[odin-js] getLocalContentFromHeader: fileId or fileMetadata is undefined');
   }
+  // As getContentFromHeaderOrPayload: a client-locked key header opens with the drive's keys, not the shared secret
+  if (fileMetadata.isEncrypted && isClientLocked(dsr)) return null;
 
   const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)

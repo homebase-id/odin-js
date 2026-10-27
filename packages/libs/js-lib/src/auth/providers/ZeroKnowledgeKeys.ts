@@ -123,8 +123,8 @@ export const zkSeal = async (data: Uint8Array, publicKeyJwk: string): Promise<st
 };
 
 /** Opens a sealed value with the private key (PKCS8). */
-export const zkUnseal = async (sealed64: string, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
-  const bytes = assertSealed(sealed64);
+export const zkUnseal = async (sealed: string | Uint8Array, privateKeyPkcs8: Uint8Array): Promise<Uint8Array> => {
+  const bytes = assertSealed(sealed);
   const me = await crypto.subtle.importKey('pkcs8', privateKeyPkcs8, ECDH_P384, false, ['deriveBits']);
   const throwaway = await crypto.subtle.importKey(
     'raw',

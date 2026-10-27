@@ -8,7 +8,6 @@ import {
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
-  uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 import { getSecuredBlob, streamToByteArray } from '../../helpers/BlobHelpers';
@@ -230,6 +229,10 @@ export const decryptChunkedBytesResponse = async (
     // Return without full block offset; Ignore 16 extra bytes at
     //  the start of the first block as that's already removed from the cipher to get the iv
     return decryptedBytes.slice(startOffset ? startOffset - 16 : 0);
+  } else if (response.headers.payloadencrypted === 'True') {
+    // As decryptBytesResponse: a client-locked file's payload comes without a key header, and returning
+    // its ciphertext as the payload would show garbage instead of failing
+    throw new Error(`Can't decrypt; missing keyheader`);
   } else {
     return responseBa.slice(startOffset);
   }
@@ -301,11 +304,7 @@ export const openClientLockedKeyHeader = async (
   if (isSealedKeyHeader(keyHeader)) {
     if (!keys.writeOnlyPrivateKey)
       throw new Error("A sealed key header opens only with the drive's write-only private key");
-    const sealed = keyHeader.encryptedAesKey;
-    bytes = await zkUnseal(
-      typeof sealed === 'string' ? sealed : uint8ArrayToBase64(sealed),
-      keys.writeOnlyPrivateKey
-    );
+    bytes = await zkUnseal(keyHeader.encryptedAesKey, keys.writeOnlyPrivateKey);
   } else if (isZkDriveKeyHeader(keyHeader)) {
     if (!keys.driveKey) throw new Error("A zkDrive key header opens only with the drive's key");
     bytes = await cbcDecrypt(

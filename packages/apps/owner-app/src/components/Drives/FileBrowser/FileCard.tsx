@@ -24,6 +24,7 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
   isClientLocked,
+  isDeposit,
 } from '@homebase-id/js-lib/core';
 import { BlogConfig, PostContent, ReactionConfig } from '@homebase-id/js-lib/public';
 import { ContactConfig } from '@homebase-id/js-lib/network';
@@ -487,7 +488,9 @@ const FileState = ({
   if (sealed) {
     return (
       <div className={`${className} flex flex-row items-center gap-1`}>
-        <p className="text-slate-500">{t('Sealed deposit')}</p>
+        <p className="text-slate-500">
+          {isDeposit(file) ? t('Sealed deposit') : t('Locked with the drive key')}
+        </p>
       </div>
     );
   }
