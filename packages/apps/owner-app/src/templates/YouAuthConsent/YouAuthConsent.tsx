@@ -39,13 +39,18 @@ const PUBLIC_KEY_PARAM = 'public_key';
 // posts it sealed to the sign-in's public key, and the server hands it to the device with its token.
 const ZK_APP_KEY_PARAM = 'zk_app_key';
 const SEALED_ZK_APP_KEY_FIELD = 'zk_app_key_sealed';
+const LOCKED_ZK_APP_KEY_FIELD = 'zk_app_key_locked';
 
 type SealedAppKey =
   | { state: 'none' }
   | { state: 'sealing' }
-  | { state: 'sealed'; sealed: string }
+  | { state: 'sealed'; sealed: string; locked: string }
   | { state: 'needsPassword' }
   | { state: 'failed'; message: string };
+
+// One sealing per sign-in: React may run the effect twice, and two first-time keys made at once would race (the
+// server keeps one, and refuses consent naming the other)
+const sealings = new Map<string, ReturnType<typeof sealAppKeyForSignIn>>();
 
 /**
  * The app's zero-knowledge key sealed to this sign-in, when the app asked for it: with the zero-knowledge master key
@@ -74,10 +79,10 @@ const useSealedAppKey = (
       const masterKey = await getZkMasterKey(dotYouClient);
       if (!masterKey) return settle({ state: 'needsPassword' });
 
-      settle({
-        state: 'sealed',
-        sealed: await sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey),
-      });
+      const sealing =
+        sealings.get(publicKey) ?? sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey);
+      sealings.set(publicKey, sealing);
+      settle({ state: 'sealed', ...(await sealing) });
     })().catch((error) => {
       console.error(error);
       settle({
@@ -281,11 +286,18 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
                   {sealedAppKey.state === 'sealed' ? (
-                    <input
-                      type="hidden"
-                      name={SEALED_ZK_APP_KEY_FIELD}
-                      value={sealedAppKey.sealed}
-                    />
+                    <>
+                      <input
+                        type="hidden"
+                        name={SEALED_ZK_APP_KEY_FIELD}
+                        value={sealedAppKey.sealed}
+                      />
+                      <input
+                        type="hidden"
+                        name={LOCKED_ZK_APP_KEY_FIELD}
+                        value={sealedAppKey.locked}
+                      />
+                    </>
                   ) : null}
                   {consentRequirements ? (
                     <input

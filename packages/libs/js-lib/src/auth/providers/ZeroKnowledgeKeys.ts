@@ -418,12 +418,13 @@ export const openOrMakeAppKey = async (
 /**
  * What an app is missing, made here: its key if it has none, and its copy of each zero-knowledge drive it is
  * granted that has none (a drive converted before the app had a key, or granted without this browser). No request
- * when nothing is missing.
+ * when nothing is missing. `locked` is the app's key as the server holds it once the request is saved: a sign-in's
+ * consent names it, and the server refuses it if a concurrent sign-in saved another key first.
  */
 export const makeAppKeyBackfill = async (
   app: ZkAppKeys,
   zkMasterKey: Uint8Array
-): Promise<{ appKey: Uint8Array; request?: ZkAppKeysRequest }> => {
+): Promise<{ appKey: Uint8Array; locked: string; request?: ZkAppKeysRequest }> => {
   const { appKey, newLocked } = await openOrMakeAppKey(app, zkMasterKey);
   const missing = app.drives.filter((d) => d.isZeroKnowledge && !d.hasAppCopy && d.zkMasterKeyEncryptedStorageKey);
 
@@ -433,9 +434,11 @@ export const makeAppKeyBackfill = async (
     copies[drive.driveId] = await zkLock(driveKey, appKey);
   }
 
-  if (!newLocked && !missing.length) return { appKey };
+  const locked = newLocked ?? (app.zkMasterKeyEncryptedAppKey as string);
+  if (!newLocked && !missing.length) return { appKey, locked };
   return {
     appKey,
+    locked,
     request: { appId: app.appId, zkMasterKeyEncryptedAppKey: newLocked, zkAppKeyEncryptedStorageKeys: copies },
   };
 };

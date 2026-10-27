@@ -3,6 +3,7 @@ import {
   bip39Decode,
   bip39Encode,
   base64ToUint8Array,
+  formatGuidId,
   stringGuidsEqual,
   uint8ArrayToBase64,
 } from '@homebase-id/js-lib/helpers';
@@ -371,19 +372,27 @@ const getZkAppKeys = (dotYouClient: DotYouClient) =>
 const saveZkAppKeys = (dotYouClient: DotYouClient, request: ZkAppKeysRequest) =>
   dotYouClient.createAxiosClient().post('/security/zk/app-keys', request);
 
-/** Saves what each app (or the one named) is missing: its key, and its copy of each zero-knowledge drive it is granted. */
-const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array, onlyApp?: ZkAppKeys) => {
-  const apps = onlyApp ? [onlyApp] : await getZkAppKeys(dotYouClient);
-  for (const app of apps.filter((a) => onlyApp || a.drives.some((d) => d.isZeroKnowledge && !d.hasAppCopy))) {
-    const { request } = await makeAppKeyBackfill(app, masterKey);
-    if (request) await saveZkAppKeys(dotYouClient, request);
+/** Saves what an app is missing: its key, and its copy of each zero-knowledge drive it is granted. */
+const backfillAppKey = async (dotYouClient: DotYouClient, app: ZkAppKeys, masterKey: Uint8Array) => {
+  const backfill = await makeAppKeyBackfill(app, masterKey);
+  if (backfill.request) await saveZkAppKeys(dotYouClient, backfill.request);
+  return backfill;
+};
+
+/** The login's backfill, for every app missing a copy: one app's failure doesn't hold up the others. */
+const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+  const apps = await getZkAppKeys(dotYouClient);
+  for (const app of apps.filter((a) => a.drives.some((d) => d.isZeroKnowledge && !d.hasAppCopy))) {
+    await backfillAppKey(dotYouClient, app, masterKey).catch((error) =>
+      console.warn(`The zero-knowledge keys of app ${app.appSlug} could not be completed`, error)
+    );
   }
 };
 
 /**
  * The consent page's part of an app's sign-in that asks for its zero-knowledge key (`zk_app_key=1`): what the app is
- * missing, backfilled, and its key sealed to the sign-in's public key (`public_key`), for the consent form to post.
- * The app is named by its client id: its id or its slug.
+ * missing, backfilled, and its key sealed to the sign-in's public key (`public_key`), for the consent form to post with
+ * the locked copy it came from. The app is named by its client id: its id or its slug.
  */
 export const sealAppKeyForSignIn = async (
   dotYouClient: DotYouClient,
@@ -396,13 +405,9 @@ export const sealAppKeyForSignIn = async (
   );
   if (!app) throw new Error(t('This app is not registered on your identity'));
 
-  const { appKey, request } = await makeAppKeyBackfill(app, masterKey);
-  if (request) await saveZkAppKeys(dotYouClient, request);
-  return sealAppKeyToSignIn(appKey, publicKeyJwkBase64Url);
+  const { appKey, locked } = await backfillAppKey(dotYouClient, app, masterKey);
+  return { sealed: await sealAppKeyToSignIn(appKey, publicKeyJwkBase64Url), locked };
 };
-
-const withDashes = (guid: string) =>
-  guid.replace(/-/g, '').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
 
 /** Whether Vault is already zero knowledge ("private"). */
 export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
@@ -417,21 +422,25 @@ export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
  * The caller asks for the password first.
  */
 export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: string) => {
-  const masterKey = await openZkMasterKey(password, await getZkStatus(dotYouClient));
-  const vaultId = withDashes(VAULT_DRIVE.alias); // the server reads a Guid from JSON only with dashes
+  const masterKey = await openZkMasterKey(password, await getZkStatus(dotYouClient)).catch(() => {
+    throw new Error(t('Wrong password'));
+  });
+  const vaultId = formatGuidId(VAULT_DRIVE.alias); // the server reads a Guid from JSON only with dashes
   const client = dotYouClient.createAxiosClient();
+  const failed = (error: unknown) => {
+    console.warn(error);
+    throw new Error(getKnownOdinErrorMessages(error) ?? t('Vault could not be made private'));
+  };
+
   const [driveKey, apps] = await Promise.all([
     client
       .get<{ storageKey64: string }>(`/security/zk/drives/${vaultId}/key-for-conversion`)
       .then((response) => base64ToUint8Array(response.data.storageKey64)),
     getZkAppKeys(dotYouClient),
-  ]);
+  ]).catch(failed);
 
   const request: ZkConvertDriveKeepingKeyRequest = await makeConversionKeepingKey(vaultId, driveKey, masterKey, apps);
-  await client.post('/security/zk/convert-drive', request).catch((error) => {
-    console.warn(error);
-    throw new Error(getKnownOdinErrorMessages(error) ?? t('Vault could not be made private'));
-  });
+  await client.post('/security/zk/convert-drive', request).catch(failed);
 };
 
 /**

@@ -86,13 +86,22 @@ test("the backfill locks each zero-knowledge drive's key the app lacks, and noth
     ],
   });
 
-  const { request } = await makeAppKeyBackfill(keys, masterKey);
+  const { request, locked } = await makeAppKeyBackfill(keys, masterKey);
 
+  expect(locked).toEqual(keys.zkMasterKeyEncryptedAppKey); // what consent names: the copy the server holds
   expect(request?.zkMasterKeyEncryptedAppKey).toBeUndefined();
   expect(Object.keys(request?.zkAppKeyEncryptedStorageKeys ?? {})).toEqual([SHARD_RECOVERY]);
   expect(await zkOpen(request!.zkAppKeyEncryptedStorageKeys[SHARD_RECOVERY], appKey)).toEqual(
     shardKey
   );
+});
+
+test("a new app key's locked copy is the one saved, and the one consent names", async () => {
+  const masterKey = getRandom16ByteArray();
+  const { appKey, locked, request } = await makeAppKeyBackfill(app(), masterKey);
+
+  expect(locked).toEqual(request?.zkMasterKeyEncryptedAppKey);
+  expect(await zkOpen(locked, masterKey)).toEqual(appKey);
 });
 
 test('nothing missing, nothing to save', async () => {
