@@ -380,13 +380,16 @@ export const makeZkDriveKeys = async (
 /** A drive an app is granted, as the server lists it with the app's zero-knowledge keys. */
 export interface ZkAppDrive {
   driveId: string;
-  targetDrive: { alias: string; type: string };
   isZeroKnowledge: boolean;
   /** On a zero-knowledge drive, its key locked by the zero-knowledge master key. */
   zkMasterKeyEncryptedStorageKey?: string | null;
   /** Whether the app has the drive's key locked by its own key yet. */
   hasAppCopy: boolean;
 }
+
+/** The zero-knowledge drives an app is granted and has no copy of the key for yet: what a backfill locks for it. */
+export const missingAppCopies = (app: Pick<ZkAppKeys, 'drives'>) =>
+  app.drives.filter((d) => d.isZeroKnowledge && !d.hasAppCopy && d.zkMasterKeyEncryptedStorageKey);
 
 export interface ZkAppKeys {
   appId: string;
@@ -426,7 +429,7 @@ export const makeAppKeyBackfill = async (
   zkMasterKey: Uint8Array
 ): Promise<{ appKey: Uint8Array; locked: string; request?: ZkAppKeysRequest }> => {
   const { appKey, newLocked } = await openOrMakeAppKey(app, zkMasterKey);
-  const missing = app.drives.filter((d) => d.isZeroKnowledge && !d.hasAppCopy && d.zkMasterKeyEncryptedStorageKey);
+  const missing = missingAppCopies(app);
 
   const copies: Record<string, string> = {};
   for (const drive of missing) {

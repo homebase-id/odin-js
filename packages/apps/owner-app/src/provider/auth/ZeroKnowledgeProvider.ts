@@ -1,4 +1,9 @@
-import { DotYouClient, getDrivesByType, getKnownOdinErrorMessages } from '@homebase-id/js-lib/core';
+import {
+  DotYouClient,
+  TargetDrive,
+  getDrivesByType,
+  getKnownOdinErrorMessages,
+} from '@homebase-id/js-lib/core';
 import {
   bip39Decode,
   bip39Encode,
@@ -23,6 +28,7 @@ import {
   getPhraseCheck,
   makePhraseCopies,
   makeAppKeyBackfill,
+  missingAppCopies,
   makeConversionKeepingKey,
   makeZkDriveKeys,
   makeZkKeys,
@@ -240,11 +246,14 @@ export const dealAutomatedRecovery = async (dotYouClient: DotYouClient, masterKe
   return true;
 };
 
-/** This identity's Shard Recovery drive, with its zero-knowledge keys (owner only). */
-export const getShardRecoveryDrive = async (dotYouClient: DotYouClient) =>
-  (await getDrivesByType(dotYouClient, SHARD_RECOVERY_DRIVE.type, 1, 10)).results.find((drive) =>
-    stringGuidsEqual(drive.targetDriveInfo.alias, SHARD_RECOVERY_DRIVE.alias)
+/** One of this identity's drives, with its zero-knowledge keys (owner only). */
+const getOwnDrive = async (dotYouClient: DotYouClient, target: TargetDrive) =>
+  (await getDrivesByType(dotYouClient, target.type, 1, 10)).results.find((drive) =>
+    stringGuidsEqual(drive.targetDriveInfo.alias, target.alias)
   );
+
+/** This identity's Shard Recovery drive, with its zero-knowledge keys (owner only). */
+export const getShardRecoveryDrive = (dotYouClient: DotYouClient) => getOwnDrive(dotYouClient, SHARD_RECOVERY_DRIVE);
 
 const getShardRecoveryDriveKey = async (dotYouClient: DotYouClient) =>
   (await getShardRecoveryDrive(dotYouClient))?.zkMasterKeyEncryptedStorageKey;
@@ -330,13 +339,11 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   }
 
   // Every app's copy of each zero-knowledge drive it is granted, so a device that already holds its app's key
-  // picks up a drive granted without this browser. Its failure stops nothing: the next login, or the app's next
-  // sign-in, backfills it.
-  try {
-    await backfillAppKeys(dotYouClient, masterKey);
-  } catch (error) {
-    console.warn("The apps' zero-knowledge keys could not be completed; the next login tries again", error);
-  }
+  // picks up a drive granted without this browser. Alongside the deal, which doesn't depend on it; its failure
+  // stops nothing: the next login, or the app's next sign-in, backfills it.
+  const backfilled = backfillAppKeys(dotYouClient, masterKey).catch((error) =>
+    console.warn("The apps' zero-knowledge keys could not be completed; the next login tries again", error)
+  );
 
   // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move
   // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login
@@ -355,6 +362,7 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   } catch (error) {
     console.warn('The recovery could not be dealt again; the next login tries again', error);
   }
+  await backfilled;
 
   if (status.recoveryPhrase === 'onServer') {
     await takeOverPhrase(dotYouClient, password, masterKey);
@@ -382,7 +390,7 @@ const backfillAppKey = async (dotYouClient: DotYouClient, app: ZkAppKeys, master
 /** The login's backfill, for every app missing a copy: one app's failure doesn't hold up the others. */
 const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
   const apps = await getZkAppKeys(dotYouClient);
-  for (const app of apps.filter((a) => a.drives.some((d) => d.isZeroKnowledge && !d.hasAppCopy))) {
+  for (const app of apps.filter((a) => missingAppCopies(a).length)) {
     await backfillAppKey(dotYouClient, app, masterKey).catch((error) =>
       console.warn(`The zero-knowledge keys of app ${app.appSlug} could not be completed`, error)
     );
@@ -411,9 +419,7 @@ export const sealAppKeyForSignIn = async (
 
 /** Whether Vault is already zero knowledge ("private"). */
 export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
-  !!(await getDrivesByType(dotYouClient, VAULT_DRIVE.type, 1, 10)).results.find((drive) =>
-    stringGuidsEqual(drive.targetDriveInfo.alias, VAULT_DRIVE.alias)
-  )?.zkMasterKeyEncryptedStorageKey;
+  !!(await getOwnDrive(dotYouClient, VAULT_DRIVE))?.zkMasterKeyEncryptedStorageKey;
 
 /**
  * Makes Vault private, keeping its key (odin-core docs/zero-knowledge-drive-api-plan.md, 3.3): the server hands the

@@ -65,21 +65,18 @@ test("the backfill locks each zero-knowledge drive's key the app lacks, and noth
     drives: [
       {
         driveId: SHARD_RECOVERY,
-        targetDrive: { alias: SHARD_RECOVERY, type: SHARD_RECOVERY },
         isZeroKnowledge: true,
         zkMasterKeyEncryptedStorageKey: await zkLock(shardKey, masterKey),
         hasAppCopy: false,
       },
       {
         driveId: VAULT,
-        targetDrive: { alias: VAULT, type: VAULT },
         isZeroKnowledge: true,
         zkMasterKeyEncryptedStorageKey: await zkLock(getRandom16ByteArray(), masterKey),
         hasAppCopy: true,
       },
       {
         driveId: 'c0ffee00-0000-4000-8000-000000000002',
-        targetDrive: { alias: 'x', type: 'y' },
         isZeroKnowledge: false,
         hasAppCopy: false,
       },
@@ -130,7 +127,6 @@ test('converting Vault keeps its key and locks a copy for each app granted it, a
     drives: [
       {
         driveId: VAULT,
-        targetDrive: { alias: VAULT, type: VAULT },
         isZeroKnowledge: false,
         hasAppCopy: false,
       },
@@ -142,7 +138,6 @@ test('converting Vault keeps its key and locks a copy for each app granted it, a
     drives: [
       {
         driveId: VAULT.toUpperCase(),
-        targetDrive: { alias: VAULT, type: VAULT },
         isZeroKnowledge: false,
         hasAppCopy: false,
       },

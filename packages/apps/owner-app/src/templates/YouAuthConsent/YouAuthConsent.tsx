@@ -80,7 +80,8 @@ const useSealedAppKey = (
       if (!masterKey) return settle({ state: 'needsPassword' });
 
       const sealing =
-        sealings.get(publicKey) ?? sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey);
+        sealings.get(publicKey) ??
+        sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey);
       sealings.set(publicKey, sealing);
       settle({ state: 'sealed', ...(await sealing) });
     })().catch((error) => {
