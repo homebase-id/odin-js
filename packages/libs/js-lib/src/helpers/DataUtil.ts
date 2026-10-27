@@ -37,6 +37,10 @@ export const stringToUint8Array = (str: string): Uint8Array => {
   return new TextEncoder().encode(str);
 };
 
+/** Bytes as they are, or decoded from base64 (the identity server returns key headers either way). */
+export const toUint8Array = (value: string | Uint8Array): Uint8Array =>
+  typeof value === 'string' ? base64ToUint8Array(value) : value;
+
 export const base64ToUint8Array = (base64: string): Uint8Array => {
   if (!base64) return new Uint8Array();
   // base64 could have been urlDecoded, which would have replaced + with space

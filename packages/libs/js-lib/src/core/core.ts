@@ -35,10 +35,8 @@ export {
   decryptJsonContent,
   decryptKeyHeader,
   isClientLocked,
-  isClientLockedKeyHeader,
   isDeposit,
   isSealedKeyHeader,
-  isZkDriveKeyHeader,
   openClientLockedKeyHeader,
 } from './DriveData/SecurityHelpers';
 export type { ClientLockKeys } from './DriveData/SecurityHelpers';

@@ -5,6 +5,7 @@ import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesE
 import {
   jsonStringify64,
   base64ToUint8Array,
+  toUint8Array,
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
@@ -284,8 +285,18 @@ export interface ClientLockKeys {
   driveKey?: Uint8Array;
 }
 
-const asBytes = (value: string | Uint8Array) =>
-  typeof value === 'string' ? base64ToUint8Array(value) : value;
+/** A key header in the AES-CBC format (`aes`, `zkDrive`): the IV and AES key, encrypted under the header's IV. */
+const openCbcKeyHeader = async (
+  keyHeader: { iv: string | Uint8Array; encryptedAesKey: string | Uint8Array },
+  key: Uint8Array
+): Promise<KeyHeader> => {
+  const bytes = await cbcDecrypt(
+    toUint8Array(keyHeader.encryptedAesKey),
+    toUint8Array(keyHeader.iv),
+    key
+  );
+  return { iv: bytes.subarray(0, 16), aesKey: bytes.subarray(16) };
+};
 
 /**
  * Opens a client-locked key header: a sealed one with the drive's write-only private key, a zkDrive
@@ -300,23 +311,19 @@ export const openClientLockedKeyHeader = async (
   },
   keys: ClientLockKeys
 ): Promise<KeyHeader> => {
-  let bytes: Uint8Array;
   if (isSealedKeyHeader(keyHeader)) {
     if (!keys.writeOnlyPrivateKey)
       throw new Error("A sealed key header opens only with the drive's write-only private key");
-    bytes = await zkUnseal(keyHeader.encryptedAesKey, keys.writeOnlyPrivateKey);
-  } else if (isZkDriveKeyHeader(keyHeader)) {
-    if (!keys.driveKey) throw new Error("A zkDrive key header opens only with the drive's key");
-    bytes = await cbcDecrypt(
-      asBytes(keyHeader.encryptedAesKey),
-      asBytes(keyHeader.iv),
-      keys.driveKey
-    );
-  } else {
-    throw new Error('Not a client-locked key header');
+    const bytes = await zkUnseal(keyHeader.encryptedAesKey, keys.writeOnlyPrivateKey);
+    return { iv: bytes.slice(0, 16), aesKey: bytes.slice(16) };
   }
 
-  return { iv: bytes.slice(0, 16), aesKey: bytes.slice(16) };
+  if (isZkDriveKeyHeader(keyHeader)) {
+    if (!keys.driveKey) throw new Error("A zkDrive key header opens only with the drive's key");
+    return openCbcKeyHeader(keyHeader, keys.driveKey);
+  }
+
+  throw new Error('Not a client-locked key header');
 };
 
 export const decryptKeyHeader = async (
@@ -339,23 +346,5 @@ export const decryptKeyHeader = async (
   const ss = dotYouClient.getSharedSecret();
   if (!ss) throw new Error('attempting to decrypt but missing the shared secret');
 
-  // Check if used params aren't still base64 encoded if so parse to bytearrays
-  let encryptedAesKey = encryptedKeyHeader.encryptedAesKey;
-  if (typeof encryptedKeyHeader.encryptedAesKey === 'string') {
-    encryptedAesKey = base64ToUint8Array(encryptedKeyHeader.encryptedAesKey);
-  }
-
-  let receivedIv = encryptedKeyHeader.iv;
-  if (typeof encryptedKeyHeader.iv === 'string') {
-    receivedIv = base64ToUint8Array(encryptedKeyHeader.iv);
-  }
-
-  const bytes = await cbcDecrypt(encryptedAesKey, receivedIv, ss);
-  const iv = bytes.subarray(0, 16);
-  const aesKey = bytes.subarray(16);
-
-  return {
-    aesKey: aesKey,
-    iv: iv,
-  };
+  return openCbcKeyHeader(encryptedKeyHeader, ss);
 };

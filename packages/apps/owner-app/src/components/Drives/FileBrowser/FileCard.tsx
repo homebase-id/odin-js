@@ -461,9 +461,9 @@ const FileState = ({
   const dotYouClient = useDotYouClientContext();
   // A client-locked file (a sealed deposit, a zkDrive file) opens with the drive's keys, not the shared
   // secret: not broken, just not readable here
-  const sealed = isClientLocked(file);
+  const clientLocked = isClientLocked(file);
   useEffect(() => {
-    if (sealed) return;
+    if (clientLocked) return;
     (async () => {
       try {
         const keyheader = file.fileMetadata.isEncrypted
@@ -485,7 +485,7 @@ const FileState = ({
     })();
   });
 
-  if (sealed) {
+  if (clientLocked) {
     return (
       <div className={`${className} flex flex-row items-center gap-1`}>
         <p className="text-slate-500">
