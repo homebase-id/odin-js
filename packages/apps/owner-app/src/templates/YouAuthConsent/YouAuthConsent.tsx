@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
-import { RETURN_URL_PARAM, loginHref } from '../../hooks/auth/useAuth';
+import { REDEAL_APP_KEY, RETURN_URL_PARAM, loginHref } from '../../hooks/auth/useAuth';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
+import { getKnownOdinErrorMessages } from '@homebase-id/js-lib/core';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useApp } from '../../hooks/apps/useApp';
@@ -88,7 +89,9 @@ const useSealedAppKey = (
       console.error(error);
       settle({
         state: 'failed',
-        message: error instanceof Error ? error.message : t('Something went wrong'),
+        message:
+          getKnownOdinErrorMessages(error) ??
+          (error instanceof Error ? error.message : t('Something went wrong')),
       });
     });
 
@@ -273,7 +276,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
                   <a
                     className="underline"
                     href={loginHref(`${window.location.pathname}${window.location.search}`, {
-                      redeal: true,
+                      redeal: REDEAL_APP_KEY,
                     })}
                   >
                     {t('Enter your password')}

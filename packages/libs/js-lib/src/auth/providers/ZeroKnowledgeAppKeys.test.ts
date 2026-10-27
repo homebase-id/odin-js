@@ -101,6 +101,33 @@ test("a new app key's locked copy is the one saved, and the one consent names", 
   expect(await zkOpen(locked, masterKey)).toEqual(appKey);
 });
 
+test("a drive whose key no longer opens (a reset forgot what locked it) is skipped, not fatal", async () => {
+  const masterKey = getRandom16ByteArray();
+  const shardKey = getRandom16ByteArray();
+  const keys = app({
+    drives: [
+      {
+        driveId: VAULT,
+        isZeroKnowledge: true,
+        zkMasterKeyEncryptedStorageKey: await zkLock(getRandom16ByteArray(), getRandom16ByteArray()),
+        hasAppCopy: false,
+      },
+      {
+        driveId: SHARD_RECOVERY,
+        isZeroKnowledge: true,
+        zkMasterKeyEncryptedStorageKey: await zkLock(shardKey, masterKey),
+        hasAppCopy: false,
+      },
+    ],
+  });
+
+  const { appKey, request } = await makeAppKeyBackfill(keys, masterKey);
+
+  expect(request?.zkMasterKeyEncryptedAppKey).toBeDefined();
+  expect(Object.keys(request?.zkAppKeyEncryptedStorageKeys ?? {})).toEqual([SHARD_RECOVERY]);
+  expect(await zkOpen(request!.zkAppKeyEncryptedStorageKeys[SHARD_RECOVERY], appKey)).toEqual(shardKey);
+});
+
 test('nothing missing, nothing to save', async () => {
   const masterKey = getRandom16ByteArray();
   const keys = app({ zkMasterKeyEncryptedAppKey: await zkLock(getRandom16ByteArray(), masterKey) });

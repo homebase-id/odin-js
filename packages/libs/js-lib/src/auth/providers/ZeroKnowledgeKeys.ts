@@ -421,7 +421,8 @@ export const openOrMakeAppKey = async (
 /**
  * What an app is missing, made here: its key if it has none, and its copy of each zero-knowledge drive it is
  * granted that has none (a drive converted before the app had a key, or granted without this browser). No request
- * when nothing is missing. `locked` is the app's key as the server holds it once the request is saved: a sign-in's
+ * when nothing is missing. A drive whose key the zero-knowledge master key no longer opens (locked by one a reset
+ * forgot, so lost) is skipped: it must not keep the app from its key and its other drives. `locked` is the app's key as the server holds it once the request is saved: a sign-in's
  * consent names it, and the server refuses it if a concurrent sign-in saved another key first.
  */
 export const makeAppKeyBackfill = async (
@@ -433,12 +434,14 @@ export const makeAppKeyBackfill = async (
 
   const copies: Record<string, string> = {};
   for (const drive of missing) {
-    const driveKey = await zkOpen(drive.zkMasterKeyEncryptedStorageKey as string, zkMasterKey);
-    copies[drive.driveId] = await zkLock(driveKey, appKey);
+    const driveKey = await zkOpen(drive.zkMasterKeyEncryptedStorageKey as string, zkMasterKey).catch(
+      () => undefined
+    );
+    if (driveKey) copies[drive.driveId] = await zkLock(driveKey, appKey);
   }
 
   const locked = newLocked ?? (app.zkMasterKeyEncryptedAppKey as string);
-  if (!newLocked && !missing.length) return { appKey, locked };
+  if (!newLocked && !Object.keys(copies).length) return { appKey, locked };
   return {
     appKey,
     locked,

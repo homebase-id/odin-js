@@ -1,6 +1,12 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { REDEAL_PARAM, RETURN_URL_PARAM, useAuth, useValidateAuthorization } from '../../hooks/auth/useAuth';
+import {
+  REDEAL_APP_KEY,
+  REDEAL_PARAM,
+  RETURN_URL_PARAM,
+  useAuth,
+  useValidateAuthorization,
+} from '../../hooks/auth/useAuth';
 import { useVerifyToken } from '../../hooks/auth/useVerifyToken';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
@@ -27,7 +33,9 @@ const Login = () => {
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   // After a recovery email change (the verify link lands here): the login deals the recovery again,
   // which needs the password, so the form shows even to an owner who is logged in
-  const redeal = searchParams.get(REDEAL_PARAM) === '1';
+  // Or an app's sign-in that needs the zero-knowledge master key (REDEAL_APP_KEY)
+  const redealReason = searchParams.get(REDEAL_PARAM);
+  const redeal = redealReason === '1' || redealReason === REDEAL_APP_KEY;
   const recoveryHref = returnUrl
     ? `/owner/account-recovery?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
     : '/owner/account-recovery';
@@ -103,7 +111,9 @@ const Login = () => {
                 </h1>
                 {redeal ? (
                   <p className="mb-4 text-slate-600 dark:text-slate-400">
-                    {t('Your recovery email changed. Log in once more so your recovery uses the new address.')}
+                    {redealReason === REDEAL_APP_KEY
+                      ? t('This app reads your private drives. Enter your password once more to continue.')
+                      : t('Your recovery email changed. Log in once more so your recovery uses the new address.')}
                   </p>
                 ) : null}
                 <div className="mb-4">

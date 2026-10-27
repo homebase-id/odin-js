@@ -445,7 +445,12 @@ export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: str
     getZkAppKeys(dotYouClient),
   ]).catch(failed);
 
-  const request: ZkConvertDriveKeepingKeyRequest = await makeConversionKeepingKey(vaultId, driveKey, masterKey, apps);
+  const request: ZkConvertDriveKeepingKeyRequest = await makeConversionKeepingKey(
+    vaultId,
+    driveKey,
+    masterKey,
+    apps
+  ).catch(failed);
   await client.post('/security/zk/convert-drive', request).catch(failed);
 };
 
