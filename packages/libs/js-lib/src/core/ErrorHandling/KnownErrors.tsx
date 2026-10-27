@@ -146,7 +146,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
     return t('The holder could not be reached; try the same link again in a minute');
   if (errorCode === 'recoveryBusy') return t('Busy just now; try again in a moment');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
-  if (errorCode === 'depositCannotBeUpdated') return t('A sealed file cannot be updated; write it again');
+  if (errorCode === 'depositCannotBeUpdated') return t('A sealed file can only replace another sealed file');
 
   console.error('[KnownErrors] Unknown error code', errorCode);
   return undefined;
