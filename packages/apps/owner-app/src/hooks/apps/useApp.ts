@@ -144,14 +144,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
     if (appRegRequest.drives)
       await ensureAppOwnedDrives(dotYouClient, appRegRequest.appId, appRegRequest.drives);
 
-    await RegisterApp(dotYouClient, {
-      ...appRegRequest,
-      drives: appRegRequest.drives
-        ? appRegRequest.drives.map((driveGrant) => {
-            return { ...driveGrant, driveMeta: undefined };
-          })
-        : [],
-    });
+    await RegisterApp(dotYouClient, { ...appRegRequest, drives: appRegRequest.drives ?? [] });
 
     if (appRegRequest.drives)
       await applyRequestedDriveChanges(dotYouClient, appRegRequest.drives, appRegRequest.appId);

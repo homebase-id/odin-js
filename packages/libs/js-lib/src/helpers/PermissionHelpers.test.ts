@@ -1,5 +1,8 @@
 import { expect, test } from 'vitest';
-import { getDrivePermissionFromString } from './PermissionHelpers';
+import {
+  getDrivePermissionFromString,
+  getPermissionNumberFromDrivePermission,
+} from './PermissionHelpers';
 import { DrivePermissionType } from '../core/DriveData/Drive/DriveTypes';
 
 test('Get read write permissions', () => {
@@ -34,4 +37,15 @@ test('Get read write permissions', () => {
     DrivePermissionType.React,
     DrivePermissionType.Comment,
   ]);
+});
+
+test('Drive permission flags combine into one number', () => {
+  const drive = { alias: 'a', type: 't' };
+  const toNumber = (permission: number[]) =>
+    getPermissionNumberFromDrivePermission({ drive, permission }).permission;
+
+  expect(toNumber([DrivePermissionType.Read, DrivePermissionType.Write])).toBe(3);
+  // Overlapping flags, as getUniqueDrivesWithHighestPermission's unions can hold them.
+  expect(toNumber([3, DrivePermissionType.Read])).toBe(3);
+  expect(toNumber([])).toBe(0);
 });

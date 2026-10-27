@@ -12,6 +12,7 @@ import {
   AppClientRegistration,
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
+  DriveGrantRequest,
 } from './AppManagementProviderTypes';
 import { DotYouClient } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
@@ -91,23 +92,32 @@ export const RegisterApp = async (
   request: AppRegistrationRequest
 ): Promise<RedactedAppRegistration> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post<RedactedAppRegistration>('appmanagement/register/app', {
-    ...request,
-    drives: request.drives?.map((driveGrant) => ({
-      ...driveGrant,
-      permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-    })),
-    circleMemberPermissionGrant: {
-      ...request.circleMemberPermissionGrant,
-      drives: request.circleMemberPermissionGrant?.drives?.map((driveGrant) => ({
-        ...driveGrant,
-        permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-      })),
-    },
-  });
+  const response = await client.post<RedactedAppRegistration>(
+    'appmanagement/register/app',
+    toServerAppRegistrationRequest(request)
+  );
 
   return response.data;
 };
+
+/** The register body as the server reads it: every drive grant list through toServerDriveGrant. */
+export const toServerAppRegistrationRequest = (request: AppRegistrationRequest) => ({
+  ...request,
+  drives: request.drives?.map(toServerDriveGrant),
+  circleMemberPermissionGrant: {
+    ...request.circleMemberPermissionGrant,
+    drives: request.circleMemberPermissionGrant?.drives?.map(toServerDriveGrant),
+  },
+  circles: request.circles?.map((circle) => ({
+    ...circle,
+    driveGrants: circle.driveGrants.map(toServerDriveGrant),
+  })),
+});
+
+/** A drive grant as the server reads it: the permissioned drive alone, its flags OR-ed into one number. */
+const toServerDriveGrant = (grant: DriveGrantRequest) => ({
+  permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
+});
 
 export const GetAppRegistration = async (
   dotYouClient: DotYouClient,
@@ -222,9 +232,7 @@ export const UpdateAuthorizedCircles = async (
     ...request,
     circleMemberPermissionGrant: {
       ...request.circleMemberPermissionGrant,
-      drives: request.circleMemberPermissionGrant?.drives?.map((driveGrant) => ({
-        permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-      })),
+      drives: request.circleMemberPermissionGrant?.drives?.map(toServerDriveGrant),
     },
   });
 
@@ -257,9 +265,7 @@ export const UpdatePermissions = async (
   const client = dotYouClient.createAxiosClient();
   const response = await client.post('appmanagement/register/updateapppermissions', {
     ...cleanedUpRequest,
-    drives: cleanedUpRequest.drives.map((driveGrant) => ({
-      permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
-    })),
+    drives: cleanedUpRequest.drives.map(toServerDriveGrant),
   });
 
   return response.data;
