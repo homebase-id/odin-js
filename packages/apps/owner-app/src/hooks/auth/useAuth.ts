@@ -56,12 +56,11 @@ export const REDEAL_VAULT_PRIVATE = 'vault-private';
 /**
  * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
  * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM); 'app-key' when an app's
- * sign-in needs the zero-knowledge master key, which only a password login opens; 'vault-private' to make
- * Vault private after the password.
+ * sign-in needs the zero-knowledge master key, which only a password login opens.
  */
 export const loginHref = (
   returnUrl: string | null,
-  options?: { redeal?: boolean | typeof REDEAL_APP_KEY | typeof REDEAL_VAULT_PRIVATE }
+  options?: { redeal?: boolean | typeof REDEAL_APP_KEY }
 ) => {
   const query = new URLSearchParams();
   if (options?.redeal) query.set(REDEAL_PARAM, options.redeal === true ? '1' : options.redeal);
@@ -125,8 +124,13 @@ export const useValidateAuthorization = () => {
   useEffect(() => {
     if (isFetched && hasValidToken !== undefined) {
       if (!hasValidToken && hasSharedSecret) {
+        // The login page asked for again (REDEAL_PARAM) already shows the form, and its login replaces the
+        // stale session: a logout's redirect to the plain login would drop the reason and an app's return
+        const params = new URLSearchParams(window.location.search);
+        if (window.location.pathname === LOGIN_PATH && params.has(REDEAL_PARAM)) return;
+
         console.warn('Token is invalid, logging out..');
-        const existing = new URLSearchParams(window.location.search).get(RETURN_URL_PARAM);
+        const existing = params.get(RETURN_URL_PARAM);
         const safeExisting = isSafeReturnUrl(existing) ? existing : null;
         // Skip capture on auth-flow pages: those URLs may carry one-time tokens
         // (recovery `token`/`id`, etc.) that shouldn't be persisted in history.
@@ -170,23 +174,25 @@ export const useAuth = () => {
       api: ApiType.Owner,
       sharedSecret: response.sharedSecret,
     });
+    const makingVaultPrivate = searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE;
     try {
-      await Promise.race([
-        ensureZeroKnowledgeKeys(ownerClient, password),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
-        ),
-      ]);
+      const keys = ensureZeroKnowledgeKeys(ownerClient, password);
+      // Making Vault private needs the keys this makes, and the owner waits for it anyway: no time limit then
+      await (makingVaultPrivate
+        ? keys
+        : Promise.race([
+            keys,
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
+            ),
+          ]));
     } catch (error) {
       console.error('Zero-knowledge keys', error);
     }
 
     // Sent by the Vault app to make Vault private: this page is its password confirm. A failure throws, so the
     // page shows it; the owner is logged in by now and can enter the password again.
-    if (
-      searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE &&
-      !(await isVaultPrivate(ownerClient))
-    ) {
+    if (makingVaultPrivate && !(await isVaultPrivate(ownerClient))) {
       await makeVaultPrivate(ownerClient, password);
     }
 
