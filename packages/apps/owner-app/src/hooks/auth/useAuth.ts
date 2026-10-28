@@ -42,13 +42,20 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
 
+/** Why the login was asked for again: '1' after a recovery email change; 'app-key' for an app's sign-in. */
+export const REDEAL_APP_KEY = 'app-key';
+
 /**
  * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
- * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM).
+ * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM); 'app-key' when an app's
+ * sign-in needs the zero-knowledge master key, which only a password login opens.
  */
-export const loginHref = (returnUrl: string | null, options?: { redeal?: boolean }) => {
+export const loginHref = (
+  returnUrl: string | null,
+  options?: { redeal?: boolean | typeof REDEAL_APP_KEY }
+) => {
   const query = new URLSearchParams();
-  if (options?.redeal) query.set(REDEAL_PARAM, '1');
+  if (options?.redeal) query.set(REDEAL_PARAM, options.redeal === true ? '1' : options.redeal);
   if (returnUrl) query.set(RETURN_URL_PARAM, returnUrl);
   const search = query.toString();
   return search ? `${LOGIN_PATH}?${search}` : LOGIN_PATH;

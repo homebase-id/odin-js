@@ -147,6 +147,11 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'recoveryBusy') return t('Busy just now; try again in a moment');
   if (errorCode === 'depositNeedsZeroKnowledgeDrive') return t('This drive cannot take a sealed file');
   if (errorCode === 'depositCannotBeUpdated') return t('A sealed file can only replace another sealed file');
+  // Zero-knowledge keys for apps, and converting a drive (odin-core docs/zero-knowledge-drive-api-plan.md, step 3)
+  if (errorCode === 'zkAppKeyAlreadySet') return t("This app's zero-knowledge key changed meanwhile; try again");
+  if (errorCode === 'zkAppKeyMissing') return t("An app with access to this drive doesn't have its key yet");
+  if (errorCode === 'zkDriveNotGrantedToApp') return t("The app doesn't have access to this drive, or the drive isn't zero knowledge");
+  if (errorCode === 'driveCannotBeConverted') return t("This drive can't be made private");
 
   console.error('[KnownErrors] Unknown error code', errorCode);
   return undefined;

@@ -7,6 +7,12 @@ export const SHARD_RECOVERY_DRIVE: TargetDrive = {
   type: '43138ae90206480b9ff493580ca147ee',
 };
 
+/** odin-core `WellKnownAppDrives.VaultDrive`: the one drive that converts to zero knowledge keeping its key, for now. */
+export const VAULT_DRIVE: TargetDrive = {
+  alias: 'f47ac10b58cc4372a5670e02b2c3d479',
+  type: '70e92f0f94d05f5c7dcd36466094f3a5',
+};
+
 /**
  * The drives with a fixed alias and type, each with the app that owns it.
  *
@@ -112,7 +118,7 @@ const WELL_KNOWN_DRIVE_OWNERS: { drive: TargetDrive; appId: string }[] = [
     appId: '6d38d41a-99f5-4f45-a591-9862d83e1fc8',
   },
   {
-    drive: { alias: 'f47ac10b58cc4372a5670e02b2c3d479', type: '70e92f0f94d05f5c7dcd36466094f3a5' },
+    drive: VAULT_DRIVE,
     appId: '6d38d41a-99f5-4f45-a591-9862d83e1fc8',
   },
 

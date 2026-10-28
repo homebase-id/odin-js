@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
-import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { REDEAL_APP_KEY, RETURN_URL_PARAM, loginHref } from '../../hooks/auth/useAuth';
 import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
+import { getKnownOdinErrorMessages } from '@homebase-id/js-lib/core';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useApp } from '../../hooks/apps/useApp';
@@ -21,6 +22,7 @@ import {
 } from '@homebase-id/common-app';
 import { Arrow, Loader } from '@homebase-id/common-app/icons';
 import { getDataVersionInfo } from '../../provider/system/DataConversionProvider';
+import { getZkMasterKey, sealAppKeyForSignIn } from '../../provider/auth/ZeroKnowledgeProvider';
 
 type AuthDuration = 'always' | 'for-1-year' | 'for-1-month' | 'for-1-week' | 'for-1-day' | 'never';
 
@@ -33,6 +35,77 @@ const CLIENT_ID_PARAM = 'client_id';
 // link carried. It is the domain's claim about itself, so it is only ever shown under the domain.
 const CLIENT_INFO_PARAM = 'client_info';
 const STATE_PARAM = 'state';
+const PUBLIC_KEY_PARAM = 'public_key';
+// An app asks for its zero-knowledge key (odin-core docs/zero-knowledge-drive-api-plan.md, step 3); the form then
+// posts it sealed to the sign-in's public key, and the server hands it to the device with its token.
+const ZK_APP_KEY_PARAM = 'zk_app_key';
+const SEALED_ZK_APP_KEY_FIELD = 'zk_app_key_sealed';
+const LOCKED_ZK_APP_KEY_FIELD = 'zk_app_key_locked';
+
+type SealedAppKey =
+  | { state: 'none' }
+  | { state: 'sealing' }
+  | { state: 'sealed'; sealed: string; locked: string }
+  | { state: 'needsPassword' }
+  | { state: 'failed'; message: string };
+
+// One sealing per sign-in: React may run the effect twice, and two first-time keys made at once would race (the
+// server keeps one, and refuses consent naming the other)
+const sealings = new Map<string, ReturnType<typeof sealAppKeyForSignIn>>();
+
+/**
+ * The app's zero-knowledge key sealed to this sign-in, when the app asked for it: with the zero-knowledge master key
+ * this session holds since its password login, or, without one, a login to get it ('needsPassword').
+ */
+const useSealedAppKey = (
+  clientId: string | null,
+  publicKey: string | null,
+  wanted: boolean
+): SealedAppKey => {
+  const { getDotYouClient } = useDotYouClient();
+  const [result, setResult] = useState<SealedAppKey>(
+    wanted ? { state: 'sealing' } : { state: 'none' }
+  );
+
+  useEffect(() => {
+    if (!wanted) return;
+    let cancelled = false;
+    const settle = (value: SealedAppKey) => !cancelled && setResult(value);
+
+    (async () => {
+      if (!clientId || !publicKey)
+        return settle({ state: 'failed', message: t('The sign-in request is incomplete') });
+
+      const dotYouClient = getDotYouClient();
+      const masterKey = await getZkMasterKey(dotYouClient);
+      if (!masterKey) return settle({ state: 'needsPassword' });
+
+      // A failed one is forgotten, so the effect running again (or a reload) tries again
+      const sealing =
+        sealings.get(publicKey) ??
+        sealAppKeyForSignIn(dotYouClient, clientId, publicKey, masterKey).catch((error) => {
+          sealings.delete(publicKey);
+          throw error;
+        });
+      sealings.set(publicKey, sealing);
+      settle({ state: 'sealed', ...(await sealing) });
+    })().catch((error) => {
+      console.error(error);
+      settle({
+        state: 'failed',
+        message:
+          getKnownOdinErrorMessages(error) ??
+          (error instanceof Error ? error.message : t('Something went wrong')),
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, publicKey, wanted]);
+
+  return result;
+};
 
 /**
  * Sends the owner to the upgrade screen when their identity's data is behind, rather than letting
@@ -119,6 +192,12 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
   const targetReturnUrl = returnUrlParams.get(REDIRECT_URI_PARAM);
   const targetDomain = getDomainFromUrl(targetReturnUrl || undefined) || '';
   const clientName = returnUrlParams.get(CLIENT_INFO_PARAM)?.trim() || undefined;
+  const wantsZkAppKey = clientType === 'app' && returnUrlParams.get(ZK_APP_KEY_PARAM) === '1';
+  const sealedAppKey = useSealedAppKey(
+    clientId,
+    returnUrlParams.get(PUBLIC_KEY_PARAM),
+    wantsZkAppKey
+  );
 
   const doCancel = () =>
     (window.location.href = targetReturnUrl
@@ -195,9 +274,39 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
                 </div>
               ) : null}
 
+              {sealedAppKey.state === 'needsPassword' ? (
+                <p className="mt-5">
+                  {t('This app reads your private drives. Confirm your password to continue:')}{' '}
+                  <a
+                    className="underline"
+                    href={loginHref(`${window.location.pathname}${window.location.search}`, {
+                      redeal: REDEAL_APP_KEY,
+                    })}
+                  >
+                    {t('Enter your password')}
+                  </a>
+                </p>
+              ) : sealedAppKey.state === 'failed' ? (
+                <p className="mt-5 text-red-500">{sealedAppKey.message}</p>
+              ) : null}
+
               <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
+                  {sealedAppKey.state === 'sealed' ? (
+                    <>
+                      <input
+                        type="hidden"
+                        name={SEALED_ZK_APP_KEY_FIELD}
+                        value={sealedAppKey.sealed}
+                      />
+                      <input
+                        type="hidden"
+                        name={LOCKED_ZK_APP_KEY_FIELD}
+                        value={sealedAppKey.locked}
+                      />
+                    </>
+                  ) : null}
                   {consentRequirements ? (
                     <input
                       type="hidden"
@@ -205,7 +314,14 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
                       value={JSON.stringify(consentRequirements)}
                     />
                   ) : null}
-                  <ActionButton type="primary" className="w-full sm:w-auto" icon={Arrow} autoFocus>
+                  <ActionButton
+                    type="primary"
+                    className="w-full sm:w-auto"
+                    icon={Arrow}
+                    autoFocus
+                    state={sealedAppKey.state === 'sealing' ? 'loading' : undefined}
+                    disabled={wantsZkAppKey && sealedAppKey.state !== 'sealed'}
+                  >
                     {t('Login')}
                   </ActionButton>
                 </form>

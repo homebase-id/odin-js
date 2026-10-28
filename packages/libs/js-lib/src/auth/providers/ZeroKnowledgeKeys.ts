@@ -5,6 +5,7 @@ import {
   getRandom16ByteArray,
   isAGuidId,
   mergeByteArrays,
+  stringGuidsEqual,
   stringToUint8Array,
   toUint8Array,
   uint8ArrayToBase64,
@@ -368,5 +369,136 @@ export const makeZkDriveKeys = async (
       writeOnlyPublicKeyJwk: pair.publicKeyJwk,
       zkStorageKeyEncryptedWriteOnlyPrivateKey: await zkLock(pair.privateKeyPkcs8, driveKey),
     },
+  };
+};
+
+// A zero-knowledge app key (odin-core docs/zero-knowledge-drive-api-plan.md, step 3): 16 random bytes per app,
+// made here. The server keeps it locked by the zero-knowledge master key, and the key of each zero-knowledge
+// drive the app is granted locked by it; each of the app's devices gets it once, at sign-in, sealed to that
+// sign-in's public key. The app never sees the zero-knowledge master key.
+
+/** A drive an app is granted, as the server lists it with the app's zero-knowledge keys. */
+export interface ZkAppDrive {
+  driveId: string;
+  isZeroKnowledge: boolean;
+  /** On a zero-knowledge drive, its key locked by the zero-knowledge master key. */
+  zkMasterKeyEncryptedStorageKey?: string | null;
+  /** Whether the app has the drive's key locked by its own key yet. */
+  hasAppCopy: boolean;
+}
+
+/** The zero-knowledge drives an app is granted and has no copy of the key for yet: what a backfill locks for it. */
+export const missingAppCopies = (app: Pick<ZkAppKeys, 'drives'>) =>
+  app.drives.filter((d) => d.isZeroKnowledge && !d.hasAppCopy && d.zkMasterKeyEncryptedStorageKey);
+
+export interface ZkAppKeys {
+  appId: string;
+  appSlug: string;
+  /** Null until this browser made the app's key. */
+  zkMasterKeyEncryptedAppKey?: string | null;
+  drives: ZkAppDrive[];
+}
+
+export interface ZkAppKeysRequest {
+  appId: string;
+  /** Only when the app had no key yet: the server refuses to replace one. */
+  zkMasterKeyEncryptedAppKey?: string;
+  /** By drive id: the drive's key locked by the app's key. */
+  zkAppKeyEncryptedStorageKeys: Record<string, string>;
+}
+
+/** The app's key, opened with the zero-knowledge master key; or a new one, with its locked copy to save. */
+export const openOrMakeAppKey = async (
+  app: Pick<ZkAppKeys, 'zkMasterKeyEncryptedAppKey'>,
+  zkMasterKey: Uint8Array
+): Promise<{ appKey: Uint8Array; newLocked?: string }> => {
+  if (app.zkMasterKeyEncryptedAppKey) return { appKey: await zkOpen(app.zkMasterKeyEncryptedAppKey, zkMasterKey) };
+
+  const appKey = getRandom16ByteArray();
+  return { appKey, newLocked: await zkLock(appKey, zkMasterKey) };
+};
+
+/**
+ * What an app is missing, made here: its key if it has none, and its copy of each zero-knowledge drive it is
+ * granted that has none (a drive converted before the app had a key, or granted without this browser). No request
+ * when nothing is missing. A drive whose key the zero-knowledge master key no longer opens (locked by one a reset
+ * forgot, so lost) is skipped: it must not keep the app from its key and its other drives. `locked` is the app's key as the server holds it once the request is saved: a sign-in's
+ * consent names it, and the server refuses it if a concurrent sign-in saved another key first.
+ */
+export const makeAppKeyBackfill = async (
+  app: ZkAppKeys,
+  zkMasterKey: Uint8Array
+): Promise<{ appKey: Uint8Array; locked: string; request?: ZkAppKeysRequest }> => {
+  const { appKey, newLocked } = await openOrMakeAppKey(app, zkMasterKey);
+  const missing = missingAppCopies(app);
+
+  const copies: Record<string, string> = {};
+  for (const drive of missing) {
+    const driveKey = await zkOpen(drive.zkMasterKeyEncryptedStorageKey as string, zkMasterKey).catch(
+      () => undefined
+    );
+    if (driveKey) copies[drive.driveId] = await zkLock(driveKey, appKey);
+  }
+
+  const locked = newLocked ?? (app.zkMasterKeyEncryptedAppKey as string);
+  if (!newLocked && !Object.keys(copies).length) return { appKey, locked };
+  return {
+    appKey,
+    locked,
+    request: { appId: app.appId, zkMasterKeyEncryptedAppKey: newLocked, zkAppKeyEncryptedStorageKeys: copies },
+  };
+};
+
+/** A base64url string, as an authorize request's `public_key` carries its JWK, decoded to text. */
+const base64UrlToString = (value: string) => {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  return byteArrayToString(base64ToUint8Array(base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')));
+};
+
+/**
+ * The app's key sealed to a sign-in's public key, as the authorize request carries it (`public_key`: a P-384 JWK,
+ * base64url); the token response hands it to the device, which alone opens it.
+ */
+export const sealAppKeyToSignIn = (appKey: Uint8Array, publicKeyJwkBase64Url: string) =>
+  zkSeal(appKey, base64UrlToString(publicKeyJwkBase64Url));
+
+export interface ZkConvertDriveKeepingKeyRequest {
+  driveId: string;
+  zkMasterKeyEncryptedStorageKey: string;
+  writeOnlyPublicKeyJwk: string;
+  zkStorageKeyEncryptedWriteOnlyPrivateKey: string;
+  apps: ZkAppKeysRequest[];
+}
+
+/**
+ * Converting a drive that keeps its key (Vault): the key the server handed over one last time, locked by the
+ * zero-knowledge master key; a new write-only key pair (the server made the old one, so it saw its private half);
+ * and, for each app granted the drive, the key locked by the app's key, made where the app has none. The server
+ * refuses the conversion if an app granted the drive is left out.
+ */
+export const makeConversionKeepingKey = async (
+  driveId: string,
+  driveKey: Uint8Array,
+  zkMasterKey: Uint8Array,
+  apps: ZkAppKeys[]
+): Promise<ZkConvertDriveKeepingKeyRequest> => {
+  const pair = await createExportedEccPair();
+  const granted = apps.filter((app) => app.drives.some((d) => stringGuidsEqual(d.driveId, driveId)));
+
+  return {
+    driveId,
+    zkMasterKeyEncryptedStorageKey: await zkLock(driveKey, zkMasterKey),
+    writeOnlyPublicKeyJwk: pair.publicKeyJwk,
+    zkStorageKeyEncryptedWriteOnlyPrivateKey: await zkLock(pair.privateKeyPkcs8, driveKey),
+    apps: await Promise.all(
+      granted.map(async (app) => {
+        const { appKey, newLocked } = await openOrMakeAppKey(app, zkMasterKey);
+        return {
+          appId: app.appId,
+          zkMasterKeyEncryptedAppKey: newLocked,
+          zkAppKeyEncryptedStorageKeys: { [driveId]: await zkLock(driveKey, appKey) },
+        };
+      })
+    ),
   };
 };
