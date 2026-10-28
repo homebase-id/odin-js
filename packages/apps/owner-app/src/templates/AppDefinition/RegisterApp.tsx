@@ -119,11 +119,12 @@ const RegisterApp = () => {
     );
   }
 
+  const { fetch: installed, registerNewApp } = useApp({ appId });
   const {
     mutateAsync: registerApp,
     status: registerAppState,
     error: registerAppError,
-  } = useApp({ appId }).registerNewApp;
+  } = registerNewApp;
 
   const doRegisterApp = async (request: AppRegistrationRequest) => {
     await registerApp(request);
@@ -134,6 +135,13 @@ const RegisterApp = () => {
     (window.location.href = cancelUrl
       ? getCancelRedirectUrl(cancelUrl, getStateParam(returnUrl))
       : '/owner');
+
+  // Registering an app again is refused: it would replace the keys its devices hold (odin-core #2039)
+  if (!installed.isFetched) return null;
+  if (installed.data)
+    return (
+      <AlreadyInstalled name={name} origin={origin} returnUrl={returnUrl} doCancel={doCancel} />
+    );
 
   return (
     <>
@@ -165,6 +173,59 @@ const RegisterApp = () => {
 };
 
 export default RegisterApp;
+
+const AppName = ({ name, origin }: { name: string; origin: string | undefined }) => (
+  <small className="block">
+    {name}{' '}
+    {origin ? (
+      <>
+        (<DomainHighlighter>{origin}</DomainHighlighter>)
+      </>
+    ) : (
+      ''
+    )}
+  </small>
+);
+
+const AlreadyInstalled = ({
+  name,
+  origin,
+  returnUrl,
+  doCancel,
+}: {
+  name: string;
+  origin: string | undefined;
+  returnUrl: string;
+  doCancel: () => void;
+}) => (
+  <section className="my-20">
+    <div className="container mx-auto">
+      <div className="max-w-[35rem]">
+        <h1 className="mb-5 text-4xl dark:text-white">
+          {t('Already installed')}:
+          <AppName name={name} origin={origin} />
+        </h1>
+        <p className="mb-5">
+          {t(
+            'This app is already installed. Its permissions are changed from its own page under Apps.'
+          )}
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row-reverse">
+          <ActionButton
+            type="primary"
+            onClick={() => (window.location.href = returnUrl)}
+            icon={Arrow}
+          >
+            {t('Continue')}
+          </ActionButton>
+          <ActionButton type="secondary" onClick={() => doCancel()}>
+            {t('Cancel')}
+          </ActionButton>
+        </div>
+      </div>
+    </div>
+  </section>
+);
 
 const AppRegistration = ({
   name,
@@ -248,16 +309,7 @@ const AppRegistration = ({
     <>
       <h1 className="mb-5 text-4xl dark:text-white">
         {t('Create new app')}:
-        <small className="block">
-          {name}{' '}
-          {origin ? (
-            <>
-              (<DomainHighlighter>{origin}</DomainHighlighter>)
-            </>
-          ) : (
-            ''
-          )}
-        </small>
+        <AppName name={name} origin={origin} />
         {/* The slug is permanent and first-come, so the owner should be able to see the name being
             claimed -- but it is an address, not something they are being asked to weigh. */}
         <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">

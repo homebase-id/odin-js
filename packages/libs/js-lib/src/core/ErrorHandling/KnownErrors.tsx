@@ -114,6 +114,7 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   // App or YouAuth Domain Errors
   if (errorCode === 'appNotRegistered') return t('App not registered');
   if (errorCode === 'appRevoked') return t('App revoked');
+  if (errorCode === 'appAlreadyRegistered') return t('App already installed');
   if (errorCode === 'domainNotRegistered') return t('Domain not registered');
   if (errorCode === 'appHasNoAuthorizedCircles') return t('App has no authorized circles');
   if (errorCode === 'invalidAccessRegistrationId') return t('Invalid access registration id');
