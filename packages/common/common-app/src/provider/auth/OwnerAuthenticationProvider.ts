@@ -33,7 +33,11 @@ const logoutOwner = async (): Promise<boolean> => {
   });
 };
 
-export const logoutOwnerAndAllApps = async (returnUrl?: string): Promise<void> => {
+/** `loginSearch`: the login page's own query to land on again (the page asked for again keeps its reason). */
+export const logoutOwnerAndAllApps = async (
+  returnUrl?: string,
+  loginSearch?: string
+): Promise<void> => {
   try {
     // Unsubscribe from notifications
     const dotYouClient = new OwnerClient({
@@ -102,9 +106,11 @@ export const logoutOwnerAndAllApps = async (returnUrl?: string): Promise<void> =
   del(`APP_REACT_QUERY_OFFLINE_CACHE`);
 
   const loginUrl = '/owner/login';
-  window.location.href = returnUrl
-    ? `${loginUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
-    : loginUrl;
+  window.location.href = loginSearch
+    ? `${loginUrl}${loginSearch}`
+    : returnUrl
+      ? `${loginUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
+      : loginUrl;
 };
 
 const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {

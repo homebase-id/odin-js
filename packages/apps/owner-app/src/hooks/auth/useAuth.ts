@@ -10,7 +10,11 @@ import {
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { ApiType } from '@homebase-id/js-lib/core';
-import { ensureZeroKnowledgeKeys } from '../../provider/auth/ZeroKnowledgeProvider';
+import {
+  ensureZeroKnowledgeKeys,
+  isVaultPrivate,
+  makeVaultPrivate,
+} from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   HOME_SHARED_SECRET,
   OwnerClient,
@@ -42,13 +46,22 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
 
-/** Why the login was asked for again: '1' after a recovery email change; 'app-key' for an app's sign-in. */
+/**
+ * Why the login was asked for again (REDEAL_PARAM): '1' after a recovery email change; 'app-key' for an app's
+ * sign-in; 'vault-private' when the Vault app sends the owner to make Vault private, which needs the password.
+ */
 export const REDEAL_APP_KEY = 'app-key';
+export const REDEAL_VAULT_PRIVATE = 'vault-private';
+const REDEAL_REASONS = ['1', REDEAL_APP_KEY, REDEAL_VAULT_PRIVATE] as const;
+export type RedealReason = (typeof REDEAL_REASONS)[number];
+
+/** The reason the login page was asked for again, when the query names a known one. */
+export const redealReasonOf = (params: URLSearchParams): RedealReason | undefined =>
+  REDEAL_REASONS.find((reason) => reason === params.get(REDEAL_PARAM));
 
 /**
  * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
- * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM); 'app-key' when an app's
- * sign-in needs the zero-knowledge master key, which only a password login opens.
+ * owner who is logged in (REDEAL_PARAM).
  */
 export const loginHref = (
   returnUrl: string | null,
@@ -86,6 +99,22 @@ const isAuthFlowPath = (pathname: string): boolean =>
 export const isAppReturnUrl = (url: string | null | undefined): url is string =>
   !!url && /^homebase[a-z0-9-]*:\/\//i.test(url);
 
+// A native app's loopback listener (http://localhost:{port}/…), as a desktop app receives a redirect
+const isLoopbackUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
+// The Vault app's return after making Vault private: this origin, one of our own app schemes (as the signup's),
+// or a desktop app's loopback listener
+const isVaultAppReturnUrl = (url: string | null | undefined): url is string =>
+  isSafeReturnUrl(url) || isAppReturnUrl(url) || isLoopbackUrl(url);
+
 export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
   if (!url) return false;
   if (url.startsWith('/')) {
@@ -105,15 +134,21 @@ export const useValidateAuthorization = () => {
   useEffect(() => {
     if (isFetched && hasValidToken !== undefined) {
       if (!hasValidToken && hasSharedSecret) {
+        const params = new URLSearchParams(window.location.search);
         console.warn('Token is invalid, logging out..');
-        const existing = new URLSearchParams(window.location.search).get(RETURN_URL_PARAM);
+        const existing = params.get(RETURN_URL_PARAM);
         const safeExisting = isSafeReturnUrl(existing) ? existing : null;
         // Skip capture on auth-flow pages: those URLs may carry one-time tokens
         // (recovery `token`/`id`, etc.) that shouldn't be persisted in history.
         const captured = isAuthFlowPath(window.location.pathname)
           ? null
           : window.location.pathname + window.location.search;
-        logoutOwnerAndAllApps(safeExisting ?? captured ?? undefined);
+        // The login page asked for again lands on itself, so its reason and an app's return survive
+        const onRedealLogin = window.location.pathname === LOGIN_PATH && !!redealReasonOf(params);
+        logoutOwnerAndAllApps(
+          safeExisting ?? captured ?? undefined,
+          onRedealLogin ? window.location.search : undefined
+        );
       }
     }
   }, [hasValidToken, hasSharedSecret]);
@@ -122,6 +157,7 @@ export const useValidateAuthorization = () => {
 export const useAuth = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const makingVaultPrivate = redealReasonOf(searchParams) === REDEAL_VAULT_PRIVATE;
 
   const authenticate = async (password: string) => {
     // Cleanup the public session: (There might have been a public login already in place)
@@ -146,16 +182,27 @@ export const useAuth = () => {
     // The only moment the browser has the password: make or open the zero-knowledge keys. The
     // redirect waits for it, but never for long, and a failure never fails the login; the next
     // login tries again. Each step is safe to cut off: nothing is used until it is saved.
+    const ownerClient = new OwnerClient({
+      api: ApiType.Owner,
+      sharedSecret: response.sharedSecret,
+    });
+    const keys = ensureZeroKnowledgeKeys(ownerClient, password);
     try {
-      const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
       await Promise.race([
-        ensureZeroKnowledgeKeys(ownerClient, password),
+        keys,
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('timed out')), ZERO_KNOWLEDGE_KEYS_TIMEOUT_MS)
         ),
       ]);
     } catch (error) {
       console.error('Zero-knowledge keys', error);
+    }
+
+    // The Vault app's password confirm: it needs the keys above, so it waits for them past the time limit. A
+    // failure throws, so the page shows it; the owner is logged in by now and can enter the password again.
+    if (makingVaultPrivate) {
+      await keys.catch(() => undefined);
+      if (!(await isVaultPrivate(ownerClient))) await makeVaultPrivate(ownerClient, password);
     }
 
     checkRedirectToReturn();
@@ -173,7 +220,8 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      window.location.href = isSafeReturnUrl(returnUrl) ? returnUrl : HOME_PATH;
+      const allowed = makingVaultPrivate ? isVaultAppReturnUrl : isSafeReturnUrl;
+      window.location.href = allowed(returnUrl) ? returnUrl : HOME_PATH;
     }
   };
 
