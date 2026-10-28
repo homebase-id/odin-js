@@ -95,6 +95,17 @@ const isAuthFlowPath = (pathname: string): boolean =>
 export const isAppReturnUrl = (url: string | null | undefined): url is string =>
   !!url && /^homebase[a-z0-9-]*:\/\//i.test(url);
 
+// A native app's loopback listener (http://localhost:{port}/…), as a desktop app receives a redirect
+const isLoopbackUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
+  } catch {
+    return false;
+  }
+};
+
 export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
   if (!url) return false;
   if (url.startsWith('/')) {
@@ -194,9 +205,11 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      // The Vault app may be a native one: back to it by our own app schemes, as the signup's return
+      // The Vault app may be a native one: back to it by our own app schemes, as the signup's return, or
+      // to the desktop app's loopback listener
       const backToApp =
-        searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE && isAppReturnUrl(returnUrl);
+        searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE &&
+        (isAppReturnUrl(returnUrl) || isLoopbackUrl(returnUrl));
       window.location.href =
         isSafeReturnUrl(returnUrl) || backToApp ? (returnUrl as string) : HOME_PATH;
     }
