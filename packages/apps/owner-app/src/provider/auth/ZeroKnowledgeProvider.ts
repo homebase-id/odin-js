@@ -362,11 +362,12 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   } catch (error) {
     console.warn('The recovery could not be dealt again; the next login tries again', error);
   }
-  await backfilled;
-
-  if (status.recoveryPhrase === 'onServer') {
-    await takeOverPhrase(dotYouClient, password, masterKey);
-  }
+  // The takeover alongside the apps' keys, not after them: while the server holds the phrase, it resets the password
+  // without the zero-knowledge master key, and this login has only a few seconds.
+  await Promise.all([
+    backfilled,
+    status.recoveryPhrase === 'onServer' && takeOverPhrase(dotYouClient, password, masterKey),
+  ]);
 };
 
 // Zero-knowledge app keys (odin-core docs/zero-knowledge-drive-api-plan.md, step 3)
@@ -428,7 +429,8 @@ export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
  * The caller asks for the password first.
  */
 export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: string) => {
-  const masterKey = await openZkMasterKey(password, await getZkStatus(dotYouClient)).catch(() => {
+  const status = await getZkStatus(dotYouClient);
+  const masterKey = await openZkMasterKey(password, status).catch(() => {
     throw new Error(t('Wrong password'));
   });
   const vaultId = formatGuidId(VAULT_DRIVE.alias); // the server reads a Guid from JSON only with dashes
@@ -437,6 +439,12 @@ export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: str
     console.warn(error);
     throw new Error(getKnownOdinErrorMessages(error) ?? t('Vault could not be made private'));
   };
+
+  // A phrase the server still holds resets the password without the zero-knowledge master key, which would lose
+  // Vault's key: take it over first, as a login does (a login's takeover may have been cut off)
+  if (status.recoveryPhrase === 'onServer') {
+    await takeOverPhrase(dotYouClient, password, masterKey).catch(failed);
+  }
 
   const [driveKey, apps] = await Promise.all([
     client
