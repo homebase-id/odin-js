@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import {
   REDEAL_APP_KEY,
   REDEAL_PARAM,
+  REDEAL_VAULT_PRIVATE,
   RETURN_URL_PARAM,
   useAuth,
   useValidateAuthorization,
@@ -33,9 +34,13 @@ const Login = () => {
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   // After a recovery email change (the verify link lands here): the login deals the recovery again,
   // which needs the password, so the form shows even to an owner who is logged in
-  // Or an app's sign-in that needs the zero-knowledge master key (REDEAL_APP_KEY)
+  // Or an app's sign-in that needs the zero-knowledge master key (REDEAL_APP_KEY), or the Vault app's
+  // password confirm for making Vault private (REDEAL_VAULT_PRIVATE)
   const redealReason = searchParams.get(REDEAL_PARAM);
-  const redeal = redealReason === '1' || redealReason === REDEAL_APP_KEY;
+  const redeal =
+    redealReason === '1' ||
+    redealReason === REDEAL_APP_KEY ||
+    redealReason === REDEAL_VAULT_PRIVATE;
   const recoveryHref = returnUrl
     ? `/owner/account-recovery?${RETURN_URL_PARAM}=${encodeURIComponent(returnUrl)}`
     : '/owner/account-recovery';
@@ -99,6 +104,8 @@ const Login = () => {
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <UrlNotifier />
+        {/* Making Vault private can fail after the password was right: say why */}
+        {redealReason === REDEAL_VAULT_PRIVATE ? <ErrorNotification error={error} /> : null}
         <section className="body-font flex h-full pt-24">
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <div className="">
@@ -113,7 +120,11 @@ const Login = () => {
                   <p className="mb-4 text-slate-600 dark:text-slate-400">
                     {redealReason === REDEAL_APP_KEY
                       ? t('This app reads your private drives. Enter your password once more to continue.')
-                      : t('Your recovery email changed. Log in once more so your recovery uses the new address.')}
+                      : redealReason === REDEAL_VAULT_PRIVATE
+                        ? t(
+                            'Enter your password to make Vault private: only your own devices will hold its key, not the server. There is no way back.'
+                          )
+                        : t('Your recovery email changed. Log in once more so your recovery uses the new address.')}
                   </p>
                 ) : null}
                 <div className="mb-4">
@@ -137,7 +148,7 @@ const Login = () => {
                   state={state}
                   size="none"
                 >
-                  {t('login')}
+                  {redealReason === REDEAL_VAULT_PRIVATE ? t('Make Vault private') : t('login')}
                 </ActionButton>
                 <Link
                   to={recoveryHref}

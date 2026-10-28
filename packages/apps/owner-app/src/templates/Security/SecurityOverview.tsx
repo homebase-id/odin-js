@@ -1,4 +1,3 @@
-import { hasDebugFlag } from '@homebase-id/js-lib/helpers';
 import { t, LoadingBlock, useDotYouClient } from '@homebase-id/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { Link } from 'react-router-dom';
@@ -18,7 +17,6 @@ import { Check, Exclamation } from '@homebase-id/common-app/icons';
 import { SettingsRow } from './SettingsRow';
 import { getDealNeedsDealing } from '../../provider/auth/ZeroKnowledgeProvider';
 import { loginHref } from '../../hooks/auth/useAuth';
-import { MakeVaultPrivateSection } from './MakeVaultPrivateSection';
 
 export const SecurityOverview = () => {
   const [openDialog, setOpenDialog] = useState<
@@ -225,11 +223,6 @@ export const SecurityOverview = () => {
             )}
           </>
         </Section>
-
-        {/* Only with the debug flag (localStorage debug=1, or a development build) until a chat-kmp that reads
-            zero-knowledge drives has reached people's devices: converting Vault before that leaves every older
-            device with an empty Vault (odin-core docs/zero-knowledge-drive-api-plan.md, step 3) */}
-        {hasDebugFlag() ? <MakeVaultPrivateSection /> : null}
 
         {/*do this later*/}
         {/*<Section*/}

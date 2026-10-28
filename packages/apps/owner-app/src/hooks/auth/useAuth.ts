@@ -10,7 +10,11 @@ import {
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
 import { ApiType } from '@homebase-id/js-lib/core';
-import { ensureZeroKnowledgeKeys } from '../../provider/auth/ZeroKnowledgeProvider';
+import {
+  ensureZeroKnowledgeKeys,
+  isVaultPrivate,
+  makeVaultPrivate,
+} from '../../provider/auth/ZeroKnowledgeProvider';
 import {
   HOME_SHARED_SECRET,
   OwnerClient,
@@ -42,17 +46,22 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const REDEAL_PARAM = 'redeal';
 export const HOME_PATH = '/owner';
 
-/** Why the login was asked for again: '1' after a recovery email change; 'app-key' for an app's sign-in. */
+/**
+ * Why the login was asked for again: '1' after a recovery email change; 'app-key' for an app's sign-in;
+ * 'vault-private' when the Vault app sends the owner to make Vault private, which needs the password.
+ */
 export const REDEAL_APP_KEY = 'app-key';
+export const REDEAL_VAULT_PRIVATE = 'vault-private';
 
 /**
  * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
  * owner who is logged in, so the login deals the recovery again (REDEAL_PARAM); 'app-key' when an app's
- * sign-in needs the zero-knowledge master key, which only a password login opens.
+ * sign-in needs the zero-knowledge master key, which only a password login opens; 'vault-private' to make
+ * Vault private after the password.
  */
 export const loginHref = (
   returnUrl: string | null,
-  options?: { redeal?: boolean | typeof REDEAL_APP_KEY }
+  options?: { redeal?: boolean | typeof REDEAL_APP_KEY | typeof REDEAL_VAULT_PRIVATE }
 ) => {
   const query = new URLSearchParams();
   if (options?.redeal) query.set(REDEAL_PARAM, options.redeal === true ? '1' : options.redeal);
@@ -146,8 +155,11 @@ export const useAuth = () => {
     // The only moment the browser has the password: make or open the zero-knowledge keys. The
     // redirect waits for it, but never for long, and a failure never fails the login; the next
     // login tries again. Each step is safe to cut off: nothing is used until it is saved.
+    const ownerClient = new OwnerClient({
+      api: ApiType.Owner,
+      sharedSecret: response.sharedSecret,
+    });
     try {
-      const ownerClient = new OwnerClient({ api: ApiType.Owner, sharedSecret: response.sharedSecret });
       await Promise.race([
         ensureZeroKnowledgeKeys(ownerClient, password),
         new Promise((_, reject) =>
@@ -156,6 +168,15 @@ export const useAuth = () => {
       ]);
     } catch (error) {
       console.error('Zero-knowledge keys', error);
+    }
+
+    // Sent by the Vault app to make Vault private: this page is its password confirm. A failure throws, so the
+    // page shows it; the owner is logged in by now and can enter the password again.
+    if (
+      searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE &&
+      !(await isVaultPrivate(ownerClient))
+    ) {
+      await makeVaultPrivate(ownerClient, password);
     }
 
     checkRedirectToReturn();
@@ -173,7 +194,11 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      window.location.href = isSafeReturnUrl(returnUrl) ? returnUrl : HOME_PATH;
+      // The Vault app may be a native one: back to it by our own app schemes, as the signup's return
+      const backToApp =
+        searchParams.get(REDEAL_PARAM) === REDEAL_VAULT_PRIVATE && isAppReturnUrl(returnUrl);
+      window.location.href =
+        isSafeReturnUrl(returnUrl) || backToApp ? (returnUrl as string) : HOME_PATH;
     }
   };
 
