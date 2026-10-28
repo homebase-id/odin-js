@@ -5,12 +5,6 @@ import { PasswordInput } from '../../components/Password/PasswordInput';
 import { isVaultPrivate, makeVaultPrivate } from '../../provider/auth/ZeroKnowledgeProvider';
 
 /**
- * Off until a chat-kmp that reads zero-knowledge drives has reached people's devices: converting Vault before that
- * leaves every older device with an empty Vault (odin-core docs/zero-knowledge-drive-api-plan.md, step 3).
- */
-export const SHOW_MAKE_VAULT_PRIVATE = false;
-
-/**
  * "Make Vault private": Vault keeps its key, now locked only in this browser, and the server keeps no copy it could
  * open. Each of the owner's devices gets the key at its next sign-in. There is no way back.
  */
