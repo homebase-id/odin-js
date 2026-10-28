@@ -9,7 +9,7 @@ import {
   getDataVersionInfo,
   VersionInfoResult,
 } from '../../provider/system/DataConversionProvider';
-import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { HOME_PATH, RETURN_URL_PARAM, resolveReturnUrl } from '../../hooks/auth/useAuth';
 import { TimeAgoUtc } from '../../components/ui/Date/TimeAgoUtc';
 
 // How often to re-check the data version while an upgrade is running.
@@ -20,26 +20,6 @@ type UpgradePhase =
   | 'running' // an upgrade is in progress (detected or triggered) -> spinner
   | 'done' // the data is up to date
   | 'error'; // the check or trigger failed
-
-// Schemes we refuse to navigate to (XSS / local-file risks). Everything else is
-// allowed: `http(s)` for web apps and custom schemes for native mobile/desktop apps.
-const BLOCKED_RETURN_SCHEMES = ['javascript:', 'data:', 'vbscript:', 'blob:', 'file:'];
-
-// Returns the raw returnUrl if it parses and isn't a blocked scheme; otherwise undefined.
-const resolveReturnUrl = (returnUrl: string | null): string | undefined => {
-  if (!returnUrl) return undefined;
-
-  let parsed: URL;
-  try {
-    parsed = new URL(returnUrl, window.location.origin);
-  } catch {
-    return undefined;
-  }
-
-  if (BLOCKED_RETURN_SCHEMES.includes(parsed.protocol.toLowerCase())) return undefined;
-
-  return returnUrl;
-};
 
 const DataUpgrade = () => {
   const [searchParams] = useSearchParams();

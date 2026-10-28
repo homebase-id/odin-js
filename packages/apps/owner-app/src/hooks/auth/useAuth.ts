@@ -96,6 +96,26 @@ const isAuthFlowPath = (pathname: string): boolean =>
 // every non-http scheme.
 // ponytail: scheme allowlist, not a host allowlist — enough for the mobile clients. A web caller
 // would need an explicit origin allowlist, which is a decision for whoever adds one.
+// Schemes we refuse to navigate to (XSS / local-file risks). Everything else is
+// allowed: `http(s)` for web apps and custom schemes for native mobile/desktop apps.
+const BLOCKED_RETURN_SCHEMES = ['javascript:', 'data:', 'vbscript:', 'blob:', 'file:'];
+
+// Returns the raw returnUrl if it parses and isn't a blocked scheme; otherwise undefined.
+export const resolveReturnUrl = (returnUrl: string | null): string | undefined => {
+  if (!returnUrl) return undefined;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(returnUrl, window.location.origin);
+  } catch {
+    return undefined;
+  }
+
+  if (BLOCKED_RETURN_SCHEMES.includes(parsed.protocol.toLowerCase())) return undefined;
+
+  return returnUrl;
+};
+
 export const isAppReturnUrl = (url: string | null | undefined): url is string =>
   !!url && /^homebase[a-z0-9-]*:\/\//i.test(url);
 

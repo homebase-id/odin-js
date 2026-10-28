@@ -16,7 +16,6 @@ import {
   ErrorNotification,
   t,
   CircleSelector,
-  DomainHighlighter,
   getCancelRedirectUrl,
   getStateParam,
 } from '@homebase-id/common-app';
@@ -33,6 +32,8 @@ import {
   appCirclesParamToDeclarations,
 } from './util';
 import { InvalidAppRequest } from './InvalidAppRequest';
+import { resolveReturnUrl } from '../../hooks/auth/useAuth';
+import { AlreadyInstalled, AppName } from './AlreadyInstalled';
 
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&cd=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A2%7D%5D&ui=minimal&return=homebase-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
@@ -60,8 +61,9 @@ const RegisterApp = () => {
   // first-come, so an app that did not say what it wants to be called has not finished asking.
   const appSlug = searchParams.get('as');
   const origin = searchParams.get('o') || undefined;
-  const returnUrl = searchParams.get('return');
-  const cancelUrl = searchParams.get('cancel');
+  // Only to a URL the browser may safely go to: never javascript: and the like
+  const returnUrl = resolveReturnUrl(searchParams.get('return'));
+  const cancelUrl = resolveReturnUrl(searchParams.get('cancel'));
 
   const p = searchParams.get('p');
   const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
@@ -91,7 +93,7 @@ const RegisterApp = () => {
       : !isValidSlug(appSlug)
         ? [`${t('`as` (app slug) is not a valid slug')} ("${appSlug}")`]
         : []),
-    ...(!returnUrl ? [t('`return` is missing')] : []),
+    ...(!returnUrl ? [t('`return` is missing, or not a URL to go back to')] : []),
     ...drivesParamProblems(d || undefined, 'd'),
     ...drivesParamProblems(cd || undefined, 'cd'),
     ...appCirclesParamProblems(ac || undefined),
@@ -119,11 +121,14 @@ const RegisterApp = () => {
     );
   }
 
+  const { fetch: installed, registerNewApp } = useApp({ appId });
+  // Started here, with the app's lookup, rather than once the install screen mounts
+  useDrives();
   const {
     mutateAsync: registerApp,
     status: registerAppState,
     error: registerAppError,
-  } = useApp({ appId }).registerNewApp;
+  } = registerNewApp;
 
   const doRegisterApp = async (request: AppRegistrationRequest) => {
     await registerApp(request);
@@ -134,6 +139,19 @@ const RegisterApp = () => {
     (window.location.href = cancelUrl
       ? getCancelRedirectUrl(cancelUrl, getStateParam(returnUrl))
       : '/owner');
+
+  // Registering an app again is refused: it would replace the keys its devices hold (odin-core #2039).
+  // Once this page has registered it, the app's lookup answers too, while the page leaves.
+  if (!installed.isFetched) return null;
+  if (installed.data && registerAppState !== 'success')
+    return (
+      <AlreadyInstalled
+        app={installed.data}
+        requestedSlug={appSlug}
+        doContinue={() => (window.location.href = returnUrl)}
+        doCancel={doCancel}
+      />
+    );
 
   return (
     <>
@@ -248,16 +266,7 @@ const AppRegistration = ({
     <>
       <h1 className="mb-5 text-4xl dark:text-white">
         {t('Create new app')}:
-        <small className="block">
-          {name}{' '}
-          {origin ? (
-            <>
-              (<DomainHighlighter>{origin}</DomainHighlighter>)
-            </>
-          ) : (
-            ''
-          )}
-        </small>
+        <AppName name={name} origin={origin} />
         {/* The slug is permanent and first-come, so the owner should be able to see the name being
             claimed -- but it is an address, not something they are being asked to weigh. */}
         <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">
