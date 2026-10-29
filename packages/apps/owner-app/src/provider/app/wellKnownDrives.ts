@@ -19,6 +19,12 @@ export const FILESYNC_DRIVE: TargetDrive = {
   type: '5da48122e946487a8b9d589642f3c91d',
 };
 
+/** odin-core `WellKnownAppDrives.EmailAppDrive` (chat-kmp `emailLabeledDrive`): it holds the OpenPGP keyring. */
+export const EMAIL_DRIVE: TargetDrive = {
+  alias: '92bbcad83558417b93769976c086a674',
+  type: '37e3480a4cd74a41a421ed49866bf07e',
+};
+
 /**
  * The drives that existed before they could be made zero knowledge and are upgraded keeping their key, for now:
  * odin-core `ZkDriveConversionService.ConvertibleDrives`. A new drive is created zero knowledge instead.
@@ -26,6 +32,7 @@ export const FILESYNC_DRIVE: TargetDrive = {
 export const ZK_UPGRADABLE_DRIVES: { drive: TargetDrive; name: string }[] = [
   { drive: VAULT_DRIVE, name: 'Vault' },
   { drive: FILESYNC_DRIVE, name: 'Filesync' },
+  { drive: EMAIL_DRIVE, name: 'Email' },
 ];
 
 /**
