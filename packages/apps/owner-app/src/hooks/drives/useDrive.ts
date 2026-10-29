@@ -33,9 +33,13 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
 
   // Always the server's answer: the drive list is kept in the browser with no expiry, so a copy of it would show a
   // drive as it was before a change made elsewhere, e.g. made private from an app's upgrade link.  The copy is only
-  // shown while the answer loads.
+  // shown while the answer loads.  One request per type, shared by the rows asking at once; 'drives-by-type' isn't a
+  // key the persister keeps (OdinQueryClient matches whole key elements against 'drives').
   const fetch = async (targetDrive: TargetDrive) => {
-    const allDrives = (await getDrivesByType(dotYouClient, targetDrive.type, 1, 100)).results;
+    const allDrives = await queryClient.fetchQuery({
+      queryKey: ['drives-by-type', targetDrive.type],
+      queryFn: async () => (await getDrivesByType(dotYouClient, targetDrive.type, 1, 100)).results,
+    });
 
     return allDrives.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive)) || null;
   };

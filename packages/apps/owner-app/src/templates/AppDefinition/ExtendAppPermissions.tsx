@@ -12,7 +12,7 @@ import { isAxiosError } from 'axios';
 import { Arrow, Chevron } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
-import { useApp, ZkPasswordNeededError } from '../../hooks/apps/useApp';
+import { useApp, useZkPasswordPrompt } from '../../hooks/apps/useApp';
 import { ZkPasswordField } from './ZkPasswordField';
 import { useDrives } from '../../hooks/drives/useDrives';
 import { useDrive } from '../../hooks/drives/useDrive';
@@ -66,9 +66,8 @@ export const ExtendAppPermissions = () => {
     setOwningApp: { mutateAsync: setOwningApp },
   } = useDrive();
 
-  // A drive the app asked for private needs the password when this session holds no zero-knowledge key. Once asked
-  // for, the field stays: a wrong password shows its error, and the owner types it again.
-  const [needsPassword, setNeedsPassword] = useState(false);
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
+  const passwordPrompt = useZkPasswordPrompt();
 
   const doUpdateApp = async () => {
     try {
@@ -148,7 +147,7 @@ export const ExtendAppPermissions = () => {
 
       doRedirectBack();
     } catch (error) {
-      if (error instanceof ZkPasswordNeededError) setNeedsPassword(true);
+      passwordPrompt.onError(error);
       setError(error);
     }
   };
@@ -196,7 +195,7 @@ export const ExtendAppPermissions = () => {
 
   return (
     <>
-      <ErrorNotification error={error instanceof ZkPasswordNeededError ? undefined : error} />
+      <ErrorNotification error={passwordPrompt.shownError(error)} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -238,7 +237,7 @@ export const ExtendAppPermissions = () => {
               </p>
             ) : null}
 
-            {needsPassword ? <ZkPasswordField onChange={setZkPassword} /> : null}
+            {passwordPrompt.needsPassword ? <ZkPasswordField onChange={setZkPassword} /> : null}
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               {adoptionError ? (
@@ -250,15 +249,10 @@ export const ExtendAppPermissions = () => {
                   <ActionButton
                     onClick={doUpdateApp}
                     type="primary"
-                    state={
-                      // While the password is asked for, the owner types it and tries again
-                      needsPassword && extendPermissionStatus === 'error'
-                        ? 'idle'
-                        : mergeStates(
-                            mergeStates(extendPermissionStatus, updateCirclesState),
-                            applyDriveChangesStatus
-                          )
-                    }
+                    state={mergeStates(
+                      mergeStates(passwordPrompt.buttonState(extendPermissionStatus), updateCirclesState),
+                      applyDriveChangesStatus
+                    )}
                     icon={Arrow}
                   >
                     {t('Allow')}

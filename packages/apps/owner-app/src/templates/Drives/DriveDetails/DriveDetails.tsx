@@ -73,6 +73,7 @@ const DriveDetails = () => {
     if (driveDefLoading) return <LoadingDetailPage/>;
 
     if (!driveDef) return <>{t('No matching drive found')}</>;
+    const modelLabel = sharingModelLabel(driveDef.sharingModel);
 
     const targetDriveInfo = driveDef?.targetDriveInfo;
 
@@ -208,7 +209,7 @@ const DriveDetails = () => {
                     {driveDef.allowCdn ? <li>{t('Allow CDN')}</li> : null}
                     {driveDef.isArchived ? <li>{t('Drive is Archived')}</li> : null}
                     {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
-                    {sharingModelLabel(driveDef.sharingModel) ? <li>{sharingModelLabel(driveDef.sharingModel)}</li> : null}
+                    {modelLabel ? <li>{modelLabel}</li> : null}
                     {driveDef?.attributes ? (
                         <>
                             {Object.keys(driveDef.attributes).map((attrKey) => (

@@ -27,18 +27,25 @@ import {
 } from '@homebase-id/common-app';
 import { Loader, Arrow } from '@homebase-id/common-app/icons';
 
+const UPGRADE_MESSAGE =
+  'Enter your password to make {0} {1}: only your own devices will hold its key, not the server. There is no way back.';
+
 const REDEAL_MESSAGES: Record<RedealReason, string> = {
   '1': 'Your recovery email changed. Log in once more so your recovery uses the new address.',
   [REDEAL_APP_KEY]:
     'This app reads your private drives. Enter your password once more to continue.',
-  [REDEAL_VAULT_PRIVATE]:
-    'Enter your password to make {0} {1}: only your own devices will hold its key, not the server. There is no way back.',
-  [REDEAL_DRIVE_PRIVATE]:
-    'Enter your password to make {0} {1}: only your own devices will hold its key, not the server. There is no way back.',
+  [REDEAL_VAULT_PRIVATE]: UPGRADE_MESSAGE,
+  [REDEAL_DRIVE_PRIVATE]: UPGRADE_MESSAGE,
 };
 
-/** The model an upgrade makes the drive, in the console's words: "Private (zero knowledge)", say. */
-const upgradeLabel = (upgrade: DriveUpgrade) => sharingModelLabel(upgrade.sharingModel) ?? '';
+/** The drive an upgrade names, and the model it makes it in the console's words: "Private (zero knowledge)", say. */
+const upgradeArgs = (upgrade: DriveUpgrade) => [
+  upgrade.name,
+  sharingModelLabel(upgrade.sharingModel) ?? '',
+];
+
+/** The upgrade's button: "Make Filesync Selective Share (zero knowledge)". */
+const upgradeButtonLabel = (upgrade: DriveUpgrade) => t('Make {0} {1}', ...upgradeArgs(upgrade));
 
 /**
  * After the password: the devices that would see the drive as empty until they sign in again. A warning, not a
@@ -91,7 +98,7 @@ const DevicesWithoutAppKeyWarning = ({
         size="none"
         onClick={doContinue}
       >
-        {t('Make {0} {1}', upgrade.name, upgradeLabel(upgrade))}
+        {upgradeButtonLabel(upgrade)}
       </ActionButton>
       <ActionButton
         className="mt-3 w-full px-5 py-3"
@@ -219,13 +226,10 @@ const Login = () => {
                     </p>
                   ) : redealReason ? (
                     <p className="mb-4 text-slate-600 dark:text-slate-400">
-                      {driveUpgrade
-                        ? t(
-                            REDEAL_MESSAGES[redealReason],
-                            driveUpgrade.name,
-                            upgradeLabel(driveUpgrade)
-                          )
-                        : t(REDEAL_MESSAGES[redealReason])}
+                      {t(
+                        REDEAL_MESSAGES[redealReason],
+                        ...(driveUpgrade ? upgradeArgs(driveUpgrade) : [])
+                      )}
                     </p>
                   ) : null}
                   <div className="mb-4">
@@ -249,9 +253,7 @@ const Login = () => {
                     state={state}
                     size="none"
                   >
-                    {driveUpgrade
-                      ? t('Make {0} {1}', driveUpgrade.name, upgradeLabel(driveUpgrade))
-                      : t('login')}
+                    {driveUpgrade ? upgradeButtonLabel(driveUpgrade) : t('login')}
                   </ActionButton>
                   <Link
                     to={recoveryHref}

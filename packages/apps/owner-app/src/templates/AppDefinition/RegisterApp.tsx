@@ -3,7 +3,7 @@ import {
   AppRegistrationRequest,
   DriveGrantRequest,
 } from '../../provider/app/AppManagementProviderTypes';
-import { useApp, ZkPasswordNeededError } from '../../hooks/apps/useApp';
+import { useApp, useZkPasswordPrompt } from '../../hooks/apps/useApp';
 import { ZkPasswordField } from './ZkPasswordField';
 import Section from '../../components/ui/Sections/Section';
 
@@ -131,15 +131,14 @@ const RegisterApp = () => {
     error: registerAppError,
   } = registerNewApp;
 
-  // A drive the app asked for private needs the password when this session holds no zero-knowledge key. Once asked
-  // for, the field stays: a wrong password shows its error, and the owner types it again.
-  const [needsPassword, setNeedsPassword] = useState(false);
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
+  const passwordPrompt = useZkPasswordPrompt();
   const doRegisterApp = async (request: AppRegistrationRequest) => {
     try {
       await registerApp(request);
     } catch (error) {
       // Shown from the mutation's error
-      if (error instanceof ZkPasswordNeededError) setNeedsPassword(true);
+      passwordPrompt.onError(error);
       return;
     }
     window.location.href = returnUrl;
@@ -165,9 +164,7 @@ const RegisterApp = () => {
 
   return (
     <>
-      <ErrorNotification
-        error={registerAppError instanceof ZkPasswordNeededError ? undefined : registerAppError}
-      />
+      <ErrorNotification error={passwordPrompt.shownError(registerAppError)} />
 
       <section className="my-20">
         <div className="container mx-auto">
@@ -184,10 +181,8 @@ const RegisterApp = () => {
               circleDriveGrants={circleDriveGrants}
               appCircles={appCircles}
               registerApp={doRegisterApp}
-              registerAppState={
-                needsPassword && registerAppState === 'error' ? 'idle' : registerAppState
-              }
-              needsPassword={needsPassword}
+              registerAppState={passwordPrompt.buttonState(registerAppState)}
+              needsPassword={passwordPrompt.needsPassword}
               onPassword={setZkPassword}
               doCancel={doCancel}
             />

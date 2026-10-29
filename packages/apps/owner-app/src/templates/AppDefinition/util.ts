@@ -62,7 +62,8 @@ export const drivesParamProblems = (
         `${which}: ${t('sharing model (sm) is not one of')} ${REQUESTABLE_SHARING_MODELS.join(', ')} ("${d.sm}")`
       );
     else if (isZeroKnowledgeSharingModel(d?.sm)) {
-      // The server can't open such a drive, so nothing may read it on the server's behalf
+      // The server can't open such a drive, so nothing may read it on the server's behalf.  The server refuses the
+      // same (CreateDriveRequest.AssertSharingModel); refused here up front, so a request never ends half-created.
       if (d.r)
         problems.push(`${which}: ${t('a private drive (sm) cannot allow anonymous reads (r)')}`);
       if (d.s)

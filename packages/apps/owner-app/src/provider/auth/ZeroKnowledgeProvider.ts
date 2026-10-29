@@ -28,6 +28,7 @@ import {
   dealToFriends,
   getPhraseCheck,
   makePhraseCopies,
+  appsGrantedDrive,
   makeAppKeyBackfill,
   missingAppCopies,
   makeConversionKeepingKey,
@@ -390,10 +391,17 @@ const backfillAppKey = async (dotYouClient: DotYouClient, app: ZkAppKeys, master
   return backfill;
 };
 
-/** The login's backfill, for every app missing a copy: one app's failure doesn't hold up the others. */
-const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+/** Whether a listed app is the one a client id names: its id or its slug. */
+const isApp = (clientId: string) => (app: ZkAppKeys) =>
+  stringGuidsEqual(app.appId, clientId) || app.appSlug.toLowerCase() === clientId.toLowerCase();
+
+/**
+ * The login's backfill, for every app missing a copy, or for the one `appId` names (after it was granted a drive created
+ * zero knowledge): one app's failure doesn't hold up the others, and its next sign-in, or the next login, fills it in.
+ */
+export const backfillAppKeys = async (dotYouClient: DotYouClient, masterKey: Uint8Array, appId?: string) => {
   const apps = await getZkAppKeys(dotYouClient);
-  for (const app of apps.filter((a) => missingAppCopies(a).length)) {
+  for (const app of apps.filter((a) => (!appId || isApp(appId)(a)) && missingAppCopies(a).length)) {
     await backfillAppKey(dotYouClient, app, masterKey).catch((error) =>
       console.warn(`The zero-knowledge keys of app ${app.appSlug} could not be completed`, error)
     );
@@ -411,9 +419,7 @@ export const sealAppKeyForSignIn = async (
   publicKeyJwkBase64Url: string,
   masterKey: Uint8Array
 ) => {
-  const app = (await getZkAppKeys(dotYouClient)).find(
-    (a) => stringGuidsEqual(a.appId, clientId) || a.appSlug.toLowerCase() === clientId.toLowerCase()
-  );
+  const app = (await getZkAppKeys(dotYouClient)).find(isApp(clientId));
   if (!app) throw new Error(t('This app is not registered on your identity'));
 
   const { appKey, locked } = await backfillAppKey(dotYouClient, app, masterKey);
@@ -424,6 +430,13 @@ export const sealAppKeyForSignIn = async (
 export const isDriveZeroKnowledge = async (dotYouClient: DotYouClient, drive: TargetDrive) =>
   !!(await getOwnDrive(dotYouClient, drive))?.zkMasterKeyEncryptedStorageKey;
 
+/** The password the owner typed doesn't open the zero-knowledge master key. */
+export class WrongPasswordError extends Error {
+  constructor() {
+    super(t('Wrong password'));
+  }
+}
+
 /**
  * The zero-knowledge master key, opened with the owner's password, for a page that needs it when this session holds
  * none. A phrase the server still holds resets the password without the zero-knowledge master key, which would lose
@@ -432,7 +445,7 @@ export const isDriveZeroKnowledge = async (dotYouClient: DotYouClient, drive: Ta
 export const openZkMasterKeyWithPassword = async (dotYouClient: DotYouClient, password: string) => {
   const status = await getZkStatus(dotYouClient);
   const masterKey = await openZkMasterKey(password, status).catch(() => {
-    throw new Error(t('Wrong password'));
+    throw new WrongPasswordError();
   });
   if (status.recoveryPhrase === 'onServer') await takeOverPhrase(dotYouClient, password, masterKey);
   await rememberZkMasterKey(dotYouClient, masterKey);
@@ -468,7 +481,7 @@ export const makeDriveZeroKnowledge = async (
   };
 
   const masterKey = await openZkMasterKeyWithPassword(dotYouClient, password).catch((error) => {
-    if (error instanceof Error && error.message === t('Wrong password')) throw error;
+    if (error instanceof WrongPasswordError) throw error;
     return failed(error);
   });
 
@@ -488,32 +501,21 @@ export const makeDriveZeroKnowledge = async (
   await client.post('/security/zk/convert-drive', { ...request, sharingModel }).catch(failed);
 };
 
-/**
- * After an app is granted a drive created zero knowledge: its copy of the drive's key, and its own key where it has
- * none. A failure stops nothing: the app's next sign-in, or the owner's next login, backfills it.
- */
-export const backfillAppKeysOf = async (dotYouClient: DotYouClient, appId: string, masterKey: Uint8Array) => {
-  const app = (await getZkAppKeys(dotYouClient)).find((a) => stringGuidsEqual(a.appId, appId));
-  if (app && missingAppCopies(app).length) await backfillAppKey(dotYouClient, app, masterKey);
-};
+export interface DeviceWithoutAppKey {
+  appSlug: string;
+  friendlyName: string;
+}
 
 /**
  * The devices that would see a drive as empty once it is zero knowledge, until they sign in again: each device, not
  * revoked, of an app granted the drive that wasn't handed its app's current key (odin-core
  * docs/zero-knowledge-drive-api-plan.md, 4.3). A host that doesn't say which devices hold the key names none.
  */
-export interface DeviceWithoutAppKey {
-  appSlug: string;
-  friendlyName: string;
-}
-
 export const getDevicesWithoutAppKey = async (
   dotYouClient: DotYouClient,
   drive: TargetDrive
 ): Promise<DeviceWithoutAppKey[]> => {
-  const apps = (await getZkAppKeys(dotYouClient)).filter((app) =>
-    app.drives.some((d) => stringGuidsEqual(d.driveId, drive.alias))
-  );
+  const apps = appsGrantedDrive(await getZkAppKeys(dotYouClient), drive.alias);
   const devices = await Promise.all(
     apps.map(async (app) =>
       (await GetAppClients(dotYouClient, app.appId))
