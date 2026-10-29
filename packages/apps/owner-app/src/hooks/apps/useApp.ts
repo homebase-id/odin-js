@@ -166,12 +166,17 @@ const ensureAppOwnedDrives = async (
   return zkMasterKey && (await zkMasterKey);
 };
 
-/** The app's copy of each zero-knowledge drive just created for it; its next sign-in fills in a copy this misses. */
-const lockCreatedDrivesForApp = async (
+/**
+ * The app's copy of each zero-knowledge drive it is granted and lacks one of: a drive just created for it, and one
+ * that already existed, such as Filesync's drive when Chat is granted it. Done with the key this page opened, or the
+ * session's; without either, the app's next sign-in or the owner's next login fills it in.
+ */
+const lockGrantedDrivesForApp = async (
   dotYouClient: DotYouClient,
   appId: string,
-  zkMasterKey: Uint8Array | undefined
+  openedZkMasterKey: Uint8Array | undefined
 ) => {
+  const zkMasterKey = openedZkMasterKey ?? (await getZkMasterKey(dotYouClient));
   if (!zkMasterKey) return;
   await backfillAppKeys(dotYouClient, zkMasterKey, appId).catch((error) =>
     console.warn(
@@ -233,7 +238,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
     );
 
     await RegisterApp(dotYouClient, { ...appRegRequest, drives: appRegRequest.drives ?? [] });
-    await lockCreatedDrivesForApp(dotYouClient, appRegRequest.appId, zkMasterKey);
+    await lockGrantedDrivesForApp(dotYouClient, appRegRequest.appId, zkMasterKey);
 
     if (appRegRequest.drives)
       await applyRequestedDriveChanges(dotYouClient, appRegRequest.drives, appRegRequest.appId);
@@ -285,7 +290,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
       permissionSet,
       drives: drives || [],
     });
-    await lockCreatedDrivesForApp(dotYouClient, appId, zkMasterKey);
+    await lockGrantedDrivesForApp(dotYouClient, appId, zkMasterKey);
     return updated;
   };
 
