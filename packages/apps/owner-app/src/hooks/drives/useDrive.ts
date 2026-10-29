@@ -31,20 +31,19 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
+  // Always the server's answer: the drive list is kept in the browser with no expiry, so a copy of it would show a
+  // drive as it was before a change made elsewhere, e.g. made private from an app's upgrade link.  The copy is only
+  // shown while the answer loads.
   const fetch = async (targetDrive: TargetDrive) => {
-    // First check all drives cache for a drive
-    const allDrivesInCache = queryClient.getQueryData<DriveDefinition[]>(['drives']);
-    if (allDrivesInCache) {
-      const foundDrive = allDrivesInCache.find((drive) =>
-        drivesEqual(drive.targetDriveInfo, targetDrive)
-      );
-      if (foundDrive) return foundDrive;
-    }
-
     const allDrives = (await getDrivesByType(dotYouClient, targetDrive.type, 1, 100)).results;
 
     return allDrives.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive)) || null;
   };
+
+  const cachedDrive = (targetDrive: TargetDrive) =>
+    queryClient
+      .getQueryData<DriveDefinition[]>(['drives'])
+      ?.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive));
 
   const fetchDriveDetail = async (targetDrive: TargetDrive) =>
     await getDriveStatus(dotYouClient, targetDrive);
@@ -141,6 +140,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     fetch: useQuery({
       queryKey: ['drives', `${targetDrive?.alias}_${targetDrive?.type}`],
       queryFn: () => fetch(targetDrive as TargetDrive),
+      placeholderData: () => (targetDrive ? cachedDrive(targetDrive) : undefined),
       refetchOnWindowFocus: false,
       enabled: !!targetDrive,
     }),

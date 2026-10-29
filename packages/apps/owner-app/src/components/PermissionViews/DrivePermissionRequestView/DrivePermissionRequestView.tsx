@@ -5,7 +5,7 @@ import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
 import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 import { getRequestedDriveChanges } from '@homebase-id/js-lib/core';
-import { zeroKnowledgeLabel } from '../../Drives/SharingModelLabel/sharingModelLabel';
+import { sharingModelLabel } from '../../Drives/SharingModelLabel/sharingModelLabel';
 
 const DrivePermissionRequestView = ({
   driveGrant,
@@ -29,8 +29,8 @@ const DrivePermissionRequestView = ({
   const changes =
     showRequestedChanges && drive ? getRequestedDriveChanges(drive, driveGrant.driveMeta) : {};
   const requestedAttributes = driveGrant.driveMeta?.attributes || {};
-  // What a new drive is created as, when its app asked for it zero knowledge; an existing drive keeps its model
-  const createdAs = isNew ? zeroKnowledgeLabel(driveGrant.driveMeta?.sharingModel) : undefined;
+  // What a new drive is created as; an existing drive keeps its model
+  const createdAs = isNew ? sharingModelLabel(driveGrant.driveMeta?.sharingModel) : undefined;
 
   const totalExistingPermissions = existingGrant?.permissionedDrive.permission.reduce(
     (a, b) => a + b,
