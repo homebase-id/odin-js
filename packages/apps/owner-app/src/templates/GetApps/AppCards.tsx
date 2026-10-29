@@ -1,7 +1,14 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { t, HomebaseApp, HomebaseFileSync } from '@homebase-id/common-app';
-import { IconProps } from '@homebase-id/common-app/icons';
+import {
+  t,
+  DialogWrapper,
+  HomebaseApp,
+  HomebaseFileSync,
+  usePortal,
+} from '@homebase-id/common-app';
+import { IconProps, Phone } from '@homebase-id/common-app/icons';
 import {
   APP_STORE_URL,
   FILE_SYNC_DESKTOP,
@@ -46,17 +53,39 @@ const StoreBadge = ({ store }: { store: keyof typeof STORES }) => (
   </a>
 );
 
-// On a computer the phone apps are the point, so each store gets a QR code to scan.
 const StoreQr = ({ store }: { store: keyof typeof STORES }) => (
-  <div className="flex flex-col items-center gap-2">
+  <div className="flex flex-col items-center gap-3">
     <img
       src={STORES[store].qr}
       alt={`${t('QR code for')} ${STORES[store].label}`}
-      className="h-28 w-28 rounded-md bg-white p-1.5"
+      className="h-40 w-40 rounded-md bg-white p-2 shadow-sm"
     />
     <StoreBadge store={store} />
   </div>
 );
+
+// The QR codes open in a dialog rather than in the card, so the card stays as short as File
+// sync's beside it.
+const PhoneQrDialog = ({ onClose }: { onClose: () => void }) => {
+  const target = usePortal('modal-container');
+  return createPortal(
+    <DialogWrapper
+      title={t('Get Homebase on your phone')}
+      onClose={onClose}
+      isSidePanel={false}
+      size="normal"
+    >
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-row flex-wrap justify-center gap-8">
+          <StoreQr store="ios" />
+          <StoreQr store="android" />
+        </div>
+        <p className="text-slate-400">{t("Point your phone's camera at a code.")}</p>
+      </div>
+    </DialogWrapper>,
+    target
+  );
+};
 
 const RowLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{children}</p>
@@ -75,6 +104,7 @@ const SecondaryLink = ({ href, children }: { href: string; children: ReactNode }
 
 export const HomebaseAppCard = () => {
   const platform = getAppPlatform();
+  const [isQrOpen, setIsQrOpen] = useState(false);
 
   return (
     <AppCard
@@ -86,21 +116,23 @@ export const HomebaseAppCard = () => {
       )}
     >
       {platform === 'desktop' ? (
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          <DesktopDownload app={HOMEBASE_DESKTOP} />
+          <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
             <RowLabel>{t('On your phone')}</RowLabel>
-            <div className="flex flex-row flex-wrap justify-around gap-4">
-              <StoreQr store="ios" />
-              <StoreQr store="android" />
+            <div className="flex flex-row flex-wrap items-center gap-3">
+              <StoreBadge store="ios" />
+              <StoreBadge store="android" />
             </div>
-            <p className="text-center text-sm text-slate-400">
-              {t("Scan with your phone's camera.")}
-            </p>
+            <button
+              className="flex flex-row items-center gap-2 self-start text-sm text-primary hover:underline"
+              onClick={() => setIsQrOpen(true)}
+            >
+              <Phone className="h-4 w-4" />
+              {t('Show QR codes to scan')}
+            </button>
           </div>
-          <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-            <RowLabel>{t('On your computer')}</RowLabel>
-            <DesktopDownload app={HOMEBASE_DESKTOP} />
-          </div>
+          {isQrOpen ? <PhoneQrDialog onClose={() => setIsQrOpen(false)} /> : null}
         </div>
       ) : (
         <>
