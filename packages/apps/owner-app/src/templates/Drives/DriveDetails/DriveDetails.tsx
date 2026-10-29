@@ -24,6 +24,7 @@ import {SetOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/Se
 import {ReassignOwningAppDialog} from '../../../components/Apps/SetOwningAppDialog/ReassignOwningAppDialog';
 import FileBrowser from '../../../components/Drives/FileBrowser/FileBrowser';
 import {DrivePurgeStatus} from '../../../components/Drives/DrivePurgeStatus/DrivePurgeStatus';
+import {zeroKnowledgeLabel} from '../../../components/Drives/SharingModelLabel/sharingModelLabel';
 import {
     ActionButton,
     ActionGroup,
@@ -207,10 +208,7 @@ const DriveDetails = () => {
                     {driveDef.allowCdn ? <li>{t('Allow CDN')}</li> : null}
                     {driveDef.isArchived ? <li>{t('Drive is Archived')}</li> : null}
                     {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
-                    {driveDef.sharingModel === 'private' ? <li>{t('Private (zero knowledge)')}</li> : null}
-                    {driveDef.sharingModel === 'selectiveShare' ? (
-                        <li>{t('Selective Share (zero knowledge)')}</li>
-                    ) : null}
+                    {zeroKnowledgeLabel(driveDef.sharingModel) ? <li>{zeroKnowledgeLabel(driveDef.sharingModel)}</li> : null}
                     {driveDef?.attributes ? (
                         <>
                             {Object.keys(driveDef.attributes).map((attrKey) => (
