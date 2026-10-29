@@ -158,7 +158,7 @@ export const FileSyncAppCard = () => {
     <AppCard
       icon={HomebaseFileSync}
       name={t('File sync')}
-      what={t('A folder on your computer that stays in sync with your Homebase.')}
+      what={t("Back up your computer's files to your Homebase.")}
       why={t(
         'Like Dropbox, but the files live on your own Homebase. Save a file in the folder and it is there, on every computer you sync.'
       )}
