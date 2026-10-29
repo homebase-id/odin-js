@@ -117,7 +117,7 @@ export const HomebaseAppCard = () => {
       name={t('Homebase')}
       what={t('Chat, moments, friends and your vault, in one app.')}
       why={t(
-        'Get a notification the moment someone messages you, and have your Homebase in your pocket, not just in a browser tab.'
+        'Chat, share moments, add friends and keep your vault in one place, right from your phone.'
       )}
     >
       {platform === 'desktop' ? (
