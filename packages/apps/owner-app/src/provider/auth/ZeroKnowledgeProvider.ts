@@ -125,6 +125,30 @@ const convertShardRecoveryDrive = async (
   request: ZkConvertDriveRequest
 ) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
+/**
+ * A built-in drive the server leaves for this browser to create, Private or Selective Share, with keys only the
+ * browser holds: Vault on an identity made since odin-core plan 4.7. As the server's CreateDriveRequest.
+ */
+interface MissingZkDrive {
+  name: string;
+  targetDrive: TargetDrive;
+  sharingModel: ZeroKnowledgeSharingModel;
+  [setting: string]: unknown;
+}
+
+/**
+ * Creates each missing built-in zero-knowledge drive with its keys; the server then sets up the app and circles
+ * that waited for it. A drive that fails is left for the next login.
+ */
+const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+  const client = dotYouClient.createAxiosClient();
+  const missing = (await client.get<MissingZkDrive[]>('/security/zk/missing-drives')).data;
+  for (const drive of missing) {
+    const { request: zkKeys } = await makeZkDriveKeys(drive.targetDrive.alias, masterKey);
+    await client.post('/drive/mgmt/create', { ...drive, zkKeys });
+  }
+};
+
 // Set when first run couldn't deal the automated deal (no zero-knowledge master key in the session
 // yet, say): the next password login deals it, if there is still no deal by then.
 const AUTOMATED_DEAL_PENDING = 'automated-recovery-pending';
@@ -340,6 +364,11 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
     const { request } = await makeZkDriveKeys(SHARD_RECOVERY_DRIVE.alias, masterKey);
     await convertShardRecoveryDrive(dotYouClient, request);
   }
+
+  // Before the backfill, so the app of a drive created here gets its copy with the rest
+  await createMissingZkDrives(dotYouClient, masterKey).catch((error) =>
+    console.warn("The built-in private drives could not be created; the next login tries again", error)
+  );
 
   // Every app's copy of each zero-knowledge drive it is granted, so a device that already holds its app's key
   // picks up a drive granted without this browser. Alongside the deal, which doesn't depend on it; its failure
