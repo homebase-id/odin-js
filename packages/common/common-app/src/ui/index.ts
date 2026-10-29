@@ -26,6 +26,8 @@ export * from './FallbackImg/FallbackHelpers';
 
 export * from './BrandIcons/Homebase';
 export * from './BrandIcons/HomebaseChat';
+export * from './BrandIcons/HomebaseApp';
+export * from './BrandIcons/HomebaseFileSync';
 export * from './BrandIcons/HomebaseFeed';
 export * from './BrandIcons/HomebasePhoto';
 export * from './BrandIcons/HomebaseMail';

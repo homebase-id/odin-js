@@ -54,6 +54,7 @@ const AppsDashboard = lazy(() => import('../templates/Apps/AppsDashboard/AppsDas
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const FileDetails = lazy(() => import('../templates/Drives/DriveDetails/FileDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
+const GetApps = lazy(() => import('../templates/GetApps/GetApps'));
 const Security = lazy(() => import('../templates/Security/Security'));
 
 const Debug = lazy(() => import('../templates/Debug/Debug'));
@@ -217,6 +218,7 @@ function App() {
               <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
 
               <Route path="apps" element={<AppsDashboard />}></Route>
+              <Route path="get-apps" element={<GetApps />}></Route>
 
               <Route path="settings" element={<Settings />}></Route>
               <Route path="settings/:sectionId" element={<Settings />}></Route>
