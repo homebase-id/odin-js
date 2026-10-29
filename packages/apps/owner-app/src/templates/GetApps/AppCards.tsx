@@ -87,8 +87,13 @@ const PhoneQrDialog = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const RowLabel = ({ children }: { children: ReactNode }) => (
-  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{children}</p>
+// The small section under a card's download. Both cards have one, so they stand the same height
+// side by side.
+const CardSection = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+    {children}
+  </div>
 );
 
 const SecondaryLink = ({ href, children }: { href: string; children: ReactNode }) =>
@@ -118,8 +123,7 @@ export const HomebaseAppCard = () => {
       {platform === 'desktop' ? (
         <div className="flex flex-col gap-4">
           <DesktopDownload app={HOMEBASE_DESKTOP} />
-          <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
-            <RowLabel>{t('On your phone')}</RowLabel>
+          <CardSection label={t('On your phone')}>
             <div className="flex flex-row flex-wrap items-center gap-3">
               <StoreBadge store="ios" />
               <StoreBadge store="android" />
@@ -131,7 +135,7 @@ export const HomebaseAppCard = () => {
               <Phone className="h-4 w-4" />
               {t('Show QR codes to scan')}
             </button>
-          </div>
+          </CardSection>
           {isQrOpen ? <PhoneQrDialog onClose={() => setIsQrOpen(false)} /> : null}
         </div>
       ) : (
@@ -147,7 +151,7 @@ export const HomebaseAppCard = () => {
   );
 };
 
-export const FileSyncAppCard = ({ showSetupHint }: { showSetupHint?: boolean }) => {
+export const FileSyncAppCard = () => {
   const isDesktop = getAppPlatform() === 'desktop';
 
   return (
@@ -160,16 +164,16 @@ export const FileSyncAppCard = ({ showSetupHint }: { showSetupHint?: boolean }) 
       )}
     >
       {isDesktop ? (
-        <>
+        <div className="flex flex-col gap-4">
           <DesktopDownload app={FILE_SYNC_DESKTOP} />
-          {showSetupHint ? (
+          <CardSection label={t('After installing')}>
             <p className="text-sm text-slate-400">
               {t(
-                'File sync has no window. After installing, open it, then choose "Log in to Homebase…" from its icon in the menu bar or taskbar.'
+                'File sync has no window. Open it, then choose "Log in to Homebase…" from its icon in the menu bar or taskbar.'
               )}
             </p>
-          ) : null}
-        </>
+          </CardSection>
+        </div>
       ) : (
         <p className="text-sm text-slate-400">
           {t('For Mac, Windows and Linux. Open your owner console on your computer to install it.')}

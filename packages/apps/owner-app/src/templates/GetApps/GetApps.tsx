@@ -10,7 +10,7 @@ const GetApps = () => (
 
     <div className="mt-8 grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-2">
       <HomebaseAppCard />
-      <FileSyncAppCard showSetupHint />
+      <FileSyncAppCard />
     </div>
   </>
 );
