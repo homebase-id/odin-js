@@ -34,7 +34,8 @@ export const DesktopDownload = ({ app }: { app: DesktopApp }) => {
       <ActionLink
         href={desktopDownloadUrl(app, target)}
         icon={Download}
-        className="w-full sm:w-auto"
+        size="none"
+        className="w-auto self-start px-3 py-1.5 text-sm"
       >
         {t('Download for')} {OS_LABEL[target.os]}
         {hasArchChoice ? ` (${archLabel(target.arch)})` : ''}
