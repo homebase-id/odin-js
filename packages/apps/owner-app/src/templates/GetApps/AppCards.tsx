@@ -117,7 +117,7 @@ export const HomebaseAppCard = () => {
       name={t('Homebase')}
       what={t('Chat, moments, friends and your vault, in one app.')}
       why={t(
-        'Chat, share moments, add friends and keep your vault in one place, right from your phone.'
+        'The easiest way to use Homebase every day; share moments and chat with friends, right from your phone.'
       )}
     >
       {platform === 'desktop' ? (
