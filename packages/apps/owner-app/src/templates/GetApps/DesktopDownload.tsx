@@ -31,7 +31,11 @@ export const DesktopDownload = ({ app }: { app: DesktopApp }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <ActionLink href={desktopDownloadUrl(app, target)} icon={Download} className="w-full sm:w-auto">
+      <ActionLink
+        href={desktopDownloadUrl(app, target)}
+        icon={Download}
+        className="w-full sm:w-auto"
+      >
         {t('Download for')} {OS_LABEL[target.os]}
         {hasArchChoice ? ` (${archLabel(target.arch)})` : ''}
       </ActionLink>

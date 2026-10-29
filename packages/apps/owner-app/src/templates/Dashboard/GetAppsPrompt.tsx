@@ -14,7 +14,9 @@ export const GetAppsPrompt = () => {
       <div className="mb-4 flex flex-row items-start justify-between gap-4">
         <div>
           <p className="text-2xl">{t('Take Homebase with you')}</p>
-          <p className="text-slate-400">{t('Two apps that make your Homebase part of your day.')}</p>
+          <p className="text-slate-400">
+            {t('Two apps that make your Homebase part of your day.')}
+          </p>
         </div>
         <button
           className="p-1 opacity-50 hover:opacity-100"

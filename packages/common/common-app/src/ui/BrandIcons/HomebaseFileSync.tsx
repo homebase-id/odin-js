@@ -9,7 +9,14 @@ export const HomebaseFileSync: FC<IconProps> = ({ className }) => {
   return (
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className={`${className}`}>
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id={gradientId}
+          x1="0"
+          y1="0"
+          x2="100"
+          y2="100"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0" stopColor="#5b438e" />
           <stop offset=".55" stopColor="#57458c" />
           <stop offset="1" stopColor="#396281" />

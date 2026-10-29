@@ -62,13 +62,19 @@ export const desktopDownloadUrl = (app: DesktopApp, target: DesktopTarget) =>
 export const useDesktopTarget = (): DesktopTarget => {
   const osName = getOperatingSystem().name;
   const os: DesktopOs =
-    osName === 'Windows' ? 'windows' : osName === 'Linux' || osName === 'Chrome OS' ? 'linux' : 'mac';
+    osName === 'Windows'
+      ? 'windows'
+      : osName === 'Linux' || osName === 'Chrome OS'
+        ? 'linux'
+        : 'mac';
 
   const [arch, setArch] = useState<DesktopArch | undefined>();
   useEffect(() => {
     const uaData = (
       navigator as Navigator & {
-        userAgentData?: { getHighEntropyValues: (hints: string[]) => Promise<{ architecture?: string }> };
+        userAgentData?: {
+          getHighEntropyValues: (hints: string[]) => Promise<{ architecture?: string }>;
+        };
       }
     ).userAgentData;
     uaData

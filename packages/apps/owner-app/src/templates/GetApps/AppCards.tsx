@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, ActionLink, HomebaseApp, HomebaseFileSync } from '@homebase-id/common-app';
-import { Download, IconProps } from '@homebase-id/common-app/icons';
+import { t, HomebaseApp, HomebaseFileSync } from '@homebase-id/common-app';
+import { IconProps } from '@homebase-id/common-app/icons';
 import {
   APP_STORE_URL,
   FILE_SYNC_DESKTOP,
@@ -11,11 +11,56 @@ import {
   getAppPlatform,
 } from './appDownloads';
 import { DesktopDownload } from './DesktopDownload';
+import appStoreBadge from './assets/app-store-badge.svg';
+import googlePlayBadge from './assets/google-play-badge.png';
+// Static QR codes of APP_STORE_URL and GOOGLE_PLAY_URL; regenerate them if either URL changes.
+import appStoreQr from './assets/qr-app-store.svg';
+import googlePlayQr from './assets/qr-google-play.svg';
 
+// Apple's and Google's own badges. Google's PNG carries its own padding, so it is drawn taller to
+// match Apple's visually.
 const STORES = {
-  ios: { label: 'App Store', href: APP_STORE_URL },
-  android: { label: 'Google Play', href: GOOGLE_PLAY_URL },
+  ios: {
+    label: 'App Store',
+    href: APP_STORE_URL,
+    badge: appStoreBadge,
+    qr: appStoreQr,
+    badgeClassName: 'h-10',
+  },
+  android: {
+    label: 'Google Play',
+    href: GOOGLE_PLAY_URL,
+    badge: googlePlayBadge,
+    qr: googlePlayQr,
+    badgeClassName: 'h-[3.6rem] -my-[0.55rem] -mx-[0.6rem]',
+  },
 };
+
+const StoreBadge = ({ store }: { store: keyof typeof STORES }) => (
+  <a href={STORES[store].href} className="inline-flex">
+    <img
+      src={STORES[store].badge}
+      alt={`${STORES[store].label}`}
+      className={`${STORES[store].badgeClassName} w-auto`}
+    />
+  </a>
+);
+
+// On a computer the phone apps are the point, so each store gets a QR code to scan.
+const StoreQr = ({ store }: { store: keyof typeof STORES }) => (
+  <div className="flex flex-col items-center gap-2">
+    <img
+      src={STORES[store].qr}
+      alt={`${t('QR code for')} ${STORES[store].label}`}
+      className="h-28 w-28 rounded-md bg-white p-1.5"
+    />
+    <StoreBadge store={store} />
+  </div>
+);
+
+const RowLabel = ({ children }: { children: ReactNode }) => (
+  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{children}</p>
+);
 
 const SecondaryLink = ({ href, children }: { href: string; children: ReactNode }) =>
   href.startsWith('/') ? (
@@ -41,19 +86,25 @@ export const HomebaseAppCard = () => {
       )}
     >
       {platform === 'desktop' ? (
-        <>
-          <DesktopDownload app={HOMEBASE_DESKTOP} />
-          <p className="text-sm text-slate-400">
-            {t('On your phone:')} <SecondaryLink href={APP_STORE_URL}>App Store</SecondaryLink>
-            {' · '}
-            <SecondaryLink href={GOOGLE_PLAY_URL}>Google Play</SecondaryLink>
-          </p>
-        </>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3">
+            <RowLabel>{t('On your phone')}</RowLabel>
+            <div className="flex flex-row flex-wrap justify-around gap-4">
+              <StoreQr store="ios" />
+              <StoreQr store="android" />
+            </div>
+            <p className="text-center text-sm text-slate-400">
+              {t("Scan with your phone's camera.")}
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <RowLabel>{t('On your computer')}</RowLabel>
+            <DesktopDownload app={HOMEBASE_DESKTOP} />
+          </div>
+        </div>
       ) : (
         <>
-          <ActionLink href={STORES[platform].href} icon={Download} className="w-full sm:w-auto">
-            {t('Get it on')} {STORES[platform].label}
-          </ActionLink>
+          <StoreBadge store={platform} />
           <p className="text-sm text-slate-400">
             {t('Also for Mac, Windows and Linux:')}{' '}
             <SecondaryLink href={GET_APPS_PATH}>{t('open this on your computer')}</SecondaryLink>
