@@ -1,4 +1,4 @@
-import { PermissionedDrive, PermissionSet } from '@homebase-id/js-lib/core';
+import { DriveSharingModel, PermissionedDrive, PermissionSet } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 
 export interface AppClientRegistrationRequest {
@@ -25,6 +25,11 @@ export interface AppClientRegistration {
   created: number;
   friendlyName: string;
   isRevoked: boolean;
+  /**
+   * Whether the device was handed the app's current zero-knowledge key: one that wasn't sees the app's
+   * zero-knowledge drives as empty until it signs in again. Not served by older identity hosts.
+   */
+  holdsZkAppKey?: boolean;
 }
 
 export interface GetAppRequest {
@@ -108,6 +113,13 @@ export interface DriveGrantRequest {
      * a malformed request rather than something to guess at.
      */
     driveTypeSlug: string;
+
+    /**
+     * What the drive is created as when the owner doesn't have it yet (`sm`): 'private' or
+     * 'selectiveShare' makes it zero knowledge from the start (odin-core
+     * docs/zero-knowledge-drive-api-plan.md, step 4). Absent means collaborative.
+     */
+    sharingModel?: DriveSharingModel;
   };
 }
 

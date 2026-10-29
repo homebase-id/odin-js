@@ -1,5 +1,10 @@
-import { PermissionSet } from '@homebase-id/js-lib/core';
-import { isValidSlug, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import {
+  isZeroKnowledgeSharingModel,
+  PermissionSet,
+  REQUESTABLE_SHARING_MODELS,
+} from '@homebase-id/js-lib/core';
+import { isValidSlug, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import {
   AppCircleDeclaration,
   DriveGrantRequest,
@@ -51,6 +56,22 @@ export const drivesParamProblems = (
       problems.push(`${which}: ${t('drive type slug (ts) is not a valid slug')} ("${d.ts}")`);
     if (d?.ds && !isValidSlug(d.ds))
       problems.push(`${which}: ${t('drive slug (ds) is not a valid slug')} ("${d.ds}")`);
+    // Never quietly downgraded: a drive asked for private is private or isn't made
+    if (d?.sm !== undefined && !(REQUESTABLE_SHARING_MODELS as readonly string[]).includes(d.sm))
+      problems.push(
+        `${which}: ${t('sharing model (sm) is not one of')} ${REQUESTABLE_SHARING_MODELS.join(', ')} ("${d.sm}")`
+      );
+    else if (isZeroKnowledgeSharingModel(d?.sm)) {
+      // The server can't open such a drive, so nothing may read it on the server's behalf.  The server refuses the
+      // same (CreateDriveRequest.AssertSharingModel); refused here up front, so a request never ends half-created.
+      if (d.r)
+        problems.push(`${which}: ${t('a private drive (sm) cannot allow anonymous reads (r)')}`);
+      if (d.s)
+        problems.push(`${which}: ${t('a private drive (sm) cannot allow subscriptions (s)')}`);
+      // The console creates every channel drive CDN-readable
+      if (stringGuidsEqual(d.t, BlogConfig.DriveType))
+        problems.push(`${which}: ${t('a channel drive cannot be private (sm)')}`);
+    }
     return problems;
   });
 };
@@ -88,6 +109,7 @@ export const drivesParamToDriveGrantRequest = (
         // Left undefined, ensureDrive derives the slug; see TargetDriveAccessRequest.driveSlug.
         driveSlug: d.ds || undefined,
         driveTypeSlug: d.ts,
+        sharingModel: d.sm,
       },
     })
   );

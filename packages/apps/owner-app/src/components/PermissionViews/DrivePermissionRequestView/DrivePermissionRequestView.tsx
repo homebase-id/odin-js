@@ -5,6 +5,7 @@ import { Arrow, HardDrive } from '@homebase-id/common-app/icons';
 import { LoadingBlock } from '@homebase-id/common-app';
 import { getDrivePermissionFromNumber } from '@homebase-id/js-lib/helpers';
 import { getRequestedDriveChanges } from '@homebase-id/js-lib/core';
+import { sharingModelLabel } from '../../Drives/SharingModelLabel/sharingModelLabel';
 
 const DrivePermissionRequestView = ({
   driveGrant,
@@ -28,6 +29,8 @@ const DrivePermissionRequestView = ({
   const changes =
     showRequestedChanges && drive ? getRequestedDriveChanges(drive, driveGrant.driveMeta) : {};
   const requestedAttributes = driveGrant.driveMeta?.attributes || {};
+  // What a new drive is created as; an existing drive keeps its model
+  const createdAs = isNew ? sharingModelLabel(driveGrant.driveMeta?.sharingModel) : undefined;
 
   const totalExistingPermissions = existingGrant?.permissionedDrive.permission.reduce(
     (a, b) => a + b,
@@ -74,6 +77,7 @@ const DrivePermissionRequestView = ({
               ) : null}
             </p>
 
+            {createdAs ? <p className="pt-2">{t('Created as')} {createdAs}</p> : null}
             {changes.allowSubscriptions ? (
               <p className="pt-2">{t('Allow notifications on this drive')}</p>
             ) : null}

@@ -387,6 +387,10 @@ export interface ZkAppDrive {
   hasAppCopy: boolean;
 }
 
+/** The apps granted a drive, of those listed with their zero-knowledge keys. */
+export const appsGrantedDrive = (apps: ZkAppKeys[], driveId: string) =>
+  apps.filter((app) => app.drives.some((d) => stringGuidsEqual(d.driveId, driveId)));
+
 /** The zero-knowledge drives an app is granted and has no copy of the key for yet: what a backfill locks for it. */
 export const missingAppCopies = (app: Pick<ZkAppKeys, 'drives'>) =>
   app.drives.filter((d) => d.isZeroKnowledge && !d.hasAppCopy && d.zkMasterKeyEncryptedStorageKey);
@@ -483,7 +487,6 @@ export const makeConversionKeepingKey = async (
   apps: ZkAppKeys[]
 ): Promise<ZkConvertDriveKeepingKeyRequest> => {
   const pair = await createExportedEccPair();
-  const granted = apps.filter((app) => app.drives.some((d) => stringGuidsEqual(d.driveId, driveId)));
 
   return {
     driveId,
@@ -491,7 +494,7 @@ export const makeConversionKeepingKey = async (
     writeOnlyPublicKeyJwk: pair.publicKeyJwk,
     zkStorageKeyEncryptedWriteOnlyPrivateKey: await zkLock(pair.privateKeyPkcs8, driveKey),
     apps: await Promise.all(
-      granted.map(async (app) => {
+      appsGrantedDrive(apps, driveId).map(async (app) => {
         const { appKey, newLocked } = await openOrMakeAppKey(app, zkMasterKey);
         return {
           appId: app.appId,

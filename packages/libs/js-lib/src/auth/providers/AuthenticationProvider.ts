@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { DrivePermissionType } from '../../core/DriveData/Drive/DriveTypes';
+import { DrivePermissionType, DriveSharingModel } from '../../core/DriveData/Drive/DriveTypes';
 import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 import { cbcDecrypt, gcmDecrypt } from '../../helpers/AesEncrypt';
 import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
@@ -113,6 +113,8 @@ export interface AppDriveAuthorizationParams {
   ds: string | undefined;
   /** driveTypeSlug. Required -- every drive has a type, and the app always knows which. */
   ts: string;
+  /** sharingModel: what a new drive is created as; absent means collaborative. See {@link TargetDriveAccessRequest.sharingModel}. */
+  sm?: DriveSharingModel;
 }
 
 export interface TargetDriveAccessRequest extends TargetDrive {
@@ -143,6 +145,13 @@ export interface TargetDriveAccessRequest extends TargetDrive {
    * a drive always knows what kind of drive it is asking for.
    */
   driveTypeSlug: string;
+
+  /**
+   * What the drive is created as, when the owner does not have it yet (odin-core
+   * docs/zero-knowledge-drive-api-plan.md, step 4): 'private' or 'selectiveShare' makes it zero knowledge from the
+   * start, with keys the owner console makes. Absent means collaborative. A drive that exists keeps its model.
+   */
+  sharingModel?: DriveSharingModel;
 }
 
 //checks if the authentication token (stored in a cookie) is valid
@@ -178,6 +187,7 @@ export const parseDriveAccessRequest = (
       : undefined,
     ds: TargetDriveAccessRequest.driveSlug,
     ts: TargetDriveAccessRequest.driveTypeSlug,
+    sm: TargetDriveAccessRequest.sharingModel,
   };
 };
 

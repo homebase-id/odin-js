@@ -7,11 +7,33 @@ export const SHARD_RECOVERY_DRIVE: TargetDrive = {
   type: '43138ae90206480b9ff493580ca147ee',
 };
 
-/** odin-core `WellKnownAppDrives.VaultDrive`: the one drive that converts to zero knowledge keeping its key, for now. */
+/** odin-core `WellKnownAppDrives.VaultDrive`. */
 export const VAULT_DRIVE: TargetDrive = {
   alias: 'f47ac10b58cc4372a5670e02b2c3d479',
   type: '70e92f0f94d05f5c7dcd36466094f3a5',
 };
+
+/** odin-core `WellKnownAppDrives.FilesyncDrive` (filesync `app.rs`, chat-kmp `FilesyncProtocol`). */
+export const FILESYNC_DRIVE: TargetDrive = {
+  alias: 'cfceb937b868496b91cb3402f18320f8',
+  type: '5da48122e946487a8b9d589642f3c91d',
+};
+
+/** odin-core `WellKnownAppDrives.EmailAppDrive` (chat-kmp `emailLabeledDrive`): it holds the OpenPGP keyring. */
+export const EMAIL_DRIVE: TargetDrive = {
+  alias: '92bbcad83558417b93769976c086a674',
+  type: '37e3480a4cd74a41a421ed49866bf07e',
+};
+
+/**
+ * The drives that existed before they could be made zero knowledge and are upgraded keeping their key, for now:
+ * odin-core `ZkDriveConversionService.ConvertibleDrives`. A new drive is created zero knowledge instead.
+ */
+export const ZK_UPGRADABLE_DRIVES: { drive: TargetDrive; name: string }[] = [
+  { drive: VAULT_DRIVE, name: 'Vault' },
+  { drive: FILESYNC_DRIVE, name: 'Filesync' },
+  { drive: EMAIL_DRIVE, name: 'Email' },
+];
 
 /**
  * The drives with a fixed alias and type, each with the app that owns it.
@@ -50,10 +72,7 @@ const WELL_KNOWN_DRIVE_OWNERS: { drive: TargetDrive; appId: string }[] = [
 
   // --- Email ---
   {
-    drive: {
-      alias: '92bbcad8-3558-417b-9376-9976c086a674',
-      type: '37e3480a-4cd7-4a41-a421-ed49866bf07e',
-    },
+    drive: EMAIL_DRIVE,
     appId: '4027937f-8a90-4f60-a5c3-18b850398482',
   },
 
