@@ -58,6 +58,7 @@ export const ExtendAppPermissions = () => {
     extendPermissions: { mutateAsync: extendPermission, status: extendPermissionStatus },
     updateAuthorizedCircles: { mutateAsync: updateCircles, status: updateCirclesState },
     applyDriveChanges: { mutateAsync: applyDriveChanges, status: applyDriveChangesStatus },
+    setZkPassword,
   } = useApp({ appId: appId || undefined });
 
   const { data: circles } = useCircles().fetch;
@@ -65,9 +66,9 @@ export const ExtendAppPermissions = () => {
     setOwningApp: { mutateAsync: setOwningApp },
   } = useDrive();
 
-  const [password, setPassword] = useState<string>();
-  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
-  const needsPassword = error instanceof ZkPasswordNeededError;
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key. Once asked
+  // for, the field stays: a wrong password shows its error, and the owner types it again.
+  const [needsPassword, setNeedsPassword] = useState(false);
 
   const doUpdateApp = async () => {
     try {
@@ -93,7 +94,6 @@ export const ExtendAppPermissions = () => {
           ) || []),
           ...(driveGrants || []),
         ],
-        password,
       });
 
       if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
@@ -148,6 +148,7 @@ export const ExtendAppPermissions = () => {
 
       doRedirectBack();
     } catch (error) {
+      if (error instanceof ZkPasswordNeededError) setNeedsPassword(true);
       setError(error);
     }
   };
@@ -195,7 +196,7 @@ export const ExtendAppPermissions = () => {
 
   return (
     <>
-      <ErrorNotification error={needsPassword ? undefined : error} />
+      <ErrorNotification error={error instanceof ZkPasswordNeededError ? undefined : error} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -237,7 +238,7 @@ export const ExtendAppPermissions = () => {
               </p>
             ) : null}
 
-            {needsPassword ? <ZkPasswordField onChange={setPassword} /> : null}
+            {needsPassword ? <ZkPasswordField onChange={setZkPassword} /> : null}
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               {adoptionError ? (
@@ -249,10 +250,15 @@ export const ExtendAppPermissions = () => {
                   <ActionButton
                     onClick={doUpdateApp}
                     type="primary"
-                    state={mergeStates(
-                      mergeStates(extendPermissionStatus, updateCirclesState),
-                      applyDriveChangesStatus
-                    )}
+                    state={
+                      // While the password is asked for, the owner types it and tries again
+                      needsPassword && extendPermissionStatus === 'error'
+                        ? 'idle'
+                        : mergeStates(
+                            mergeStates(extendPermissionStatus, updateCirclesState),
+                            applyDriveChangesStatus
+                          )
+                    }
                     icon={Arrow}
                   >
                     {t('Allow')}

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 // common-app reaches for window when loaded; this file needs only its translations
 vi.mock('@homebase-id/common-app', () => ({ t: (text: string) => text }));
 
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import { drivesParamProblems, drivesParamToDriveGrantRequest } from './util';
 
 const drive = (extra: Record<string, unknown>) =>
@@ -35,5 +36,17 @@ describe('the sharing model an app asks a drive to be created as (sm)', () => {
   it('refuses a private drive that allows anonymous reads', () => {
     expect(drivesParamProblems(drive({ sm: 'private', r: true }), 'd')).toHaveLength(1);
     expect(drivesParamProblems(drive({ sm: 'collaborative', r: true }), 'd')).toHaveLength(0);
+  });
+
+  it('refuses a private drive that allows subscriptions', () => {
+    expect(drivesParamProblems(drive({ sm: 'selectiveShare', s: true }), 'd')).toHaveLength(1);
+    expect(drivesParamProblems(drive({ s: true }), 'd')).toHaveLength(0);
+  });
+
+  it('refuses a private channel drive, which the console makes CDN-readable', () => {
+    expect(
+      drivesParamProblems(drive({ sm: 'private', t: BlogConfig.DriveType }), 'd')
+    ).toHaveLength(1);
+    expect(drivesParamProblems(drive({ t: BlogConfig.DriveType }), 'd')).toHaveLength(0);
   });
 });

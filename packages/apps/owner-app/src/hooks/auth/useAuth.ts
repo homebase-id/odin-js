@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { invalidateVerifyToken, useVerifyToken } from './useVerifyToken';
 import {
@@ -9,9 +9,12 @@ import {
   changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
 import { stringGuidsEqual, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
-import { ApiType, TargetDrive } from '@homebase-id/js-lib/core';
+import { ApiType, isZeroKnowledgeSharingModel } from '@homebase-id/js-lib/core';
 import {
+  DeviceWithoutAppKey,
+  DriveUpgrade,
   ensureZeroKnowledgeKeys,
+  getDevicesWithoutAppKey,
   isDriveZeroKnowledge,
   makeDriveZeroKnowledge,
 } from '../../provider/auth/ZeroKnowledgeProvider';
@@ -65,12 +68,6 @@ export const MODEL_PARAM = 'model';
 export const redealReasonOf = (params: URLSearchParams): RedealReason | undefined =>
   REDEAL_REASONS.find((reason) => reason === params.get(REDEAL_PARAM));
 
-export interface DriveUpgrade {
-  drive: TargetDrive;
-  name: string;
-  sharingModel: 'private' | 'selectiveShare';
-}
-
 /**
  * The drive an upgrade login asks to make zero knowledge, and as what: one of the drives that upgrade this way
  * (ZK_UPGRADABLE_DRIVES). Undefined for any other login, and for a request naming another drive or model, which the
@@ -78,12 +75,14 @@ export interface DriveUpgrade {
  */
 export const driveUpgradeOf = (params: URLSearchParams): DriveUpgrade | undefined => {
   const reason = redealReasonOf(params);
-  if (reason === REDEAL_VAULT_PRIVATE) return { drive: VAULT_DRIVE, name: 'Vault', sharingModel: 'private' };
-  if (reason !== REDEAL_DRIVE_PRIVATE) return undefined;
-
-  const upgradable = ZK_UPGRADABLE_DRIVES.find((d) => stringGuidsEqual(d.drive.alias, params.get(DRIVE_PARAM) ?? ''));
-  const model = params.get(MODEL_PARAM);
-  if (!upgradable || (model !== 'private' && model !== 'selectiveShare')) return undefined;
+  const [alias, model] =
+    reason === REDEAL_VAULT_PRIVATE
+      ? [VAULT_DRIVE.alias, 'private']
+      : reason === REDEAL_DRIVE_PRIVATE
+        ? [params.get(DRIVE_PARAM), params.get(MODEL_PARAM)]
+        : [];
+  const upgradable = ZK_UPGRADABLE_DRIVES.find((d) => stringGuidsEqual(d.drive.alias, alias ?? ''));
+  if (!upgradable || !isZeroKnowledgeSharingModel(model)) return undefined;
   return { ...upgradable, sharingModel: model };
 };
 
@@ -206,6 +205,10 @@ export const useAuth = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const driveUpgrade = driveUpgradeOf(searchParams);
+  // An upgrade waits after the login while devices would lose the drive: the owner reads which, then continues
+  const [devicesWithoutAppKey, setDevicesWithoutAppKey] = useState<DeviceWithoutAppKey[]>();
+  // Kept only while the owner reads that warning: the upgrade still needs the password
+  const pendingUpgrade = useRef<{ ownerClient: OwnerClient; password: string }>();
 
   const authenticate = async (password: string) => {
     // Cleanup the public session: (There might have been a public login already in place)
@@ -250,12 +253,41 @@ export const useAuth = () => {
     // limit. A failure throws, so the page shows it; the owner is logged in by now and can enter the password again.
     if (driveUpgrade) {
       await keys.catch(() => undefined);
-      if (!(await isDriveZeroKnowledge(ownerClient, driveUpgrade.drive)))
-        await makeDriveZeroKnowledge(ownerClient, password, driveUpgrade, driveUpgrade.sharingModel);
+      if (!(await isDriveZeroKnowledge(ownerClient, driveUpgrade.drive))) {
+        // A warning, not a block: devices that would see the drive empty until they sign in again (plan 4.3). A list
+        // that can't be read warns about nothing.
+        const devices = await getDevicesWithoutAppKey(ownerClient, driveUpgrade.drive).catch(
+          (error) => {
+            console.warn('The devices without their app key could not be listed', error);
+            return [];
+          }
+        );
+        if (devices.length) {
+          pendingUpgrade.current = { ownerClient, password };
+          setDevicesWithoutAppKey(devices);
+          return true;
+        }
+        await makeDriveZeroKnowledge(ownerClient, password, driveUpgrade);
+      }
     }
 
     checkRedirectToReturn();
     return true;
+  };
+
+  /** The upgrade the owner continues after reading which devices would see the drive empty. */
+  const continueUpgrade = async () => {
+    const pending = pendingUpgrade.current;
+    if (!driveUpgrade || !pending) return;
+    await makeDriveZeroKnowledge(pending.ownerClient, pending.password, driveUpgrade);
+    pendingUpgrade.current = undefined;
+    checkRedirectToReturn();
+  };
+
+  /** Back to the app without the upgrade. */
+  const cancelUpgrade = () => {
+    pendingUpgrade.current = undefined;
+    checkRedirectToReturn();
   };
 
   const finalizeRegistration = async (
@@ -276,6 +308,10 @@ export const useAuth = () => {
 
   return {
     authenticate,
+    driveUpgrade,
+    devicesWithoutAppKey,
+    continueUpgrade,
+    cancelUpgrade,
     checkRedirectToReturn,
     setFirstPassword: setFirstOwnerPassword,
     resetPassword: resetOwnerPassword,

@@ -1,6 +1,7 @@
 import {
   DotYouClient,
   TargetDrive,
+  ZeroKnowledgeSharingModel,
   getDrivesByType,
   getKnownOdinErrorMessages,
 } from '@homebase-id/js-lib/core';
@@ -438,25 +439,31 @@ export const openZkMasterKeyWithPassword = async (dotYouClient: DotYouClient, pa
   return masterKey;
 };
 
+/** An existing drive an app asks to upgrade to zero knowledge, and the model it asks for. */
+export interface DriveUpgrade {
+  drive: TargetDrive;
+  name: string;
+  sharingModel: ZeroKnowledgeSharingModel;
+}
+
 /**
  * Upgrades a drive that already exists to zero knowledge, keeping its key (odin-core
  * docs/zero-knowledge-drive-api-plan.md, 3.3 and 4.1): the server hands the key over one last time, this browser locks
  * it with the zero-knowledge master key and with the key of each app granted the drive, and the server drops every copy
- * it could open. `sharingModel` is what the app that asked for the upgrade wants. A device of an app gets its key at
- * its next sign-in. The caller asks for the password first.
+ * it could open. The model is what the app that asked for the upgrade wants. A device of an app gets its key at its
+ * next sign-in. The caller asks for the password first.
  */
 export const makeDriveZeroKnowledge = async (
   dotYouClient: DotYouClient,
   password: string,
-  drive: { drive: TargetDrive; name: string },
-  sharingModel: 'private' | 'selectiveShare'
+  { drive, name, sharingModel }: DriveUpgrade
 ) => {
-  const driveId = formatGuidId(drive.drive.alias); // the server reads a Guid from JSON only with dashes
+  const driveId = formatGuidId(drive.alias); // the server reads a Guid from JSON only with dashes
   const client = dotYouClient.createAxiosClient();
   const failed = (error: unknown) => {
     console.warn(error);
     throw new Error(
-      getKnownOdinErrorMessages(error) ?? t('{0} could not be made private', drive.name)
+      getKnownOdinErrorMessages(error) ?? t('{0} could not be made private', name)
     );
   };
 
@@ -495,7 +502,15 @@ export const backfillAppKeysOf = async (dotYouClient: DotYouClient, appId: strin
  * revoked, of an app granted the drive that wasn't handed its app's current key (odin-core
  * docs/zero-knowledge-drive-api-plan.md, 4.3). A host that doesn't say which devices hold the key names none.
  */
-export const getDevicesWithoutAppKey = async (dotYouClient: DotYouClient, drive: TargetDrive) => {
+export interface DeviceWithoutAppKey {
+  appSlug: string;
+  friendlyName: string;
+}
+
+export const getDevicesWithoutAppKey = async (
+  dotYouClient: DotYouClient,
+  drive: TargetDrive
+): Promise<DeviceWithoutAppKey[]> => {
   const apps = (await getZkAppKeys(dotYouClient)).filter((app) =>
     app.drives.some((d) => stringGuidsEqual(d.driveId, drive.alias))
   );

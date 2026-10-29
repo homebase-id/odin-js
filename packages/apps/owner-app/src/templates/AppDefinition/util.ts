@@ -3,7 +3,8 @@ import {
   PermissionSet,
   REQUESTABLE_SHARING_MODELS,
 } from '@homebase-id/js-lib/core';
-import { isValidSlug, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { isValidSlug, stringGuidsEqual, tryJsonParse } from '@homebase-id/js-lib/helpers';
+import { BlogConfig } from '@homebase-id/js-lib/public';
 import {
   AppCircleDeclaration,
   DriveGrantRequest,
@@ -60,8 +61,16 @@ export const drivesParamProblems = (
       problems.push(
         `${which}: ${t('sharing model (sm) is not one of')} ${REQUESTABLE_SHARING_MODELS.join(', ')} ("${d.sm}")`
       );
-    else if (isZeroKnowledgeSharingModel(d?.sm) && d?.r)
-      problems.push(`${which}: ${t('a private drive (sm) cannot allow anonymous reads (r)')}`);
+    else if (isZeroKnowledgeSharingModel(d?.sm)) {
+      // The server can't open such a drive, so nothing may read it on the server's behalf
+      if (d.r)
+        problems.push(`${which}: ${t('a private drive (sm) cannot allow anonymous reads (r)')}`);
+      if (d.s)
+        problems.push(`${which}: ${t('a private drive (sm) cannot allow subscriptions (s)')}`);
+      // The console creates every channel drive CDN-readable
+      if (stringGuidsEqual(d.t, BlogConfig.DriveType))
+        problems.push(`${which}: ${t('a channel drive cannot be private (sm)')}`);
+    }
     return problems;
   });
 };

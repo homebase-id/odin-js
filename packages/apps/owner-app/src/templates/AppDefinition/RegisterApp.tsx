@@ -122,7 +122,7 @@ const RegisterApp = () => {
     );
   }
 
-  const { fetch: installed, registerNewApp } = useApp({ appId });
+  const { fetch: installed, registerNewApp, setZkPassword } = useApp({ appId });
   // Started here, with the app's lookup, rather than once the install screen mounts
   useDrives();
   const {
@@ -131,12 +131,19 @@ const RegisterApp = () => {
     error: registerAppError,
   } = registerNewApp;
 
-  const doRegisterApp = async (request: AppRegistrationRequest & { password?: string }) => {
-    await registerApp(request);
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key. Once asked
+  // for, the field stays: a wrong password shows its error, and the owner types it again.
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const doRegisterApp = async (request: AppRegistrationRequest) => {
+    try {
+      await registerApp(request);
+    } catch (error) {
+      // Shown from the mutation's error
+      if (error instanceof ZkPasswordNeededError) setNeedsPassword(true);
+      return;
+    }
     window.location.href = returnUrl;
   };
-  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
-  const needsPassword = registerAppError instanceof ZkPasswordNeededError;
 
   const doCancel = () =>
     (window.location.href = cancelUrl
@@ -158,7 +165,9 @@ const RegisterApp = () => {
 
   return (
     <>
-      <ErrorNotification error={needsPassword ? undefined : registerAppError} />
+      <ErrorNotification
+        error={registerAppError instanceof ZkPasswordNeededError ? undefined : registerAppError}
+      />
 
       <section className="my-20">
         <div className="container mx-auto">
@@ -175,8 +184,11 @@ const RegisterApp = () => {
               circleDriveGrants={circleDriveGrants}
               appCircles={appCircles}
               registerApp={doRegisterApp}
-              registerAppState={needsPassword ? 'idle' : registerAppState}
+              registerAppState={
+                needsPassword && registerAppState === 'error' ? 'idle' : registerAppState
+              }
               needsPassword={needsPassword}
+              onPassword={setZkPassword}
               doCancel={doCancel}
             />
           </div>
@@ -202,6 +214,7 @@ const AppRegistration = ({
   registerApp,
   registerAppState,
   needsPassword,
+  onPassword,
   doCancel,
 }: {
   name: string;
@@ -214,12 +227,12 @@ const AppRegistration = ({
   circlePermissionSet?: PermissionSet;
   circleDriveGrants?: DriveGrantRequest[];
   appCircles: AppCircleDeclaration[];
-  registerApp: (data: AppRegistrationRequest & { password?: string }) => Promise<void>;
+  registerApp: (data: AppRegistrationRequest) => Promise<void>;
   registerAppState: ActionButtonState;
   needsPassword: boolean;
+  onPassword: (password: string) => void;
   doCancel: () => void;
 }) => {
-  const [password, setPassword] = useState<string>();
   const [circleIds, setCircleIds] = useState<string[]>(defaultCircleIds || []);
   const { data: existingDrives } = useDrives().fetch;
   const needsCircleSelection = circleDriveGrants?.length;
@@ -240,7 +253,6 @@ const AppRegistration = ({
         permissionSet: circlePermissionSet,
       },
       circles: appCircles,
-      password,
     });
   };
 
@@ -420,7 +432,7 @@ const AppRegistration = ({
         </div>
       ) : (
         <>
-          {needsPassword ? <ZkPasswordField onChange={setPassword} /> : null}
+          {needsPassword ? <ZkPasswordField onChange={onPassword} /> : null}
           <div className="flex flex-col gap-2 sm:flex-row-reverse">
             <ActionButton
               onClick={doRegisterApp}

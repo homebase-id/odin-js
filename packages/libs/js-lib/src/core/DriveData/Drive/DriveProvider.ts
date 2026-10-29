@@ -1,4 +1,4 @@
-import { DriveDefinition } from './DriveTypes';
+import { DriveDefinition, ZeroKnowledgeSharingModel } from './DriveTypes';
 import { makeZkDriveKeys } from '../../../auth/providers/ZeroKnowledgeKeys';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
@@ -111,7 +111,7 @@ export const ensureDrive = async (
   driveTypeSlug: string,
   attributes?: { [key: string]: string },
   zeroKnowledge?: {
-    sharingModel: 'private' | 'selectiveShare';
+    sharingModel: ZeroKnowledgeSharingModel;
     getZkMasterKey: () => Promise<Uint8Array>;
   }
 ): Promise<boolean> => {

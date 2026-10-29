@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { invalidateDriveRemoval } from '../drives/useDrive';
 import {
@@ -38,8 +39,6 @@ import {
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
-  /** The owner's password, when creating a private drive needs the zero-knowledge master key (ZkPasswordNeededError). */
-  password?: string;
 }
 
 /**
@@ -190,21 +189,21 @@ export const applyRequestedDriveChanges = async (
 export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
+  // The owner's password, when creating a private drive needs it (ZkPasswordNeededError). Read by the mutations rather
+  // than passed to them, so react-query's mutation cache never holds it.
+  const zkPassword = useRef<string>();
 
   const fetch = async ({ appId }: { appId: string }) => {
     return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;
   };
 
-  const registerNewApp = async ({
-    password,
-    ...appRegRequest
-  }: AppRegistrationRequest & { password?: string }) => {
+  const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {
     const zkMasterKey = appRegRequest.drives
       ? await ensureAppOwnedDrives(
           dotYouClient,
           appRegRequest.appId,
           appRegRequest.drives,
-          password
+          zkPassword.current
         )
       : undefined;
 
@@ -253,10 +252,9 @@ export const useApp = ({ appId }: { appId?: string }) => {
     appId,
     permissionSet,
     drives,
-    password,
   }: PermissionExtensionRequest) => {
     const zkMasterKey = drives
-      ? await ensureAppOwnedDrives(dotYouClient, appId, drives, password)
+      ? await ensureAppOwnedDrives(dotYouClient, appId, drives, zkPassword.current)
       : undefined;
 
     const updated = await UpdatePermissions(dotYouClient, {
@@ -280,6 +278,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
   };
 
   return {
+    setZkPassword: (password: string | undefined) => (zkPassword.current = password),
     fetch: useQuery({
       queryKey: ['app', appId],
       queryFn: () => fetch({ appId: appId as string }),

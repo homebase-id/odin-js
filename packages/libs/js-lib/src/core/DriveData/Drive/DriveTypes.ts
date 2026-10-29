@@ -28,9 +28,11 @@ export type DriveSharingModel = 'collaborative' | 'private' | 'selectiveShare' |
 export const REQUESTABLE_SHARING_MODELS = ['collaborative', 'private', 'selectiveShare'] as const;
 
 /** Private and Selective Share drives hold their key the same way: the server has no copy it can open. */
+export type ZeroKnowledgeSharingModel = 'private' | 'selectiveShare';
+
 export const isZeroKnowledgeSharingModel = (
-  model: DriveSharingModel | null | undefined
-): model is 'private' | 'selectiveShare' => model === 'private' || model === 'selectiveShare';
+  model: DriveSharingModel | string | null | undefined
+): model is ZeroKnowledgeSharingModel => model === 'private' || model === 'selectiveShare';
 
 export interface DriveDefinition {
     driveId: string;
