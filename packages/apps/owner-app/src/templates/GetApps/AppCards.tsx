@@ -159,9 +159,7 @@ export const FileSyncAppCard = () => {
       icon={HomebaseFileSync}
       name={t('File sync')}
       what={t("Back up your computer's files to your Homebase.")}
-      why={t(
-        'Like Dropbox, but the files live on your own Homebase. Save a file in the folder and it is there, on every computer you sync.'
-      )}
+      why={t('If your computer is lost or breaks, your files are still safe on your own Homebase.')}
     >
       {isDesktop ? (
         <div className="flex flex-col gap-4">
