@@ -3,7 +3,9 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {WelcomeData} from '../../templates/Setup/Setup';
 import {DriveDefinitionParam, initialize} from '../../provider/system/SystemProvider';
 import {
+  completeZkDrivesAndAppKeys,
   dealAutomatedRecovery,
+  getZkMasterKey,
   rememberAutomatedDealPending,
   requireZkMasterKey,
 } from '../../provider/auth/ZeroKnowledgeProvider';
@@ -43,6 +45,11 @@ export const useInit = () => {
     // wizard used to send Friends, Family, Work and Acquaintances, and the server created whichever
     // did not exist yet -- so new identities kept getting the three the server no longer seeds.
     await initialize(dotYouClient, firstRunToken, initDrives);
+
+    // The built-in private drives (Vault, Email) and their apps' copies: the first login ran before the identity was
+    // set up, so it made none. Without the key in this session, the next password login does it.
+    const zkMasterKey = await getZkMasterKey(dotYouClient);
+    if (zkMasterKey) await completeZkDrivesAndAppKeys(dotYouClient, zkMasterKey);
 
     if (data?.enableAutomatedPasswordRecovery === true) {
       try {

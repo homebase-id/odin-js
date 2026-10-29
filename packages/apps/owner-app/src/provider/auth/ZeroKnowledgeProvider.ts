@@ -127,7 +127,7 @@ const convertShardRecoveryDrive = async (
 
 /**
  * A built-in drive the server leaves for this browser to create, Private or Selective Share, with keys only the
- * browser holds: Vault on an identity made since odin-core plan 4.7. As the server's CreateDriveRequest.
+ * browser holds: Vault and Email on an identity made since odin-core plan 4.7. As the server's CreateDriveRequest.
  */
 interface MissingZkDrive {
   name: string;
@@ -138,16 +138,35 @@ interface MissingZkDrive {
 
 /**
  * Creates each missing built-in zero-knowledge drive with its keys; the server then sets up the app and circles
- * that waited for it. A drive that fails is left for the next login.
+ * that waited for it. A drive that fails is left for the next login, and doesn't hold up the others.
  */
-const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+export const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
   const client = dotYouClient.createAxiosClient();
   const missing = (await client.get<MissingZkDrive[]>('/security/zk/missing-drives')).data;
   for (const drive of missing) {
-    const { request: zkKeys } = await makeZkDriveKeys(drive.targetDrive.alias, masterKey);
-    await client.post('/drive/mgmt/create', { ...drive, zkKeys });
+    try {
+      const { request: zkKeys } = await makeZkDriveKeys(drive.targetDrive.alias, masterKey);
+      await client.post('/drive/mgmt/create', { ...drive, zkKeys });
+    } catch (error) {
+      console.warn(`The private drive ${drive.name} could not be created; the next login tries again`, error);
+    }
   }
 };
+
+/**
+ * The built-in private drives a new identity is missing, then every app's copy of each zero-knowledge drive it is
+ * granted: the drives first, so their apps get their copies in the same pass. Its failure stops nothing: the next
+ * login, or an app's next sign-in, does what is left.
+ */
+export const completeZkDrivesAndAppKeys = (dotYouClient: DotYouClient, masterKey: Uint8Array) =>
+  createMissingZkDrives(dotYouClient, masterKey)
+    .catch((error) =>
+      console.warn('The built-in private drives could not be listed; the next login tries again', error)
+    )
+    .then(() => backfillAppKeys(dotYouClient, masterKey))
+    .catch((error) =>
+      console.warn("The apps' zero-knowledge keys could not be completed; the next login tries again", error)
+    );
 
 // Set when first run couldn't deal the automated deal (no zero-knowledge master key in the session
 // yet, say): the next password login deals it, if there is still no deal by then.
@@ -366,16 +385,10 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
   }
 
   // Before the backfill, so the app of a drive created here gets its copy with the rest
-  await createMissingZkDrives(dotYouClient, masterKey).catch((error) =>
-    console.warn("The built-in private drives could not be created; the next login tries again", error)
-  );
-
-  // Every app's copy of each zero-knowledge drive it is granted, so a device that already holds its app's key
-  // picks up a drive granted without this browser. Alongside the deal, which doesn't depend on it; its failure
-  // stops nothing: the next login, or the app's next sign-in, backfills it.
-  const backfilled = backfillAppKeys(dotYouClient, masterKey).catch((error) =>
-    console.warn("The apps' zero-knowledge keys could not be completed; the next login tries again", error)
-  );
+  // The built-in private drives a new identity is missing, then every app's copy of each zero-knowledge drive it is
+  // granted, so a device that already holds its app's key picks up a drive granted without this browser. Alongside
+  // the deal, which doesn't depend on it.
+  const backfilled = completeZkDrivesAndAppKeys(dotYouClient, masterKey);
 
   // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move
   // it. Its own failure stops nothing: the takeover moves an old deal itself, and the next login

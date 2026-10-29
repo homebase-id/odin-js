@@ -298,11 +298,14 @@ export const useApp = ({ appId }: { appId?: string }) => {
     await applyRequestedDriveChanges(dotYouClient, drives);
 
   const updatePermissions = async ({ appId, permissionSet, drives }: PermissionUpdateRequest) => {
-    return await UpdatePermissions(dotYouClient, {
+    const updated = await UpdatePermissions(dotYouClient, {
       appId,
       permissionSet,
       drives,
     });
+    // A private drive granted from the console's own editors: the app's copy of its key
+    await lockGrantedDrivesForApp(dotYouClient, appId, undefined);
+    return updated;
   };
 
   return {

@@ -72,10 +72,7 @@ const WELL_KNOWN_DRIVE_OWNERS: { drive: TargetDrive; appId: string }[] = [
 
   // --- Email ---
   {
-    drive: {
-      alias: '92bbcad8-3558-417b-9376-9976c086a674',
-      type: '37e3480a-4cd7-4a41-a421-ed49866bf07e',
-    },
+    drive: EMAIL_DRIVE,
     appId: '4027937f-8a90-4f60-a5c3-18b850398482',
   },
 
