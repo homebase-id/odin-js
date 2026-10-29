@@ -1,6 +1,6 @@
 import {
   FallbackImg,
-  HomebaseChat,
+  HomebaseApp,
   HomebaseFeed,
   HomebasePhoto,
   CHAT_APP_ID,
@@ -32,12 +32,12 @@ export const CompanyImage = ({
 
   const bgClass = 'bg-white dark:bg-black';
 
-  const appIcon = useMemo(() => AppSpecificIcon(appId), [appId]);
+  const AppIcon = useMemo(() => AppSpecificIcon(appId), [appId]);
 
   return (
     <div className={`relative z-0 aspect-square ${className || ''}`}>
-      {appIcon ? (
-        appIcon({ className: 'absolute inset-0 flex aspect-square w-full h-full' })
+      {AppIcon ? (
+        <AppIcon className={'absolute inset-0 flex aspect-square w-full h-full'} />
       ) : (
         <>
           <FallbackImg odinId={domain} className={'absolute inset-0 flex aspect-square w-full'} />
@@ -62,7 +62,7 @@ export const CompanyImage = ({
 export const AppSpecificIcon = (appId: string | undefined) => {
   if (!appId) return;
   if (stringGuidsEqual(appId, OWNER_APP_ID)) return HomebaseNotifications;
-  if (stringGuidsEqual(appId, CHAT_APP_ID)) return HomebaseChat;
+  if (stringGuidsEqual(appId, CHAT_APP_ID)) return HomebaseApp;
   if (stringGuidsEqual(appId, FEED_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, FEED_CHAT_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;

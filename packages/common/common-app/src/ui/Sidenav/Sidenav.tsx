@@ -3,10 +3,9 @@ import {NavLink} from 'react-router-dom';
 import {BuiltInProfiles} from '@homebase-id/js-lib/profile';
 import {isTouchDevice} from '@homebase-id/js-lib/helpers';
 import {
-  FEED_APP_ID,
-  FEED_ROOT_PATH,
+  CHAT_APP_ID,
+  CHAT_ROOT_PATH,
   HOME_ROOT_PATH,
-  COMMUNITY_APP_ID,
   OWNER_ROOT,
 } from '../../constants';
 import {getVersion, t, ellipsisAtMaxChar} from '../../helpers';
@@ -21,14 +20,13 @@ import {OwnerImage} from '../../socialFeed';
 import {MiniDarkModeToggle} from '../DarkModeToggle/DarkModeToggle';
 import {ArrowDown} from '../Icons';
 import {Bars} from '../Icons';
-import {Bell} from '../Icons';
 import {Cloud} from '../Icons';
 import {Cog} from '../Icons';
 import {Ellipsis} from '../Icons';
-import {Feed} from '../Icons';
 import {Globe} from '../Icons';
 import {Grid} from '../Icons';
 import {Heart} from '../Icons';
+import {HomebaseApp} from '../BrandIcons/HomebaseApp';
 import {House} from '../Icons';
 import {Person} from '../Icons';
 import {Persons} from '../Icons';
@@ -37,7 +35,7 @@ import {Times} from '../Icons';
 import {IconProps} from '../Icons';
 import {Wallet} from '../Icons';
 import {logoutOwnerAndAllApps} from '../../provider';
-import {Shield, RadioTower} from '../Icons';
+import {Shield} from '../Icons';
 import {OwnerClient} from "../../core";
 import {ApiType} from "@homebase-id/js-lib/core";
 
@@ -136,7 +134,6 @@ export const Sidenav = ({
                 to={`${OWNER_ROOT}/`}
                 end
               />
-              <NotificationBell/>
             </div>
 
             <div className="pb-3">
@@ -147,9 +144,9 @@ export const Sidenav = ({
               <ProfilesNavItem isOpen={isPinned || isOpen || isHoverOpen || isPeeking}/>
             </div>
 
+            {/* Feed and Community live on the dashboard only. */}
             <div className="py-3">
-              <FeedNavItem/>
-              <CommunityNavItem/>
+              <ChatNavItem label={'Chat'}/>
             </div>
 
             <div className={`py-3`}>
@@ -160,27 +157,20 @@ export const Sidenav = ({
                   to={`${OWNER_ROOT}/follow`}
                 />
               )}
-              {/* Apps hold the top-level slot circles used to. Apps own drives and circles now,
-                  so the app is what you navigate from; circles moved under Drives in the overflow,
-                  where you go when you already know which circle you want. */}
-              {isTightHeight ? null : (
-                <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
-              )}
             </div>
 
             <MoreItems
               isOpen={isPinned || isOpen || isHoverOpen || isPeeking}
               logout={logoutOwnerAndAllApps}
             >
+              {/* Apps is a developer view, so it sits in the overflow rather than the bar. */}
+              <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
               {isTightHeight ? (
-                <>
-                  <NavItem
-                    icon={Persons}
-                    label={'Following & Followers'}
-                    to={`${OWNER_ROOT}/follow`}
-                  />
-                  <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
-                </>
+                <NavItem
+                  icon={Persons}
+                  label={'Following & Followers'}
+                  to={`${OWNER_ROOT}/follow`}
+                />
               ) : null}
             </MoreItems>
 
@@ -291,7 +281,7 @@ const MoreItems = ({
 };
 
 const NavItem = ({
-                   icon,
+                   icon: Icon,
                    to,
                    label,
 
@@ -311,7 +301,7 @@ const NavItem = ({
     (to.split('/')[1] === 'apps' && pathname.split('/')[2] !== to.split('/')[2]);
 
   if (isExternal) {
-    return <ExternalNavItem icon={icon} href={to} label={label} unread={unread}/>;
+    return <ExternalNavItem icon={Icon} href={to} label={label} unread={unread}/>;
   }
 
   return (
@@ -322,7 +312,7 @@ const NavItem = ({
       to={to}
       end={end}
     >
-      {icon && icon({className: iconClassName})}
+      {Icon ? <Icon className={iconClassName}/> : null}
       {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </NavLink>
@@ -330,7 +320,7 @@ const NavItem = ({
 };
 
 const ExternalNavItem = ({
-                           icon,
+                           icon: Icon,
                            href,
                            label,
 
@@ -344,7 +334,7 @@ const ExternalNavItem = ({
 }) => {
   return (
     <a className={`${navItemClassName} relative`} href={href}>
-      {icon && icon({className: iconClassName})}
+      {Icon ? <Icon className={iconClassName}/> : null}
       {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </a>
@@ -484,27 +474,11 @@ const SecurityMenuItem = () => {
 };
 
 
-const NotificationBell = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: 'all'});
+// Chat (chat-kmp, served at /apps/chat) wears the Homebase app icon.
+const ChatNavItem = ({label}: { label?: string }) => {
+  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: CHAT_APP_ID});
   return (
-    <NavItem
-      label={t('Notifications')}
-      to={`${OWNER_ROOT}/notifications`}
-      icon={Bell}
-      unread={!!unreadCount}
-    />
-  );
-};
-
-const FeedNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: FEED_APP_ID});
-  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!unreadCount}/>;
-};
-
-const CommunityNavItem = () => {
-  const {data: unreadCount} = useUnreadPushNotificationsCount({appId: COMMUNITY_APP_ID});
-  return (
-    <NavItem icon={RadioTower} label={'Community'} to="/apps/community" unread={!!unreadCount}/>
+    <NavItem icon={HomebaseApp} label={label} to={CHAT_ROOT_PATH} unread={!!unreadCount}/>
   );
 };
 
@@ -515,7 +489,7 @@ const MobileDrawer = ({setIsOpen}: { setIsOpen: (isOpen: boolean) => void }) => 
     >
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner/'} end={true}/>
-        <NavItem icon={Feed} to={FEED_ROOT_PATH} end={true}/>
+        <ChatNavItem/>
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName}/>

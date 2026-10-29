@@ -4,6 +4,8 @@ import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyIm
 import { getOperatingSystem } from '@homebase-id/js-lib/auth';
 import { isTouchDevice } from '@homebase-id/js-lib/helpers';
 import { FeedTeaser } from './FeedTeaser';
+import { GetAppsPrompt } from './GetAppsPrompt';
+import { APP_STORE_URL, GOOGLE_PLAY_URL } from '../GetApps/appDownloads';
 import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
 import {
   t,
@@ -11,10 +13,8 @@ import {
   HybridLink,
   ActionGroup,
   useUnreadPushNotificationsCount,
-  OWNER_APP_ID,
   CHAT_APP_ID,
   FEED_APP_ID,
-  PHOTO_APP_ID,
   COMMUNITY_APP_ID,
   SOCIAL_SYNC_APP_ID,
 } from '@homebase-id/common-app';
@@ -39,14 +39,14 @@ const Dashboard = () => {
         .
       </p>
 
-      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
-        <SystemApp />
-        <FeedApp />
+      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4">
         <ChatApp />
+        <FeedApp />
         <CommunityApp />
-        <PhotoApp />
         <SocialSyncApp />
       </div>
+
+      <GetAppsPrompt />
 
       <div className="mt-10 flex w-full max-w-2xl flex-row flex-wrap gap-4">
         <FeedTeaser className="w-full" />
@@ -101,22 +101,6 @@ const AppWrapper = ({
   </div>
 );
 
-const SystemApp = () => {
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
-
-  // const os = getOperatingSystem();
-  // const isAndroid = os.name === 'Android';
-
-  return (
-    <AppWrapper
-      name={'Notifications'}
-      appId={OWNER_APP_ID}
-      href={'/owner/notifications'}
-      unreadCount={unreadCount || 0}
-    />
-  );
-};
-
 // The chat web app is the Kotlin/WASM chat-kmp bundle odin-core serves at /apps/chat.
 const ChatApp = () => {
   // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
@@ -142,7 +126,7 @@ const ChatApp = () => {
               {
                 label: t('Install on Android'),
                 icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
+                href: GOOGLE_PLAY_URL,
               },
             ]
           : isIos
@@ -150,7 +134,7 @@ const ChatApp = () => {
                 {
                   label: t('Install on iOS'),
                   icon: Download,
-                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                  href: APP_STORE_URL,
                 },
               ]
             : []),
@@ -202,7 +186,7 @@ const FeedApp = () => {
               {
                 label: t('Install on Android'),
                 icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
+                href: GOOGLE_PLAY_URL,
               },
             ]
           : isIos
@@ -210,43 +194,10 @@ const FeedApp = () => {
                 {
                   label: t('Install on iOS'),
                   icon: Download,
-                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                  href: APP_STORE_URL,
                 },
               ]
             : []),
-      ]}
-    />
-  );
-};
-
-const PhotoApp = () => {
-  // const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
-  const { data: unreadCount } = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
-
-  const os = getOperatingSystem();
-  const isAndroid = os.name === 'Android';
-
-  return (
-    <AppWrapper
-      appId={PHOTO_APP_ID}
-      name={'Photos'}
-      href={`https://photos.homebase.id`}
-      unreadCount={unreadCount || 0}
-      options={[
-        {
-          label: t('Settings'),
-          icon: Cog,
-          href: `/owner/apps/${PHOTO_APP_ID}`,
-        },
-        ...(isAndroid
-          ? [
-              {
-                label: t('Install on Android'),
-                icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.photos`,
-              },
-            ]
-          : []),
       ]}
     />
   );
