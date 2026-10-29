@@ -174,7 +174,7 @@ const ensureAppOwnedDrives = async (
 const lockGrantedDrivesForApp = async (
   dotYouClient: DotYouClient,
   appId: string,
-  openedZkMasterKey: Uint8Array | undefined
+  openedZkMasterKey?: Uint8Array
 ) => {
   const zkMasterKey = openedZkMasterKey ?? (await getZkMasterKey(dotYouClient));
   if (!zkMasterKey) return;
@@ -297,14 +297,23 @@ export const useApp = ({ appId }: { appId?: string }) => {
   const applyDriveChanges = async (drives: DriveGrantRequest[]) =>
     await applyRequestedDriveChanges(dotYouClient, drives);
 
-  const updatePermissions = async ({ appId, permissionSet, drives }: PermissionUpdateRequest) => {
+  /**
+   * `lockGrantedDrives: false` leaves the app's copies of its private drives' keys to the caller: a page that updates
+   * several apps locks them once afterwards (backfillAppKeys), rather than reading every app's keys per app.
+   */
+  const updatePermissions = async ({
+    appId,
+    permissionSet,
+    drives,
+    lockGrantedDrives = true,
+  }: PermissionUpdateRequest & { lockGrantedDrives?: boolean }) => {
     const updated = await UpdatePermissions(dotYouClient, {
       appId,
       permissionSet,
       drives,
     });
     // A private drive granted from the console's own editors: the app's copy of its key
-    await lockGrantedDrivesForApp(dotYouClient, appId, undefined);
+    if (lockGrantedDrives) await lockGrantedDrivesForApp(dotYouClient, appId);
     return updated;
   };
 

@@ -8,12 +8,14 @@ import {
   t,
   ErrorNotification,
   DialogWrapper,
+  useDotYouClientContext,
 } from '@homebase-id/common-app';
 
 import { Arrow } from '@homebase-id/common-app/icons';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
 import { useApp } from '../../../hooks/apps/useApp';
 import { useApps } from '../../../hooks/apps/useApps';
+import { backfillAppKeys, getZkMasterKey } from '../../../provider/auth/ZeroKnowledgeProvider';
 import { PermissionUpdateRequest } from '../../../provider/app/AppManagementProviderTypes';
 import AppMembershipView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 
@@ -42,6 +44,7 @@ const DriveAppAccessDialog = ({
 
   const [saveState, setSaveState] = useState<ActionButtonState>('idle');
 
+  const dotYouClient = useDotYouClientContext();
   const { data: apps } = useApps().fetchRegistered;
   const { mutateAsync: updateAppPermission, error: updateAppError } = useApp({}).updatePermissions;
 
@@ -62,8 +65,21 @@ const DriveAppAccessDialog = ({
 
             try {
               await Promise.all(
-                newAppPermission.map(async (newAppPerm) => await updateAppPermission(newAppPerm))
+                newAppPermission.map(
+                  async (newAppPerm) =>
+                    await updateAppPermission({ ...newAppPerm, lockGrantedDrives: false })
+                )
               );
+              // Each app's copy of a private drive granted here, locked once for all of them; without the key in
+              // this session, an app's next sign-in or the next login does it
+              const zkMasterKey = await getZkMasterKey(dotYouClient);
+              if (zkMasterKey)
+                await backfillAppKeys(dotYouClient, zkMasterKey).catch((error) =>
+                  console.warn(
+                    "The apps' copies of their private drives' keys could not be saved",
+                    error
+                  )
+                );
             } catch (ex) {
               console.error('Failed to update apps', ex);
               setSaveState('error');

@@ -140,7 +140,7 @@ interface MissingZkDrive {
  * Creates each missing built-in zero-knowledge drive with its keys; the server then sets up the app and circles
  * that waited for it. A drive that fails is left for the next login, and doesn't hold up the others.
  */
-export const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
+const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
   const client = dotYouClient.createAxiosClient();
   const missing = (await client.get<MissingZkDrive[]>('/security/zk/missing-drives')).data;
   for (const drive of missing) {
@@ -384,10 +384,7 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
     await convertShardRecoveryDrive(dotYouClient, request);
   }
 
-  // Before the backfill, so the app of a drive created here gets its copy with the rest
-  // The built-in private drives a new identity is missing, then every app's copy of each zero-knowledge drive it is
-  // granted, so a device that already holds its app's key picks up a drive granted without this browser. Alongside
-  // the deal, which doesn't depend on it.
+  // Alongside the deal, which doesn't depend on it.
   const backfilled = completeZkDrivesAndAppKeys(dotYouClient, masterKey);
 
   // Before the takeover: a deal dealt here no longer locks the phrase, so the takeover needn't move
