@@ -40,7 +40,8 @@ import {
   zkOpen,
 } from '@homebase-id/js-lib/auth';
 import { OWNER_ZK_MASTER_KEY, t } from '@homebase-id/common-app';
-import { SHARD_RECOVERY_DRIVE, VAULT_DRIVE } from '../app/wellKnownDrives';
+import { SHARD_RECOVERY_DRIVE } from '../app/wellKnownDrives';
+import { GetAppClients } from '../app/AppManagementProvider';
 import { PlayerType, type DealerShardConfig, type ShamirDealPlan } from './ShamirProvider';
 import {
   encryptRecoveryKey,
@@ -418,48 +419,94 @@ export const sealAppKeyForSignIn = async (
   return { sealed: await sealAppKeyToSignIn(appKey, publicKeyJwkBase64Url), locked };
 };
 
-/** Whether Vault is already zero knowledge ("private"). */
-export const isVaultPrivate = async (dotYouClient: DotYouClient) =>
-  !!(await getOwnDrive(dotYouClient, VAULT_DRIVE))?.zkMasterKeyEncryptedStorageKey;
+/** Whether a drive is already zero knowledge (Private or Selective Share). */
+export const isDriveZeroKnowledge = async (dotYouClient: DotYouClient, drive: TargetDrive) =>
+  !!(await getOwnDrive(dotYouClient, drive))?.zkMasterKeyEncryptedStorageKey;
 
 /**
- * Makes Vault private, keeping its key (odin-core docs/zero-knowledge-drive-api-plan.md, 3.3): the server hands the
- * key over one last time, this browser locks it with the zero-knowledge master key and with the key of each app
- * granted Vault, and the server drops every copy it could open. A device of an app gets its key at its next sign-in.
- * The caller asks for the password first.
+ * The zero-knowledge master key, opened with the owner's password, for a page that needs it when this session holds
+ * none. A phrase the server still holds resets the password without the zero-knowledge master key, which would lose
+ * every key it locks: it is taken over first, as a login does (a login's takeover may have been cut off).
  */
-export const makeVaultPrivate = async (dotYouClient: DotYouClient, password: string) => {
+export const openZkMasterKeyWithPassword = async (dotYouClient: DotYouClient, password: string) => {
   const status = await getZkStatus(dotYouClient);
   const masterKey = await openZkMasterKey(password, status).catch(() => {
     throw new Error(t('Wrong password'));
   });
-  const vaultId = formatGuidId(VAULT_DRIVE.alias); // the server reads a Guid from JSON only with dashes
+  if (status.recoveryPhrase === 'onServer') await takeOverPhrase(dotYouClient, password, masterKey);
+  await rememberZkMasterKey(dotYouClient, masterKey);
+  return masterKey;
+};
+
+/**
+ * Upgrades a drive that already exists to zero knowledge, keeping its key (odin-core
+ * docs/zero-knowledge-drive-api-plan.md, 3.3 and 4.1): the server hands the key over one last time, this browser locks
+ * it with the zero-knowledge master key and with the key of each app granted the drive, and the server drops every copy
+ * it could open. `sharingModel` is what the app that asked for the upgrade wants. A device of an app gets its key at
+ * its next sign-in. The caller asks for the password first.
+ */
+export const makeDriveZeroKnowledge = async (
+  dotYouClient: DotYouClient,
+  password: string,
+  drive: { drive: TargetDrive; name: string },
+  sharingModel: 'private' | 'selectiveShare'
+) => {
+  const driveId = formatGuidId(drive.drive.alias); // the server reads a Guid from JSON only with dashes
   const client = dotYouClient.createAxiosClient();
   const failed = (error: unknown) => {
     console.warn(error);
-    throw new Error(getKnownOdinErrorMessages(error) ?? t('Vault could not be made private'));
+    throw new Error(
+      getKnownOdinErrorMessages(error) ?? t('{0} could not be made private', drive.name)
+    );
   };
 
-  // A phrase the server still holds resets the password without the zero-knowledge master key, which would lose
-  // Vault's key: take it over first, as a login does (a login's takeover may have been cut off)
-  if (status.recoveryPhrase === 'onServer') {
-    await takeOverPhrase(dotYouClient, password, masterKey).catch(failed);
-  }
+  const masterKey = await openZkMasterKeyWithPassword(dotYouClient, password).catch((error) => {
+    if (error instanceof Error && error.message === t('Wrong password')) throw error;
+    return failed(error);
+  });
 
   const [driveKey, apps] = await Promise.all([
     client
-      .get<{ storageKey64: string }>(`/security/zk/drives/${vaultId}/key-for-conversion`)
+      .get<{ storageKey64: string }>(`/security/zk/drives/${driveId}/key-for-conversion`)
       .then((response) => base64ToUint8Array(response.data.storageKey64)),
     getZkAppKeys(dotYouClient),
   ]).catch(failed);
 
   const request: ZkConvertDriveKeepingKeyRequest = await makeConversionKeepingKey(
-    vaultId,
+    driveId,
     driveKey,
     masterKey,
     apps
   ).catch(failed);
-  await client.post('/security/zk/convert-drive', request).catch(failed);
+  await client.post('/security/zk/convert-drive', { ...request, sharingModel }).catch(failed);
+};
+
+/**
+ * After an app is granted a drive created zero knowledge: its copy of the drive's key, and its own key where it has
+ * none. A failure stops nothing: the app's next sign-in, or the owner's next login, backfills it.
+ */
+export const backfillAppKeysOf = async (dotYouClient: DotYouClient, appId: string, masterKey: Uint8Array) => {
+  const app = (await getZkAppKeys(dotYouClient)).find((a) => stringGuidsEqual(a.appId, appId));
+  if (app && missingAppCopies(app).length) await backfillAppKey(dotYouClient, app, masterKey);
+};
+
+/**
+ * The devices that would see a drive as empty once it is zero knowledge, until they sign in again: each device, not
+ * revoked, of an app granted the drive that wasn't handed its app's current key (odin-core
+ * docs/zero-knowledge-drive-api-plan.md, 4.3). A host that doesn't say which devices hold the key names none.
+ */
+export const getDevicesWithoutAppKey = async (dotYouClient: DotYouClient, drive: TargetDrive) => {
+  const apps = (await getZkAppKeys(dotYouClient)).filter((app) =>
+    app.drives.some((d) => stringGuidsEqual(d.driveId, drive.alias))
+  );
+  const devices = await Promise.all(
+    apps.map(async (app) =>
+      (await GetAppClients(dotYouClient, app.appId))
+        .filter((device) => !device.isRevoked && device.holdsZkAppKey === false)
+        .map((device) => ({ appSlug: app.appSlug, friendlyName: device.friendlyName }))
+    )
+  );
+  return devices.flat();
 };
 
 /**

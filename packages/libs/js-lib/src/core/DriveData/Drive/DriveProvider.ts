@@ -1,4 +1,5 @@
 import { DriveDefinition } from './DriveTypes';
+import { makeZkDriveKeys } from '../../../auth/providers/ZeroKnowledgeKeys';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
   assertIfDefined,
@@ -91,6 +92,11 @@ export const getDrivesByType = async (
  *
  * `attributes` are stored on the drive when it is created (e.g. `IsCollaborativeChannel`). Like the
  * other settings, they are not applied to a drive that already exists.
+ *
+ * `zeroKnowledge`: the drive is created Private or Selective Share (odin-core
+ * docs/zero-knowledge-drive-api-plan.md, step 4), with keys made here and locked with the zero-knowledge master
+ * key, which is asked for only when the drive is new. The server never sees the drive key. A drive that exists
+ * keeps its model.
  */
 export const ensureDrive = async (
   dotYouClient: DotYouClient,
@@ -103,7 +109,11 @@ export const ensureDrive = async (
   appId: string,
   driveSlug: string | undefined,
   driveTypeSlug: string,
-  attributes?: { [key: string]: string }
+  attributes?: { [key: string]: string },
+  zeroKnowledge?: {
+    sharingModel: 'private' | 'selectiveShare';
+    getZkMasterKey: () => Promise<Uint8Array>;
+  }
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
@@ -140,6 +150,13 @@ export const ensureDrive = async (
     driveSlug: slug,
     driveTypeSlug: driveTypeSlug,
     attributes: attributes,
+    ...(zeroKnowledge
+      ? {
+          sharingModel: zeroKnowledge.sharingModel,
+          zkKeys: (await makeZkDriveKeys(targetDrive.alias, await zeroKnowledge.getZkMasterKey()))
+            .request,
+        }
+      : {}),
   };
 
   return client

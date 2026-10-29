@@ -7,6 +7,7 @@ import {
   ensureDrive,
   getDrives,
   getRequestedDriveChanges,
+  isZeroKnowledgeSharingModel,
 } from '@homebase-id/js-lib/core';
 import { drivesEqual, stringGuidsEqual } from '@homebase-id/js-lib/helpers';
 import { BlogConfig } from '@homebase-id/js-lib/public';
@@ -28,10 +29,27 @@ import {
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
 import { invalidateApps } from './useApps';
-import { invalidateCircles, useDotYouClientContext } from '@homebase-id/common-app';
+import { invalidateCircles, t, useDotYouClientContext } from '@homebase-id/common-app';
+import {
+  backfillAppKeysOf,
+  getZkMasterKey,
+  openZkMasterKeyWithPassword,
+} from '../../provider/auth/ZeroKnowledgeProvider';
 
 interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
   drives?: (DriveGrantRequest | DriveGrant)[];
+  /** The owner's password, when creating a private drive needs the zero-knowledge master key (ZkPasswordNeededError). */
+  password?: string;
+}
+
+/**
+ * A drive the app asked for private or Selective Share is new, and this session holds no zero-knowledge master key:
+ * the page asks for the password and tries again with it.
+ */
+export class ZkPasswordNeededError extends Error {
+  constructor() {
+    super(t('Enter your password to create the private drives this app asked for'));
+  }
 }
 
 /**
@@ -59,12 +77,29 @@ interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'driv
  * channel or community, created through the extend-permissions flow. There `ensureDrive` derives it
  * from the name, unique against the slugs the owning app's drives already hold; the server requires
  * a stated slug and derives nothing. Every other drive names its own.
+ *
+ * A drive asked for private or Selective Share (`sharingModel`) is created zero knowledge, never created and then
+ * converted (odin-core docs/zero-knowledge-drive-api-plan.md, step 4): its keys are made here, locked with the
+ * zero-knowledge master key, from this session or opened with `password`. Without either it throws
+ * ZkPasswordNeededError. Returns that key when a zero-knowledge drive was created, so the app's copy of its key can
+ * be locked once the app is granted it.
  */
 const ensureAppOwnedDrives = async (
   dotYouClient: DotYouClient,
   appId: string,
-  drives: (DriveGrantRequest | DriveGrant)[]
-) => {
+  drives: (DriveGrantRequest | DriveGrant)[],
+  password?: string
+): Promise<Uint8Array | undefined> => {
+  // Asked for only when a zero-knowledge drive is actually created, and once for all of them
+  let zkMasterKey: Promise<Uint8Array> | undefined;
+  const getMasterKey = () =>
+    (zkMasterKey ??= (async () => {
+      const key = await getZkMasterKey(dotYouClient);
+      if (key) return key;
+      if (!password) throw new ZkPasswordNeededError();
+      return await openZkMasterKeyWithPassword(dotYouClient, password);
+    })());
+
   await Promise.all(
     drives.map(async (driveGrant) => {
       // A DriveGrant already describes a drive that exists, so it carries no driveMeta and falls
@@ -94,9 +129,29 @@ const ensureAppOwnedDrives = async (
         appId,
         driveMeta.driveSlug,
         driveMeta.driveTypeSlug,
-        driveMeta.attributes
+        driveMeta.attributes,
+        isZeroKnowledgeSharingModel(driveMeta.sharingModel)
+          ? { sharingModel: driveMeta.sharingModel, getZkMasterKey: getMasterKey }
+          : undefined
       );
     })
+  );
+
+  return zkMasterKey && (await zkMasterKey);
+};
+
+/** The app's copy of each zero-knowledge drive just created for it; its next sign-in fills in a copy this misses. */
+const lockCreatedDrivesForApp = async (
+  dotYouClient: DotYouClient,
+  appId: string,
+  zkMasterKey: Uint8Array | undefined
+) => {
+  if (!zkMasterKey) return;
+  await backfillAppKeysOf(dotYouClient, appId, zkMasterKey).catch((error) =>
+    console.warn(
+      "The app's copy of its private drives' keys could not be saved; its next sign-in does",
+      error
+    )
   );
 };
 
@@ -140,11 +195,21 @@ export const useApp = ({ appId }: { appId?: string }) => {
     return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;
   };
 
-  const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {
-    if (appRegRequest.drives)
-      await ensureAppOwnedDrives(dotYouClient, appRegRequest.appId, appRegRequest.drives);
+  const registerNewApp = async ({
+    password,
+    ...appRegRequest
+  }: AppRegistrationRequest & { password?: string }) => {
+    const zkMasterKey = appRegRequest.drives
+      ? await ensureAppOwnedDrives(
+          dotYouClient,
+          appRegRequest.appId,
+          appRegRequest.drives,
+          password
+        )
+      : undefined;
 
     await RegisterApp(dotYouClient, { ...appRegRequest, drives: appRegRequest.drives ?? [] });
+    await lockCreatedDrivesForApp(dotYouClient, appRegRequest.appId, zkMasterKey);
 
     if (appRegRequest.drives)
       await applyRequestedDriveChanges(dotYouClient, appRegRequest.drives, appRegRequest.appId);
@@ -188,14 +253,19 @@ export const useApp = ({ appId }: { appId?: string }) => {
     appId,
     permissionSet,
     drives,
+    password,
   }: PermissionExtensionRequest) => {
-    if (drives) await ensureAppOwnedDrives(dotYouClient, appId, drives);
+    const zkMasterKey = drives
+      ? await ensureAppOwnedDrives(dotYouClient, appId, drives, password)
+      : undefined;
 
-    return await UpdatePermissions(dotYouClient, {
+    const updated = await UpdatePermissions(dotYouClient, {
       appId,
       permissionSet,
       drives: drives || [],
     });
+    await lockCreatedDrivesForApp(dotYouClient, appId, zkMasterKey);
+    return updated;
   };
 
   const applyDriveChanges = async (drives: DriveGrantRequest[]) =>

@@ -8,13 +8,14 @@ import {
   resetPassword as resetOwnerPassword,
   changePassword as setNewOwnerPassword, canUseAutoRecovery,
 } from '../../provider/auth/AuthenticationProvider';
-import { uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
-import { ApiType } from '@homebase-id/js-lib/core';
+import { stringGuidsEqual, uint8ArrayToBase64 } from '@homebase-id/js-lib/helpers';
+import { ApiType, TargetDrive } from '@homebase-id/js-lib/core';
 import {
   ensureZeroKnowledgeKeys,
-  isVaultPrivate,
-  makeVaultPrivate,
+  isDriveZeroKnowledge,
+  makeDriveZeroKnowledge,
 } from '../../provider/auth/ZeroKnowledgeProvider';
+import { VAULT_DRIVE, ZK_UPGRADABLE_DRIVES } from '../../provider/app/wellKnownDrives';
 import {
   HOME_SHARED_SECRET,
   OwnerClient,
@@ -48,16 +49,43 @@ export const HOME_PATH = '/owner';
 
 /**
  * Why the login was asked for again (REDEAL_PARAM): '1' after a recovery email change; 'app-key' for an app's
- * sign-in; 'vault-private' when the Vault app sends the owner to make Vault private, which needs the password.
+ * sign-in; 'drive-private' when an app sends the owner to upgrade one of its drives to zero knowledge
+ * (`drive=<alias>&model=<private|selectiveShare>`), which needs the password; 'vault-private', the Vault app's
+ * older form of it, makes Vault Private.
  */
 export const REDEAL_APP_KEY = 'app-key';
 export const REDEAL_VAULT_PRIVATE = 'vault-private';
-const REDEAL_REASONS = ['1', REDEAL_APP_KEY, REDEAL_VAULT_PRIVATE] as const;
+export const REDEAL_DRIVE_PRIVATE = 'drive-private';
+const REDEAL_REASONS = ['1', REDEAL_APP_KEY, REDEAL_VAULT_PRIVATE, REDEAL_DRIVE_PRIVATE] as const;
 export type RedealReason = (typeof REDEAL_REASONS)[number];
+export const DRIVE_PARAM = 'drive';
+export const MODEL_PARAM = 'model';
 
 /** The reason the login page was asked for again, when the query names a known one. */
 export const redealReasonOf = (params: URLSearchParams): RedealReason | undefined =>
   REDEAL_REASONS.find((reason) => reason === params.get(REDEAL_PARAM));
+
+export interface DriveUpgrade {
+  drive: TargetDrive;
+  name: string;
+  sharingModel: 'private' | 'selectiveShare';
+}
+
+/**
+ * The drive an upgrade login asks to make zero knowledge, and as what: one of the drives that upgrade this way
+ * (ZK_UPGRADABLE_DRIVES). Undefined for any other login, and for a request naming another drive or model, which the
+ * page refuses rather than guessing.
+ */
+export const driveUpgradeOf = (params: URLSearchParams): DriveUpgrade | undefined => {
+  const reason = redealReasonOf(params);
+  if (reason === REDEAL_VAULT_PRIVATE) return { drive: VAULT_DRIVE, name: 'Vault', sharingModel: 'private' };
+  if (reason !== REDEAL_DRIVE_PRIVATE) return undefined;
+
+  const upgradable = ZK_UPGRADABLE_DRIVES.find((d) => stringGuidsEqual(d.drive.alias, params.get(DRIVE_PARAM) ?? ''));
+  const model = params.get(MODEL_PARAM);
+  if (!upgradable || (model !== 'private' && model !== 'selectiveShare')) return undefined;
+  return { ...upgradable, sharingModel: model };
+};
 
 /**
  * The login page, coming back to `returnUrl` after login when there is one. `redeal`: shown even to an
@@ -130,9 +158,9 @@ const isLoopbackUrl = (url: string | null | undefined): url is string => {
   }
 };
 
-// The Vault app's return after making Vault private: this origin, one of our own app schemes (as the signup's),
-// or a desktop app's loopback listener
-const isVaultAppReturnUrl = (url: string | null | undefined): url is string =>
+// An app's return after upgrading its drive to zero knowledge: this origin, one of our own app schemes (as the
+// signup's), or a desktop app's loopback listener
+const isDriveUpgradeReturnUrl = (url: string | null | undefined): url is string =>
   isSafeReturnUrl(url) || isAppReturnUrl(url) || isLoopbackUrl(url);
 
 export const isSafeReturnUrl = (url: string | null | undefined): url is string => {
@@ -177,7 +205,7 @@ export const useValidateAuthorization = () => {
 export const useAuth = () => {
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
-  const makingVaultPrivate = redealReasonOf(searchParams) === REDEAL_VAULT_PRIVATE;
+  const driveUpgrade = driveUpgradeOf(searchParams);
 
   const authenticate = async (password: string) => {
     // Cleanup the public session: (There might have been a public login already in place)
@@ -218,11 +246,12 @@ export const useAuth = () => {
       console.error('Zero-knowledge keys', error);
     }
 
-    // The Vault app's password confirm: it needs the keys above, so it waits for them past the time limit. A
-    // failure throws, so the page shows it; the owner is logged in by now and can enter the password again.
-    if (makingVaultPrivate) {
+    // An app's password confirm for upgrading its drive: it needs the keys above, so it waits for them past the time
+    // limit. A failure throws, so the page shows it; the owner is logged in by now and can enter the password again.
+    if (driveUpgrade) {
       await keys.catch(() => undefined);
-      if (!(await isVaultPrivate(ownerClient))) await makeVaultPrivate(ownerClient, password);
+      if (!(await isDriveZeroKnowledge(ownerClient, driveUpgrade.drive)))
+        await makeDriveZeroKnowledge(ownerClient, password, driveUpgrade, driveUpgrade.sharingModel);
     }
 
     checkRedirectToReturn();
@@ -240,7 +269,7 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      const allowed = makingVaultPrivate ? isVaultAppReturnUrl : isSafeReturnUrl;
+      const allowed = driveUpgrade ? isDriveUpgradeReturnUrl : isSafeReturnUrl;
       window.location.href = allowed(returnUrl) ? returnUrl : HOME_PATH;
     }
   };

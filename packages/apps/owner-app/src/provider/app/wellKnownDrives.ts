@@ -7,11 +7,26 @@ export const SHARD_RECOVERY_DRIVE: TargetDrive = {
   type: '43138ae90206480b9ff493580ca147ee',
 };
 
-/** odin-core `WellKnownAppDrives.VaultDrive`: the one drive that converts to zero knowledge keeping its key, for now. */
+/** odin-core `WellKnownAppDrives.VaultDrive`. */
 export const VAULT_DRIVE: TargetDrive = {
   alias: 'f47ac10b58cc4372a5670e02b2c3d479',
   type: '70e92f0f94d05f5c7dcd36466094f3a5',
 };
+
+/** odin-core `WellKnownAppDrives.FilesyncDrive` (filesync `app.rs`, chat-kmp `FilesyncProtocol`). */
+export const FILESYNC_DRIVE: TargetDrive = {
+  alias: 'cfceb937b868496b91cb3402f18320f8',
+  type: '5da48122e946487a8b9d589642f3c91d',
+};
+
+/**
+ * The drives that existed before they could be made zero knowledge and are upgraded keeping their key, for now:
+ * odin-core `ZkDriveConversionService.ConvertibleDrives`. A new drive is created zero knowledge instead.
+ */
+export const ZK_UPGRADABLE_DRIVES: { drive: TargetDrive; name: string }[] = [
+  { drive: VAULT_DRIVE, name: 'Vault' },
+  { drive: FILESYNC_DRIVE, name: 'Filesync' },
+];
 
 /**
  * The drives with a fixed alias and type, each with the app that owns it.

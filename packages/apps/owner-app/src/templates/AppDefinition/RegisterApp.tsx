@@ -3,7 +3,8 @@ import {
   AppRegistrationRequest,
   DriveGrantRequest,
 } from '../../provider/app/AppManagementProviderTypes';
-import { useApp } from '../../hooks/apps/useApp';
+import { useApp, ZkPasswordNeededError } from '../../hooks/apps/useApp';
+import { ZkPasswordField } from './ZkPasswordField';
 import Section from '../../components/ui/Sections/Section';
 
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
@@ -130,10 +131,12 @@ const RegisterApp = () => {
     error: registerAppError,
   } = registerNewApp;
 
-  const doRegisterApp = async (request: AppRegistrationRequest) => {
+  const doRegisterApp = async (request: AppRegistrationRequest & { password?: string }) => {
     await registerApp(request);
     window.location.href = returnUrl;
   };
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
+  const needsPassword = registerAppError instanceof ZkPasswordNeededError;
 
   const doCancel = () =>
     (window.location.href = cancelUrl
@@ -155,7 +158,7 @@ const RegisterApp = () => {
 
   return (
     <>
-      <ErrorNotification error={registerAppError} />
+      <ErrorNotification error={needsPassword ? undefined : registerAppError} />
 
       <section className="my-20">
         <div className="container mx-auto">
@@ -172,7 +175,8 @@ const RegisterApp = () => {
               circleDriveGrants={circleDriveGrants}
               appCircles={appCircles}
               registerApp={doRegisterApp}
-              registerAppState={registerAppState}
+              registerAppState={needsPassword ? 'idle' : registerAppState}
+              needsPassword={needsPassword}
               doCancel={doCancel}
             />
           </div>
@@ -197,6 +201,7 @@ const AppRegistration = ({
   appCircles,
   registerApp,
   registerAppState,
+  needsPassword,
   doCancel,
 }: {
   name: string;
@@ -209,10 +214,12 @@ const AppRegistration = ({
   circlePermissionSet?: PermissionSet;
   circleDriveGrants?: DriveGrantRequest[];
   appCircles: AppCircleDeclaration[];
-  registerApp: (data: AppRegistrationRequest) => Promise<void>;
+  registerApp: (data: AppRegistrationRequest & { password?: string }) => Promise<void>;
   registerAppState: ActionButtonState;
+  needsPassword: boolean;
   doCancel: () => void;
 }) => {
+  const [password, setPassword] = useState<string>();
   const [circleIds, setCircleIds] = useState<string[]>(defaultCircleIds || []);
   const { data: existingDrives } = useDrives().fetch;
   const needsCircleSelection = circleDriveGrants?.length;
@@ -233,6 +240,7 @@ const AppRegistration = ({
         permissionSet: circlePermissionSet,
       },
       circles: appCircles,
+      password,
     });
   };
 
@@ -411,25 +419,28 @@ const AppRegistration = ({
           </ActionButton>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 sm:flex-row-reverse">
-          <ActionButton
-            onClick={doRegisterApp}
-            type="primary"
-            state={registerAppState}
-            icon={Arrow}
-          >
-            {t('Allow')}
-          </ActionButton>
-          {needsCircleSelection ? (
-            <ActionButton type="secondary" onClick={() => setCircleSelection(false)}>
-              {t('Back')}
+        <>
+          {needsPassword ? <ZkPasswordField onChange={setPassword} /> : null}
+          <div className="flex flex-col gap-2 sm:flex-row-reverse">
+            <ActionButton
+              onClick={doRegisterApp}
+              type="primary"
+              state={registerAppState}
+              icon={Arrow}
+            >
+              {t('Allow')}
             </ActionButton>
-          ) : (
-            <ActionButton type="secondary" onClick={() => doCancel()}>
-              {t('Cancel')}
-            </ActionButton>
-          )}
-        </div>
+            {needsCircleSelection ? (
+              <ActionButton type="secondary" onClick={() => setCircleSelection(false)}>
+                {t('Back')}
+              </ActionButton>
+            ) : (
+              <ActionButton type="secondary" onClick={() => doCancel()}>
+                {t('Cancel')}
+              </ActionButton>
+            )}
+          </div>
+        </>
       )}
     </>
   );

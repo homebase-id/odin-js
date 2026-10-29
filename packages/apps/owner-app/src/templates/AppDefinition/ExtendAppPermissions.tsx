@@ -12,7 +12,8 @@ import { isAxiosError } from 'axios';
 import { Arrow, Chevron } from '@homebase-id/common-app/icons';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
-import { useApp } from '../../hooks/apps/useApp';
+import { useApp, ZkPasswordNeededError } from '../../hooks/apps/useApp';
+import { ZkPasswordField } from './ZkPasswordField';
 import { useDrives } from '../../hooks/drives/useDrives';
 import { useDrive } from '../../hooks/drives/useDrive';
 import { useState } from 'react';
@@ -64,6 +65,10 @@ export const ExtendAppPermissions = () => {
     setOwningApp: { mutateAsync: setOwningApp },
   } = useDrive();
 
+  const [password, setPassword] = useState<string>();
+  // A drive the app asked for private needs the password when this session holds no zero-knowledge key
+  const needsPassword = error instanceof ZkPasswordNeededError;
+
   const doUpdateApp = async () => {
     try {
       if (!appRegistration || !appRegistration?.appId)
@@ -88,6 +93,7 @@ export const ExtendAppPermissions = () => {
           ) || []),
           ...(driveGrants || []),
         ],
+        password,
       });
 
       if (circleIds?.length || circlePermissionSet?.keys?.length || circleDriveGrants?.length)
@@ -189,7 +195,7 @@ export const ExtendAppPermissions = () => {
 
   return (
     <>
-      <ErrorNotification error={error} />
+      <ErrorNotification error={needsPassword ? undefined : error} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -230,6 +236,8 @@ export const ExtendAppPermissions = () => {
                 . {t('The rest of the request was approved.')}
               </p>
             ) : null}
+
+            {needsPassword ? <ZkPasswordField onChange={setPassword} /> : null}
 
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               {adoptionError ? (

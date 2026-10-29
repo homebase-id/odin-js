@@ -1,4 +1,8 @@
-import { PermissionSet } from '@homebase-id/js-lib/core';
+import {
+  isZeroKnowledgeSharingModel,
+  PermissionSet,
+  REQUESTABLE_SHARING_MODELS,
+} from '@homebase-id/js-lib/core';
 import { isValidSlug, tryJsonParse } from '@homebase-id/js-lib/helpers';
 import {
   AppCircleDeclaration,
@@ -51,6 +55,13 @@ export const drivesParamProblems = (
       problems.push(`${which}: ${t('drive type slug (ts) is not a valid slug')} ("${d.ts}")`);
     if (d?.ds && !isValidSlug(d.ds))
       problems.push(`${which}: ${t('drive slug (ds) is not a valid slug')} ("${d.ds}")`);
+    // Never quietly downgraded: a drive asked for private is private or isn't made
+    if (d?.sm !== undefined && !(REQUESTABLE_SHARING_MODELS as readonly string[]).includes(d.sm))
+      problems.push(
+        `${which}: ${t('sharing model (sm) is not one of')} ${REQUESTABLE_SHARING_MODELS.join(', ')} ("${d.sm}")`
+      );
+    else if (isZeroKnowledgeSharingModel(d?.sm) && d?.r)
+      problems.push(`${which}: ${t('a private drive (sm) cannot allow anonymous reads (r)')}`);
     return problems;
   });
 };
@@ -88,6 +99,7 @@ export const drivesParamToDriveGrantRequest = (
         // Left undefined, ensureDrive derives the slug; see TargetDriveAccessRequest.driveSlug.
         driveSlug: d.ds || undefined,
         driveTypeSlug: d.ts,
+        sharingModel: d.sm,
       },
     })
   );

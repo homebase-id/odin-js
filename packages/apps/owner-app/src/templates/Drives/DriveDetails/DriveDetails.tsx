@@ -208,6 +208,9 @@ const DriveDetails = () => {
                     {driveDef.isArchived ? <li>{t('Drive is Archived')}</li> : null}
                     {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
                     {driveDef.sharingModel === 'private' ? <li>{t('Private (zero knowledge)')}</li> : null}
+                    {driveDef.sharingModel === 'selectiveShare' ? (
+                        <li>{t('Selective Share (zero knowledge)')}</li>
+                    ) : null}
                     {driveDef?.attributes ? (
                         <>
                             {Object.keys(driveDef.attributes).map((attrKey) => (

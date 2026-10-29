@@ -24,6 +24,14 @@ export interface PermissionSet {
 
 export type DriveSharingModel = 'collaborative' | 'private' | 'selectiveShare' | 'unclassified';
 
+/** The models an app may ask a new drive to be: absent means collaborative. */
+export const REQUESTABLE_SHARING_MODELS = ['collaborative', 'private', 'selectiveShare'] as const;
+
+/** Private and Selective Share drives hold their key the same way: the server has no copy it can open. */
+export const isZeroKnowledgeSharingModel = (
+  model: DriveSharingModel | null | undefined
+): model is 'private' | 'selectiveShare' => model === 'private' || model === 'selectiveShare';
+
 export interface DriveDefinition {
     driveId: string;
     name: string;
