@@ -48,9 +48,11 @@ import { PlayerType, type DealerShardConfig, type ShamirDealPlan } from './Shami
 import {
   encryptRecoveryKey,
   getPublicKey,
+  getNonce,
   getSalts,
   prepareAuthPassword,
   preparePasswordProof,
+  type NonceData,
 } from './AuthenticationHelper';
 
 // The owner's zero-knowledge keys (odin-core docs/zero-knowledge-keys-plan.md) and recovery in the
@@ -91,19 +93,23 @@ const saveMissingPasswordCopies = async (dotYouClient: DotYouClient, password: s
   });
 };
 
-const handOverPhrase = async (dotYouClient: DotYouClient, password: string) =>
+const handOverPhrase = async (dotYouClient: DotYouClient, password: string, nonce: NonceData) =>
   dotYouClient
     .createAxiosClient()
     .post<{ phrase: string }>('/security/zk/phrase-handover', {
-      currentAuthenticationPasswordReply: await preparePasswordProof(dotYouClient, password),
+      currentAuthenticationPasswordReply: await prepareAuthPassword(password, nonce),
     })
     .then((response) => response.data.phrase);
 
-// The takeover's proof is made while the handover runs: the login has 10 seconds for all of this.
+// The takeover's proof is made while the handover runs: the login has 10 seconds for all of this. Its nonce is
+// fetched after the handover's, not beside it: a browser answered both parallel requests with one response, and
+// the handover used up the nonce the takeover then sent.
 const takeOverPhrase = async (dotYouClient: DotYouClient, password: string, masterKey: Uint8Array) => {
+  const handoverNonce = await getNonce(dotYouClient);
+  const takeoverNonce = await getNonce(dotYouClient);
   const [phrase, currentAuthenticationPasswordReply] = await Promise.all([
-    handOverPhrase(dotYouClient, password),
-    preparePasswordProof(dotYouClient, password),
+    handOverPhrase(dotYouClient, password, handoverNonce),
+    prepareAuthPassword(password, takeoverNonce),
   ]);
   const copies: ZkPhraseCopiesRequest = await makePhraseCopies(phrase, masterKey);
 
