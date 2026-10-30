@@ -504,3 +504,21 @@ export const getDriveStatus = async (
       throw error;
     });
 };
+
+/// getDriveStatus on the V2 api; owner only, as V1's is
+export const getDriveStatusV2 = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive
+): Promise<DriveStatus> => {
+  assertIfDefined('targetDrive', targetDrive);
+
+  const client = dotYouClient.createAxiosClient({ v2: true });
+
+  return client
+    .get<DriveStatus>(`/drives/${targetDrive.alias}/status`)
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error('[odin-js:getDriveStatusV2]', error);
+      throw error;
+    });
+};
