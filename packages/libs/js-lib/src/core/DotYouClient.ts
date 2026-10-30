@@ -24,6 +24,8 @@ interface createAxiosClientOptions {
   overrideEncryption?: boolean;
   headers?: Record<string, string>;
   systemFileType?: SystemFileType;
+  // The unified V2 api: one base path for owner, app and guest; the token says which caller it is
+  v2?: boolean;
 }
 
 export class BaseDotYouClient {
@@ -94,6 +96,17 @@ export class BaseDotYouClient {
     return this.getRoot() + endpoint;
   }
 
+  //Returns the V2 endpoint for the identity; the same for every ApiType
+  getEndpointV2(): string {
+    return this.getRoot() + '/api/v2';
+  }
+
+  // V2 reads an app's token from `Authorization: Bearer`, not from the bx0900 header V1 uses
+  private getHeadersV2(headers: Record<string, string>): Record<string, string> {
+    const { bx0900, ...rest } = headers;
+    return bx0900 ? { ...rest, Authorization: `Bearer ${bx0900}` } : rest;
+  }
+
   getHeaders(): Record<string, string> {
     return this._options.headers || {};
   }
@@ -101,14 +114,15 @@ export class BaseDotYouClient {
   //Gets an Axios client configured with token info
   createAxiosClient(options?: createAxiosClientOptions) {
     const isDebug = hasDebugFlag();
+    const headers = {
+      'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
+      ...this._options.headers,
+      ...options?.headers,
+    };
     const client = axios.create({
-      baseURL: this.getEndpoint(),
+      baseURL: options?.v2 ? this.getEndpointV2() : this.getEndpoint(),
       withCredentials: isLocalStorageAvailable(),
-      headers: {
-        'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
-        ...this._options.headers,
-        ...options?.headers,
-      },
+      headers: options?.v2 ? this.getHeadersV2(headers) : headers,
     });
 
     if (options?.overrideEncryption) return client;

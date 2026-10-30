@@ -13,8 +13,8 @@ import {
   deleteFile,
   HomebaseFile,
   getContentFromHeaderOrPayload,
-  getPayloadBytes,
-  queryBatch,
+  getPayloadBytesV2,
+  queryBatchV2,
   SystemFileType,
   TargetDrive,
   getFileHeader,
@@ -45,7 +45,7 @@ export const useFiles = ({
     targetDrive: TargetDrive;
     pageParam: string | undefined;
   }) => {
-    const response = await queryBatch(
+    const response = await queryBatchV2(
       dotYouClient,
       { targetDrive, systemFileType },
       {
@@ -158,7 +158,7 @@ export const useFile = ({
 
   const fetchFile = async (result: HomebaseFile | DeletedHomebaseFile, payloadKey?: string) => {
     if (payloadKey) {
-      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
+      const payload = await getPayloadBytesV2(dotYouClient, targetDrive, result.fileId, payloadKey, {
         systemFileType: result.fileSystemType,
       });
       if (!payload) return null;

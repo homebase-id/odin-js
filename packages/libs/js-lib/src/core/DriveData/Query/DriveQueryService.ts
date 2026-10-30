@@ -107,6 +107,45 @@ type QueryBatchParamsWithoutFileState = Omit<FileQueryParams, 'fileState'>;
 interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState'> {
   fileState: (0 | 1)[];
 }
+
+const toBatchQueryParams = (
+  params: QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState
+): FileQueryParams => {
+  const strippedQueryParams: FileQueryParams = {
+    ...params,
+    fileState: 'fileState' in params ? params.fileState : [1],
+    // if userDate is set, then we set userDateStart and userDateEnd,
+    // is userDateStart and userDateEnd are userDate unset, we set userDate values
+    userDateStart: params.userDate ? params.userDate.start : params.userDateStart,
+    userDateEnd: params.userDate ? params.userDate.end : params.userDateEnd,
+    userDate: 'userDateStart' in params && 'userDateEnd' in params && params.userDateStart !== undefined && params.userDateEnd !== undefined
+      ? {
+        start: params.userDateStart,
+        end: params.userDateEnd,
+      }
+      : params.userDate,
+  };
+  delete strippedQueryParams.systemFileType;
+  return strippedQueryParams;
+};
+
+const decryptBatchResults = async <R>(dotYouClient: DotYouClient, data: R): Promise<R> => ({
+  ...data,
+  searchResults: await Promise.all(
+    (data as QueryBatchResponseWithDeletedResults | QueryBatchResponse).searchResults.map(
+      async (dsr) => {
+        const keyheader = dsr.fileMetadata.isEncrypted
+          ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+          : undefined;
+
+        dsr.fileMetadata.appData.content = await decryptJsonContent(dsr.fileMetadata, keyheader);
+
+        return dsr;
+      }
+    )
+  ),
+});
+
 export const queryBatch = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
@@ -123,28 +162,12 @@ export const queryBatch = async <
 ): Promise<R> => {
   const { decrypt, axiosConfig } = options ?? {};
 
-  const strippedQueryParams: FileQueryParams = {
-    ...params,
-    fileState: 'fileState' in params ? params.fileState : [1],
-    // if userDate is set, then we set userDateStart and userDateEnd,
-    // is userDateStart and userDateEnd are userDate unset, we set userDate values
-    userDateStart: params.userDate ? params.userDate.start : params.userDateStart,
-    userDateEnd: params.userDate ? params.userDate.end : params.userDateEnd,
-    userDate: 'userDateStart' in params && 'userDateEnd' in params && params.userDateStart !== undefined && params.userDateEnd !== undefined
-      ? {
-        start: params.userDateStart,
-        end: params.userDateEnd,
-      }
-      : params.userDate,
-  };
-  delete strippedQueryParams.systemFileType;
-
   const client = dotYouClient.createAxiosClient({
     systemFileType: params.systemFileType,
   });
 
   const request: GetBatchRequest = {
-    queryParams: strippedQueryParams,
+    queryParams: toBatchQueryParams(params),
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
@@ -166,31 +189,49 @@ export const queryBatch = async <
     }
   })();
 
-  return requestPromise.then(async (response) => {
-    if (decrypt) {
-      return {
-        ...response.data,
-        searchResults: await Promise.all(
-          (
-            response.data as QueryBatchResponseWithDeletedResults | QueryBatchResponse
-          ).searchResults.map(async (dsr) => {
-            const keyheader = dsr.fileMetadata.isEncrypted
-              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
-              : undefined;
+  return requestPromise.then(async (response) =>
+    decrypt ? decryptBatchResults(dotYouClient, response.data) : response.data
+  );
+};
 
-            dsr.fileMetadata.appData.content = await decryptJsonContent(
-              dsr.fileMetadata,
-              keyheader
-            );
+/// queryBatch on the V2 api: the drive is in the route (its id is the V1 alias), and the query is always a POST
+export const queryBatchV2 = async <
+  T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
+  R = T extends QueryBatchParamsWithFileState
+  ? QueryBatchResponseWithDeletedResults
+  : QueryBatchResponse,
+>(
+  dotYouClient: DotYouClient,
+  params: T,
+  ro?: GetBatchQueryResultOptions,
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<R> => {
+  const { decrypt, axiosConfig } = options ?? {};
 
-            return dsr;
-          })
-        ),
-      };
-    }
-
-    return response.data;
+  const client = dotYouClient.createAxiosClient({
+    systemFileType: params.systemFileType,
+    v2: true,
   });
+
+  const { targetDrive, ...queryParams } = toBatchQueryParams(params);
+
+  const request: Omit<GetBatchRequest, 'queryParams'> & {
+    queryParams: Omit<FileQueryParams, 'targetDrive'>;
+  } = {
+    queryParams,
+    resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
+  };
+
+  if (decrypt) request.resultOptionsRequest.includeMetadataHeader = true;
+
+  return client
+    .post<R>(`/drives/${targetDrive.alias}/files/query-batch`, request, axiosConfig)
+    .then(async (response) =>
+      decrypt ? decryptBatchResults(dotYouClient, response.data) : response.data
+    );
 };
 
 export const queryBatchCollection = async (

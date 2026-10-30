@@ -232,6 +232,51 @@ export const getPayloadBytes = async (
     });
 };
 
+/// getPayloadBytes on the V2 api, for the whole payload. The path names the file, so the request carries no
+/// query string to encrypt (V2 payload reads take none), and the response is decrypted as V1's is.
+export const getPayloadBytesV2 = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  key: string,
+  options?: {
+    systemFileType?: SystemFileType;
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileId', fileId);
+  assertIfDefined('Key', key);
+
+  const decrypt = options?.decrypt ?? true;
+  const client = dotYouClient.createAxiosClient({
+    systemFileType: options?.systemFileType ?? 'Standard',
+    v2: true,
+  });
+
+  return client
+    .get<ArrayBuffer>(`/drives/${targetDrive.alias}/files/${fileId}/payload/${key}`, {
+      responseType: 'arraybuffer',
+      ...options?.axiosConfig,
+    })
+    .then(async (response) => {
+      if (!response.data || !response.data.byteLength) return null;
+      return {
+        bytes: decrypt
+          ? await decryptBytesResponse(dotYouClient, response)
+          : new Uint8Array(response.data),
+        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
+      };
+    })
+    .catch((error) => {
+      if (error.response?.status === 404) return null;
+      console.error('[odin-js:getPayloadBytesV2]', error);
+      return null;
+    });
+};
+
 export const getThumbBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
