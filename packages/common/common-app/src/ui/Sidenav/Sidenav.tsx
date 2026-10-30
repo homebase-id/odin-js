@@ -29,11 +29,9 @@ import {Heart} from '../Icons';
 import {HomebaseApp} from '../BrandIcons/HomebaseApp';
 import {House} from '../Icons';
 import {Person} from '../Icons';
-import {Persons} from '../Icons';
 import {Pin} from '../Icons';
 import {Times} from '../Icons';
 import {IconProps} from '../Icons';
-import {Wallet} from '../Icons';
 import {logoutOwnerAndAllApps} from '../../provider';
 import {Shield} from '../Icons';
 import {OwnerClient} from "../../core";
@@ -149,29 +147,12 @@ export const Sidenav = ({
               <ChatNavItem label={'Chat'}/>
             </div>
 
-            <div className={`py-3`}>
-              {isTightHeight ? null : (
-                <NavItem
-                  icon={Persons}
-                  label={'Following & Followers'}
-                  to={`${OWNER_ROOT}/follow`}
-                />
-              )}
-            </div>
-
             <MoreItems
               isOpen={isPinned || isOpen || isHoverOpen || isPeeking}
               logout={logoutOwnerAndAllApps}
             >
               {/* Apps is a developer view, so it sits in the overflow rather than the bar. */}
               <NavItem icon={Grid} label={'Apps'} to={`${OWNER_ROOT}/apps`}/>
-              {isTightHeight ? (
-                <NavItem
-                  icon={Persons}
-                  label={'Following & Followers'}
-                  to={`${OWNER_ROOT}/follow`}
-                />
-              ) : null}
             </MoreItems>
 
             {!isTightHeight ? (
@@ -250,29 +231,23 @@ const MoreItems = ({
         }`}
         onClick={() => setIsOpen(false)}
       >
-        {logout ? (
-          <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
-            <Person className={`${iconClassName}`}/>
-            <span className={`my-auto ml-3`}>Log out</span>
-          </button>
-        ) : null}
-        <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`}/>
-
-        <hr className="border-b dark:border-slate-500"/>
-
-        <NavItem icon={Globe} label={'Sign-ins'} to={`${OWNER_ROOT}/sign-ins`}/>
-        <hr className="border-b dark:border-slate-500"/>
-        <WalletLink/>
-        <hr className="border-b dark:border-slate-500"/>
+        {/* Alphabetical (Apps arrives as children), then Log out last, nearest the More button. Dark and
+            Light mode sort to the same place. */}
+        {children}
         <button className={navItemClassName} onClick={() => toggleDarkMode()}>
           <MiniDarkModeToggle className={`my-auto ${iconClassName}`}/>
           <span className={`mx-3 my-auto`}>{isDarkMode ? t('Light mode') : t('Dark mode')}</span>
         </button>
+        <NavItem icon={Cog} label={'Settings'} to={`${OWNER_ROOT}/settings`}/>
+        <NavItem icon={Globe} label={'Sign-ins'} to={`${OWNER_ROOT}/sign-ins`}/>
 
-        {children ? (
+        {logout ? (
           <>
             <hr className="border-b dark:border-slate-500"/>
-            {children}
+            <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
+              <Person className={`${iconClassName}`}/>
+              <span className={`my-auto ml-3`}>Log out</span>
+            </button>
           </>
         ) : null}
       </div>
@@ -424,19 +399,6 @@ const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
         </div>
       ) : null}
     </>
-  );
-};
-
-const WalletLink = () => {
-  const {data: profiles} = useProfiles().fetchProfiles;
-  const walletProfile = profiles?.find((profile) => profile.profileId === BuiltInProfiles.WalletId);
-
-  return (
-    <NavItem
-      label={t('Wallet')}
-      to={`${OWNER_ROOT}/profile/${walletProfile?.slug || 'wallet'}`}
-      icon={Wallet}
-    />
   );
 };
 
