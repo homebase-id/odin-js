@@ -8,7 +8,7 @@ import {
   HomebaseFileSync,
   usePortal,
 } from '@homebase-id/common-app';
-import { IconProps, Phone } from '@homebase-id/common-app/icons';
+import { IconProps } from '@homebase-id/common-app/icons';
 import {
   APP_STORE_URL,
   FILE_SYNC_DESKTOP,
@@ -129,11 +129,10 @@ export const HomebaseAppCard = () => {
               <StoreBadge store="android" />
             </div>
             <button
-              className="flex flex-row items-center gap-2 self-start text-sm text-primary hover:underline"
+              className="self-start text-sm text-primary hover:underline"
               onClick={() => setIsQrOpen(true)}
             >
-              <Phone className="h-4 w-4" />
-              {t('Show QR codes to scan')}
+              {t('Show QR code')}
             </button>
           </CardSection>
           {isQrOpen ? <PhoneQrDialog onClose={() => setIsQrOpen(false)} /> : null}
