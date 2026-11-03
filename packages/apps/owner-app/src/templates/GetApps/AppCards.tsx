@@ -107,14 +107,14 @@ const SecondaryLink = ({ href, children }: { href: string; children: ReactNode }
     </a>
   );
 
-export const HomebaseAppCard = () => {
+export const HomebaseAppCard = ({ name = t('Homebase') }: { name?: string }) => {
   const platform = getAppPlatform();
   const [isQrOpen, setIsQrOpen] = useState(false);
 
   return (
     <AppCard
       icon={HomebaseApp}
-      name={t('Homebase')}
+      name={name}
       what={t('Chat, moments, friends and your vault, in one app.')}
       why={t(
         'The easiest way to use Homebase every day; share moments and chat with friends, right from your phone.'
@@ -150,13 +150,13 @@ export const HomebaseAppCard = () => {
   );
 };
 
-export const FileSyncAppCard = () => {
+export const FileSyncAppCard = ({ name = t('File sync') }: { name?: string }) => {
   const isDesktop = getAppPlatform() === 'desktop';
 
   return (
     <AppCard
       icon={HomebaseFileSync}
-      name={t('File sync')}
+      name={name}
       what={t("Back up your computer's files to your Homebase.")}
       why={t('If your computer is lost or breaks, your files are still safe on your own Homebase.')}
     >
@@ -166,7 +166,8 @@ export const FileSyncAppCard = () => {
           <CardSection label={t('After installing')}>
             <p className="text-sm text-slate-400">
               {t(
-                'File sync has no window. Open it, then choose "Log in to Homebase…" from its icon in the menu bar or taskbar.'
+                '{0} has no window. Open it, then choose "Log in to Homebase…" from its icon in the menu bar or taskbar.',
+                name
               )}
             </p>
           </CardSection>
