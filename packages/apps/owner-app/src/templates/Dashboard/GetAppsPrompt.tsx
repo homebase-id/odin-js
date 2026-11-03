@@ -10,8 +10,8 @@ export const GetAppsPrompt = () => (
       <p className="text-slate-400">{t('Two apps that make your Homebase part of your day.')}</p>
     </div>
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <HomebaseAppCard />
-      <FileSyncAppCard />
+      <HomebaseAppCard name={t('Base App')} />
+      <FileSyncAppCard name={t('Base Drive')} />
     </div>
   </div>
 );

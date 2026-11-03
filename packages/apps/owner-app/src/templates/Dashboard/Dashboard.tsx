@@ -112,7 +112,7 @@ const ChatApp = () => {
   return (
     <AppWrapper
       appId={CHAT_APP_ID}
-      name={'Chat'}
+      name={'Base'}
       href={`/apps/chat`}
       unreadCount={unreadCount || 0}
       options={[
