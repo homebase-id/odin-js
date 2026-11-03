@@ -12,6 +12,7 @@ import { IconProps } from '@homebase-id/common-app/icons';
 import {
   APP_STORE_URL,
   FILE_SYNC_DESKTOP,
+  FILE_SYNC_WEB_PATH,
   GET_APPS_PATH,
   GOOGLE_PLAY_URL,
   HOMEBASE_DESKTOP,
@@ -173,9 +174,19 @@ export const FileSyncAppCard = ({ name = t('File sync') }: { name?: string }) =>
           </CardSection>
         </div>
       ) : (
-        <p className="text-sm text-slate-400">
-          {t('For Mac, Windows and Linux. Open your owner console on your computer to install it.')}
-        </p>
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-slate-400">
+            {t(
+              'For Mac, Windows and Linux. Open your owner console on your computer to install it.'
+            )}
+          </p>
+          <CardSection label={t('On this phone')}>
+            {/* A plain <a>: /apps/chat is outside the owner app's router. */}
+            <a className="text-sm text-primary hover:underline" href={FILE_SYNC_WEB_PATH}>
+              {t('Open {0} in your browser', name)}
+            </a>
+          </CardSection>
+        </div>
       )}
     </AppCard>
   );

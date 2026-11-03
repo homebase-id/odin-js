@@ -7,6 +7,9 @@ export const GOOGLE_PLAY_URL = 'https://play.google.com/store/apps/details?id=id
 
 export const GET_APPS_PATH = '/owner/get-apps';
 
+// File sync inside the chat web app (chat-kmp's #filesync link), for phones, which get no installer.
+export const FILE_SYNC_WEB_PATH = '/apps/chat#filesync';
+
 export type AppPlatform = 'ios' | 'android' | 'desktop';
 
 export const getAppPlatform = (): AppPlatform => {
