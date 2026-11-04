@@ -1,5 +1,7 @@
+import { AxiosError } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
+import { reactionsRootV2 } from '../../../core/ReactionData/ReactionRoutesV2';
 import { tryJsonParse } from '../../../helpers/DataUtil';
 import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
 import { RawReactionContent, ReactionContext } from '../PostTypes';
@@ -35,11 +37,46 @@ export const removeEmojiReaction = async (
   });
 };
 
+const mapReactionsSummary = (data: ServerReactionsSummary): EmojiReactionSummary => ({
+  reactions: data.reactions
+    .map((reaction) => {
+      try {
+        return {
+          emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+          count: reaction.count,
+        };
+      } catch {
+        console.error('[odin-js] parse failed for', reaction);
+        return;
+      }
+    })
+    .filter(Boolean) as { emoji: string; count: number }[],
+  totalCount: data.total,
+});
+
 export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
   const isLocal = context.odinId === dotYouClient.getHostIdentity();
+
+  const handleSummaryError = (e: AxiosError): EmojiReactionSummary => {
+    dotYouClient.handleErrorResponse(e);
+    return { reactions: [], totalCount: 0 };
+  };
+
+  // V2 addresses a local file by fileId; the channel id is the drive alias. Cursor and max are ignored.
+  // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
+  if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
+    return dotYouClient
+      .createAxiosClient({ v2: true })
+      .post<ServerReactionsSummary>(
+        `${reactionsRootV2(GetTargetDriveFromChannelId(context.channelId).alias, context.target.fileId)}/summary`,
+        { maxRecords: 5 }
+      )
+      .then((response) => mapReactionsSummary(response.data))
+      .catch(handleSummaryError);
+  }
 
   const client = dotYouClient.createAxiosClient();
 
@@ -57,56 +94,19 @@ export const getReactionSummary = async (
     const url = emojiRoot + '/summary';
     return client
       .post<ServerReactionsSummary>(url, data)
-      .then((response) => {
-        return {
-          reactions: response.data.reactions
-            .map((reaction) => {
-              try {
-                return {
-                  emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
-                  count: reaction.count,
-                };
-              } catch {
-                console.error('[odin-js] parse failed for', reaction);
-                return;
-              }
-            })
-            .filter(Boolean) as { emoji: string; count: number }[],
-          totalCount: response.data.total,
-        };
-      })
-      .catch((e) => {
-        dotYouClient.handleErrorResponse(e);
-        return { reactions: [], totalCount: 0 };
-      });
+      .then((response) => mapReactionsSummary(response.data))
+      .catch(handleSummaryError);
   } else {
     const url = emojiRootTransit + '/summary';
     return client
       .post<ServerReactionsSummary>(url, { odinId: context.odinId, request: data })
-      .then((response) => {
-        return {
-          reactions: response.data.reactions
-            .map((reaction) => {
-              try {
-                return {
-                  emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
-                  count: reaction.count,
-                };
-              } catch {
-                console.error('[odin-js] parse failed for', reaction);
-                return;
-              }
-            })
-            .filter(Boolean) as { emoji: string; count: number }[],
-          totalCount: response.data.total,
-        };
-      })
-      .catch((e) => {
-        dotYouClient.handleErrorResponse(e);
-        return { reactions: [], totalCount: 0 };
-      });
+      .then((response) => mapReactionsSummary(response.data))
+      .catch(handleSummaryError);
   }
 };
+
+const mapEmojiStrings = (data: string[] | undefined) =>
+  data?.map((emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji);
 
 export const getMyReactions = async (
   dotYouClient: DotYouClient,
@@ -116,6 +116,20 @@ export const getMyReactions = async (
   cursor?: string
 ): Promise<string[] | undefined> => {
   const isLocal = context.odinId === dotYouClient.getHostIdentity();
+  const identity = odinId || dotYouClient.getHostIdentity();
+
+  // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
+  if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
+    return dotYouClient
+      .createAxiosClient({ v2: true })
+      .post<string[]>(
+        `${reactionsRootV2(GetTargetDriveFromChannelId(context.channelId).alias, context.target.fileId)}/listbyidentity`,
+        { identity: identity }
+      )
+      .then((response) => mapEmojiStrings(response.data))
+      .catch(dotYouClient.handleErrorResponse);
+  }
+
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -124,7 +138,7 @@ export const getMyReactions = async (
       fileId: context.target.fileId,
       globalTransitId: context.target.globalTransitId,
     },
-    identity: odinId || dotYouClient.getHostIdentity(),
+    identity: identity,
     cursor: cursor,
     maxRecords: pageSize,
   };
@@ -133,21 +147,13 @@ export const getMyReactions = async (
     const url = emojiRoot + '/listbyidentity';
     return client
       .post<string[]>(url, data)
-      .then((response) => {
-        return response.data?.map(
-          (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
-        );
-      })
+      .then((response) => mapEmojiStrings(response.data))
       .catch(dotYouClient.handleErrorResponse);
   } else {
     const url = emojiRootTransit + '/listbyidentity';
     return client
       .post<string[]>(url, { odinId: context.odinId, ...data })
-      .then((response) => {
-        return response.data?.map(
-          (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
-        );
-      })
+      .then((response) => mapEmojiStrings(response.data))
       .catch(dotYouClient.handleErrorResponse);
   }
 };

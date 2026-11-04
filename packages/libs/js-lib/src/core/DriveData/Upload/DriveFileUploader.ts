@@ -26,6 +26,8 @@ import {
   buildManifest,
   pureUpdate,
   buildUpdateManifest,
+  pureUploadV2,
+  pureUpdateV2,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import {
@@ -56,16 +58,31 @@ export const uploadFile = async (
     aesKey?: Uint8Array | undefined;
   }
 ): Promise<UploadResult | void> => {
+  // A new file goes to V2. An overwrite stays on V1: V1's overwrite replaces the whole file (payloads not resent are
+  // dropped, a new key header is taken, storageIntent 'metadataOnly' keeps the payloads under the old key), while V2
+  // refuses overwriteFileId and its PATCH applies per-payload operations to the file it finds.
+  const v2Drive = instructions.storageOptions?.overwriteFileId
+    ? undefined
+    : instructions.storageOptions?.drive;
+
   isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
-      instructions,
-      metadata,
-      payloads,
-      thumbnails,
-    });
+    console.debug(
+      'request',
+      v2Drive
+        ? new URL(`${dotYouClient.getEndpointV2()}/drives/${v2Drive.alias}/files`).pathname
+        : new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname,
+      {
+        instructions,
+        metadata,
+        payloads,
+        thumbnails,
+      }
+    );
 
   if (!instructions.storageOptions?.overwriteFileId && metadata.versionTag) {
-    console.warn('VersionTag is set but no overwriteFileId is provided. You will run into issues since the uniqueId is not used to identify the file for update anymore.');
+    console.warn(
+      'VersionTag is set but no overwriteFileId is provided. You will run into issues since the uniqueId is not used to identify the file for update anymore.'
+    );
   }
 
   // Force isEncrypted on the metadata to match the encrypt flag
@@ -100,13 +117,16 @@ export const uploadFile = async (
   );
 
   // Upload
-  const uploadResult = await pureUpload(
-    dotYouClient,
-    data,
-    systemFileType,
-    onVersionConflict,
-    options?.axiosConfig
-  );
+  const uploadResult = v2Drive
+    ? await pureUploadV2(
+        dotYouClient,
+        v2Drive,
+        data,
+        systemFileType,
+        onVersionConflict,
+        options?.axiosConfig
+      )
+    : await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, options?.axiosConfig);
 
   if (!uploadResult) return;
   uploadResult.keyHeader = keyHeader;
@@ -126,14 +146,26 @@ export const patchFile = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<UpdateResult | void> => {
+  // A local update goes to V2's PATCH by file id. A peer update (locale 'peer') stays on V1: it names the file by its
+  // global transit id and there is no local file, and V2's update routes take a local file id or unique id.
+  const localFile = instructions.locale === 'local' ? instructions.file : undefined;
+
   isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname, {
-      instructions,
-      metadata,
-      payloads,
-      thumbnails,
-      toDeletePayloads,
-    });
+    console.debug(
+      'request',
+      localFile
+        ? new URL(
+            `${dotYouClient.getEndpointV2()}/drives/${localFile.targetDrive.alias}/files/${localFile.fileId}`
+          ).pathname
+        : new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname,
+      {
+        instructions,
+        metadata,
+        payloads,
+        thumbnails,
+        toDeletePayloads,
+      }
+    );
 
   const decryptedKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
@@ -177,13 +209,16 @@ export const patchFile = async (
   );
 
   // Upload
-  const updateResult = await pureUpdate(
-    dotYouClient,
-    data,
-    systemFileType,
-    onVersionConflict,
-    options?.axiosConfig
-  );
+  const updateResult = localFile
+    ? await pureUpdateV2(
+        dotYouClient,
+        localFile,
+        data,
+        systemFileType,
+        onVersionConflict,
+        options?.axiosConfig
+      )
+    : await pureUpdate(dotYouClient, data, systemFileType, onVersionConflict, options?.axiosConfig);
 
   if (!updateResult) return;
   return updateResult;
@@ -272,14 +307,16 @@ export const uploadLocalMetadataTags = async (
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient
-    .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-tags', {
-      localVersionTag: localAppData.versionTag,
-      file: file,
-      tags: localAppData.tags,
-    })
+    .patch<LocalMetadataUploadResult>(
+      `/drives/${file.targetDrive.alias}/files/${file.fileId}/update-local-metadata-tags`,
+      {
+        localVersionTag: localAppData.versionTag,
+        tags: localAppData.tags,
+      }
+    )
     .then((response) => response.data)
     .catch((error) => {
       if (error.response?.data?.errorCode === 'versionTagMismatch') {
@@ -305,12 +342,7 @@ export const uploadLocalMetadataContent = async (
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-  const axiosClient = dotYouClient.createAxiosClient();
-
-  const fileIdentifier: FileIdFileIdentifier = {
-    fileId: file.fileId,
-    targetDrive,
-  };
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   const decryptedKeyHeader = file.sharedSecretEncryptedKeyHeader
     ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)
@@ -323,33 +355,35 @@ export const uploadLocalMetadataContent = async (
   const keyHeader: KeyHeader | undefined =
     file.fileMetadata.isEncrypted && decryptedKeyHeader
       ? {
-        aesKey: decryptedKeyHeader.aesKey,
-        iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
-      }
+          aesKey: decryptedKeyHeader.aesKey,
+          iv: (localAppData.iv && base64ToUint8Array(localAppData.iv)) || getRandom16ByteArray(),
+        }
       : undefined;
 
   const ivToSend = (keyHeader?.iv && uint8ArrayToBase64(keyHeader.iv)) || undefined;
   const encryptedContent =
     keyHeader && localAppData.content
       ? uint8ArrayToBase64(
-        await encryptWithKeyheader(
-          stringToUint8Array(
-            typeof localAppData.content === 'string'
-              ? localAppData.content
-              : jsonStringify64(localAppData.content)
-          ),
-          keyHeader
+          await encryptWithKeyheader(
+            stringToUint8Array(
+              typeof localAppData.content === 'string'
+                ? localAppData.content
+                : jsonStringify64(localAppData.content)
+            ),
+            keyHeader
+          )
         )
-      )
       : localAppData.content;
 
   return await axiosClient
-    .patch<LocalMetadataUploadResult>('/drive/files/update-local-metadata-content', {
-      iv: ivToSend,
-      localVersionTag: localAppData.versionTag,
-      file: fileIdentifier,
-      content: encryptedContent,
-    })
+    .patch<LocalMetadataUploadResult>(
+      `/drives/${targetDrive.alias}/files/${file.fileId}/update-local-metadata-content`,
+      {
+        iv: ivToSend,
+        localVersionTag: localAppData.versionTag,
+        content: encryptedContent,
+      }
+    )
     .then((response) => response.data)
     .catch((error) => {
       if (error.response?.data?.errorCode === 'versionTagMismatch') {

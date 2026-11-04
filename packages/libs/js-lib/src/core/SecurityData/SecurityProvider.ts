@@ -13,10 +13,13 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
     };
   }
 
-  const client = dotYouClient.createAxiosClient();
+  // V2's /auth/context takes an app or a signed-in visitor; V1's guest route also answers an
+  // anonymous visitor, so an anonymous guest stays on V1
+  const v2 = dotYouClient.getType() !== ApiType.Guest || dotYouClient.isAuthenticated();
+  const client = dotYouClient.createAxiosClient({ v2 });
 
   return client
-    .get<SecurityContex>('/security/context')
+    .get<SecurityContex>(v2 ? '/auth/context' : '/security/context')
     .then((response) => response.data)
     .then((context) => {
       return {

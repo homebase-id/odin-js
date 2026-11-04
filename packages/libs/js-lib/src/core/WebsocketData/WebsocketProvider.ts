@@ -14,9 +14,9 @@ import {
 } from './WebsocketTypes';
 import { onlineManager } from '@tanstack/react-query';
 // The use of onlineManager is pretty much useless for browsers.
-// It has been added for better React Native support, 
+// It has been added for better React Native support,
 // where the online/offline events are more reliable,
-// Added to handle scenario where RN gets flooded with reconnect 
+// Added to handle scenario where RN gets flooded with reconnect
 // events when in airplane mode.
 //
 
@@ -43,11 +43,14 @@ const subscribers: {
 
 const isDebug = hasDebugFlag();
 
-// V2 (App only) authenticates the WS upgrade with a Sec-WebSocket-Protocol bearer instead of the
-// preauth cookie, so a browser can connect cross-site where it can send neither the BX0900 header
-// nor the SameSite cookie on the upgrade. 'odin.notify.v1' is echoed by the server so the browser
-// accepts the 101. Mirrors the kube-apiserver subprotocol-bearer pattern.
+// V2 authenticates the WS upgrade with a Sec-WebSocket-Protocol bearer instead of the preauth
+// cookie, so a browser can connect cross-site where it can send neither the BX0900 header nor the
+// SameSite cookie on the upgrade. 'odin.notify.v1' is echoed by the server so the browser accepts
+// the 101. Mirrors the kube-apiserver subprotocol-bearer pattern.
+// The V2 socket only accepts app tokens: an App with a bx0900 token goes to V2; the owner console
+// (cookie only) and an App without a token stay on the V1 cookie route.
 const getV2Protocols = (dotYouClient: DotYouClient): string[] | undefined => {
+  if (dotYouClient.getType() !== ApiType.App) return undefined;
   const token = dotYouClient.getHeaders()['bx0900'];
   if (!token) return undefined;
   // Subprotocol values must be RFC 7230 tokens, so the base64 token is sent base64url-encoded.
@@ -59,13 +62,14 @@ const ConnectSocket = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...;
-  useV2 = false
+  useV2 = true
 ) => {
   if (webSocketClient) throw new Error('Socket already connected');
 
   const apiType = dotYouClient.getType();
-  // V2 is App-only; Owner always stays on the V1 cookie path.
-  const useV2App = useV2 && apiType === ApiType.App;
+  // V2 is App-only (token in the subprotocol); Owner, and an App without a token, use the V1 cookie path.
+  const protocols = useV2 ? getV2Protocols(dotYouClient) : undefined;
+  const useV2App = !!protocols;
 
   // We're already connecting, return the existing promise
   if (connectPromise) return connectPromise;
@@ -74,7 +78,8 @@ const ConnectSocket = async (
     subscribedDrives = drives;
 
     if (!onlineManager.isOnline()) {
-      if (isDebug) console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
+      if (isDebug)
+        console.debug('[WebsocketProvider] Offline, ConnectSocket: skipping connection attempt');
       reconnectPromise = undefined;
       reject('[WebsocketProvider] Offline, cannot connect');
       return;
@@ -98,12 +103,19 @@ const ConnectSocket = async (
       ? `wss://${host}/api/v2/notify/ws-token-wasm`
       : `wss://${host}/api/${apiType === ApiType.Owner ? 'owner' : 'apps'}/v1/notify/ws`;
 
-    const protocols = useV2App ? getV2Protocols(dotYouClient) : undefined;
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    webSocketClient = protocols ? new WebSocket(url, protocols, args) : args ? new WebSocket(url, undefined, args) : new WebSocket(url);
-    if (isDebug) console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
+    // The third argument is the node `ws` client's options (tests, node); browsers take two.
+    const Socket = WebSocket as unknown as new (
+      url: string,
+      protocols?: string | string[],
+      options?: unknown
+    ) => WebSocket;
+    webSocketClient = protocols
+      ? new Socket(url, protocols, args)
+      : args
+        ? new Socket(url, undefined, args)
+        : new Socket(url);
+    if (isDebug)
+      console.debug(`[WebsocketProvider] WebSocket object created, attempting connection`);
     reconnectPromise = undefined;
     isHandshaked = false;
 
@@ -124,8 +136,7 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-          if (!onlineManager.isOnline())
-          {
+          if (!onlineManager.isOnline()) {
             if (isDebug) console.debug(`[WebsocketProvider] Offline, ConnectSocket: skipping ping`);
             return;
           }
@@ -193,7 +204,7 @@ const ReconnectSocket = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
-  useV2 = false
+  useV2 = true
 ) => {
   if (reconnectPromise) return;
 
@@ -209,29 +220,36 @@ const ReconnectSocket = async (
     clearInterval(pingInterval);
 
     // Delay the reconnect to avoid a tight loop on network issues
-    setTimeout(async () => {
-      if (!onlineManager.isOnline()) {
-        if (isDebug) console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
-        reconnectPromise = undefined;
+    setTimeout(
+      async () => {
+        if (!onlineManager.isOnline()) {
+          if (isDebug)
+            console.debug(`[WebsocketProvider] Offline, ReconnectSocket: skipping reconnect`);
+          reconnectPromise = undefined;
+          resolve();
+          return;
+        }
+
+        if (isDebug)
+          console.debug(
+            `[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`
+          );
+
+        try {
+          await ConnectSocket(dotYouClient, drives, args, useV2);
+        } catch (e) {
+          console.error('[WebsocketProvider] Reconnect failed', e);
+          reject();
+
+          // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
+          return;
+        }
+        subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
+
         resolve();
-        return;
-      }
-
-      if (isDebug) console.debug(`[WebsocketProvider] Reconnecting - Delayed reconnect #${reconnectCounter} at ${Date.now()}ms`);
-
-      try {
-        await ConnectSocket(dotYouClient, drives, args, useV2);
-      } catch (e) {
-        console.error('[WebsocketProvider] Reconnect failed', e);
-        reject();
-
-        // Grok recommends we try to disable the recursive call - it'll fallback to Ping timeouts: ReconnectSocket(dotYouClient, drives, args);
-        return;
-      }
-      subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
-
-      resolve();
-    }, Math.min(500 * reconnectCounter, 5000)); //500ms*n, 5s delay max
+      },
+      Math.min(500 * reconnectCounter, 5000)
+    ); //500ms*n, 5s delay max
   });
 };
 
@@ -261,7 +279,7 @@ export const Subscribe = async (
   onReconnect?: () => void,
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
   refId?: string,
-  useV2 = false // App only: authenticate the upgrade with the odin.bearer subprotocol against /api/v2 (cross-site capable)
+  useV2 = true // App with a bx0900 token: authenticate the upgrade with the odin.bearer subprotocol against /api/v2 (cross-site capable); false forces the V1 cookie route
 ): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
@@ -273,7 +291,8 @@ export const Subscribe = async (
   if (subscribers.some((subscriber) => subscriber.handler === handler)) return;
 
   if (!onlineManager.isOnline()) {
-    if (isDebug) console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
+    if (isDebug)
+      console.debug('[WebsocketProvider] Offline, Subscribe: skipping subscription connection');
     return Promise.resolve();
   }
 

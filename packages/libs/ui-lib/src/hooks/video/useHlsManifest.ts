@@ -5,7 +5,6 @@ import {
   SystemFileType,
   TargetDrive,
   decryptKeyHeader,
-  InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
 import {
   stringifyToQueryParams,
@@ -164,24 +163,18 @@ const getSegmentUrl = async (
       systemFileType
     );
 
-  const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    return null;
-  }
+  // Without a shared secret the file's key header can't be opened, so an encrypted video can't play
+  if (!dotYouClient.getSharedSecret()) return null;
 
-  const params = {
-    ...videoDrive,
-    fileId: videoFileId,
-    key: videoFileKey,
-    xfst: systemFileType || 'Standard',
-  };
+  // V2 payload reads take no shared secret, so the url is not encrypted; hls.js adds the token as a Bearer header
+  // (HlsSource). Segments are byte ranges of one file (ffmpeg's single_file), so the url must honour a Range header:
+  // on a local drive that is the ranged route (from 0, length 0 = "to the end"); the peer payload route honours it.
+  const filePath = `drives/${videoDrive.alias}/files/${videoFileId}/payload/${videoFileKey}`;
+  const query = stringifyToQueryParams({ xfst: systemFileType || 'Standard' });
 
-  const unenryptedThumbUrl =
-    odinId !== identity
-      ? `${dotYouClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
-      : `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
-
-  return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
+  return odinId !== identity
+    ? `${dotYouClient.getEndpointV2()}/peer/${encodeURIComponent(odinId)}/${filePath}?${query}`
+    : `${dotYouClient.getEndpointV2()}/${filePath}/0/0?${query}`;
 };
 
 const getKeyUrl = async (aesKey: Uint8Array) => {

@@ -16,6 +16,7 @@ interface GetFileRequest {
   uniqueId: string;
 }
 
+// Stays on V1: V2's peer by-uid route has only `exists`, no header read
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getFileHeaderOverPeerByUniqueId = async <T = string>(

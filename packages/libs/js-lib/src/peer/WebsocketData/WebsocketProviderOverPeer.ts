@@ -98,15 +98,11 @@ const getOrFetchPeerToken = async (
   // Fetch new token
   isDebug && console.debug('[WebsocketProviderOverPeer] Fetching new peer token');
   const token = await dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({ v2: true })
     .post<{
       authenticationToken64: string;
       sharedSecret: string;
-    }>(
-      '/notify/peer/token',
-      { identity: odinId },
-      { validateStatus: () => true }
-    )
+    }>('/peer/notify/token', { identity: odinId }, { validateStatus: () => true })
     .then((response) => response.data)
     .catch((error) => {
       console.error({ error });
@@ -159,7 +155,9 @@ const ConnectSocket = async (
       sharedSecret: activeSs,
     });
 
-    const url = `wss://${directGuestClient.getRoot().split('//')[1]}/api/guest/v1/notify/peer/ws`;
+    // The peer's V2 socket; the upgrade is anonymous and the token above authenticates in-band, as on V1. The
+    // -wasm route also accepts an HTTP/2 Extended CONNECT upgrade, which a browser may use.
+    const url = `wss://${directGuestClient.getRoot().split('//')[1]}/api/v2/peer/notify/ws-token-wasm`;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

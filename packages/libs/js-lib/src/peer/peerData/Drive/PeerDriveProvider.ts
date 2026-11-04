@@ -2,6 +2,7 @@ import { DotYouClient, assertIfDotYouClientIsOwnerOrApp } from '../../../core/Do
 import { TargetDrive, SystemFileType, PagedResult, DriveDefinition } from '../../../core/core';
 
 /// Drive methods:
+// Stays on V1: V2 has no peer drives-by-type route
 //returns all drives for a given type
 export const getDrivesByTypeOverPeer = async (
   dotYouClient: DotYouClient,

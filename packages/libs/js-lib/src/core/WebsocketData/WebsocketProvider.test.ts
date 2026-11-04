@@ -46,36 +46,45 @@ afterEach(() => {
 });
 
 describe('WebsocketProvider V1/V2 selection', () => {
-  it('defaults to the V1 cookie path (no subprotocol) for App connections', async () => {
+  it('defaults to the V2 route with the "odin.bearer." subprotocol (base64url) for an App with a token', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.App, { bx0900: 'ab+/cd==' }), drives, () => {}, undefined, undefined, undefined, undefined, false).catch(() => {});
-    await flush();
-    expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe('wss://example.com/api/apps/v1/notify/ws');
-    expect(captured[0].protocols).toBeUndefined();
-  });
-
-  it('uses the V2 route with the "odin.bearer." subprotocol (base64url) when useV2 is set', async () => {
-    const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.App, { bx0900: 'ab+/cd==' }), drives, () => {}, undefined, undefined, undefined, undefined, true).catch(() => {});
+    Subscribe(makeClient(ApiType.App, { bx0900: 'ab+/cd==' }), drives, () => {}).catch(() => {});
     await flush();
     expect(captured).toHaveLength(1);
     expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-token-wasm');
     expect(captured[0].protocols).toEqual(['odin.notify.v1', 'odin.bearer.ab-_cd']);
   });
 
-  it('omits the subprotocol on V2 when the App has no bx0900 token', async () => {
+  it('uses the V1 cookie path (no subprotocol) for an App when useV2 is false', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.App, {}), drives, () => {}, undefined, undefined, undefined, undefined, true).catch(() => {});
+    Subscribe(
+      makeClient(ApiType.App, { bx0900: 'ab+/cd==' }),
+      drives,
+      () => {},
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      false
+    ).catch(() => {});
     await flush();
     expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-token-wasm');
+    expect(captured[0].url).toBe('wss://example.com/api/apps/v1/notify/ws');
     expect(captured[0].protocols).toBeUndefined();
   });
 
-  it('ignores useV2 for Owner connections (stays on V1 cookie path)', async () => {
+  it('falls back to the V1 cookie path when the App has no bx0900 token', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.Owner, { bx0900: 'ab+/cd==' }), drives, () => {}, undefined, undefined, undefined, undefined, true).catch(() => {});
+    Subscribe(makeClient(ApiType.App, {}), drives, () => {}).catch(() => {});
+    await flush();
+    expect(captured).toHaveLength(1);
+    expect(captured[0].url).toBe('wss://example.com/api/apps/v1/notify/ws');
+    expect(captured[0].protocols).toBeUndefined();
+  });
+
+  it('keeps Owner connections on the V1 cookie path (the V2 socket accepts app tokens only)', async () => {
+    const { Subscribe } = await loadProvider();
+    Subscribe(makeClient(ApiType.Owner, { bx0900: 'ab+/cd==' }), drives, () => {}).catch(() => {});
     await flush();
     expect(captured).toHaveLength(1);
     expect(captured[0].url).toBe('wss://example.com/api/owner/v1/notify/ws');

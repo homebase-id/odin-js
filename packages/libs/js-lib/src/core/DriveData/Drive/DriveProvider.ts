@@ -488,25 +488,8 @@ export interface DriveStatus {
   };
 }
 
+/// Owner only, on V2 as on V1; the drive is addressed by its id, which is the V1 alias
 export const getDriveStatus = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive
-): Promise<DriveStatus> => {
-  assertIfDefined('targetDrive', targetDrive);
-
-  const client = dotYouClient.createAxiosClient();
-
-  return client
-    .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error('[odin-js:getDriveStatus]', error);
-      throw error;
-    });
-};
-
-/// getDriveStatus on the V2 api; owner only, as V1's is
-export const getDriveStatusV2 = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive
 ): Promise<DriveStatus> => {
@@ -518,7 +501,7 @@ export const getDriveStatusV2 = async (
     .get<DriveStatus>(`/drives/${targetDrive.alias}/status`)
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[odin-js:getDriveStatusV2]', error);
+      console.error('[odin-js:getDriveStatus]', error);
       throw error;
     });
 };

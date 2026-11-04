@@ -1,12 +1,13 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { assertIfDefined } from '../../helpers/DataUtil';
 
-const statusPath = '/circles/connections/troubleshooting-info';
+// V2: /api/v2/connections/...
+const statusPath = '/connections/troubleshooting-info';
 export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, odinId: string) => {
   assertIfDefined('DotYouClient is required', dotYouClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return await client
     .post<CircleMembershipStatus>(statusPath, { odinId: odinId })
     .then((res) => res.data)
@@ -35,12 +36,12 @@ export interface CircleMembershipStatusDriveGrantAnalysis {
   driveGrantIsValid: true;
 }
 
-const verifyPath = '/circles/connections/verify-connection';
+const verifyPath = '/connections/verify-connection';
 export const verifyConnection = async (dotYouClient: DotYouClient, odinId: string) => {
   assertIfDefined('DotYouClient is required', dotYouClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return await client
     .post<{ isValid: boolean }>(verifyPath, { odinId: odinId })
     .then((res) => res.data.isValid)

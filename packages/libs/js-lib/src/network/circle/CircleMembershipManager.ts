@@ -1,7 +1,9 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { CircleGrant } from './CircleDataTypes';
 
-const connectionsRoot = '/circles/connections/circles';
+// V2: /api/v2/connections/circles
+const connectionsRootV2 = '/connections/circles';
+// V1 only: V2 lists a circle's identities, not its domains (circles/membership/list returns both)
 const membershipRoot = '/circles/membership';
 
 //Handles management of Circles
@@ -9,14 +11,12 @@ export const removeMemberFromCircle = async (
   dotYouClient: DotYouClient,
   membershipGrant: { odinId: string; circleId: string }
 ) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = connectionsRoot + '/revoke';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = connectionsRootV2 + '/revoke';
 
   return client
     .post(url, membershipGrant)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };
 

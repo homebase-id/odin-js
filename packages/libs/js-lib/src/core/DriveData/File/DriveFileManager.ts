@@ -19,18 +19,17 @@ export const deleteFile = async (
 
   const client = dotYouClient.createAxiosClient({
     systemFileType,
+    v2: true,
   });
 
-  const request = {
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    recipients: recipients,
-  };
+  // V2 names the file by its path. A hard delete takes no body and tells no recipients (V1 refused recipients with a
+  // 400; V2 ignores them); the empty object is only there for the shared-secret interceptor to encrypt.
+  const fileRoot = `/drives/${targetDrive.alias}/files/${fileId}`;
+  const request = hardDelete
+    ? client.post(`${fileRoot}/hard-delete`, {}, axiosConfig)
+    : client.post(`${fileRoot}/delete`, { recipients: recipients }, axiosConfig);
 
-  return client
-    .post(`/drive/files/${hardDelete ? 'harddelete' : 'delete'}`, request, axiosConfig)
+  return request
     .then((response) => {
       if (response.status === 200) {
         return true;
@@ -57,20 +56,18 @@ export const deleteFiles = async (
 
   const client = dotYouClient.createAxiosClient({
     systemFileType,
+    v2: true,
   });
 
   const request = {
     requests: fileIds.map((fileId) => ({
-      file: {
-        targetDrive: targetDrive,
-        fileId: fileId,
-      },
+      fileId: fileId,
       recipients: recipients,
     })),
   };
 
   return client
-    .post('/drive/files/deletefileidbatch', request, axiosConfig)
+    .post(`/drives/${targetDrive.alias}/files/delete-batch/by-file-id`, request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 
@@ -95,18 +92,18 @@ export const deleteFilesByGroupId = async (
 
   const client = dotYouClient.createAxiosClient({
     systemFileType,
+    v2: true,
   });
 
   const request = {
     requests: groupIds.map((groupId) => ({
-      targetDrive: targetDrive,
       groupId: groupId,
       recipients: recipients,
     })),
   };
 
   return client
-    .post('/drive/files/deletegroupidbatch', request, axiosConfig)
+    .post(`/drives/${targetDrive.alias}/files/delete-batch/by-group-id`, request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 

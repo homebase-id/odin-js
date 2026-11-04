@@ -1,11 +1,5 @@
-import { AxiosRequestConfig } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
-import {
-  decryptKeyHeader,
-  decryptJsonContent,
-  decryptChunkedBytesResponse,
-  decryptBytesResponse,
-} from '../../../core/DriveData/SecurityHelpers';
+import { decryptKeyHeader, decryptJsonContent } from '../../../core/DriveData/SecurityHelpers';
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/constants';
 import {
   TargetDrive,
@@ -19,29 +13,10 @@ import {
 import {
   assertIfDefined,
   tryJsonParse,
-  stringifyToQueryParams,
   assertIfDefinedAndNotDefault,
 } from '../../../helpers/DataUtil';
-import {
-  getAxiosClient,
-  getRangeHeader,
-  parseBytesToObject,
-} from '../../../core/DriveData/File/DriveFileHelper';
-
-interface GetFileRequest {
-  odinId: string;
-  alias: string;
-  type: string;
-  globalTransitId: string;
-}
-
-interface GetPayloadRequest extends GetFileRequest {
-  key: string;
-}
-
-interface GetThumbRequest extends GetFileRequest {
-  payloadKey: string;
-}
+import { getAxiosClientV2, parseBytesToObject } from '../../../core/DriveData/File/DriveFileHelper';
+import { getPeerPayloadBytesV2, getPeerThumbBytesV2, peerFileByGtidV2 } from '../PeerRoutesV2';
 
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
@@ -94,59 +69,13 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetPayloadRequest = {
-    odinId: odinId,
-    ...targetDrive,
-    globalTransitId,
-    key: key,
-  };
-
-  const config: AxiosRequestConfig = {
-    responseType: 'arraybuffer',
-  };
-
-  const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
-  config.headers = {
-    ...config.headers,
-    range: rangeHeader,
-  };
-
-  return client
-    .get<ArrayBuffer>(
-      '/transit/query/payload_byglobaltransitid?' +
-        stringifyToQueryParams({ ...request, lastModified }),
-      config
-    )
-    .then(async (response) => {
-      if (!response.data) return null;
-      return {
-        bytes: !decrypt
-          ? new Uint8Array(response.data)
-          : updatedChunkStart !== undefined
-            ? (
-                await decryptChunkedBytesResponse(
-                  dotYouClient,
-                  response,
-                  startOffset,
-                  updatedChunkStart
-                )
-              ).slice(
-                0,
-                chunkEnd !== undefined && chunkStart !== undefined
-                  ? chunkEnd - chunkStart
-                  : undefined
-              )
-            : await decryptBytesResponse(dotYouClient, response),
-
-        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
-      };
-    })
-    .catch((error) => {
-      if (error.response?.status === 404) return null;
-      console.error('[odin-js:getPayloadBytesOverPeerByGlobalTransitId]', error);
-      return null;
-    });
+  return getPeerPayloadBytesV2(
+    dotYouClient,
+    peerFileByGtidV2(odinId, targetDrive.alias, globalTransitId),
+    key,
+    { systemFileType, chunkStart, chunkEnd, decrypt, lastModified },
+    'getPayloadBytesOverPeerByGlobalTransitId'
+  );
 };
 
 export const getThumbBytesOverPeerByGlobalTransitId = async (
@@ -171,35 +100,16 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetThumbRequest = {
-    odinId: odinId,
-    ...targetDrive,
-    globalTransitId,
-    payloadKey: payloadKey,
-  };
 
-  const config: AxiosRequestConfig = {
-    responseType: 'arraybuffer',
-  };
-
-  return client
-    .get<ArrayBuffer>(
-      '/transit/query/thumb_byglobaltransitid?' +
-        stringifyToQueryParams({ ...request, width, height, lastModified }),
-      config
-    )
-    .then(async (response) => {
-      return {
-        bytes: await decryptBytesResponse(dotYouClient, response),
-        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-      };
-    })
-    .catch((error) => {
-      if (error.response?.status === 404) return null;
-      console.error('[odin-js:getThumbBytesOverPeerByGlobalTransitId]', error);
-      return null;
-    });
+  return getPeerThumbBytesV2(
+    dotYouClient,
+    peerFileByGtidV2(odinId, targetDrive.alias, globalTransitId),
+    payloadKey,
+    width,
+    height,
+    { systemFileType, lastModified },
+    'getThumbBytesOverPeerByGlobalTransitId'
+  );
 };
 
 export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
@@ -259,16 +169,10 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
     if (cacheData) return cacheData;
   }
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileRequest = {
-    odinId: odinId,
-    ...targetDrive,
-    globalTransitId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise = client
-    .get('/transit/query/header_byglobaltransitid?' + stringifyToQueryParams(request))
+    .get(`${peerFileByGtidV2(odinId, targetDrive.alias, globalTransitId)}/header`)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

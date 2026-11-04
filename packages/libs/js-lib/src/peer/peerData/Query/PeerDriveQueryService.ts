@@ -12,12 +12,8 @@ import {
   QueryModifiedResponse,
   QueryBatchResponseWithDeletedResults,
 } from '../../../core/core';
-
-interface TransitQueryBatchRequest {
-  queryParams: FileQueryParams;
-  resultOptionsRequest: GetBatchQueryResultOptions;
-  odinId: string;
-}
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
 type QueryBatchParamsWithoutFileState = Omit<FileQueryParams, 'fileState'>;
 interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState'> {
@@ -46,19 +42,22 @@ export const queryBatchOverPeer = async <
   };
   delete strippedQueryParams.systemFileType;
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType: params.systemFileType,
-  });
+  const client = getAxiosClientV2(dotYouClient, params.systemFileType);
 
-  const request: TransitQueryBatchRequest = {
-    queryParams: strippedQueryParams,
+  // V2 names the peer and the drive in the route; the query itself no longer carries the drive
+  const { targetDrive, ...queryParams } = strippedQueryParams;
+  const request: {
+    queryParams: Omit<FileQueryParams, 'targetDrive'>;
+    resultOptionsRequest: GetBatchQueryResultOptions;
+  } = {
+    queryParams,
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
-    odinId: odinId,
   };
 
   if (decrypt) request.resultOptionsRequest.includeMetadataHeader = true;
 
-  return client.post<R>('/transit/query/batch', request, axiosConfig).then(async (response) => {
+  const url = `${peerDriveRootV2(odinId, targetDrive.alias)}/query-batch`;
+  return client.post<R>(url, request, axiosConfig).then(async (response) => {
     if (decrypt) {
       return {
         ...response.data,
@@ -92,6 +91,7 @@ interface TransitQueryModifiedRequest {
 }
 
 /// Query methods:
+// Stays on V1: V2 has no peer query-modified route
 export const queryModifiedOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,

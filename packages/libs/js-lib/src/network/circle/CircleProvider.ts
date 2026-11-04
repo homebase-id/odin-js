@@ -8,7 +8,11 @@ import {
 import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 
 //Handles management of Circles
+// V1: list, get, create, update, set-owner and reassign-owner have no V2 equivalent for every caller
+// (V2 has no single get, no update, no ownership moves, and its create is apps-only)
 const root = '/circles/definitions';
+// V2: /api/v2/connections/circles
+const rootV2 = '/connections/circles';
 
 export const CONFIRMED_CONNECTIONS_CIRCLE_ID = 'bb2683fa402aff866e771a6495765a15';
 export const AUTO_CONNECTIONS_CIRCLE_ID = '9e22b42952f74d2580e11250b651d343';
@@ -184,26 +188,22 @@ export const reassignCircleOwningApp = async (
 };
 
 export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/disable';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/disable';
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };
 
 export const enableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/enable';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/enable';
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };
 
@@ -216,13 +216,11 @@ export const removeCircle = async (
   circleId: string,
   options?: { removeMembers?: boolean }
 ) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };

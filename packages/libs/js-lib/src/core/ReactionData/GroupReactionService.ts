@@ -1,6 +1,7 @@
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { EmojiReaction, TargetDrive } from '../DriveData/File/DriveFileTypes';
+import { groupReactionsRootV2 } from './ReactionRoutesV2';
 
 export interface GroupEmojiReaction {
   odinId: string;
@@ -16,6 +17,8 @@ interface ServerReactionsListWithCursor {
   reactions: GroupEmojiReaction[];
   cursor: string;
 }
+// V1. getGroupReactions and uploadGroupReaction address the message by globalTransitId only; V2's group
+// reaction routes take a fileId in the path and have no by-gtid form, so those two stay here.
 const emojiRoot = '/drive/files/group/reactions';
 
 export const getGroupReactions = async (
@@ -87,6 +90,22 @@ export const deleteGroupReaction = async (
     targetDrive: TargetDrive;
   }
 ) => {
+  const reactionContent = JSON.stringify({ emoji: emoji.body });
+
+  if (target.fileId) {
+    // V2 reads the globalTransitId off the local file (target.fileId on target.targetDrive)
+    return await dotYouClient
+      .createAxiosClient({ v2: true })
+      .delete(groupReactionsRootV2(target.targetDrive.alias, target.fileId), {
+        data: {
+          transitOptions: {
+            recipients: [...recipients],
+          },
+          reaction: reactionContent,
+        },
+      });
+  }
+
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.delete(emojiRoot, {
@@ -98,7 +117,7 @@ export const deleteGroupReaction = async (
         targetDrive: targetDrive,
         globalTransitId: target.globalTransitId,
       },
-      reaction: JSON.stringify({ emoji: emoji.body }),
+      reaction: reactionContent,
     },
   });
 };

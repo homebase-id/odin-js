@@ -6,11 +6,12 @@ import {
   GetBatchQueryResultOptions,
   QueryBatchResponse,
   QueryBatchCollectionResponse,
+  QueryBatchResponseResult,
   QueryBatchResponseWithDeletedResults,
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
-import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
-import { AxiosRequestConfig } from 'axios';
+import { stringifyToQueryParams } from '../../../helpers/DataUtil';
+import { AxiosError, AxiosRequestConfig } from 'axios';
 import { decryptJsonContent, decryptKeyHeader } from '../SecurityHelpers';
 
 interface GetModifiedRequest {
@@ -18,8 +19,8 @@ interface GetModifiedRequest {
   resultOptions: GetModifiedResultOptions;
 }
 
-interface GetBatchRequest {
-  queryParams: FileQueryParams;
+interface GetBatchRequestV2 {
+  queryParams: Omit<FileQueryParams, 'targetDrive'>;
   resultOptionsRequest: GetBatchQueryResultOptions;
 }
 
@@ -118,12 +119,16 @@ const toBatchQueryParams = (
     // is userDateStart and userDateEnd are userDate unset, we set userDate values
     userDateStart: params.userDate ? params.userDate.start : params.userDateStart,
     userDateEnd: params.userDate ? params.userDate.end : params.userDateEnd,
-    userDate: 'userDateStart' in params && 'userDateEnd' in params && params.userDateStart !== undefined && params.userDateEnd !== undefined
-      ? {
-        start: params.userDateStart,
-        end: params.userDateEnd,
-      }
-      : params.userDate,
+    userDate:
+      'userDateStart' in params &&
+      'userDateEnd' in params &&
+      params.userDateStart !== undefined &&
+      params.userDateEnd !== undefined
+        ? {
+            start: params.userDateStart,
+            end: params.userDateEnd,
+          }
+        : params.userDate,
   };
   delete strippedQueryParams.systemFileType;
   return strippedQueryParams;
@@ -146,60 +151,13 @@ const decryptBatchResults = async <R>(dotYouClient: DotYouClient, data: R): Prom
   ),
 });
 
+/// The query is always a POST on V2 (its body is shared-secret encrypted), with the drive in the route: its id is the
+/// V1 alias, and the query params carry no targetDrive
 export const queryBatch = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
-  ? QueryBatchResponseWithDeletedResults
-  : QueryBatchResponse,
->(
-  dotYouClient: DotYouClient,
-  params: T,
-  ro?: GetBatchQueryResultOptions,
-  options?: {
-    decrypt?: boolean;
-    axiosConfig?: AxiosRequestConfig;
-  }
-): Promise<R> => {
-  const { decrypt, axiosConfig } = options ?? {};
-
-  const client = dotYouClient.createAxiosClient({
-    systemFileType: params.systemFileType,
-  });
-
-  const request: GetBatchRequest = {
-    queryParams: toBatchQueryParams(params),
-    resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
-  };
-
-  if (decrypt) request.resultOptionsRequest.includeMetadataHeader = true;
-
-  const requestPromise = (() => {
-    const queryParams = stringifyToQueryParams({
-      ...request.queryParams,
-      ...request.resultOptionsRequest,
-    });
-
-
-    const getUrl = '/drive/query/batch?' + queryParams;
-    // Max Url is 1800 so we keep room for encryption overhead
-    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<R>('/drive/query/batch', request, axiosConfig);
-    } else {
-      return client.get<R>(getUrl, axiosConfig);
-    }
-  })();
-
-  return requestPromise.then(async (response) =>
-    decrypt ? decryptBatchResults(dotYouClient, response.data) : response.data
-  );
-};
-
-/// queryBatch on the V2 api: the drive is in the route (its id is the V1 alias), and the query is always a POST
-export const queryBatchV2 = async <
-  T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
-  R = T extends QueryBatchParamsWithFileState
-  ? QueryBatchResponseWithDeletedResults
-  : QueryBatchResponse,
+    ? QueryBatchResponseWithDeletedResults
+    : QueryBatchResponse,
 >(
   dotYouClient: DotYouClient,
   params: T,
@@ -218,9 +176,7 @@ export const queryBatchV2 = async <
 
   const { targetDrive, ...queryParams } = toBatchQueryParams(params);
 
-  const request: Omit<GetBatchRequest, 'queryParams'> & {
-    queryParams: Omit<FileQueryParams, 'targetDrive'>;
-  } = {
+  const request: GetBatchRequestV2 = {
     queryParams,
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
@@ -234,6 +190,10 @@ export const queryBatchV2 = async <
     );
 };
 
+/// Runs each query as its own V2 query-batch, in parallel. V2's query-batch-collection is not used: its maxRecords
+/// is one budget for the whole call, filled greedily in order, where each query here asks for its own maxRecords.
+/// As V1's collection did, a query on a drive the caller may not read comes back empty with `invalidDrive`, rather
+/// than failing the others; any other error fails the call.
 export const queryBatchCollection = async (
   dotYouClient: DotYouClient,
   queries: {
@@ -247,69 +207,41 @@ export const queryBatchCollection = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<QueryBatchCollectionResponse> => {
-  const { decrypt, axiosConfig } = config ?? {};
+  if (new Set(queries.map((query) => query.name)).size !== queries.length)
+    throw new Error('[odin-js] queryBatchCollection: the names of queries must be unique');
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
+  const results = await Promise.all(
+    queries.map(async (query): Promise<QueryBatchResponseResult> => {
+      const ro = { ...(query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION) };
+      try {
+        const response = await queryBatch<QueryBatchParamsWithFileState, QueryBatchResponse>(
+          dotYouClient,
+          {
+            ...query.queryParams,
+            fileState: query.queryParams.fileState || [1],
+            // The collection's file system applies to every query, as V1's request header did
+            systemFileType,
+          },
+          ro,
+          config
+        );
+        return { ...response, name: query.name };
+      } catch (error) {
+        const status = (error as AxiosError)?.response?.status;
+        if (status !== 401 && status !== 403) throw error;
 
-  const updatedQueries = queries.map((query) => {
-    const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
-    if (decrypt) ro.includeMetadataHeader = true;
-    return {
-      ...query,
-      queryParams: { ...query.queryParams, fileState: query.queryParams.fileState || [1] },
-      resultOptionsRequest: ro,
-    };
-  });
+        // As V1's FromInvalidDrive: no rows, no cursor
+        return {
+          name: query.name,
+          invalidDrive: true,
+          searchResults: [],
+          includeMetadataHeader: false,
+          queryTime: 0,
+          cursorState: null,
+        } as unknown as QueryBatchResponseResult;
+      }
+    })
+  );
 
-  const requestPromise = (() => {
-    const queryParams = stringifyArrayToQueryParams([
-      ...updatedQueries.map((q) => ({ name: q.name, ...q.queryParams, ...q.resultOptionsRequest })),
-    ]);
-
-    const getUrl = '/drive/query/batchcollection?' + queryParams;
-    // Max Url is 1800 so we keep room for encryption overhead
-    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryBatchCollectionResponse>(
-        '/drive/query/batchcollection',
-        {
-          queries: updatedQueries,
-        },
-        axiosConfig
-      );
-    } else {
-      return client.get<QueryBatchCollectionResponse>(getUrl, axiosConfig);
-    }
-  })();
-
-  return requestPromise.then(async (response) => {
-    if (decrypt) {
-      return {
-        ...response.data,
-        results: await Promise.all(
-          response.data.results.map(async (result) => {
-            return {
-              ...result,
-              searchResults: await Promise.all(
-                result.searchResults.map(async (dsr) => {
-                  const keyheader = dsr.fileMetadata.isEncrypted
-                    ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
-                    : undefined;
-
-                  dsr.fileMetadata.appData.content = await decryptJsonContent(
-                    dsr.fileMetadata,
-                    keyheader
-                  );
-                  return dsr;
-                })
-              ),
-            };
-          })
-        ),
-      };
-    }
-
-    return response.data;
-  });
+  return { results };
 };
