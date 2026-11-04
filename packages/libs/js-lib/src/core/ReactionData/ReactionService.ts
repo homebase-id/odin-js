@@ -6,9 +6,8 @@ import {
   FileIdFileIdentifier,
   GlobalTransitIdFileIdentifier,
 } from '../DriveData/File/DriveFileTypes';
-import { getLocalFileId, reactionsRootV2 } from './ReactionRoutesV2';
+import { getLocalFileId, peerReactionsRootV2, reactionsRootV2 } from './ReactionRoutesV2';
 
-const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 
 export interface ServerReactionsListWithCursor {
@@ -19,15 +18,22 @@ export interface ServerReactionsListWithCursor {
   cursor: string;
 }
 
-// A local file with a fileId goes to V2; another identity's file, or a file addressed only by
-// globalTransitId, keeps its V1 route (V2 has neither). So does an anonymous visitor: V2's reaction
-// routes are OwnerOrAppOrGuest, which needs a signed-in caller, where V1's guest routes answer anyone.
+// Local and peer routes take the same bodies, so a caller only needs the root. A local file with a fileId, for a
+// signed-in caller, and any file on another identity (by its globalTransitId), go to V2. A local file with no fileId
+// keeps V1, as does an anonymous visitor: V2's local reaction routes are OwnerOrAppOrGuest, which needs a signed-in
+// caller, where V1's guest routes answer anyone.
 const getV2Root = (
   dotYouClient: DotYouClient,
   odinId: string | undefined,
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
 ): string | undefined => {
-  if (odinId !== dotYouClient.getHostIdentity()) return undefined;
+  if (odinId !== dotYouClient.getHostIdentity()) {
+    const globalTransitId = 'globalTransitId' in file ? file.globalTransitId : undefined;
+    if (!odinId || !globalTransitId) {
+      throw new Error('A reaction on another identity needs its odinId and a globalTransitId');
+    }
+    return peerReactionsRootV2(odinId, file.targetDrive.alias, globalTransitId);
+  }
   if (!dotYouClient.isAuthenticated()) return undefined;
   const fileId = getLocalFileId(file);
   return fileId ? reactionsRootV2(file.targetDrive.alias, fileId) : undefined;
@@ -56,7 +62,6 @@ export const uploadReaction = async (
       .catch(dotYouClient.handleErrorResponse);
   }
 
-  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -64,21 +69,12 @@ export const uploadReaction = async (
     file: file,
   };
 
-  if (isLocal) {
-    const url = emojiRoot + '/add';
-    return client
-      .post(url, data)
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/add';
-    return client
-      .post(url, { odinId: odinId, request: data })
-      .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
-      .catch(dotYouClient.handleErrorResponse);
-  }
+  return client
+    .post(emojiRoot + '/add', data)
+    .then((response) => {
+      return { ...response.data, status: response.data?.status?.toLowerCase() };
+    })
+    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const deleteReaction = async (
@@ -97,7 +93,6 @@ export const deleteReaction = async (
       .catch(dotYouClient.handleErrorResponse);
   }
 
-  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -106,23 +101,12 @@ export const deleteReaction = async (
     file: file,
   };
 
-  if (isLocal) {
-    const url = emojiRoot + '/delete';
-    return client
-      .post(url, data)
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/delete';
-    return client
-      .post(url, { odinId: odinId, request: data })
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  }
+  return client
+    .post(emojiRoot + '/delete', data)
+    .then((response) => {
+      return { ...response.data, status: response.data?.status?.toLowerCase() };
+    })
+    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const getReactions = async (
@@ -144,7 +128,6 @@ export const getReactions = async (
       .catch(dotYouClient.handleErrorResponse);
   }
 
-  const isLocal = odinId === dotYouClient.getHostIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -153,17 +136,8 @@ export const getReactions = async (
     maxRecords: pageSize,
   };
 
-  if (isLocal) {
-    const url = emojiRoot + '/list';
-    return client
-      .post<ServerReactionsListWithCursor>(url, data)
-      .then((response) => mapReactionsList(response.data))
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/list';
-    return client
-      .post<ServerReactionsListWithCursor>(url, { odinId: odinId, request: data })
-      .then((response) => mapReactionsList(response.data))
-      .catch(dotYouClient.handleErrorResponse);
-  }
+  return client
+    .post<ServerReactionsListWithCursor>(emojiRoot + '/list', data)
+    .then((response) => mapReactionsList(response.data))
+    .catch(dotYouClient.handleErrorResponse);
 };

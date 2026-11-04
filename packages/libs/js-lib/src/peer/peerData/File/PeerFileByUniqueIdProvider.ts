@@ -4,19 +4,11 @@ import { TargetDrive, HomebaseFile, SystemFileType } from '../../../core/core';
 import {
   assertIfDefined,
   tryJsonParse,
-  stringifyToQueryParams,
   assertIfDefinedAndNotDefault,
 } from '../../../helpers/DataUtil';
-import { getAxiosClient } from '../../../core/DriveData/File/DriveFileHelper';
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
-interface GetFileRequest {
-  odinId: string;
-  alias: string;
-  type: string;
-  uniqueId: string;
-}
-
-// Stays on V1: V2's peer by-uid route has only `exists`, no header read
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getFileHeaderOverPeerByUniqueId = async <T = string>(
@@ -76,16 +68,10 @@ export const getFileHeaderBytesOverPeerByUniqueId = async (
     if (cacheData) return cacheData;
   }
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileRequest = {
-    odinId: odinId,
-    ...targetDrive,
-    uniqueId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise = client
-    .get('/transit/query/header_byuniqueId?' + stringifyToQueryParams(request))
+    .get(`${peerDriveRootV2(odinId, targetDrive.alias)}/files/by-uid/${uniqueId}/header`)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

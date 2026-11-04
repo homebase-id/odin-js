@@ -1,14 +1,8 @@
-import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
+import { assertIfDefined, tryJsonParse } from '../../../helpers/DataUtil';
 import { DotYouClient } from '../../DotYouClient';
 import { decryptKeyHeader, decryptJsonContent } from '../SecurityHelpers';
-import { getCacheKey, getAxiosClient } from './DriveFileHelper';
+import { getCacheKey, getAxiosClientV2 } from './DriveFileHelper';
 import { TargetDrive, SystemFileType, HomebaseFile } from './DriveFileTypes';
-
-interface GetFileByGlobalTransitIdRequest {
-  alias: string;
-  type: string;
-  globalTransitId: string;
-}
 
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
@@ -66,15 +60,10 @@ export const getFileHeaderBytesByGlobalTransitId = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileByGlobalTransitIdRequest = {
-    ...targetDrive,
-    globalTransitId: uniqueId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise: Promise<HomebaseFile | null> = client
-    .get<HomebaseFile>('/drive/files/header_byglobaltransitid?' + stringifyToQueryParams(request))
+    .get<HomebaseFile>(`/drives/${targetDrive.alias}/files/by-gtid/${uniqueId}/header`)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

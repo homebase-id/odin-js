@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
-import { reactionsRootV2 } from '../../../core/ReactionData/ReactionRoutesV2';
+import { peerReactionsRootV2, reactionsRootV2 } from '../../../core/ReactionData/ReactionRoutesV2';
 import { tryJsonParse } from '../../../helpers/DataUtil';
 import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
 import { RawReactionContent, ReactionContext } from '../PostTypes';
@@ -13,7 +13,6 @@ interface ServerReactionsSummary {
   total: number;
 }
 
-const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
@@ -65,15 +64,28 @@ export const getReactionSummary = async (
     return { reactions: [], totalCount: 0 };
   };
 
+  const driveId = GetTargetDriveFromChannelId(context.channelId).alias;
+
+  // Another identity's file, by the globalTransitId both copies share
+  if (!isLocal) {
+    return dotYouClient
+      .createAxiosClient({ v2: true })
+      .post<ServerReactionsSummary>(
+        `${peerReactionsRootV2(context.odinId, driveId, context.target.globalTransitId)}/summary`,
+        {}
+      )
+      .then((response) => mapReactionsSummary(response.data))
+      .catch(handleSummaryError);
+  }
+
   // V2 addresses a local file by fileId; the channel id is the drive alias. Cursor and max are ignored.
   // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
   if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
     return dotYouClient
       .createAxiosClient({ v2: true })
-      .post<ServerReactionsSummary>(
-        `${reactionsRootV2(GetTargetDriveFromChannelId(context.channelId).alias, context.target.fileId)}/summary`,
-        { maxRecords: 5 }
-      )
+      .post<ServerReactionsSummary>(`${reactionsRootV2(driveId, context.target.fileId)}/summary`, {
+        maxRecords: 5,
+      })
       .then((response) => mapReactionsSummary(response.data))
       .catch(handleSummaryError);
   }
@@ -90,19 +102,10 @@ export const getReactionSummary = async (
     maxRecords: 5,
   };
 
-  if (isLocal) {
-    const url = emojiRoot + '/summary';
-    return client
-      .post<ServerReactionsSummary>(url, data)
-      .then((response) => mapReactionsSummary(response.data))
-      .catch(handleSummaryError);
-  } else {
-    const url = emojiRootTransit + '/summary';
-    return client
-      .post<ServerReactionsSummary>(url, { odinId: context.odinId, request: data })
-      .then((response) => mapReactionsSummary(response.data))
-      .catch(handleSummaryError);
-  }
+  return client
+    .post<ServerReactionsSummary>(emojiRoot + '/summary', data)
+    .then((response) => mapReactionsSummary(response.data))
+    .catch(handleSummaryError);
 };
 
 const mapEmojiStrings = (data: string[] | undefined) =>
@@ -117,15 +120,27 @@ export const getMyReactions = async (
 ): Promise<string[] | undefined> => {
   const isLocal = context.odinId === dotYouClient.getHostIdentity();
   const identity = odinId || dotYouClient.getHostIdentity();
+  const driveId = GetTargetDriveFromChannelId(context.channelId).alias;
+
+  // Another identity's file, by the globalTransitId both copies share
+  if (!isLocal) {
+    return dotYouClient
+      .createAxiosClient({ v2: true })
+      .post<string[]>(
+        `${peerReactionsRootV2(context.odinId, driveId, context.target.globalTransitId)}/listbyidentity`,
+        { identity: identity }
+      )
+      .then((response) => mapEmojiStrings(response.data))
+      .catch(dotYouClient.handleErrorResponse);
+  }
 
   // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
   if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
     return dotYouClient
       .createAxiosClient({ v2: true })
-      .post<string[]>(
-        `${reactionsRootV2(GetTargetDriveFromChannelId(context.channelId).alias, context.target.fileId)}/listbyidentity`,
-        { identity: identity }
-      )
+      .post<string[]>(`${reactionsRootV2(driveId, context.target.fileId)}/listbyidentity`, {
+        identity: identity,
+      })
       .then((response) => mapEmojiStrings(response.data))
       .catch(dotYouClient.handleErrorResponse);
   }
@@ -143,17 +158,8 @@ export const getMyReactions = async (
     maxRecords: pageSize,
   };
 
-  if (isLocal) {
-    const url = emojiRoot + '/listbyidentity';
-    return client
-      .post<string[]>(url, data)
-      .then((response) => mapEmojiStrings(response.data))
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/listbyidentity';
-    return client
-      .post<string[]>(url, { odinId: context.odinId, ...data })
-      .then((response) => mapEmojiStrings(response.data))
-      .catch(dotYouClient.handleErrorResponse);
-  }
+  return client
+    .post<string[]>(emojiRoot + '/listbyidentity', data)
+    .then((response) => mapEmojiStrings(response.data))
+    .catch(dotYouClient.handleErrorResponse);
 };

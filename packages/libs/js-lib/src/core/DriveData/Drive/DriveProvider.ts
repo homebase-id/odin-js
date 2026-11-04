@@ -62,8 +62,9 @@ export const getDrivesByType = async (
         };
       });
   } else {
-    const client = dotYouClient.createAxiosClient();
-    return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
+    const client = dotYouClient.createAxiosClient({ v2: true });
+    const v2Params = { type, pageNumber, pageSize };
+    return client.get('/drives?' + stringifyToQueryParams(v2Params)).then((response) => {
       return {
         ...response.data,
         results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {
