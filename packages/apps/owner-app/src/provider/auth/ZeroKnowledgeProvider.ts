@@ -209,18 +209,26 @@ const getDeal = (dotYouClient: DotYouClient) =>
     .get<DealerShardConfig | ''>('/security/recovery/config')
     .then((response) => response.data || null);
 
-/** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
-const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
-  const key = await dotYouClient
+/**
+ * A friend's Shard Recovery write-only public key, served to anyone. `callerMayWrite` says whether they let this
+ * identity write there, which they do once they have reviewed its connection: until then the server refuses a deal
+ * that gives them a shard (`notReviewedByOwner`).
+ */
+export const getShardRecoveryPublicKey = (dotYouClient: DotYouClient, odinId: string) =>
+  dotYouClient
     .createAxiosClient()
-    .get<{ publicKeyJwk: string; isZeroKnowledge: boolean }>(
+    .get<{ publicKeyJwk: string; isZeroKnowledge: boolean; callerMayWrite: boolean }>(
       `${dotYouClient.getRoot()}/api/v2/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
     )
     .then((response) => response.data);
 
+/** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
+const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
+  const key = await getShardRecoveryPublicKey(dotYouClient, odinId);
+
   // Until they log in once more, their server holds the private key and could release the shard itself
   if (!key.isZeroKnowledge) {
-    throw new Error(t(`${odinId} has to log in to Homebase once more before they can hold a shard that needs their approval`));
+    throw new Error(t('{0} has to log in to Homebase once more before they can hold a shard that needs their approval', odinId));
   }
   return key.publicKeyJwk;
 };
@@ -269,6 +277,10 @@ export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsReq
     .post('/security/recovery/configure-shards', request)
     .catch((error) => {
       console.warn(error);
+      // Shamir's own text: circle key copies use the same code. Only the server's untranslated text names the friend.
+      if (error?.response?.data?.errorCode === 'notReviewedByOwner') {
+        throw new Error(t("A friend you picked hasn't reviewed your connection yet, so they can't hold a shard; ask them to, or pick someone else"));
+      }
       throw new Error(getKnownOdinErrorMessages(error) ?? failure);
     });
 

@@ -3,7 +3,8 @@ import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
 import {ConnectionImage, ConnectionName, t} from "@homebase-id/common-app";
 import {ReactNode} from "react";
 
-export type Status = "loading" | "valid" | "invalid" | "notConnected" | "error" | "moot";
+// notReviewed: reachable, but they haven't reviewed this connection, so can't hold a shard yet
+export type Status = "loading" | "valid" | "invalid" | "notConnected" | "notReviewed" | "error" | "moot";
 
 export const PlayerListItem = ({
                                    player,
