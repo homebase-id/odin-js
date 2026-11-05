@@ -22,7 +22,6 @@ import {
   GenerateKeyHeader,
   buildDescriptor,
   buildFormData,
-  pureUpload,
   buildManifest,
   pureUpdate,
   buildUpdateManifest,
@@ -30,6 +29,7 @@ import {
   pureUpdateV2,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
+import { deleteFile } from '../File/DriveFileManager';
 import {
   base64ToUint8Array,
   getRandom16ByteArray,
@@ -58,19 +58,29 @@ export const uploadFile = async (
     aesKey?: Uint8Array | undefined;
   }
 ): Promise<UploadResult | void> => {
-  // A new file goes to V2. An overwrite stays on V1: V1's overwrite replaces the whole file (payloads not resent are
-  // dropped, a new key header is taken, storageIntent 'metadataOnly' keeps the payloads under the old key), while V2
-  // refuses overwriteFileId and its PATCH applies per-payload operations to the file it finds.
-  const v2Drive = instructions.storageOptions?.overwriteFileId
-    ? undefined
-    : instructions.storageOptions?.drive;
+  const drive = instructions.storageOptions?.drive;
+  if (!drive) throw new Error('storageOptions.drive is required');
+
+  const overwriteFileId = instructions.storageOptions?.overwriteFileId;
+  if (overwriteFileId) {
+    return await overwriteFile(
+      dotYouClient,
+      drive,
+      overwriteFileId,
+      instructions,
+      metadata,
+      payloads,
+      thumbnails,
+      encrypt,
+      onVersionConflict,
+      options
+    );
+  }
 
   isDebug &&
     console.debug(
       'request',
-      v2Drive
-        ? new URL(`${dotYouClient.getEndpointV2()}/drives/${v2Drive.alias}/files`).pathname
-        : new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname,
+      new URL(`${dotYouClient.getEndpointV2()}/drives/${drive.alias}/files`).pathname,
       {
         instructions,
         metadata,
@@ -79,9 +89,9 @@ export const uploadFile = async (
       }
     );
 
-  if (!instructions.storageOptions?.overwriteFileId && metadata.versionTag) {
+  if (metadata.versionTag) {
     console.warn(
-      'VersionTag is set but no overwriteFileId is provided. You will run into issues since the uniqueId is not used to identify the file for update anymore.'
+      'VersionTag is set but no overwriteFileId is provided. You will run into issues since the uniqueId is not used for the overwrite'
     );
   }
 
@@ -117,20 +127,113 @@ export const uploadFile = async (
   );
 
   // Upload
-  const uploadResult = v2Drive
-    ? await pureUploadV2(
-        dotYouClient,
-        v2Drive,
-        data,
-        systemFileType,
-        onVersionConflict,
-        options?.axiosConfig
-      )
-    : await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, options?.axiosConfig);
+  const uploadResult = await pureUploadV2(
+    dotYouClient,
+    drive,
+    data,
+    systemFileType,
+    onVersionConflict,
+    options?.axiosConfig
+  );
 
   if (!uploadResult) return;
   uploadResult.keyHeader = keyHeader;
   return uploadResult;
+};
+
+/**
+ * Replaces an existing file, on V2's PATCH: the file keeps its id, global transit id and AES key, and any payload
+ * not sent again is deleted. PATCH can't change whether a file is encrypted, so that switch deletes the file and
+ * creates it again, which gives it a new file id and global transit id.
+ */
+const overwriteFile = async (
+  dotYouClient: DotYouClient,
+  drive: TargetDrive,
+  fileId: string,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads: PayloadFile[] | undefined,
+  thumbnails: ThumbnailFile[] | undefined,
+  encrypt: boolean,
+  onVersionConflict: (() => Promise<void | UploadResult> | void) | undefined,
+  options: { axiosConfig?: AxiosRequestConfig; aesKey?: Uint8Array | undefined } | undefined
+): Promise<UploadResult | void> => {
+  // Payloads encrypted with a caller's key could not be read under the file's own key, which PATCH requires
+  if (options?.aesKey)
+    throw new Error('An overwrite cannot take an aesKey: it keeps the key of the file');
+
+  const { systemFileType, transitOptions } = instructions;
+  const existing = await getFileHeader(dotYouClient, drive, fileId, {
+    decrypt: false,
+    systemFileType,
+  });
+  if (!existing) throw new Error(`The file to overwrite was not found: ${fileId}`);
+
+  if (existing.fileMetadata.isEncrypted !== encrypt) {
+    // A stale save must not delete the newer file
+    if (metadata.versionTag && metadata.versionTag !== existing.fileMetadata.versionTag) {
+      if (onVersionConflict) return await onVersionConflict();
+      throw new Error(`The file to overwrite has changed: ${fileId}`);
+    }
+
+    await deleteFile(
+      dotYouClient,
+      drive,
+      fileId,
+      undefined,
+      systemFileType,
+      options?.axiosConfig,
+      true
+    );
+    return await uploadFile(
+      dotYouClient,
+      {
+        ...instructions,
+        storageOptions: { ...instructions.storageOptions, drive, overwriteFileId: undefined },
+      },
+      { ...metadata, versionTag: undefined },
+      payloads,
+      thumbnails,
+      encrypt,
+      onVersionConflict,
+      options
+    );
+  }
+
+  const keyHeader = encrypt
+    ? await decryptKeyHeader(dotYouClient, existing.sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  const toDeletePayloads = (existing.fileMetadata.payloads ?? [])
+    .filter((existingPayload) => !payloads?.some((payload) => payload.key === existingPayload.key))
+    .map((existingPayload) => ({ key: existingPayload.key }));
+
+  const result = await patchFile(
+    dotYouClient,
+    keyHeader,
+    {
+      file: { fileId, targetDrive: drive },
+      versionTag: metadata.versionTag ?? existing.fileMetadata.versionTag,
+      locale: 'local',
+      systemFileType,
+      transferIv: instructions.transferIv,
+      recipients:
+        transitOptions && 'recipients' in transitOptions ? transitOptions.recipients : undefined,
+    },
+    {
+      ...metadata,
+      isEncrypted: encrypt,
+      versionTag: metadata.versionTag ?? existing.fileMetadata.versionTag,
+    },
+    payloads,
+    thumbnails,
+    toDeletePayloads,
+    onVersionConflict,
+    options?.axiosConfig ? { axiosConfig: options.axiosConfig } : undefined
+  );
+
+  if (!result) return;
+  return { ...result, file: result.file ?? { fileId, targetDrive: drive }, keyHeader };
 };
 
 export const patchFile = async (

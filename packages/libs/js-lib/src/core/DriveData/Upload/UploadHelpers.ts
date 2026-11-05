@@ -196,45 +196,6 @@ export const buildFormData = async (
   return data;
 };
 
-export const pureUpload = async (
-  dotYouClient: DotYouClient,
-  data: FormData,
-  systemFileType?: SystemFileType,
-  onVersionConflict?: () => Promise<void | UploadResult> | void,
-  axiosConfig?: AxiosRequestConfig
-): Promise<UploadResult | void> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
-  const url = '/drive/files/upload';
-
-  const config: AxiosRequestConfig = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  return client
-    .post<UploadResult>(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch') {
-        if (!onVersionConflict) {
-          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
-        } else {
-          return onVersionConflict();
-        }
-      }
-
-      if (error.response?.status === 400)
-        console.error('[odin-js:pureUpload]', error.response?.data);
-      else console.error('[odin-js:pureUpload]', error);
-      throw error;
-    });
-};
-
 export const pureUpdate = async (
   dotYouClient: DotYouClient,
   data: FormData,

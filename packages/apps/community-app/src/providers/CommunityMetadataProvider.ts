@@ -139,7 +139,6 @@ export const uploadCommunityMetadata = async (
   const instructionSet: UploadInstructionSet = {
     storageOptions: {
       drive: LOCAL_COMMUNITY_APP_DRIVE,
-      overwriteFileId: definition.fileId,
     },
   };
   const result = await uploadFile(
