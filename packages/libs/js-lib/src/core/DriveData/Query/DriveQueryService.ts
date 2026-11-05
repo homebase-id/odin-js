@@ -1,8 +1,6 @@
 import { DotYouClient } from '../../DotYouClient';
 import {
   FileQueryParams,
-  GetModifiedResultOptions,
-  QueryModifiedResponse,
   GetBatchQueryResultOptions,
   QueryBatchResponse,
   QueryBatchCollectionResponse,
@@ -10,26 +8,13 @@ import {
   QueryBatchResponseWithDeletedResults,
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
-import { stringifyToQueryParams } from '../../../helpers/DataUtil';
 import { AxiosError, AxiosRequestConfig } from 'axios';
 import { decryptJsonContent, decryptKeyHeader } from '../SecurityHelpers';
-
-interface GetModifiedRequest {
-  queryParams: FileQueryParams;
-  resultOptions: GetModifiedResultOptions;
-}
 
 interface GetBatchRequestV2 {
   queryParams: Omit<FileQueryParams, 'targetDrive'>;
   resultOptionsRequest: GetBatchQueryResultOptions;
 }
-
-export const DEFAULT_QUERY_MODIFIED_RESULT_OPTION = {
-  cursor: undefined,
-  maxRecords: 10,
-  includeHeaderContent: true,
-  excludePreviewThumbnail: false,
-};
 
 export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
   cursorState: undefined,
@@ -38,72 +23,6 @@ export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
 };
 
 /// Query methods:
-export const queryModified = async (
-  dotYouClient: DotYouClient,
-  params: FileQueryParams,
-  ro?: GetModifiedResultOptions,
-  options?: {
-    decrypt?: boolean;
-    axiosConfig?: AxiosRequestConfig;
-  }
-): Promise<QueryModifiedResponse> => {
-  const { decrypt, axiosConfig } = options ?? {};
-
-  const strippedQueryParams = { ...params };
-  delete strippedQueryParams.systemFileType;
-
-  const client = dotYouClient.createAxiosClient({
-    systemFileType: params.systemFileType,
-  });
-
-  const request: GetModifiedRequest = {
-    queryParams: params,
-    resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
-  };
-
-  if (decrypt) request.resultOptions.includeHeaderContent = true;
-
-  const requestPromise = (() => {
-    const queryParams = stringifyToQueryParams({
-      ...request.queryParams,
-      ...request.resultOptions,
-    });
-
-    const getUrl = '/drive/query/modified?' + queryParams;
-    // Max Url is 1800 so we keep room for encryption overhead
-    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryModifiedResponse>('/drive/query/modified', request, axiosConfig);
-    } else {
-      return client.get<QueryModifiedResponse>(getUrl, axiosConfig);
-    }
-  })();
-
-  return requestPromise.then(async (response) => {
-    // Decrypt the content if requested
-    if (decrypt) {
-      return {
-        ...response.data,
-        searchResults: await Promise.all(
-          response.data.searchResults.map(async (dsr) => {
-            const keyheader = dsr.fileMetadata.isEncrypted
-              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
-              : undefined;
-
-            dsr.fileMetadata.appData.content = await decryptJsonContent(
-              dsr.fileMetadata,
-              keyheader
-            );
-
-            return dsr;
-          })
-        ),
-      };
-    }
-
-    return response.data;
-  });
-};
-
 type QueryBatchParamsWithoutFileState = Omit<FileQueryParams, 'fileState'>;
 interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState'> {
   fileState: (0 | 1)[];

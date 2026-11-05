@@ -10,11 +10,8 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './ConnectionManager';
-import { ConnectionRequestResult } from './ConnectionRequestResult';
 
 //Handles making and reading requests to connect with others
-// V1 root: only send-request-with-outcome is left on it (V2 has no equivalent)
-const Root = '/circles/requests';
 // V2: /api/v2/connections
 const ConnectionsRootV2 = '/connections';
 const RequestsRootV2 = ConnectionsRootV2 + '/requests';
@@ -154,28 +151,6 @@ export const sendRequest = async (
       dotYouClient.handleErrorResponse(error);
       throw error;
     });
-};
-
-export const sendConnectionRequestWithOutcome = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  message: string,
-  circleIds: string[]
-): Promise<ConnectionRequestResult> => {
-  const url = Root + '/send-request-with-outcome';
-  const data: ConnectionRequestHeader = {
-    recipient: odinId,
-    message: message,
-    circleIds: circleIds,
-  };
-
-  const client = dotYouClient.createAxiosClient();
-  return client
-    .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {

@@ -156,9 +156,9 @@ export interface TargetDriveAccessRequest extends TargetDrive {
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
-  const response = await client.get('/auth/verifytoken').catch((_error) => {
+  const response = await client.get('/auth/verify-token').catch((_error) => {
     return { status: _error?.response?.status || 404 };
   });
 
@@ -366,7 +366,7 @@ export const openTokenFieldWith = (cipher: string | undefined | null) => {
 };
 
 export const logout = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   await client
     .post('/auth/logout', undefined, {

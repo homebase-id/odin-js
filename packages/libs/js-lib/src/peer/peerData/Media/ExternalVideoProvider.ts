@@ -56,15 +56,14 @@ export const getDecryptedVideoUrlOverPeer = async (
     systemFileType,
   });
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpointV2();
 
-    return `${host}/drive/files/payload?${stringifyToQueryParams({
-      ...targetDrive,
-      fileId,
-      key,
-      xfst: systemFileType || 'Standard',
-      iac: true,
-    })}`;
+    return `${host}/drives/${targetDrive.alias}/files/${fileId}/payload/${key}?${stringifyToQueryParams(
+      {
+        xfst: systemFileType || 'Standard',
+        iac: true,
+      }
+    )}`;
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
@@ -97,14 +96,13 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
     }
   );
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
-    return `${host}/drive/files/payload?${stringifyToQueryParams({
-      ...targetDrive,
-      fileId: meta?.fileId,
-      key,
-      xfst: systemFileType || 'Standard',
-      iac: true,
-    })}`;
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpointV2();
+    return `${host}/drives/${targetDrive.alias}/files/${meta?.fileId}/payload/${key}?${stringifyToQueryParams(
+      {
+        xfst: systemFileType || 'Standard',
+        iac: true,
+      }
+    )}`;
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted

@@ -12,11 +12,6 @@ import { TargetDrive, SystemFileType, ContentType } from './DriveFileTypes';
 export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boolean) =>
   `${targetDrive.alias}-${targetDrive.type}+${id}+${decrypt}`;
 
-export const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileType) =>
-  dotYouClient.createAxiosClient({
-    systemFileType,
-  });
-
 /// A client on the unified V2 api (`/api/v2`). `noSharedSecret` is for the actions marked
 /// [NoSharedSecretOnRequest]/[NoSharedSecretOnResponse] (payload and thumb reads): they take their query string
 /// in the clear (an encrypted `?ss=` is passed through unread) and answer with raw bytes, so the client skips
