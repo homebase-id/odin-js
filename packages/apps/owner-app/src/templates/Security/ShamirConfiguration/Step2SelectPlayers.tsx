@@ -10,6 +10,7 @@ import {
 import { ReactNode, useEffect, useState } from "react";
 import { ConfigureTrustedConnections } from "./ConfigureTrustedConnections";
 import { ShamiraPlayer } from "../../../provider/auth/ShamirProvider";
+import { Status } from "./PlayerListItem";
 
 export const Step2SelectPlayers = ({
                                        addPlayer,
@@ -25,7 +26,7 @@ export const Step2SelectPlayers = ({
     const [query, setQuery] = useState<string>("");
     const { data: contacts } = useAllContacts(true);
     const [verificationResults, setVerificationResults] = useState<
-        Record<string, { isValid?: boolean }>
+        Record<string, { status: Status }>
     >({});
     const [allPlayersVerified, setAllPlayersVerified] = useState(false);
     const [forceVerify, setForceVerify] = useState(0);
@@ -33,7 +34,7 @@ export const Step2SelectPlayers = ({
     useEffect(() => {
         const allValid =
             players.length > 0 &&
-            players.every((p) => verificationResults[p.odinId]?.isValid === true);
+            players.every((p) => verificationResults[p.odinId]?.status === "valid");
 
         setAllPlayersVerified(allValid);
         onPlayerValidityChange(allValid);

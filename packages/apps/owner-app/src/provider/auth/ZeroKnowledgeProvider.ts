@@ -222,9 +222,6 @@ export const getShardRecoveryPublicKey = (dotYouClient: DotYouClient, odinId: st
     )
     .then((response) => response.data);
 
-export const notReviewedText = (odinId: string) =>
-  t("{0} hasn't reviewed your connection yet, so they can't hold a shard", odinId);
-
 /** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
 const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
   const key = await getShardRecoveryPublicKey(dotYouClient, odinId);

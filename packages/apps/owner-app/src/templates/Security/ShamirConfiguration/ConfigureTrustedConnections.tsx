@@ -14,14 +14,12 @@ import {
     VerifyRemotePlayerReadinessRequest,
 } from "../../../provider/auth/ShamirProvider";
 import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
-import {getShardRecoveryPublicKey, notReviewedText} from "../../../provider/auth/ZeroKnowledgeProvider";
+import {getShardRecoveryPublicKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {Status, trustEmoji, trustLabel} from "./PlayerListItem"; // ✅ import helpers
 
 type VerificationInfo = {
     status: Status;
     trustLevel?: ShardTrustLevel;
-    /** Whether they can hold a shard, which gates Next: reachable, and they have reviewed this connection */
-    isValid?: boolean;
     isZeroKnowledge?: boolean;
 };
 
@@ -49,6 +47,7 @@ export const ConfigureTrustedConnections = ({
     >({});
 
     const dotYouClient = useDotYouClientContext();
+    const pickedKey = trustedPlayers.map((p) => p.odinId).join(",");
 
     // A friend removed is checked afresh when added again: after they review this connection, say
     useEffect(() => {
@@ -57,7 +56,7 @@ export const ConfigureTrustedConnections = ({
             const kept = Object.fromEntries(Object.entries(prev).filter(([odinId]) => picked.has(odinId)));
             return Object.keys(kept).length === Object.keys(prev).length ? prev : kept;
         });
-    }, [trustedPlayers.map(p => p.odinId).join(",")]);
+    }, [pickedKey]);
 
     useEffect(() => {
         if (!enableVerification || !trustedPlayers?.length) return;
@@ -84,16 +83,14 @@ export const ConfigureTrustedConnections = ({
                             .catch(() => undefined),
                     ]);
 
+                    // Only "valid" can hold a shard, which gates Next
+                    const status: Status = !res ? "error"
+                        : !res.isValid ? "invalid"
+                        : callerMayWrite === false ? "notReviewed"
+                        : "valid";
                     setStatuses((prev) => ({
                         ...prev,
-                        [player.odinId]: res
-                            ? {
-                                status: !res.isValid ? "invalid" : callerMayWrite === false ? "notReviewed" : "valid",
-                                trustLevel: res.trustLevel,
-                                isValid: res.isValid && callerMayWrite !== false,
-                                isZeroKnowledge: res.isZeroKnowledge,
-                            }
-                            : {status: "error"},
+                        [player.odinId]: {status, trustLevel: res?.trustLevel, isZeroKnowledge: res?.isZeroKnowledge},
                     }));
                 } catch (e) {
                     console.error(e);
@@ -110,7 +107,7 @@ export const ConfigureTrustedConnections = ({
 
         verifyNewPlayers();
         // Only re-run when a new odinId appears or verification is toggled
-    }, [enableVerification, trustedPlayers.map(p => p.odinId).join(","), forceVerify, dotYouClient]);
+    }, [enableVerification, pickedKey, forceVerify, dotYouClient]);
 
 
     return (
@@ -137,7 +134,6 @@ export const ConfigureTrustedConnections = ({
                                 trustLevel={
                                     enableVerification ? info.trustLevel : undefined
                                 }
-                                isValid={enableVerification ? info.isValid : true}
                                 // Only a friend who must approve needs a zero-knowledge drive, and only a check
                                 // that reached them can say theirs isn't; a failed check shows as unavailable
                                 canApprove={
@@ -170,7 +166,6 @@ const SelectedConnectionItem = ({
                                     showPlayerType,
                                     verificationStatus,
                                     trustLevel,
-                                    isValid,
                                     canApprove = true,
                                 }: {
     player: ShamiraPlayer;
@@ -181,7 +176,6 @@ const SelectedConnectionItem = ({
     allowRemove?: boolean;
     verificationStatus: Status;
     trustLevel?: ShardTrustLevel;
-    isValid?: boolean;
     canApprove?: boolean;
 }) => {
     // ✅ Use the same color logic as PlayerListItem
@@ -216,11 +210,11 @@ const SelectedConnectionItem = ({
                 {verificationStatus === "loading" ? (
                     <span className="text-slate-500">{t("Verifying...")}</span>
                 ) : verificationStatus === "notReviewed" ? (
-                    <span className="text-xs text-red-600">{notReviewedText(player.odinId)}</span>
+                    <span className="text-xs text-red-600">
+                        {t("{0} hasn't reviewed your connection yet, so they can't hold a shard", player.odinId)}
+                    </span>
                 ) : (
-                    (verificationStatus === "invalid" ||
-                        verificationStatus === "error" ||
-                        !isValid) && (
+                    verificationStatus !== "valid" && verificationStatus !== "moot" && (
                         <span className="text-xs text-red-600">
                             {t("⚠ Unavailable")}
                         </span>
