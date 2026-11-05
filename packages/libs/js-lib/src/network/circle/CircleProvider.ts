@@ -8,9 +8,8 @@ import {
 import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 
 //Handles management of Circles
-// V1: list, get, create, update, set-owner and reassign-owner have no V2 equivalent for every caller
-// (V2 has no single get, no update, no ownership moves, and its create is apps-only)
-const root = '/circles/definitions';
+// V2: /api/v2/connections/circles/definitions
+const root = '/connections/circles/definitions';
 // V2: /api/v2/connections/circles
 const rootV2 = '/connections/circles';
 
@@ -29,7 +28,7 @@ export const updateCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/update';
 
   const data: ServerCircleUpdateRequest = {
@@ -62,7 +61,7 @@ export const createCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/create';
 
   const data: ServerCircleUpdateRequest = {
@@ -90,7 +89,7 @@ export const getCircles = async (
   dotYouClient: DotYouClient,
   excludeSystemCircles: boolean
 ): Promise<CircleDefinition[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url =
     root +
     '/list' +
@@ -120,7 +119,7 @@ export const getCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<CircleDefinition> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/get';
 
   const circleDef = await client.post<CircleDefinition>(url, circleId).then((response) => {
@@ -152,7 +151,7 @@ export const setCircleOwningApp = async (
   circleId: string,
   appId: string
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/set-owner';
 
   return client
@@ -178,7 +177,7 @@ export const reassignCircleOwningApp = async (
   circleId: string,
   appId: string
 ): Promise<ReassignCircleOwningAppResult> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/reassign-owner';
 
   return client

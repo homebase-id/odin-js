@@ -15,8 +15,8 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
   // the call to the endpoint will automatically include the
   // cookie.  we just need to check the success code
 
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
-  return client.get('/authentication/verifyToken').then((response) => {
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
+  return client.get('/auth/owner/verifyToken').then((response) => {
     return response.data;
   });
 };
@@ -25,10 +25,10 @@ const logoutOwner = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
 
-  //withCredentials lets us set the cookies return from the /admin/authentication endpoint
-  return client.get('/authentication/logout', { withCredentials: true }).then((response) => {
+  //withCredentials lets us set the cookies return from the owner logout endpoint
+  return client.get('/auth/owner/logout', { withCredentials: true }).then((response) => {
     return response.data;
   });
 };
@@ -46,6 +46,15 @@ export const logoutOwnerAndAllApps = async (
     await removeCurrentRegisteredDevice(dotYouClient);
   } catch (ex) {
     console.warn('Failed unregister push notifiations', ex);
+  }
+
+  // Before the apps: while the owner's cookie is there, V2 reads it ahead of an app's bearer token, so an app's logout
+  // would be the owner's request and leave the app's session alive
+  try {
+    // Remove session from server
+    await logoutOwner();
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
   }
 
   try {
@@ -77,13 +86,6 @@ export const logoutOwnerAndAllApps = async (
       localStorage.removeItem(`BX0900_${key}`);
       localStorage.removeItem(`APPS_${key}`);
     });
-  } catch (ex) {
-    console.warn('Failed to logout on the server', ex);
-  }
-
-  try {
-    // Remove session from server
-    await logoutOwner();
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);
   }

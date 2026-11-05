@@ -23,8 +23,8 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/authentication';
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const url = '/auth/owner';
 
   const response = await client.post(url, reply);
 
@@ -76,8 +76,8 @@ export const setFirstPassword = async (
   const reply = await prepareAuthPassword(newPassword, salts);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/passwd', {...reply, firstRunToken})
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/passwd', {...reply, firstRunToken})
     .then((response) => {
       return response.status === 200;
     })
@@ -99,8 +99,8 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
   const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
     .then((response) => {
       return response.status === 200;
     })
@@ -131,8 +131,8 @@ export const changePassword = async (
   }
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: false})
-    .post('/security/resetpasswd', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
+    .createAxiosClient({overrideEncryption: false, v2: true})
+    .post('/security/reset-password', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
     .then((response) => {
       return response.status === 200;
     })
@@ -172,8 +172,8 @@ export const isPasswordSet = async (): Promise<boolean> => {
   });
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/ispasswordset')
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/ispasswordset')
     .then((response) => {
       return response.data == true;
     });

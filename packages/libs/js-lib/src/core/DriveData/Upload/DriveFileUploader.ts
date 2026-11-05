@@ -7,6 +7,7 @@ import {
   EncryptedKeyHeader,
   LocalAppData,
   FileIdFileIdentifier,
+  GlobalTransitIdFileIdentifier,
   HomebaseFile,
   TargetDrive,
 } from '../File/DriveFileTypes';
@@ -23,10 +24,10 @@ import {
   buildDescriptor,
   buildFormData,
   buildManifest,
-  pureUpdate,
   buildUpdateManifest,
   pureUploadV2,
   pureUpdateV2,
+  pureUpdateOverPeerV2,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { deleteFile } from '../File/DriveFileManager';
@@ -249,9 +250,12 @@ export const patchFile = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<UpdateResult | void> => {
-  // A local update goes to V2's PATCH by file id. A peer update (locale 'peer') stays on V1: it names the file by its
-  // global transit id and there is no local file, and V2's update routes take a local file id or unique id.
+  // A local update goes to V2's PATCH by file id. A peer update (locale 'peer') has no local file: it names the file by
+  // its global transit id, on the one recipient V2 puts in the path.
   const localFile = instructions.locale === 'local' ? instructions.file : undefined;
+  const peerRecipient = instructions.recipients?.[0];
+  if (!localFile && (instructions.recipients?.length !== 1 || !peerRecipient))
+    throw new Error('A peer update needs exactly one recipient');
 
   isDebug &&
     console.debug(
@@ -260,7 +264,7 @@ export const patchFile = async (
         ? new URL(
             `${dotYouClient.getEndpointV2()}/drives/${localFile.targetDrive.alias}/files/${localFile.fileId}`
           ).pathname
-        : new URL(`${dotYouClient.getEndpoint()}/drive/files/update`).pathname,
+        : `peer update on ${peerRecipient}`,
       {
         instructions,
         metadata,
@@ -321,7 +325,15 @@ export const patchFile = async (
         onVersionConflict,
         options?.axiosConfig
       )
-    : await pureUpdate(dotYouClient, data, systemFileType, onVersionConflict, options?.axiosConfig);
+    : await pureUpdateOverPeerV2(
+        dotYouClient,
+        peerRecipient as string,
+        instructions.file as GlobalTransitIdFileIdentifier,
+        data,
+        systemFileType,
+        onVersionConflict,
+        options?.axiosConfig
+      );
 
   if (!updateResult) return;
   return updateResult;

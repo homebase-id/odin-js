@@ -12,7 +12,8 @@ import { useEffect } from 'react';
 import { MinimalLayout } from '../../ui/Layout/Layout';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
 
-const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
+// Used only on this page's own host, so the same server version. YouAuthLoginBox goes to the identity typed in, on V1.
+const AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();

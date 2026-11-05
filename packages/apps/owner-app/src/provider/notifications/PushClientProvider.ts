@@ -7,9 +7,9 @@ export const getApplicationServerKey = async () => {
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return await client
-    .get<string>('/public/keys/notifications_pk', {
+    .get<string>('/public/keys/notifications-pk', {
       validateStatus: () => true,
     })
     .then((response) => response.data);

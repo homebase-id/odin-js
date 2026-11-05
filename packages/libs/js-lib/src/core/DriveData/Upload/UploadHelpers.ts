@@ -196,46 +196,6 @@ export const buildFormData = async (
   return data;
 };
 
-export const pureUpdate = async (
-  dotYouClient: DotYouClient,
-  data: FormData,
-  systemFileType?: SystemFileType,
-  onVersionConflict?: () => Promise<void | UpdateResult> | void,
-  axiosConfig?: AxiosRequestConfig
-): Promise<UpdateResult | void> => {
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType,
-  });
-  const url = '/drive/files/update';
-
-  const config = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  return client
-    .patch(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch') {
-        if (!onVersionConflict) {
-          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
-        } else {
-          return onVersionConflict();
-        }
-      }
-
-      console.error('[odin-js:pureUpdate]', error);
-      throw error;
-    });
-};
-
 /// V2 (/api/v2) create and update. The multipart body is the same as V1's: an `instructions` part in plain JSON, a
 /// `metadata` part encrypted with the shared secret under the instruction set's transferIv, then the payloads and
 /// thumbnails (both actions are [NoSharedSecretOnRequest]/[NoSharedSecretOnResponse], so the client sends no
@@ -352,6 +312,28 @@ export const pureUpdateV2 = async (
     onVersionConflict,
     axiosConfig,
     'pureUpdateV2'
+  );
+
+/// Updates a file on another identity, with no local copy: PATCH /api/v2/peer/{odinId}/drives/{driveId}/files/by-gtid/{gtid}
+export const pureUpdateOverPeerV2 = async (
+  dotYouClient: DotYouClient,
+  recipient: string,
+  file: GlobalTransitIdFileIdentifier,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<UpdateResult | void> =>
+  sendMultipartV2<UpdateResult>(
+    dotYouClient,
+    'patch',
+    `/peer/${recipient}/drives/${file.targetDrive.alias}/files/by-gtid/${file.globalTransitId}`,
+    file.targetDrive,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig,
+    'pureUpdateOverPeerV2'
   );
 
 export const GenerateKeyHeader = (aesKey?: Uint8Array): KeyHeader => {

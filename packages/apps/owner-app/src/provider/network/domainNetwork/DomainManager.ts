@@ -1,6 +1,6 @@
 import { DotYouClient } from '@homebase-id/js-lib/core';
 
-const root = '/youauthdomain';
+const root = '/youauth-domains';
 
 export interface DomainClient {
   accessRegistrationClientType: string;
@@ -12,7 +12,7 @@ export interface DomainClient {
 }
 
 export const getDomainClients = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = `${root}/clients?domain=${domain}`;
 
   return client.get<DomainClient[]>(url).then((response) => {
@@ -25,8 +25,8 @@ export const removeDomainClient = async (
   domain: string,
   accessRegistrationId: string
 ) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/deleteClient';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = root + '/delete-client';
 
   return client.post(url, { accessRegistrationId }).then((response) => {
     return response.data;
@@ -34,7 +34,7 @@ export const removeDomainClient = async (
 };
 
 export const revokeDomainAccess = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/revoke';
 
   return client.post(url, { domain }).then((response) => {
@@ -43,7 +43,7 @@ export const revokeDomainAccess = async (dotYouClient: DotYouClient, domain: str
 };
 
 export const restoreDomainAccess = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/allow';
 
   return client.post(url, { domain }).then((response) => {
@@ -52,8 +52,8 @@ export const restoreDomainAccess = async (dotYouClient: DotYouClient, domain: st
 };
 
 export const disconnectFromDomain = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/deleteDomain';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = root + '/delete-domain';
 
   return client.post(url, { domain }).then((response) => {
     return response.data;

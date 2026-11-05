@@ -34,8 +34,8 @@ export const GetAppClients = async (
   dotYouClient: DotYouClient,
   appId: string
 ): Promise<AppClientRegistration[]> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post<AppClientRegistration[]>(`appmanagement/clients`, {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post<AppClientRegistration[]>(`app-management/clients`, {
     appId: appId,
   });
   return response.data;
@@ -45,8 +45,8 @@ export const RemoveClient = async (
   dotYouClient: DotYouClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/deleteClient', {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post('app-management/delete-client', {
     accessRegistrationId: request.registrationId,
   });
   return response.data;
@@ -56,8 +56,8 @@ export const RevokeClient = async (
   dotYouClient: DotYouClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/revokeClient', {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post('app-management/revoke-client', {
     accessRegistrationId: request.registrationId,
   });
   return response.data;
@@ -67,8 +67,8 @@ export const AllowClient = async (
   dotYouClient: DotYouClient,
   request: { appId: string; registrationId: string }
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/allowClient', {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post('app-management/allow-client', {
     accessRegistrationId: request.registrationId,
   });
   return response.data;
@@ -91,9 +91,9 @@ export const RegisterApp = async (
   dotYouClient: DotYouClient,
   request: AppRegistrationRequest
 ): Promise<RedactedAppRegistration> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const response = await client.post<RedactedAppRegistration>(
-    'appmanagement/register/app',
+    'app-management/register/app',
     toServerAppRegistrationRequest(request)
   );
 
@@ -123,9 +123,9 @@ export const GetAppRegistration = async (
   dotYouClient: DotYouClient,
   request: GetAppRequest
 ): Promise<RedactedAppRegistration | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const appreg = await client
-    .post<RedactedAppRegistration>('appmanagement/app', request)
+    .post<RedactedAppRegistration>('app-management/app', request)
     .then((response) => response.data);
   if (!appreg) return;
 
@@ -159,8 +159,8 @@ export const GetAppRegistration = async (
 export const GetAppRegistrations = async (
   dotYouClient: DotYouClient
 ): Promise<RedactedAppRegistration[]> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.get<RedactedAppRegistration[]>('appmanagement/list');
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.get<RedactedAppRegistration[]>('app-management/list');
 
   return response.data.map((appreg) => {
     return {
@@ -195,16 +195,16 @@ export const RevokeApp = async (
   dotYouClient: DotYouClient,
   request: GetAppRequest
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
-  await client.post('appmanagement/revoke', request);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  await client.post('app-management/revoke', request);
 };
 
 export const AllowApp = async (
   dotYouClient: DotYouClient,
   request: GetAppRequest
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
-  return await client.post('appmanagement/allow', request).then((response) => response.data);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  return await client.post('app-management/allow', request).then((response) => response.data);
 };
 
 /**
@@ -215,8 +215,8 @@ export const UninstallApp = async (
   dotYouClient: DotYouClient,
   request: { appId: string; deleteOwnedCirclesAndDrives: boolean }
 ): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
-  return await client.post('appmanagement/uninstall', request).then((response) => response.data);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  return await client.post('app-management/uninstall', request).then((response) => response.data);
 };
 
 export const UpdateAuthorizedCircles = async (
@@ -227,8 +227,8 @@ export const UpdateAuthorizedCircles = async (
     circleMemberPermissionGrant: PermissionSetGrantRequest;
   }
 ) => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/register/updateauthorizedcircles', {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post('app-management/register/update-authorized-circles', {
     ...request,
     circleMemberPermissionGrant: {
       ...request.circleMemberPermissionGrant,
@@ -262,8 +262,8 @@ export const UpdatePermissions = async (
     }, [] as DriveGrant[]),
   };
 
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/register/updateapppermissions', {
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const response = await client.post('app-management/register/update-app-permissions', {
     ...cleanedUpRequest,
     drives: cleanedUpRequest.drives.map(toServerDriveGrant),
   });

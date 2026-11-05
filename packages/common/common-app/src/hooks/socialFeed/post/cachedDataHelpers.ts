@@ -170,6 +170,7 @@ const queryBatchCachedCollection = async (
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient({
     systemFileType,
+    v2: true,
   });
 
   const updatedQueries = queries.map((query) => {
@@ -186,10 +187,10 @@ const queryBatchCachedCollection = async (
       ...updatedQueries.map((q) => ({ name: q.name, ...q.queryParams, ...q.resultOptionsRequest })),
     ]);
 
-    const getUrl = '/builtin/home/data/cacheable/qbc?' + queryParams;
+    const getUrl = '/home/data/cacheable/qbc?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryBatchCollectionResponse>('/builtin/home/data/cacheable/qbc', {
+      return client.post<QueryBatchCollectionResponse>('/home/data/cacheable/qbc', {
         queries: updatedQueries,
       });
     } else {

@@ -2,8 +2,8 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import { encryptKeyHeader } from '../SecurityHelpers';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
-import { uploadFile } from './DriveFileUploader';
-import { pureUpdateV2, pureUploadV2 } from './UploadHelpers';
+import { patchFile, uploadFile } from './DriveFileUploader';
+import { pureUpdateOverPeerV2, pureUpdateV2, pureUploadV2 } from './UploadHelpers';
 import { getFileHeader } from '../File/DriveFileProvider';
 import { deleteFile } from '../File/DriveFileManager';
 import { UploadFileMetadata, UploadInstructionSet } from './DriveUploadTypes';
@@ -13,6 +13,7 @@ vi.mock('./UploadHelpers', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./UploadHelpers')>()),
   pureUploadV2: vi.fn(),
   pureUpdateV2: vi.fn(),
+  pureUpdateOverPeerV2: vi.fn(),
 }));
 vi.mock('../File/DriveFileProvider', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../File/DriveFileProvider')>()),
@@ -174,6 +175,60 @@ test('an overwrite refuses a caller-supplied aesKey', async () => {
     })
   ).rejects.toThrow('aesKey');
   expect(getFileHeader).not.toHaveBeenCalled();
+});
+
+const peerUpdate = {
+  transferIv: getRandom16ByteArray(),
+  locale: 'peer',
+  file: { globalTransitId: 'a-gtid', targetDrive: drive },
+  versionTag: 'a-tag',
+} as const;
+
+test('a peer update goes to the V2 peer route, naming its one recipient', async () => {
+  vi.mocked(pureUpdateOverPeerV2).mockResolvedValue(updateResult as never);
+
+  const result = await patchFile(
+    dotYouClient,
+    undefined,
+    { ...peerUpdate, recipients: ['sam.dotyou.cloud'], systemFileType: 'Comment' },
+    metadata('a-tag')
+  );
+
+  expect(pureUpdateV2).not.toHaveBeenCalled();
+  const [, recipient, file, data, systemFileType] = vi.mocked(pureUpdateOverPeerV2).mock.calls[0];
+  expect(recipient).toBe('sam.dotyou.cloud');
+  expect(file).toEqual(peerUpdate.file);
+  expect(systemFileType).toBe('Comment');
+  expect((await sentInstructions(data)).locale).toBe('peer');
+  expect(result).toBe(updateResult);
+});
+
+test.each([[undefined], [[]], [['sam.dotyou.cloud', 'frodo.dotyou.cloud']]])(
+  'a peer update refuses recipients %j: the route names exactly one',
+  async (recipients) => {
+    await expect(
+      patchFile(dotYouClient, undefined, { ...peerUpdate, recipients }, metadata('a-tag'))
+    ).rejects.toThrow('exactly one recipient');
+    expect(pureUpdateOverPeerV2).not.toHaveBeenCalled();
+  }
+);
+
+test('a local update stays on the V2 route by file id, recipients or not', async () => {
+  await patchFile(
+    dotYouClient,
+    undefined,
+    {
+      transferIv: getRandom16ByteArray(),
+      locale: 'local',
+      file: { fileId, targetDrive: drive },
+      versionTag: 'a-tag',
+      recipients: ['sam.dotyou.cloud', 'frodo.dotyou.cloud'],
+    },
+    metadata('a-tag')
+  );
+
+  expect(pureUpdateV2).toHaveBeenCalledOnce();
+  expect(pureUpdateOverPeerV2).not.toHaveBeenCalled();
 });
 
 test('a new file still goes to the V2 create route', async () => {

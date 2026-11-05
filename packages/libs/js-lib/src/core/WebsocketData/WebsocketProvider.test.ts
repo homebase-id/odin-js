@@ -7,8 +7,8 @@ const loadProvider = async () => {
   return import('./WebsocketProvider');
 };
 
-// Let the connect promise executor run past its preauth `await` so the V1 path
-// reaches `new WebSocket`. The V2 path has no await before construction.
+// Let the connect promise executor run past its preauth `await` so the cookie path
+// reaches `new WebSocket`. The bearer path has no await before construction.
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 let captured: { url: string; protocols?: string[] | string; args: unknown }[];
@@ -25,14 +25,18 @@ class FakeWebSocket {
   send() {}
 }
 
-const makeClient = (api: ApiType, headers?: Record<string, string>) =>
-  ({
+const makeClient = (api: ApiType, headers?: Record<string, string>) => {
+  const post = vi.fn().mockResolvedValue({ status: 200 });
+  const createAxiosClient = vi.fn().mockReturnValue({ post });
+  const client = {
     getType: () => api,
     getSharedSecret: () => new Uint8Array(16).fill(1),
     getRoot: () => 'https://example.com',
     getHeaders: () => headers ?? {},
-    createAxiosClient: () => ({ post: () => Promise.resolve() }),
-  }) as unknown as DotYouClient;
+    createAxiosClient,
+  } as unknown as DotYouClient;
+  return { client, post, createAxiosClient };
+};
 
 const drives: TargetDrive[] = [];
 
@@ -45,49 +49,47 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('WebsocketProvider V1/V2 selection', () => {
-  it('defaults to the V2 route with the "odin.bearer." subprotocol (base64url) for an App with a token', async () => {
+describe('WebsocketProvider route selection', () => {
+  it('uses the bearer route with the "odin.bearer." subprotocol (base64url) for an App with a token, with no preauth', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.App, { bx0900: 'ab+/cd==' }), drives, () => {}).catch(() => {});
+    const { client, post } = makeClient(ApiType.App, { bx0900: 'ab+/cd==' });
+    Subscribe(client, drives, () => {}).catch(() => {});
     await flush();
     expect(captured).toHaveLength(1);
     expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-token-wasm');
     expect(captured[0].protocols).toEqual(['odin.notify.v1', 'odin.bearer.ab-_cd']);
+    expect(post).not.toHaveBeenCalled();
   });
 
-  it('uses the V1 cookie path (no subprotocol) for an App when useV2 is false', async () => {
+  it('preauths on V2, then uses the app cookie route, when the App has no bx0900 token', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(
-      makeClient(ApiType.App, { bx0900: 'ab+/cd==' }),
-      drives,
-      () => {},
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      false
-    ).catch(() => {});
+    const { client, post, createAxiosClient } = makeClient(ApiType.App, {});
+    Subscribe(client, drives, () => {}).catch(() => {});
     await flush();
+    expect(createAxiosClient).toHaveBeenCalledWith({ v2: true, overrideEncryption: true });
+    expect(post.mock.calls[0][0]).toBe('/notify/preauth');
     expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe('wss://example.com/api/apps/v1/notify/ws');
-    expect(captured[0].protocols).toBeUndefined();
+    expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-cookie-app');
+    expect(captured[0].protocols).toEqual(['odin.notify.v1']);
   });
 
-  it('falls back to the V1 cookie path when the App has no bx0900 token', async () => {
+  it('uses the owner cookie route for the owner console, with no bearer and no preauth', async () => {
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.App, {}), drives, () => {}).catch(() => {});
+    const { client, post } = makeClient(ApiType.Owner, { bx0900: 'ab+/cd==' });
+    Subscribe(client, drives, () => {}).catch(() => {});
     await flush();
     expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe('wss://example.com/api/apps/v1/notify/ws');
-    expect(captured[0].protocols).toBeUndefined();
+    expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-cookie-owner');
+    expect(captured[0].protocols).toEqual(['odin.notify.v1']);
+    expect(post).not.toHaveBeenCalled();
   });
 
-  it('keeps Owner connections on the V1 cookie path (the V2 socket accepts app tokens only)', async () => {
+  it('passes the extra constructor arguments on every route', async () => {
+    const args = { headers: { something: 'for react native' } };
     const { Subscribe } = await loadProvider();
-    Subscribe(makeClient(ApiType.Owner, { bx0900: 'ab+/cd==' }), drives, () => {}).catch(() => {});
+    const { client } = makeClient(ApiType.Owner);
+    Subscribe(client, drives, () => {}, undefined, undefined, args).catch(() => {});
     await flush();
-    expect(captured).toHaveLength(1);
-    expect(captured[0].url).toBe('wss://example.com/api/owner/v1/notify/ws');
-    expect(captured[0].protocols).toBeUndefined();
+    expect(captured[0].args).toBe(args);
   });
 });

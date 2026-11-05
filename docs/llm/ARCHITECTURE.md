@@ -194,7 +194,7 @@ Handles file creation and updates with encryption.
 
 **WebSocket Lifecycle**:
 
-1. Connect: `wss://{identity}/api/{owner|guest}/v1/notify/ws`
+1. Connect: `wss://{identity}/api/v2/notify/ws-token-wasm` (an app with its token, in the `odin.bearer.` subprotocol), `.../ws-cookie-owner` (the owner console) or `.../ws-cookie-app` (an app with only its cookie)
 2. Handshake: Send `establishConnectionRequest` with drives
 3. Receive: `deviceHandshakeSuccess` confirmation
 4. Stream: Notifications for subscribed drives

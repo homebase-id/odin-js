@@ -3,8 +3,8 @@ import { CircleGrant } from './CircleDataTypes';
 
 // V2: /api/v2/connections/circles
 const connectionsRootV2 = '/connections/circles';
-// V1 only: V2 lists a circle's identities, not its domains (circles/membership/list returns both)
-const membershipRoot = '/circles/membership';
+// V2's connections/circles lists a circle's identities, not its domains; this returns both
+const membershipRoot = '/connections/circles/membership';
 
 //Handles management of Circles
 export const removeMemberFromCircle = async (
@@ -30,7 +30,7 @@ export const fetchMembersOfCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<Membership[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = membershipRoot + '/list';
 
   return client

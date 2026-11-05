@@ -19,6 +19,7 @@ import {
   DomainHighlighter,
   useDotYouClient,
   getCancelRedirectUrl,
+  getConsentFormAction,
 } from '@homebase-id/common-app';
 import { Arrow, Loader } from '@homebase-id/common-app/icons';
 import { getDataVersionInfo } from '../../provider/system/DataConversionProvider';
@@ -291,7 +292,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
               ) : null}
 
               <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
-                <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
+                <form action={getConsentFormAction(returnUrl)} method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
                   {sealedAppKey.state === 'sealed' ? (
                     <>

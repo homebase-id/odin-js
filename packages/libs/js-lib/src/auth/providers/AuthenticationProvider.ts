@@ -379,7 +379,7 @@ export const logout = async (dotYouClient: DotYouClient) => {
 };
 
 export const preAuth = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true, overrideEncryption: true });
 
   await client
     .post('/notify/preauth', undefined, {

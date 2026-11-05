@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 
-const root = '/youauthdomain';
+const root = '/youauth-domains';
 
 export const removeDomainFromCircle = async (
   dotYouClient: DotYouClient,
@@ -10,7 +10,7 @@ export const removeDomainFromCircle = async (
     throw new Error('Only owner can get domains');
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/circles/revoke';
 
   return client
@@ -29,7 +29,7 @@ export const addDomainToCircle = async (
     throw new Error('Only owner can get domains');
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/circles/add';
 
   return client
