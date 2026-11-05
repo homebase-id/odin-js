@@ -14,7 +14,16 @@ import {
     VerifyRemotePlayerReadinessRequest,
 } from "../../../provider/auth/ShamirProvider";
 import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {getShardRecoveryPublicKey, notReviewedText} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {Status, trustEmoji, trustLabel} from "./PlayerListItem"; // ✅ import helpers
+
+type VerificationInfo = {
+    status: Status;
+    trustLevel?: ShardTrustLevel;
+    /** Whether they can hold a shard, which gates Next: reachable, and they have reviewed this connection */
+    isValid?: boolean;
+    isZeroKnowledge?: boolean;
+};
 
 export const ConfigureTrustedConnections = ({
                                                 removePlayer,
@@ -32,20 +41,23 @@ export const ConfigureTrustedConnections = ({
     forceVerify: number;
     enableVerification?: boolean;
     onVerificationComplete?: (
-        results: Record<
-            string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
-        >
+        results: Record<string, VerificationInfo>
     ) => void;
 }) => {
     const [statuses, setStatuses] = useState<
-        Record<
-            string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
-        >
+        Record<string, VerificationInfo>
     >({});
 
     const dotYouClient = useDotYouClientContext();
+
+    // A friend removed is checked afresh when added again: after they review this connection, say
+    useEffect(() => {
+        const picked = new Set(trustedPlayers.map((p) => p.odinId));
+        setStatuses((prev) => {
+            const kept = Object.fromEntries(Object.entries(prev).filter(([odinId]) => picked.has(odinId)));
+            return Object.keys(kept).length === Object.keys(prev).length ? prev : kept;
+        });
+    }, [trustedPlayers.map(p => p.odinId).join(",")]);
 
     useEffect(() => {
         if (!enableVerification || !trustedPlayers?.length) return;
@@ -63,15 +75,22 @@ export const ConfigureTrustedConnections = ({
 
                 try {
                     const req: VerifyRemotePlayerReadinessRequest = {odinId: player.odinId};
-                    const res = await verifyRemotePlayerReadiness(dotYouClient, req);
+                    // Their key says whether they have reviewed this connection, which every holder must have
+                    // done; a key that can't be read leaves that to the server, which checks it again
+                    const [res, callerMayWrite] = await Promise.all([
+                        verifyRemotePlayerReadiness(dotYouClient, req),
+                        getShardRecoveryPublicKey(dotYouClient, player.odinId)
+                            .then((key) => key.callerMayWrite)
+                            .catch(() => undefined),
+                    ]);
 
                     setStatuses((prev) => ({
                         ...prev,
                         [player.odinId]: res
                             ? {
-                                status: res.isValid ? "valid" : "invalid",
+                                status: !res.isValid ? "invalid" : callerMayWrite === false ? "notReviewed" : "valid",
                                 trustLevel: res.trustLevel,
-                                isValid: res.isValid,
+                                isValid: res.isValid && callerMayWrite !== false,
                                 isZeroKnowledge: res.isZeroKnowledge,
                             }
                             : {status: "error"},
@@ -196,6 +215,8 @@ const SelectedConnectionItem = ({
 
                 {verificationStatus === "loading" ? (
                     <span className="text-slate-500">{t("Verifying...")}</span>
+                ) : verificationStatus === "notReviewed" ? (
+                    <span className="text-xs text-red-600">{notReviewedText(player.odinId)}</span>
                 ) : (
                     (verificationStatus === "invalid" ||
                         verificationStatus === "error" ||
