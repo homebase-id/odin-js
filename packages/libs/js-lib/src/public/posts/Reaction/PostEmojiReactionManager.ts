@@ -79,8 +79,7 @@ export const getReactionSummary = async (
   }
 
   // V2 addresses a local file by fileId; the channel id is the drive alias. Cursor and max are ignored.
-  // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
-  if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
+  if (isLocal && context.target.fileId) {
     return dotYouClient
       .createAxiosClient({ v2: true })
       .post<ServerReactionsSummary>(`${reactionsRootV2(driveId, context.target.fileId)}/summary`, {
@@ -134,8 +133,7 @@ export const getMyReactions = async (
       .catch(dotYouClient.handleErrorResponse);
   }
 
-  // An anonymous visitor stays on V1: V2 reaction routes need a signed-in caller (OwnerOrAppOrGuest)
-  if (isLocal && context.target.fileId && dotYouClient.isAuthenticated()) {
+  if (isLocal && context.target.fileId) {
     return dotYouClient
       .createAxiosClient({ v2: true })
       .post<string[]>(`${reactionsRootV2(driveId, context.target.fileId)}/listbyidentity`, {

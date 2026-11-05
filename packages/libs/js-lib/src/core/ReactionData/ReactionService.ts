@@ -18,10 +18,8 @@ export interface ServerReactionsListWithCursor {
   cursor: string;
 }
 
-// Local and peer routes take the same bodies, so a caller only needs the root. A local file with a fileId, for a
-// signed-in caller, and any file on another identity (by its globalTransitId), go to V2. A local file with no fileId
-// keeps V1, as does an anonymous visitor: V2's local reaction routes are OwnerOrAppOrGuest, which needs a signed-in
-// caller, where V1's guest routes answer anyone.
+// Local and peer routes take the same bodies, so a caller only needs the root. A local file with a fileId, and
+// any file on another identity (by its globalTransitId), go to V2. A local file with no fileId keeps V1.
 const getV2Root = (
   dotYouClient: DotYouClient,
   odinId: string | undefined,
@@ -34,7 +32,6 @@ const getV2Root = (
     }
     return peerReactionsRootV2(odinId, file.targetDrive.alias, globalTransitId);
   }
-  if (!dotYouClient.isAuthenticated()) return undefined;
   const fileId = getLocalFileId(file);
   return fileId ? reactionsRootV2(file.targetDrive.alias, fileId) : undefined;
 };

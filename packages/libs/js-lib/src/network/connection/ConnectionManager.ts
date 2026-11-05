@@ -1,5 +1,4 @@
 import {
-  ApiType,
   DotYouClient,
   assertIfDotYouClientIsOwner,
   assertIfDotYouClientIsOwnerOrApp,
@@ -17,8 +16,6 @@ import {
   ActiveConnection,
 } from '../circle/CircleDataTypes';
 
-// V1 root, for the guest read of the connections list (V2's /connections is owner-or-app only)
-const root = '/circles/connections';
 // V2: /api/v2/connections
 const rootV2 = '/connections';
 
@@ -45,14 +42,6 @@ export const getConnections = async (
     cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<ActiveConnection>> => {
-  // A guest (the public site) may list connections when the owner allows it; V2's list is owner-or-app
-  // only, so a guest stays on V1
-  if (dotYouClient.getType() === ApiType.Guest) {
-    const client = dotYouClient.createAxiosClient();
-    const url = root + '/connected?' + stringifyToQueryParams(data);
-    return client.get(url).then((response) => response.data);
-  }
-
   const client = dotYouClient.createAxiosClient({ v2: true });
   const url = rootV2 + '/connected?' + stringifyToQueryParams(data);
   return client.get(url).then((response) => response.data);

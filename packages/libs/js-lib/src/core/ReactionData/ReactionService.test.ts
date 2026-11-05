@@ -127,12 +127,14 @@ test('a group reaction delete addresses the local file on V2', async () => {
   ]);
 });
 
-test('an anonymous visitor stays on V1, which V2 reaction routes do not admit', async () => {
+test('an anonymous visitor reads local reactions on V2', async () => {
   const { dotYouClient, calls } = recordingClient(false);
 
   await getReactions(dotYouClient, 'frodo.dotyou.cloud', { targetDrive: drive, fileId }, 10, 'c');
 
-  expect(calls.map((c) => c.v2)).toEqual([false]);
+  expect(calls.map((c) => [c.v2, c.url])).toEqual([
+    [true, `/drives/${drive.alias}/files/${fileId}/reactions/list`],
+  ]);
 });
 
 test('group reactions addressed by globalTransitId go to V2', async () => {
