@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../DotYouClient';
+import { getAxiosClientV2 } from '../File/DriveFileHelper';
 
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
@@ -237,11 +238,7 @@ const sendMultipartV2 = async <T>(
   axiosConfig: AxiosRequestConfig | undefined,
   logName: string
 ) => {
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType,
-    v2: true,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
 
   const config: AxiosRequestConfig = {
     ...axiosConfig,
@@ -327,7 +324,7 @@ export const pureUpdateOverPeerV2 = async (
   sendMultipartV2<UpdateResult>(
     dotYouClient,
     'patch',
-    `/peer/${recipient}/drives/${file.targetDrive.alias}/files/by-gtid/${file.globalTransitId}`,
+    `/peer/${encodeURIComponent(recipient)}/drives/${file.targetDrive.alias}/files/by-gtid/${file.globalTransitId}`,
     file.targetDrive,
     data,
     systemFileType,

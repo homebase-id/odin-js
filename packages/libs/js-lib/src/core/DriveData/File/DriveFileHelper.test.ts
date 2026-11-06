@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { getRangeHeader, getRangePath, toV2QueryString } from './DriveFileHelper';
+import { getRangePath, toV2QueryString } from './DriveFileHelper';
 
 describe('getRangePath', () => {
   it('is empty for a whole payload', () => {
     expect(getRangePath()).toEqual({ startOffset: 0, updatedChunkStart: undefined, rangePath: '' });
   });
 
-  it('covers exactly the bytes the V1 Range header asked for', () => {
-    const { rangeHeader } = getRangeHeader(100, 200);
-    expect(rangeHeader).toBe('bytes=80-207');
+  it('covers bytes 80-207 for a read of 100-200, aligned to 16 bytes', () => {
     expect(getRangePath(100, 200)).toEqual({
       startOffset: 20,
       updatedChunkStart: 80,

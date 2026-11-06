@@ -61,12 +61,9 @@ export const HlsSource = ({
     if (videoRef.current) {
       const hlsInstance = new hls({
         xhrSetup: (xhr, url) => {
-          // V2 reads an app's token from `Authorization: Bearer`, not from the bx0900 header V1 uses
-          const { bx0900, ...rest }: Record<string, string> = dotYouClient.getHeaders();
-          const headers =
-            bx0900 && url.includes('/api/v2/')
-              ? { ...rest, Authorization: `Bearer ${bx0900}` }
-              : dotYouClient.getHeaders();
+          const headers = url.includes('/api/v2/')
+            ? dotYouClient.getHeadersV2()
+            : dotYouClient.getHeaders();
           for (const [key, value] of Object.entries(headers)) {
             xhr.setRequestHeader(key, value);
           }

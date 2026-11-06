@@ -1,4 +1,3 @@
-import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/Drive/DriveTypes';
 import {
   BaseUploadInstructionSet,
   PriorityOptions,
@@ -7,12 +6,6 @@ import {
   TransferUploadStatus,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { KeyHeader, TargetDrive } from '../../core/core';
-
-export interface TransitQueryBatchRequest {
-  queryParams: FileQueryParams;
-  resultOptionsRequest: GetBatchQueryResultOptions;
-  odinId: string;
-}
 
 export interface TransitInstructionSet
   extends Omit<BaseUploadInstructionSet, 'storageOptions' | 'transitOptions'> {
@@ -23,7 +16,6 @@ export interface TransitInstructionSet
   priority?: PriorityOptions;
 
   recipients: string[];
-  storageIntent?: 'metadataOnly';
 
   notificationOptions?: PushNotificationOptions;
 }

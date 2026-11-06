@@ -1,23 +1,13 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-import { type YouAuthorizationParams } from '@homebase-id/js-lib/auth';
+import { YOUAUTH_AUTHORIZE_PATH, type YouAuthorizationParams } from '@homebase-id/js-lib/auth';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { pingIdentity } from '../hooks/checkIdentity/useCheckIdentity';
 import { replaceDomainSeparatorsInPlace, stripUrlToHost } from '../helpers/domainCleaner';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
-const AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 const STORAGE_KEY_IDENTITY = 'youauth-previous-identity';
 
 const stripIdentity = stripUrlToHost;
-
-const pingIdentity = async (identity: string): Promise<boolean> => {
-  try {
-    const response = await fetch(`https://${identity}/api/v2/auth/ident`);
-    const validation = await response.json();
-    return validation?.odinId?.toLowerCase() === identity;
-  } catch {
-    return false;
-  }
-};
 
 const getSavedIdentity = (): string | null => {
   try {
@@ -99,7 +89,7 @@ export const YouAuthLoginBox = ({
       if (strippedIdentity === window.location.hostname) {
         window.location.href = `https://${strippedIdentity}/owner/login?returnUrl=/owner`;
       } else {
-        window.location.href = `https://${strippedIdentity}${AUTHORIZE_PATH}?${stringifiedParams}`;
+        window.location.href = `https://${strippedIdentity}${YOUAUTH_AUTHORIZE_PATH}?${stringifiedParams}`;
       }
     },
     [identity, isValidating, authParams]

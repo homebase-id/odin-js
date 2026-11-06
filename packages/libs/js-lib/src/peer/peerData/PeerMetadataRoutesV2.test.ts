@@ -31,7 +31,7 @@ test('drives by type go to V2, locally and over peer, and keep targetDriveInfo',
   const { dotYouClient, calls } = recordingClient({ results: [{ targetDrive: drive }] });
 
   const local = await getDrivesByType(dotYouClient, drive.type, 1, 25);
-  const remote = await getDrivesByTypeOverPeer(dotYouClient, drive.type, 1, 25, peer);
+  const remote = await getDrivesByTypeOverPeer(dotYouClient, drive.type, peer);
 
   expect(calls).toEqual([
     [true, `/drives?type=${drive.type}&pageNumber=1&pageSize=25`],

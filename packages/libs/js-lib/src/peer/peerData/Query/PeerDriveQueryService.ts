@@ -80,5 +80,3 @@ export const queryBatchOverPeer = async <
     return response.data;
   });
 };
-
-/// Query methods:

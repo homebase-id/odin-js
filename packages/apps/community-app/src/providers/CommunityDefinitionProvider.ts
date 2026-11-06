@@ -110,7 +110,7 @@ export const getCommunities = async (dotYouClient: DotYouClient) => {
 };
 
 export const getCommunitiesOverPeer = async (dotYouClient: DotYouClient, odinId: string) => {
-  const drives = await getDrivesByTypeOverPeer(dotYouClient, COMMUNITY_DRIVE_TYPE, 1, 1000, odinId);
+  const drives = await getDrivesByTypeOverPeer(dotYouClient, COMMUNITY_DRIVE_TYPE, odinId);
   const communityHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,

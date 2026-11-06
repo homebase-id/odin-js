@@ -102,7 +102,7 @@ export class BaseDotYouClient {
   }
 
   // V2 reads an app's token from `Authorization: Bearer`, not from the bx0900 header V1 uses
-  private getHeadersV2(headers: Record<string, string>): Record<string, string> {
+  getHeadersV2(headers: Record<string, string> = this.getHeaders()): Record<string, string> {
     const { bx0900, ...rest } = headers;
     return bx0900 ? { ...rest, Authorization: `Bearer ${bx0900}` } : rest;
   }

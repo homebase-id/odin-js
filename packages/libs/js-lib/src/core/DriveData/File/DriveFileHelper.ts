@@ -38,31 +38,17 @@ export const parseBytesToObject = <T>(
   return tryJsonParse<T>(json);
 };
 
-export const getRangeHeader = (chunkStart?: number, chunkEnd?: number) => {
-  let startOffset = 0;
-  let updatedChunkEnd: number | undefined, updatedChunkStart: number | undefined;
-  if (chunkStart !== undefined) {
-    updatedChunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
-    startOffset = Math.abs(chunkStart - updatedChunkStart);
-    // End of range is inclusive, so we need to subtract 1
-    updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) - 1 : undefined;
-    return {
-      startOffset,
-      updatedChunkStart,
-      updatedChunkEnd,
-      rangeHeader: `bytes=${updatedChunkStart}-${updatedChunkEnd || ''}`,
-    };
-  }
-  return { startOffset, updatedChunkStart, rangeHeader: undefined };
-};
-
-/// getRangeHeader as a V2 route suffix: V2's `payload/{key}` ignores a Range header, and a partial read goes to
-/// `payload/{key}/{start}/{length}` instead, with the same 16-byte aligned start (so the decrypt-with-offset logic
-/// is unchanged). A length of 0 means "to the end", as an open-ended Range did. Empty when the whole payload is read.
+/// A partial read's V2 route suffix: `payload/{key}/{start}/{length}`, with a 16-byte aligned start for decrypting with
+/// an offset. A length of 0 means "to the end". Empty when the whole payload is read.
 export const getRangePath = (chunkStart?: number, chunkEnd?: number) => {
-  const { startOffset, updatedChunkStart, updatedChunkEnd } = getRangeHeader(chunkStart, chunkEnd);
-  if (updatedChunkStart === undefined) return { startOffset, updatedChunkStart, rangePath: '' };
+  if (chunkStart === undefined) {
+    return { startOffset: 0, updatedChunkStart: undefined, rangePath: '' };
+  }
 
+  const updatedChunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
+  const startOffset = Math.abs(chunkStart - updatedChunkStart);
+  // End of range is inclusive, so we need to subtract 1
+  const updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) - 1 : undefined;
   const length = updatedChunkEnd !== undefined ? updatedChunkEnd - updatedChunkStart + 1 : 0;
   return { startOffset, updatedChunkStart, rangePath: `/${updatedChunkStart}/${length}` };
 };

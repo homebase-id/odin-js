@@ -209,12 +209,13 @@ const overwriteFile = async (
     .filter((existingPayload) => !payloads?.some((payload) => payload.key === existingPayload.key))
     .map((existingPayload) => ({ key: existingPayload.key }));
 
+  const versionTag = metadata.versionTag ?? existing.fileMetadata.versionTag;
   const result = await patchFile(
     dotYouClient,
     keyHeader,
     {
       file: { fileId, targetDrive: drive },
-      versionTag: metadata.versionTag ?? existing.fileMetadata.versionTag,
+      versionTag,
       locale: 'local',
       systemFileType,
       transferIv: instructions.transferIv,
@@ -224,13 +225,13 @@ const overwriteFile = async (
     {
       ...metadata,
       isEncrypted: encrypt,
-      versionTag: metadata.versionTag ?? existing.fileMetadata.versionTag,
+      versionTag,
     },
     payloads,
     thumbnails,
     toDeletePayloads,
     onVersionConflict,
-    options?.axiosConfig ? { axiosConfig: options.axiosConfig } : undefined
+    options
   );
 
   if (!result) return;

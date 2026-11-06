@@ -1,6 +1,7 @@
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import { YouAuthLoginBox } from '@homebase-id/common-app';
 import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
+import { YOUAUTH_AUTHORIZE_PATH } from '@homebase-id/js-lib/auth';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -8,7 +9,6 @@ import { useSearchParams } from 'react-router-dom';
 import { Loader } from '@homebase-id/common-app/icons';
 
 export const AUTO_LOGON_PARAM = 'youauth-logon';
-const AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
@@ -30,7 +30,7 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
     if (searchParams.has(AUTO_LOGON_PARAM) && authParams)
       window.location.href = `https://${searchParams.get(
         AUTO_LOGON_PARAM
-      )}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      )}${YOUAUTH_AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams, searchParams, stringifiedAuthParams]);
 
   return (

@@ -40,14 +40,10 @@ export const getDrivesByType = async (
   pageNumber: number,
   pageSize: number
 ): Promise<PagedResult<DriveDefinition>> => {
-  const params = {
-    driveType: type,
-    pageNumber: pageNumber,
-    pageSize: pageSize,
-  };
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   if (dotYouClient.getType() === ApiType.Owner) {
-    const client = dotYouClient.createAxiosClient({ v2: true });
+    const params = { driveType: type, pageNumber, pageSize };
     return client
       .get<PagedResult<DriveDefinition>>('/drive-management/type?' + stringifyToQueryParams(params))
       .then((response) => {
@@ -62,9 +58,8 @@ export const getDrivesByType = async (
         };
       });
   } else {
-    const client = dotYouClient.createAxiosClient({ v2: true });
-    const v2Params = { type, pageNumber, pageSize };
-    return client.get('/drives?' + stringifyToQueryParams(v2Params)).then((response) => {
+    const params = { type, pageNumber, pageSize };
+    return client.get('/drives?' + stringifyToQueryParams(params)).then((response) => {
       return {
         ...response.data,
         results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {

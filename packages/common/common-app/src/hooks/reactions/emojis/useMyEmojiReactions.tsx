@@ -6,7 +6,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
   const dotYouClient = useDotYouClientContext();
   const loggedInIdentity = dotYouClient.getLoggedInIdentity();
 
-  const fetch = async ({ context }: { context?: ReactionContext }) => {
+  const fetch = async () => {
     if (
       !context?.odinId ||
       !context?.channelId ||
@@ -26,7 +26,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
         context?.target?.fileId,
         context?.target?.globalTransitId,
       ],
-      queryFn: () => fetch({ context }),
+      queryFn: fetch,
       staleTime: 1000 * 60 * 2, // 2 minutes
 
       enabled:

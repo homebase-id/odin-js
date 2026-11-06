@@ -17,6 +17,9 @@ import { exportEccPublicKey, getEccSharedSecret, importRemotePublicEccKey } from
  */
 export type YouAuthCipher = 'aes-cbc' | 'aes-gcm';
 
+/** Where a browser goes to authorize an app or a sign-in on an identity. */
+export const YOUAUTH_AUTHORIZE_PATH = '/api/v2/youauth/authorize';
+
 export interface YouAuthorizationParams {
   client_id: string;
   client_type: 'domain' | 'app';

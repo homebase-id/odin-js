@@ -1,6 +1,7 @@
 import { AxiosRequestConfig } from 'axios';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 import { DotYouClient } from '../../DotYouClient';
+import { getAxiosClientV2 } from './DriveFileHelper';
 import { SystemFileType } from './DriveFileTypes';
 import { TargetDrive } from './DriveFileTypes';
 
@@ -17,10 +18,7 @@ export const deleteFile = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-    v2: true,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   // V2 names the file by its path. A hard delete takes no body and tells no recipients (V1 refused recipients with a
   // 400; V2 ignores them); the empty object is only there for the shared-secret interceptor to encrypt.
@@ -54,10 +52,7 @@ export const deleteFiles = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileIds', fileIds);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-    v2: true,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const request = {
     requests: fileIds.map((fileId) => ({
@@ -90,10 +85,7 @@ export const deleteFilesByGroupId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GroupIds', groupIds);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-    v2: true,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const request = {
     requests: groupIds.map((groupId) => ({

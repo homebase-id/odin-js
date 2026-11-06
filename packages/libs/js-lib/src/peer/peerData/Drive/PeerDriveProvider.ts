@@ -7,8 +7,6 @@ import { stringifyToQueryParams } from '../../../helpers/DataUtil';
 export const getDrivesByTypeOverPeer = async (
   dotYouClient: DotYouClient,
   type: string,
-  pageNumber: number,
-  pageSize: number,
   odinId: string,
   systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {

@@ -1,7 +1,6 @@
-import { AxiosError } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { deleteReaction, uploadReaction } from '../../../core/ReactionData/ReactionService';
-import { peerReactionsRootV2, reactionsRootV2 } from '../../../core/ReactionData/ReactionRoutesV2';
+import { getReactionsRootV2 } from '../../../core/ReactionData/ReactionRoutesV2';
 import { tryJsonParse } from '../../../helpers/DataUtil';
 import { getChannelDrive, GetTargetDriveFromChannelId } from '../Channel/PostChannelManager';
 import { RawReactionContent, ReactionContext } from '../PostTypes';
@@ -35,10 +34,12 @@ export const removeEmojiReaction = async (
   });
 };
 
-const localReactionsRoot = (driveId: string, context: ReactionContext) => {
-  if (!context.target.fileId) throw new Error('A reaction on a local file needs its fileId');
-  return reactionsRootV2(driveId, context.target.fileId);
-};
+const reactionsRoot = (dotYouClient: DotYouClient, context: ReactionContext) =>
+  getReactionsRootV2(dotYouClient, context.odinId, {
+    fileId: context.target.fileId,
+    globalTransitId: context.target.globalTransitId,
+    targetDrive: GetTargetDriveFromChannelId(context.channelId),
+  });
 
 const mapReactionsSummary = (data: ServerReactionsSummary): EmojiReactionSummary => ({
   reactions: data.reactions
@@ -60,37 +61,15 @@ const mapReactionsSummary = (data: ServerReactionsSummary): EmojiReactionSummary
 export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
-): Promise<EmojiReactionSummary> => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
-
-  const handleSummaryError = (e: AxiosError): EmojiReactionSummary => {
-    dotYouClient.handleErrorResponse(e);
-    return { reactions: [], totalCount: 0 };
-  };
-
-  const driveId = GetTargetDriveFromChannelId(context.channelId).alias;
-
-  // Another identity's file, by the globalTransitId both copies share
-  if (!isLocal) {
-    return dotYouClient
-      .createAxiosClient({ v2: true })
-      .post<ServerReactionsSummary>(
-        `${peerReactionsRootV2(context.odinId, driveId, context.target.globalTransitId)}/summary`,
-        {}
-      )
-      .then((response) => mapReactionsSummary(response.data))
-      .catch(handleSummaryError);
-  }
-
-  // V2 addresses a local file by fileId; the channel id is the drive alias. Cursor and max are ignored.
-  return dotYouClient
+): Promise<EmojiReactionSummary> =>
+  dotYouClient
     .createAxiosClient({ v2: true })
-    .post<ServerReactionsSummary>(`${localReactionsRoot(driveId, context)}/summary`, {
-      maxRecords: 5,
-    })
+    .post<ServerReactionsSummary>(`${reactionsRoot(dotYouClient, context)}/summary`, {})
     .then((response) => mapReactionsSummary(response.data))
-    .catch(handleSummaryError);
-};
+    .catch((e) => {
+      dotYouClient.handleErrorResponse(e);
+      return { reactions: [], totalCount: 0 };
+    });
 
 const mapEmojiStrings = (data: string[] | undefined) =>
   data?.map((emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji);
@@ -99,28 +78,11 @@ export const getMyReactions = async (
   dotYouClient: DotYouClient,
   odinId: string | undefined,
   context: ReactionContext
-): Promise<string[] | undefined> => {
-  const isLocal = context.odinId === dotYouClient.getHostIdentity();
-  const identity = odinId || dotYouClient.getHostIdentity();
-  const driveId = GetTargetDriveFromChannelId(context.channelId).alias;
-
-  // Another identity's file, by the globalTransitId both copies share
-  if (!isLocal) {
-    return dotYouClient
-      .createAxiosClient({ v2: true })
-      .post<string[]>(
-        `${peerReactionsRootV2(context.odinId, driveId, context.target.globalTransitId)}/listbyidentity`,
-        { identity: identity }
-      )
-      .then((response) => mapEmojiStrings(response.data))
-      .catch(dotYouClient.handleErrorResponse);
-  }
-
-  return dotYouClient
+): Promise<string[] | undefined> =>
+  dotYouClient
     .createAxiosClient({ v2: true })
-    .post<string[]>(`${localReactionsRoot(driveId, context)}/listbyidentity`, {
-      identity: identity,
+    .post<string[]>(`${reactionsRoot(dotYouClient, context)}/listbyidentity`, {
+      identity: odinId || dotYouClient.getHostIdentity(),
     })
     .then((response) => mapEmojiStrings(response.data))
     .catch(dotYouClient.handleErrorResponse);
-};

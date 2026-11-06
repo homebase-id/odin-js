@@ -113,7 +113,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
     }
   }
 
-  const drives = await getDrivesByTypeOverPeer(dotYouClient, BlogConfig.DriveType, 1, 1000, odinId);
+  const drives = await getDrivesByTypeOverPeer(dotYouClient, BlogConfig.DriveType, odinId);
   const channelHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,

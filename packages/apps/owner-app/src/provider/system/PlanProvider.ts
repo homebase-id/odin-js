@@ -29,9 +29,9 @@ export interface IdentityPlan {
 
 /** GET /api/v2/plan. Null on a server from before hosting plans, which answers 404. */
 export const getPlan = async (dotYouClient: DotYouClient): Promise<IdentityPlan | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
-    .get<IdentityPlan>(`${dotYouClient.getRoot()}/api/v2/plan`)
+    .get<IdentityPlan>('/plan')
     .then((response) => response.data)
     .catch((error) => {
       if (error?.response?.status === 404) return null;

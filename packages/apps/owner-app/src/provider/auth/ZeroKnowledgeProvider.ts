@@ -212,9 +212,9 @@ const getDeal = (dotYouClient: DotYouClient) =>
 /** A gated friend's Shard Recovery write-only public key; their shard is sealed to it. */
 const getGatedFriendPublicKey = async (dotYouClient: DotYouClient, odinId: string) => {
   const key = await dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({ v2: true })
     .get<{ publicKeyJwk: string; isZeroKnowledge: boolean }>(
-      `${dotYouClient.getRoot()}/api/v2/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
+      `/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
     )
     .then((response) => response.data);
 
