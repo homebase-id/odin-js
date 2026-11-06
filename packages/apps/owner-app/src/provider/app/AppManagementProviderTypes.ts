@@ -1,23 +1,6 @@
 import { DriveSharingModel, PermissionedDrive, PermissionSet } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
 
-export interface AppClientRegistrationRequest {
-  appId: string;
-  clientFriendlyName: string;
-  jwkBase64UrlPublicKey: string;
-}
-
-export interface AppClientRegistrationResponse {
-  /** Version number for how the data field is encrypted */
-  encryptionVersion: number;
-
-  /** RSA encrypted response.  When encryption version == 1, the  first 16 bytes is token id, second 16 bytes is AccessTokenHalfKey, and last 16 bytes is SharedSecret */
-  data: string;
-
-  /** A Guid representing the Id of the access registration */
-  token: string;
-}
-
 export interface AppClientRegistration {
   appId: string;
   accessRegistrationClientType: string;

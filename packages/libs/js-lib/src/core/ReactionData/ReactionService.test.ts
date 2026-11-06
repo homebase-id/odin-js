@@ -93,15 +93,16 @@ test('a reaction on another identity with no globalTransitId fails before any re
   expect(calls).toEqual([]);
 });
 
-test('a local file known only by globalTransitId stays on V1', async () => {
+test('a reaction on a local file with no fileId fails before any request', async () => {
   const { dotYouClient, calls } = recordingClient();
 
-  await uploadReaction(dotYouClient, '👍', 'frodo.dotyou.cloud', {
-    targetDrive: drive,
-    globalTransitId: gtid,
-  });
-
-  expect(calls.map((c) => [c.v2, c.url])).toEqual([[false, '/drive/files/reactions/add']]);
+  await expect(
+    uploadReaction(dotYouClient, '👍', 'frodo.dotyou.cloud', {
+      targetDrive: drive,
+      globalTransitId: gtid,
+    })
+  ).rejects.toThrow('fileId');
+  expect(calls).toEqual([]);
 });
 
 test('a group reaction delete addresses the local file on V2', async () => {

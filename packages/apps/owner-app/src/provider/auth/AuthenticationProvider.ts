@@ -39,31 +39,6 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
 };
 
 
-// Verifies the password without logging in the owner (i.e. changing cookies, etc.)
-export const verifyPassword = async (password: string): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
-
-  const noncePackage = await getNonce(dotYouClient);
-  const reply = await prepareAuthPassword(password, noncePackage);
-
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/authentication/verify-password';
-
-  return await client.post(url, reply)
-    .then((response) => {
-      return response.status === 200;
-    })
-    .catch((error) => {
-      if (error.response?.status === 403) {
-        return false;
-      }
-      console.error(error);
-      return false;
-    });
-};
-
 export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
@@ -142,23 +117,11 @@ export const changePassword = async (
     });
 };
 
-export const finalizeRegistration = async (firstRunToken: string) => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/config/registration/finalize?frid=' + firstRunToken;
-
-  return await client.get(url).then((response) => {
-    return response.data;
-  });
-};
-
 export const canUseAutoRecovery = async (firstRunToken:string) => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
   const url = `/config/can-use-auto-recovery?frt=${firstRunToken}`;
 
   return await client.get(url).then((response) => {

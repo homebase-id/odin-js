@@ -4,8 +4,6 @@ import {
   getPermissionNumberFromDrivePermission,
 } from '@homebase-id/js-lib/helpers';
 import {
-  AppClientRegistrationRequest,
-  AppClientRegistrationResponse,
   AppRegistrationRequest,
   RedactedAppRegistration,
   GetAppRequest,
@@ -16,19 +14,6 @@ import {
 } from './AppManagementProviderTypes';
 import { DotYouClient } from '@homebase-id/js-lib/core';
 import { DriveGrant } from '@homebase-id/js-lib/network';
-
-//adds the specified client to the list of allowed clients for a given app; returns a CAT
-export const RegisterAppClient = async (
-  dotYouClient: DotYouClient,
-  request: AppClientRegistrationRequest
-): Promise<AppClientRegistrationResponse> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post<AppClientRegistrationResponse>(
-    'appmanagement/register/client',
-    request
-  );
-  return response.data;
-};
 
 export const GetAppClients = async (
   dotYouClient: DotYouClient,
@@ -71,19 +56,6 @@ export const AllowClient = async (
   const response = await client.post('app-management/allow-client', {
     accessRegistrationId: request.registrationId,
   });
-  return response.data;
-};
-
-export const RegisterChatAppClient_temp = async (
-  dotYouClient: DotYouClient,
-  request: AppClientRegistrationRequest
-): Promise<AppClientRegistrationResponse> => {
-  const client = dotYouClient.createAxiosClient();
-  const response = await client.post<AppClientRegistrationResponse>(
-    'appmanagement/register/chatclient_temp',
-    request
-  );
-
   return response.data;
 };
 
