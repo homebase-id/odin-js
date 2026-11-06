@@ -101,7 +101,7 @@ export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
 
   if (!identity || identity === '') {
-    window.top.location.href = `https://${window.location.host}/auth/owner/v1/youauth/authorize?${params.toString()}`;
+    window.top.location.href = `https://${window.location.host}/auth/v2/youauth/authorize?${params.toString()}`;
     return;
   }
 
@@ -113,5 +113,5 @@ export const authorize = async (identity: string, params: URLSearchParams) => {
   if (stripIdentity(parentUrl) === identity && !window.location.pathname.includes('anonymous-apps'))
     window.top.location.href = `https://${identity}/owner/login?returnUrl=/owner`;
   else
-    window.top.location.href = `https://${identity}/api/owner/v1/youauth/authorize?${params.toString()}`;
+    window.top.location.href = `https://${identity}/api/v2/youauth/authorize?${params.toString()}`;
 };

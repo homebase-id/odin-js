@@ -297,17 +297,11 @@ export const exchangeDigestForToken = async (
   /** What sealed the two ciphers. Absent from an identity server that predates the field: CBC. */
   cipher?: YouAuthCipher;
 }> => {
-  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
   const tokenResponse = await axiosClient
-    .post(
-      '/youauth/token',
-      {
-        secret_digest: base64ExchangedSecretDigest,
-      },
-      {
-        baseURL: axiosClient.defaults.baseURL?.replace('/api/apps/v1', '/api/owner/v1'),
-      }
-    )
+    .post('/youauth/token', {
+      secret_digest: base64ExchangedSecretDigest,
+    })
     .then((response) => response.data);
 
   return tokenResponse;

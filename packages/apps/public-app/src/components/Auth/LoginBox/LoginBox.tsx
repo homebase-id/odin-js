@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Loader } from '@homebase-id/common-app/icons';
 
 export const AUTO_LOGON_PARAM = 'youauth-logon';
-const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
+const AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
