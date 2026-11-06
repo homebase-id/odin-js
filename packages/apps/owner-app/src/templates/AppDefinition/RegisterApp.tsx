@@ -41,7 +41,7 @@ import { AlreadyInstalled, AppName } from './AlreadyInstalled';
 
 /*
  * incoming parameters:
- *   values on AppClientRegistrationRequest
+ *   appId, clientFriendlyName and jwkBase64UrlPublicKey
  *
  *   Required Drive Creation Specs
  *     Alias

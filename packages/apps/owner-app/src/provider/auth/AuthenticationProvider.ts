@@ -23,8 +23,8 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/authentication';
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const url = '/auth/owner';
 
   const response = await client.post(url, reply);
 
@@ -39,31 +39,6 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
 };
 
 
-// Verifies the password without logging in the owner (i.e. changing cookies, etc.)
-export const verifyPassword = async (password: string): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
-
-  const noncePackage = await getNonce(dotYouClient);
-  const reply = await prepareAuthPassword(password, noncePackage);
-
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/authentication/verify-password';
-
-  return await client.post(url, reply)
-    .then((response) => {
-      return response.status === 200;
-    })
-    .catch((error) => {
-      if (error.response?.status === 403) {
-        return false;
-      }
-      console.error(error);
-      return false;
-    });
-};
-
 export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
@@ -76,8 +51,8 @@ export const setFirstPassword = async (
   const reply = await prepareAuthPassword(newPassword, salts);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/passwd', {...reply, firstRunToken})
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/passwd', {...reply, firstRunToken})
     .then((response) => {
       return response.status === 200;
     })
@@ -99,8 +74,8 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
   const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
     .then((response) => {
       return response.status === 200;
     })
@@ -131,8 +106,8 @@ export const changePassword = async (
   }
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: false})
-    .post('/security/resetpasswd', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
+    .createAxiosClient({overrideEncryption: false, v2: true})
+    .post('/security/reset-password', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
     .then((response) => {
       return response.status === 200;
     })
@@ -142,23 +117,11 @@ export const changePassword = async (
     });
 };
 
-export const finalizeRegistration = async (firstRunToken: string) => {
-  const dotYouClient = new OwnerClient({
-    api: ApiType.Owner,
-  });
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
-  const url = '/config/registration/finalize?frid=' + firstRunToken;
-
-  return await client.get(url).then((response) => {
-    return response.data;
-  });
-};
-
 export const canUseAutoRecovery = async (firstRunToken:string) => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
   const url = `/config/can-use-auto-recovery?frt=${firstRunToken}`;
 
   return await client.get(url).then((response) => {
@@ -172,8 +135,8 @@ export const isPasswordSet = async (): Promise<boolean> => {
   });
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true})
-    .post('/authentication/ispasswordset')
+    .createAxiosClient({overrideEncryption: true, v2: true})
+    .post('/auth/owner/ispasswordset')
     .then((response) => {
       return response.data == true;
     });

@@ -10,7 +10,7 @@ const root = '/config';
 //Handles management of Contacts
 
 export const getFlags = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/system/flags';
 
   return await client.post<Record<string, boolean>>(url).then((response) => {
@@ -19,8 +19,8 @@ export const getFlags = async (dotYouClient: DotYouClient) => {
 };
 
 export const updateFlag = async (dotYouClient: DotYouClient, name: string, value: boolean) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/system/updateflag';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = root + '/system/update-flag';
 
   return await client
     .post(url, { flagName: name, value: value ? 'true' : 'false' })
@@ -30,8 +30,8 @@ export const updateFlag = async (dotYouClient: DotYouClient, name: string, value
 };
 
 export const getSettings = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/ownerapp/settings/list';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = root + '/owner-app/settings/list';
 
   return await client.post<{ settings: uiSettings }>(url).then((response) => {
     const settingsObj = response.data?.settings;
@@ -46,8 +46,8 @@ export const getSettings = async (dotYouClient: DotYouClient) => {
 };
 
 export const updateSettings = async (dotYouClient: DotYouClient, settings: uiSettings) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/ownerapp/settings/update';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = root + '/owner-app/settings/update';
 
   const requestObj: uiSettings = {};
 

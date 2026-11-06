@@ -30,7 +30,7 @@ const Debug = () => {
 
   const defaultValues = tryJsonParse<DefaulValue>(window.localStorage.getItem(STORAGE_KEY) || '');
 
-  const [url, setUrl] = useState<string>(defaultValues.url || '/circles/definitions/list');
+  const [url, setUrl] = useState<string>(defaultValues.url || '/auth/verify-token');
   const [isPost, setIsPost] = useState<boolean>(defaultValues.isPost);
 
   const [headers, setHeaders] = useState<Record<string, string> | undefined>(defaultValues.headers);
@@ -52,7 +52,7 @@ const Debug = () => {
   }, [url, isPost, headers, params]);
 
   const doRequest = async () => {
-    const client = dotYouClient.createAxiosClient({ headers });
+    const client = dotYouClient.createAxiosClient({ headers, v2: true });
     addToOutput(`Requesting ${isPost ? 'POST' : 'GET'} ${url}\n`);
     const result = isPost
       ? await client.post(url, params).catch((data) => data.response)

@@ -14,21 +14,18 @@ import {
   ImageContentType,
   HomebaseFile,
 } from './DriveFileTypes';
-import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
-import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
+import { assertIfDefined, tryJsonParse } from '../../../helpers/DataUtil';
+import {
+  getAxiosClientV2,
+  getCacheKey,
+  getRangePath,
+  parseBytesToObject,
+  toV2QueryString,
+} from './DriveFileHelper';
 
-interface GetFileByUniqueIdRequest {
-  alias: string;
-  type: string;
-  clientUniqueId: string;
-}
-
-interface GetFileByUniqueIdPayloadRequest extends GetFileByUniqueIdRequest {
-  key: string;
-}
-interface GetFileThumbByUniqueIdRequest extends GetFileByUniqueIdRequest {
-  payloadKey: string;
-}
+/// The V2 route of a file by its uniqueId; the drive is addressed by its id, which is the V1 alias
+const byUniqueIdRoute = (targetDrive: TargetDrive, uniqueId: string) =>
+  `/drives/${targetDrive.alias}/files/by-uid/${uniqueId}`;
 
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
@@ -83,15 +80,10 @@ export const getFileHeaderBytesByUniqueId = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileByUniqueIdRequest = {
-    ...targetDrive,
-    clientUniqueId: uniqueId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise: Promise<HomebaseFile | null> = client
-    .get<HomebaseFile>('/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request))
+    .get<HomebaseFile>(`${byUniqueIdRoute(targetDrive, uniqueId)}/header`)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
@@ -159,27 +151,19 @@ export const getPayloadBytesByUniqueId = async (
     systemFileType: 'Standard',
   };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileByUniqueIdPayloadRequest = {
-    ...targetDrive,
-    clientUniqueId: uniqueId,
-    key,
-  };
-
+  // Payload reads take no shared secret: the path names the file, and lastModified (a cache buster) goes in clear
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
   };
 
-  const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
-  config.headers = {
-    ...config.headers,
-    range: rangeHeader,
-  };
+  // V2 ignores a Range header on payload/{key}; a partial read is the ranged route
+  const { startOffset, updatedChunkStart, rangePath } = getRangePath(chunkStart, chunkEnd);
 
   return client
     .get<ArrayBuffer>(
-      '/drive/query/specialized/cuid/payload?' +
-        stringifyToQueryParams({ ...request, lastModified }),
+      `${byUniqueIdRoute(targetDrive, uniqueId)}/payload/${key}${rangePath}` +
+        toV2QueryString({ lastModified }),
       config
     )
     .then(async (response) => {
@@ -235,20 +219,16 @@ export const getThumbBytesByUniqueId = async (
   const lastModified = options?.lastModified ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileThumbByUniqueIdRequest = {
-    ...targetDrive,
-    clientUniqueId: uniqueId,
-    payloadKey: payloadKey,
-  };
+  // by-uid has no path-based thumb size; width and height go in the (unencrypted) query string
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
   };
 
   return client
     .get<ArrayBuffer>(
-      '/drive/query/specialized/cuid/thumb?' +
-        stringifyToQueryParams({ ...request, width, height, lastModified }),
+      `${byUniqueIdRoute(targetDrive, uniqueId)}/payload/${payloadKey}/thumb` +
+        toV2QueryString({ width, height, lastModified }),
       config
     )
     .then(async (response) => {

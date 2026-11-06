@@ -157,7 +157,7 @@ export const Sidenav = ({
 
             {!isTightHeight ? (
               <div>
-                <a className={`${navItemClassName} opacity-40 leading-none`} href="/api/v1/version">
+                <a className={`${navItemClassName} opacity-40 leading-none`} href="/api/v2/version">
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
                   <span
                     className={`my-auto ml-3 max-w-[15rem] overflow-hidden whitespace-pre-wrap ${
@@ -409,7 +409,7 @@ const SecurityMenuItem = () => {
 
   const getNeedsAttention = async (): Promise<boolean> => {
     const dotYouClient = new OwnerClient({api: ApiType.Owner});
-    const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+    const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
     const url = "/security/recovery/needs-attention";
     try {
 

@@ -17,22 +17,24 @@ import {
   decryptLocalContent,
   isClientLocked,
 } from '../SecurityHelpers';
-import { getCacheKey, getAxiosClient, parseBytesToObject, getRangeHeader } from './DriveFileHelper';
-import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
+import {
+  getCacheKey,
+  getAxiosClientV2,
+  parseBytesToObject,
+  getRangePath,
+  toV2QueryString,
+} from './DriveFileHelper';
+import { assertIfDefined, tryJsonParse } from '../../../helpers/DataUtil';
 import { DEFAULT_PAYLOAD_KEY } from '../../constants';
 
-interface GetFileRequest {
-  alias: string;
-  type: string;
-  fileId: string;
-}
+/// The V2 route of a file; the drive is addressed by its id, which is the V1 alias
+const fileRoute = (targetDrive: TargetDrive, fileId: string) =>
+  `/drives/${targetDrive.alias}/files/${fileId}`;
 
-interface GetFilePayloadRequest extends GetFileRequest {
-  key: string;
-}
-
-interface GetFileThumbRequest extends GetFileRequest {
-  payloadKey: string;
+/// One recipient in V2's transfer history: V1's `isReadByRecipient` became the read timestamp, or null
+interface RecipientTransferHistoryV2
+  extends Omit<TransferHistory['history']['results'][number], 'isReadByRecipient'> {
+  readByRecipientTimestamp: number | null;
 }
 
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
@@ -96,18 +98,10 @@ export const getFileHeaderBytes = async (
     (await _internalMetadataPromiseCache.get(cacheKey));
   if (cacheEntry) return cacheEntry;
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileRequest = {
-    ...targetDrive,
-    fileId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise: Promise<HomebaseFile | null> = client
-    .get<HomebaseFile>(
-      '/drive/files/header?' + stringifyToQueryParams(request),
-      options?.axiosConfig
-    )
+    .get<HomebaseFile>(`${fileRoute(targetDrive, fileId)}/header`, options?.axiosConfig)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
@@ -178,27 +172,20 @@ export const getPayloadBytes = async (
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFilePayloadRequest = {
-    ...targetDrive,
-    fileId,
-    key,
-  };
-
+  // Payload reads take no shared secret: the path names the file, and lastModified (a cache buster) goes in clear
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
     ...options?.axiosConfig,
   };
 
-  const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
-  config.headers = {
-    ...config.headers,
-    range: rangeHeader,
-  };
+  // V2 ignores a Range header on payload/{key}; a partial read is the ranged route
+  const { startOffset, updatedChunkStart, rangePath } = getRangePath(chunkStart, chunkEnd);
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/payload?' + stringifyToQueryParams({ ...request, lastModified }),
+      `${fileRoute(targetDrive, fileId)}/payload/${key}${rangePath}` +
+        toV2QueryString({ lastModified }),
       config
     )
     .then(async (response) => {
@@ -232,51 +219,6 @@ export const getPayloadBytes = async (
     });
 };
 
-/// getPayloadBytes on the V2 api, for the whole payload. The path names the file, so the request carries no
-/// query string to encrypt (V2 payload reads take none), and the response is decrypted as V1's is.
-export const getPayloadBytesV2 = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  key: string,
-  options?: {
-    systemFileType?: SystemFileType;
-    decrypt?: boolean;
-    axiosConfig?: AxiosRequestConfig;
-  }
-): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
-  assertIfDefined('DotYouClient', dotYouClient);
-  assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('FileId', fileId);
-  assertIfDefined('Key', key);
-
-  const decrypt = options?.decrypt ?? true;
-  const client = dotYouClient.createAxiosClient({
-    systemFileType: options?.systemFileType ?? 'Standard',
-    v2: true,
-  });
-
-  return client
-    .get<ArrayBuffer>(`/drives/${targetDrive.alias}/files/${fileId}/payload/${key}`, {
-      responseType: 'arraybuffer',
-      ...options?.axiosConfig,
-    })
-    .then(async (response) => {
-      if (!response.data || !response.data.byteLength) return null;
-      return {
-        bytes: decrypt
-          ? await decryptBytesResponse(dotYouClient, response)
-          : new Uint8Array(response.data),
-        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
-      };
-    })
-    .catch((error) => {
-      if (error.response?.status === 404) return null;
-      console.error('[odin-js:getPayloadBytesV2]', error);
-      return null;
-    });
-};
-
 export const getThumbBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -299,12 +241,7 @@ export const getThumbBytes = async (
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileThumbRequest = {
-    ...targetDrive,
-    fileId,
-    payloadKey: payloadKey,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
     ...options?.axiosConfig,
@@ -312,7 +249,8 @@ export const getThumbBytes = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
+      `${fileRoute(targetDrive, fileId)}/payload/${payloadKey}/thumb/${width}/${height}` +
+        toV2QueryString({ lastModified }),
       config
     )
     .then(async (response) => {
@@ -344,18 +282,30 @@ export const getTransferHistory = async (
 
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileRequest = {
-    ...targetDrive,
-    fileId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   return client
-    .get<TransferHistory>(
-      '/drive/files/transfer-history?' + stringifyToQueryParams(request),
-      options?.axiosConfig
+    .get<
+      Omit<TransferHistory, 'history'> & {
+        history: Omit<TransferHistory['history'], 'results'> & {
+          results: RecipientTransferHistoryV2[];
+        };
+      }
+    >(`${fileRoute(targetDrive, fileId)}/transfer-history`, options?.axiosConfig)
+    .then(({ data }): TransferHistory | null =>
+      data
+        ? {
+            ...data,
+            history: {
+              ...data.history,
+              results: data.history.results.map(({ readByRecipientTimestamp, ...item }) => ({
+                ...item,
+                isReadByRecipient: !!readByRecipientTimestamp,
+              })),
+            },
+          }
+        : null
     )
-    .then((response) => response.data)
     .catch((error) => {
       if (error.response?.status === 404) return null;
       console.error('[odin-js:getTransferHistory]', error);

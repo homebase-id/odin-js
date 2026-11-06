@@ -21,7 +21,7 @@ export const initialize = async (
     firstRunToken: string | null,
     drives?: DriveDefinitionParam[]
 ) => {
-    const client = dotYouClient.createAxiosClient();
+    const client = dotYouClient.createAxiosClient({ v2: true });
     const url = root + '/initialize?';
     drives?.forEach((d) => {
         assertValidSlug('driveSlug', d.driveSlug);
@@ -39,8 +39,8 @@ export const initialize = async (
 };
 
 export const isConfigured = async (dotYouClient: DotYouClient) => {
-    const client = dotYouClient.createAxiosClient();
-    const url = root + '/isconfigured';
+    const client = dotYouClient.createAxiosClient({ v2: true });
+    const url = root + '/is-configured';
     return client.post<boolean>(url, {}).then((response) => {
         return response.data;
     });

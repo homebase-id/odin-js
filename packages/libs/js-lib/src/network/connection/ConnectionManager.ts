@@ -1,5 +1,4 @@
 import {
-  ApiType,
   DotYouClient,
   assertIfDotYouClientIsOwner,
   assertIfDotYouClientIsOwnerOrApp,
@@ -17,21 +16,23 @@ import {
   ActiveConnection,
 } from '../circle/CircleDataTypes';
 
-const root = '/circles/connections';
+// V2: /api/v2/connections
+const rootV2 = '/connections';
 
 export const disconnectFromContact = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/disconnect';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/disconnect';
   const data: OdinIdRequest = { odinId: odinId };
   return client
     .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .then(() => true) // V2 answers an empty 200; V1 answered true
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const getConnections = async (
@@ -41,19 +42,9 @@ export const getConnections = async (
     cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<ActiveConnection>> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/connected?' + stringifyToQueryParams(data);
-
-  if (dotYouClient.getType() === ApiType.Owner) {
-    // Post needed
-    return client.post(url).then((response) => {
-      return response.data;
-    });
-  } else {
-    return client.get(url).then((response) => {
-      return response.data;
-    });
-  }
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/connected?' + stringifyToQueryParams(data);
+  return client.get(url).then((response) => response.data);
 };
 
 export const getBlockedConnections = (
@@ -61,14 +52,27 @@ export const getBlockedConnections = (
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
   assertIfDotYouClientIsOwner(dotYouClient);
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/blocked?' + stringifyToQueryParams(params);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+
+  // V2 pages by cursor, not page number: ask for everything up to the end of the requested page and
+  // keep that page
+  const pageNumber = Math.max(1, params.pageNumber || 1);
+  const count = params.pageSize * pageNumber;
+  const url = rootV2 + '/blocked?' + stringifyToQueryParams({ count });
   return client
-    .get(url)
+    .get<NumberCursoredResult<DotYouProfile>>(url)
     .then((response) => {
-      return response.data;
+      const all = response.data?.results || [];
+      const hasMore = all.length >= count && !!response.data?.cursor;
+      return {
+        results: all.slice(params.pageSize * (pageNumber - 1)),
+        totalPages: hasMore ? pageNumber + 1 : pageNumber,
+      };
     })
-    .catch(dotYouClient.handleErrorResponse);
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const getConnectionInfo = (
@@ -77,13 +81,11 @@ export const getConnectionInfo = (
 ): Promise<ConnectionInfo | undefined> => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
 
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/status';
-
-  const data: OdinIdRequest = { odinId: odinId };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/status?' + stringifyToQueryParams({ odinId });
 
   return client
-    .post(url, data)
+    .get(url)
     .then((response) => {
       return {
         ...response.data,
@@ -143,9 +145,9 @@ export const getEnrollmentCandidates = async (
   dotYouClient: DotYouClient,
   appId: string
 ): Promise<CircleEnrollmentCandidates[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
-    .get<CircleEnrollmentCandidates[]>(`${root}/circles/enrollment-candidates?appId=${appId}`)
+    .get<CircleEnrollmentCandidates[]>(`${rootV2}/circles/enrollment-candidates?appId=${appId}`)
     .then((response) => response.data);
 };
 
@@ -153,10 +155,10 @@ export const getEnrollmentCandidatesForCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<CircleEnrollmentCandidates> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .post<CircleEnrollmentCandidates>(
-      `${root}/circles/enrollment-candidates-for-circle`,
+      `${rootV2}/circles/enrollment-candidates-for-circle`,
       JSON.stringify(circleId),
       { headers: { 'Content-Type': 'application/json' } }
     )
@@ -168,8 +170,8 @@ export const grantCircleToMany = async (
   circleId: string,
   odinIds: string[]
 ): Promise<EnrollmentResult> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
-    .post<EnrollmentResult>(`${root}/circles/add-many`, { circleId, odinIds })
+    .post<EnrollmentResult>(`${rootV2}/circles/add-many`, { circleId, odinIds })
     .then((response) => response.data);
 };

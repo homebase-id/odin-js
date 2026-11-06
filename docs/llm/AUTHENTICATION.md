@@ -46,9 +46,9 @@ const { getDotYouClient } = useDotYouClient();
 await preAuth(getDotYouClient());
 ```
 
-**Purpose**: Establishes initial connection with the identity server and prepares for authentication.
+**Purpose**: Sets the app's cookie, which an app with no token in hand authenticates its websocket with.
 
-**Endpoint**: `POST /notify/preauth`
+**Endpoint**: `POST /api/v2/notify/preauth`
 
 ---
 

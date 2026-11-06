@@ -13,7 +13,7 @@ const clientWithDrives = (existing: Partial<DriveDefinition>[]) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const post = vi.fn((url: string, _data?: unknown) =>
     Promise.resolve(
-      url === 'drive/mgmt' ? { status: 200, data: { results: existing } } : { status: 200 }
+      url === '/drive-management' ? { status: 200, data: { results: existing } } : { status: 200 }
     )
   );
   return { post, client: { createAxiosClient: () => ({ post }) } as unknown as DotYouClient };
@@ -40,7 +40,7 @@ test('ensureDrive sends the requested attributes when it creates the drive', asy
   await ensure(client, { IsCollaborativeChannel: 'true' });
 
   expect(post).toHaveBeenCalledWith(
-    '/drive/mgmt/create',
+    '/drive-management/create',
     expect.objectContaining({
       targetDrive,
       allowSubscriptions: true,
@@ -54,7 +54,7 @@ test('ensureDrive without attributes still creates the drive', async () => {
 
   await ensure(client);
 
-  const createBody = post.mock.calls.find(([url]) => url === '/drive/mgmt/create')?.[1] as
+  const createBody = post.mock.calls.find(([url]) => url === '/drive-management/create')?.[1] as
     | Record<string, unknown>
     | undefined;
   expect(createBody).toMatchObject({ targetDrive, driveSlug: 'notes' });
@@ -65,7 +65,7 @@ test('ensureDrive does not create a drive that already exists', async () => {
   const { post, client } = clientWithDrives([{ targetDriveInfo: targetDrive, appId }]);
 
   expect(await ensure(client, { IsCollaborativeChannel: 'true' })).toBe(true);
-  expect(post).not.toHaveBeenCalledWith('/drive/mgmt/create', expect.anything());
+  expect(post).not.toHaveBeenCalledWith('/drive-management/create', expect.anything());
 });
 
 test('getRequestedDriveChanges keeps the attributes a drive has, and the requested ones win', () => {

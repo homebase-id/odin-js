@@ -59,7 +59,6 @@ export interface StorageOptions {
    */
   overwriteFileId?: string;
   expiresTimestamp?: number;
-  storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
 interface BaseTransitOptions {
@@ -132,7 +131,6 @@ export interface UploadFileMetadata {
   referencedFile?: GlobalTransitIdFileIdentifier;
   versionTag?: string;
 }
-
 
 export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];

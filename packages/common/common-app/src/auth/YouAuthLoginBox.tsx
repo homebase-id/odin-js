@@ -4,14 +4,14 @@ import { stringifyToQueryParams } from '@homebase-id/js-lib/helpers';
 import { replaceDomainSeparatorsInPlace, stripUrlToHost } from '../helpers/domainCleaner';
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
-const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
+const AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 const STORAGE_KEY_IDENTITY = 'youauth-previous-identity';
 
 const stripIdentity = stripUrlToHost;
 
 const pingIdentity = async (identity: string): Promise<boolean> => {
   try {
-    const response = await fetch(`https://${identity}/api/guest/v1/auth/ident`);
+    const response = await fetch(`https://${identity}/api/v2/auth/ident`);
     const validation = await response.json();
     return validation?.odinId?.toLowerCase() === identity;
   } catch {

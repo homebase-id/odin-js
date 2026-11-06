@@ -101,7 +101,7 @@ export const LoginBox = async (
   dotyouInputBox.addEventListener('keyup', replaceSeparatorsWithDots);
 
   const pingIdentity = async (identity: string) => {
-    return await fetch(`https://${identity}/api/guest/v1/auth/ident`)
+    return await fetch(`https://${identity}/api/v2/auth/ident`)
       .then((response) => response.json())
       .then((validation) => validation?.odinId.toLowerCase() === identity)
       .catch(() => false);

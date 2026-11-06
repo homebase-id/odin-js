@@ -89,6 +89,11 @@ export const getDecryptedMediaUrl = async (
   });
 };
 
+/**
+ * A direct V2 url to an unencrypted payload or thumb, for an `<img>`/`<video>` src; it carries no token. A payload
+ * goes to the ranged route from 0 with length 0 ("to the end"), the one V2 payload route that honours a Range
+ * header, so a browser or hls.js can still request byte ranges; without one it is the whole payload.
+ */
 export const getAnonymousDirectImageUrl = (
   identity: string,
   targetDrive: TargetDrive,
@@ -99,15 +104,9 @@ export const getAnonymousDirectImageUrl = (
   lastModified?: number
 ) => {
   const dotYouClient = new DotYouClient({ hostIdentity: identity, api: ApiType.Guest });
-  return `${dotYouClient.getEndpoint()}/drive/files/${
-    size ? 'thumb' : 'payload'
+  return `${dotYouClient.getEndpointV2()}/drives/${targetDrive.alias}/files/${fileId}/payload/${fileKey}${
+    size ? `/thumb/${size.pixelWidth}/${size.pixelHeight}` : '/0/0'
   }?${stringifyToQueryParams({
-    alias: targetDrive.alias,
-    type: targetDrive.type,
-    fileId: fileId,
-    ...(size
-      ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-      : { key: fileKey }),
     lastModified: lastModified,
     xfst: systemFileType || 'Standard',
     iac: true, // iac is a flag that tells the identity to ignore any auth cookies

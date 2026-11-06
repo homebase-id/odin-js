@@ -156,9 +156,9 @@ export interface TargetDriveAccessRequest extends TargetDrive {
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean | null> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
-  const response = await client.get('/auth/verifytoken').catch((_error) => {
+  const response = await client.get('/auth/verify-token').catch((_error) => {
     return { status: _error?.response?.status || 404 };
   });
 
@@ -297,17 +297,11 @@ export const exchangeDigestForToken = async (
   /** What sealed the two ciphers. Absent from an identity server that predates the field: CBC. */
   cipher?: YouAuthCipher;
 }> => {
-  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
   const tokenResponse = await axiosClient
-    .post(
-      '/youauth/token',
-      {
-        secret_digest: base64ExchangedSecretDigest,
-      },
-      {
-        baseURL: axiosClient.defaults.baseURL?.replace('/api/apps/v1', '/api/owner/v1'),
-      }
-    )
+    .post('/youauth/token', {
+      secret_digest: base64ExchangedSecretDigest,
+    })
     .then((response) => response.data);
 
   return tokenResponse;
@@ -366,7 +360,7 @@ export const openTokenFieldWith = (cipher: string | undefined | null) => {
 };
 
 export const logout = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   await client
     .post('/auth/logout', undefined, {
@@ -379,7 +373,7 @@ export const logout = async (dotYouClient: DotYouClient) => {
 };
 
 export const preAuth = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true, overrideEncryption: true });
 
   await client
     .post('/notify/preauth', undefined, {

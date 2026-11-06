@@ -11,6 +11,7 @@ import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
 import { ContactDataImage, ContactFile } from './ContactTypes';
 import { CONTACT_PROFILE_IMAGE_KEY, getContactByUniqueId } from './ContactManager';
 
+// V2: /api/v2/contacts (same shapes as V1's /contacts)
 const CONTACTS_ROOT = '/contacts';
 
 /**
@@ -39,7 +40,7 @@ export const createContact = async (
   dotYouClient: DotYouClient,
   content: ContactFile
 ): Promise<ContactWriteResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client.post<ContactWriteResponse>(CONTACTS_ROOT, { content }).then((response) => response.data);
 };
 
@@ -54,7 +55,7 @@ export const updateContact = async (
   versionTag: string,
   content: ContactFile
 ): Promise<ContactWriteResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .put<ContactWriteResponse>(`${CONTACTS_ROOT}/${uniqueId}`, { versionTag, content })
     .then((response) => response.data);
@@ -90,13 +91,13 @@ export const updateContactWithRetry = async (
 
 /** Enrich a contact from the peer's profile (`POST /contacts/sync/{odinId}`); best-effort, appData-safe. */
 export const syncContact = async (dotYouClient: DotYouClient, odinId: string): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   await client.post(`${CONTACTS_ROOT}/sync/${odinId}`);
 };
 
 /** Soft-delete a contact (`DELETE /contacts/{uniqueId}`). */
 export const deleteContact = async (dotYouClient: DotYouClient, uniqueId: string): Promise<void> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   await client.delete(`${CONTACTS_ROOT}/${uniqueId}`);
 };
 
@@ -139,7 +140,7 @@ export const setContactImage = async (
     })
   );
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .put<ContactWriteResponse>(`${CONTACTS_ROOT}/${uniqueId}/image`, {
       versionTag: header.fileMetadata.versionTag,
@@ -157,7 +158,7 @@ export const deleteContactImage = async (
   uniqueId: string,
   versionTag: string
 ): Promise<ContactWriteResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .delete<ContactWriteResponse>(`${CONTACTS_ROOT}/${uniqueId}/image`, { params: { versionTag } })
     .then((response) => response.data);

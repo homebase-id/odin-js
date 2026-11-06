@@ -132,15 +132,6 @@ export interface FileQueryParams {
     archivalStatus?: ArchivalStatus[];
 }
 
-export interface GetModifiedResultOptions {
-    maxRecords: number;
-    includeHeaderContent?: boolean;
-    includeTransferHistory?: boolean;
-    excludePreviewThumbnail?: boolean;
-    maxDate?: number | undefined;
-    cursor?: string | undefined;
-}
-
 export interface GetBatchQueryResultOptions {
     cursorState?: string | undefined;
     maxRecords: number;
@@ -148,12 +139,6 @@ export interface GetBatchQueryResultOptions {
     includeTransferHistory?: boolean;
     sorting?: 'fileId' | 'userDate' | 'createdDate' | 'anyChangeDate' | 'onlyModifiedDate' // default is 'fileId'
     ordering?: 'default' | 'newestFirst' | 'oldestFirst'; // default is 'default'
-}
-
-export interface QueryModifiedResponse {
-    includeHeaderContent: boolean;
-    cursor: unknown;
-    searchResults: (HomebaseFile | DeletedHomebaseFile)[];
 }
 
 export interface QueryBatchResponse {

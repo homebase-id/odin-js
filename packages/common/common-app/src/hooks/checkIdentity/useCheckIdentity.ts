@@ -12,7 +12,7 @@ export const useCheckIdentity = (odinId?: string) => {
     if (!isValid || !strippedIdentity) return false;
 
     const dotYouClient = new DotYouClient({ api: ApiType.Guest, hostIdentity: strippedIdentity });
-    return await fetch(`${dotYouClient.getEndpoint()}/auth/ident`)
+    return await fetch(`${dotYouClient.getEndpointV2()}/auth/ident`)
       .then((response) => {
         if (response.status !== 200) return;
         return response.json();

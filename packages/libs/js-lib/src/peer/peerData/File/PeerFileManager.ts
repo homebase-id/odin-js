@@ -2,7 +2,12 @@ import { AxiosRequestConfig } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { TargetDrive, SystemFileType } from '../../../core/core';
 import { assertIfDefined } from '../../../helpers/DataUtil';
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
+/// V2's send-delete action takes its body and answers in the clear ([NoSharedSecretOnRequest/OnResponse]). The
+/// route names one peer, but the server reads the recipients from the body as V1 did, so the first recipient
+/// stands in for the path (the caller's own identity when there are none, which the server rejects as V1 did).
 export const deleteFileOverPeer = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -14,7 +19,7 @@ export const deleteFileOverPeer = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
 
   const request = {
     fileSystemType: systemFileType || 'Standard',
@@ -26,7 +31,11 @@ export const deleteFileOverPeer = async (
   };
 
   return client
-    .post('/transit/sender/files/senddeleterequest', request, axiosConfig)
+    .post(
+      `${peerDriveRootV2(recipients?.[0] ?? dotYouClient.getHostIdentity(), targetDrive.alias)}/files/senddeleterequest`,
+      request,
+      axiosConfig
+    )
     .then((response) => {
       if (response.status === 200) {
         return true;
