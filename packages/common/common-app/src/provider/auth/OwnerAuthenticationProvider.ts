@@ -48,15 +48,6 @@ export const logoutOwnerAndAllApps = async (
     console.warn('Failed unregister push notifiations', ex);
   }
 
-  // Before the apps: while the owner's cookie is there, V2 reads it ahead of an app's bearer token, so an app's logout
-  // would be the owner's request and leave the app's session alive
-  try {
-    // Remove session from server
-    await logoutOwner();
-  } catch (ex) {
-    console.warn('Failed to logout on the server', ex);
-  }
-
   try {
     await Promise.all(
       APP_KEYS.map(async (key) => {
@@ -86,6 +77,13 @@ export const logoutOwnerAndAllApps = async (
       localStorage.removeItem(`BX0900_${key}`);
       localStorage.removeItem(`APPS_${key}`);
     });
+  } catch (ex) {
+    console.warn('Failed to logout on the server', ex);
+  }
+
+  try {
+    // Remove session from server
+    await logoutOwner();
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);
   }
