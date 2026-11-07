@@ -53,25 +53,25 @@ const enLocale = [
 
   // Transfer Statusses:
   [
-    TransferStatus.RecipientIdentityReturnedAccessDenied.toLowerCase(),
+    TransferStatus.RecipientIdentityReturnedAccessDenied,
     'Recipient identity returned access denied',
   ],
-  [TransferStatus.RecipientServerNotResponding.toLowerCase(), 'Recipient server not responding'],
+  [TransferStatus.RecipientServerNotResponding, 'Recipient server not responding'],
+  [TransferStatus.RecipientIdentityReturnedServerError, 'Recipient identity returned server error'],
+  [TransferStatus.SendingServerTooManyAttempts, "Too many failed attempts, won't try again"],
+  [TransferStatus.RecipientIdentityReturnedBadRequest, 'Recipient identity returned bad request'],
   [
-    TransferStatus.RecipientIdentityReturnedServerError.toLowerCase(),
-    'Recipient identity returned server error',
+    TransferStatus.RecipientIdentityReturnedVersionTagMismatch,
+    "Recipient's copy of the file has changed",
   ],
   [
-    TransferStatus.SendingServerTooManyAttempts.toLowerCase(),
-    "Too many failed attempts, won't try again",
+    TransferStatus.RecipientIdentityReturnedInvalidKeyHeader,
+    "Recipient refused the file's encryption key",
   ],
-  [
-    TransferStatus.RecipientIdentityReturnedBadRequest.toLowerCase(),
-    'Recipient identity returned bad request',
-  ],
+  [TransferStatus.RecipientIdentityOutOfStorage, 'Recipient is out of storage; will retry'],
 ] as const;
 
-const internalDict: Map<string, string> = new Map(enLocale);
+const internalDict = new Map<string, string>(enLocale);
 
 const t = (key: string | undefined, ...args: (string | number)[]) => {
   if (!key) return '';
