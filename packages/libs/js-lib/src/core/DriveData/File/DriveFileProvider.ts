@@ -5,6 +5,7 @@ import {
   EncryptedKeyHeader,
   SystemFileType,
   TransferHistory,
+  TransferStatus,
 } from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
@@ -355,7 +356,25 @@ export const getTransferHistory = async (
       '/drive/files/transfer-history?' + stringifyToQueryParams(request),
       options?.axiosConfig
     )
-    .then((response) => response.data)
+    .then(({ data }) => {
+      // A file without a header comes back as an empty response
+      if (!data?.history) return null;
+
+      return {
+        ...data,
+        history: {
+          ...data.history,
+          results: data.history.results.map((result) => ({
+            ...result,
+            // The server sends these in camelCase; TransferStatus is lowercase. A status it no longer
+            // has a name for arrives as a number
+            latestTransferStatus: result.latestTransferStatus
+              ?.toString()
+              .toLowerCase() as TransferStatus,
+          })),
+        },
+      };
+    })
     .catch((error) => {
       if (error.response?.status === 404) return null;
       console.error('[odin-js:getTransferHistory]', error);

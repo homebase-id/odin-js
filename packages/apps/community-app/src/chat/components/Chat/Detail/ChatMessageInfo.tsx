@@ -1,6 +1,10 @@
 import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
-import { ChatMessage, transferHistoryToChatDeliveryStatus } from '../../../providers/ChatProvider';
+import {
+  ChatDeliveryStatus,
+  ChatMessage,
+  transferHistoryToChatDeliveryStatus,
+} from '../../../providers/ChatProvider';
 import {
   AuthorImage,
   AuthorName,
@@ -12,7 +16,7 @@ import {
   getOwnerDrivePath,
   CHAT_APP_ID,
 } from '@homebase-id/common-app';
-import { FailedDeliveryDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
+import { DeliveryStatusDetails, InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { formatDateExludingYearIfCurrent } from '@homebase-id/common-app';
 import {
@@ -113,8 +117,9 @@ export const ChatMessageInfo = ({
                     </div>
                     {isAuthor && recipientTransferHistory ? (
                       <div className="flex flex-row justify-end gap-2 sm:contents">
-                        <FailedDeliveryDetails
+                        <DeliveryStatusDetails
                           transferHistory={recipientTransferHistory}
+                          isFailed={deliveryStatus === ChatDeliveryStatus.Failed}
                           className="sm:ml-auto"
                         />
                         <InnerDeliveryIndicator state={deliveryStatus} />

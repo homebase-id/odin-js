@@ -28,7 +28,6 @@ import {
   RecipientTransferSummary,
   RecipientTransferHistory,
   FailedTransferStatuses,
-  TransferStatus,
   MAX_HEADER_CONTENT_BYTES,
   patchFile,
   UpdateLocalInstructionSet,
@@ -290,6 +289,12 @@ export const transferHistoryToChatDeliveryStatus = (
 ): ChatDeliveryStatus => {
   if (!transferHistory) return ChatDeliveryStatus.Failed;
 
+  // The failure goes first: the delivered tag stays as the last version that got through, and the
+  // next successful delivery overwrites this status
+  if (FailedTransferStatuses.includes(transferHistory.latestTransferStatus)) {
+    return ChatDeliveryStatus.Failed;
+  }
+
   if (transferHistory.latestSuccessfullyDeliveredVersionTag) {
     if (transferHistory.isReadByRecipient) {
       return ChatDeliveryStatus.Read;
@@ -298,14 +303,6 @@ export const transferHistoryToChatDeliveryStatus = (
     }
   }
 
-  const latest = transferHistory.latestTransferStatus;
-  const transferStatus =
-    latest && typeof latest === 'string'
-      ? (latest?.toLocaleLowerCase() as TransferStatus)
-      : undefined;
-  if (transferStatus && FailedTransferStatuses.includes(transferStatus)) {
-    return ChatDeliveryStatus.Failed;
-  }
   return ChatDeliveryStatus.Sent;
 };
 

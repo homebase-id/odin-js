@@ -19,18 +19,22 @@ export const ChatDeliveryIndicator = ({
   return <InnerDeliveryIndicator state={content.deliveryStatus} className={className} />;
 };
 
-export const FailedDeliveryDetails = ({
+export const DeliveryStatusDetails = ({
   transferHistory,
+  isFailed,
   className,
 }: {
   transferHistory: RecipientTransferHistory | undefined;
+  isFailed: boolean;
   className?: string;
 }) => {
-  if (!transferHistory?.latestTransferStatus) return null;
-  if (transferHistory.latestTransferStatus === TransferStatus.None) return null;
-  if (transferHistory.latestSuccessfullyDeliveredVersionTag) return null;
+  const status = transferHistory?.latestTransferStatus;
+  if (!status || status === TransferStatus.None || status === TransferStatus.Delivered) return null;
+
   return (
-    <p className={`text-red-500 ${className || ''}`}>{t(transferHistory.latestTransferStatus)}</p>
+    <p className={`${isFailed ? 'text-red-500' : 'text-foreground/50'} ${className || ''}`}>
+      {t(status)}
+    </p>
   );
 };
 

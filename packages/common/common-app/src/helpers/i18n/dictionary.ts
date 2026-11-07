@@ -69,6 +69,8 @@ const enLocale = [
     "Recipient refused the file's encryption key",
   ],
   [TransferStatus.RecipientIdentityOutOfStorage, 'Recipient is out of storage; will retry'],
+  [TransferStatus.SourceFileDoesNotAllowDistribution, 'File does not allow distribution'],
+  [TransferStatus.UnknownServerError, 'Unknown server error'],
 ] as const;
 
 const internalDict = new Map<string, string>(enLocale);
