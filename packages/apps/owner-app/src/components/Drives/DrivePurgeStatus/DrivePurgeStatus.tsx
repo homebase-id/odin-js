@@ -62,20 +62,60 @@ const PurgeAlert = ({
       ? `10,000+ ${t('files left')}`
       : `${purge.filesRemaining} ${purge.filesRemaining === 1 ? t('file left') : t('files left')}`;
 
-  if (purge.stopped || purge.lastError) {
+  // Servers older than `phase` only say stopped and lastError; read those the way they always were.
+  const phase =
+    purge.phase ??
+    (purge.stopped
+      ? 'stopped'
+      : purge.lastError
+        ? 'retrying'
+        : purge.filesRemaining > 0
+          ? 'removingFiles'
+          : 'finishing');
+
+  if (phase === 'stopped' || phase === 'retrying') {
+    const retryAt = purge.nextRunAt ? new Date(purge.nextRunAt).toLocaleTimeString() : undefined;
     return (
-      <Alert type={purge.stopped ? 'critical' : 'warning'} title={`${doing} ${name}: ${left}`} isCompact={true}>
+      <Alert
+        type={phase === 'stopped' ? 'critical' : 'warning'}
+        title={`${doing} ${name}: ${left}`}
+        isCompact={true}
+      >
         <div className="flex flex-row items-center gap-3">
           <p className="flex-grow">
-            {purge.stopped ? t('This stopped and is not retrying.') : t('A run failed; it will retry.')}
+            {phase === 'stopped'
+              ? t('This stopped and is not retrying.')
+              : retryAt
+                ? `${t('A run failed; it will retry at')} ${retryAt}.`
+                : t('A run failed; it will retry.')}
             {purge.lastError ? ` ${t('Last error')}: ${purge.lastError}` : ''}
+            {purge.kind === 'delete'
+              ? ` ${t('Until this finishes, the drive cannot be created again.')}`
+              : ''}
           </p>
-          {purge.stopped ? (
+          {phase === 'stopped' ? (
             <ActionButton type="secondary" onClick={onRetry} state={retryStatus}>
               {t('Retry')}
             </ActionButton>
           ) : null}
         </div>
+      </Alert>
+    );
+  }
+
+  if (phase === 'finishing') {
+    return (
+      <Alert
+        type="info"
+        title={`${t('Finishing up')}: ${doing.toLowerCase()} ${name}…`}
+        isCompact={true}
+      >
+        {purge.kind === 'delete'
+          ? t(
+              'All files are removed; the last cleanup is still running. Until it finishes, the drive cannot be created again (for example, by reinstalling the app).'
+            )
+          : t('All files are removed; finishing up.')}{' '}
+        {t('You can leave this page.')}
       </Alert>
     );
   }
