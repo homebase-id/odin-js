@@ -31,6 +31,9 @@ Issue numbers in comments (`#316`, …) are journal's.
 - `tiptapToSlate(doc)` writes the reduced copy old clients read from `body`. It uses only the
   types in `OLD_RENDERER_TYPES` and flattens what the old renderer can't show: a table becomes
   one paragraph per row, a callout a quote, math code, footnotes `[n]` and a closing list.
+- Neither throws on malformed input (null entries, strings in place of nodes, children that
+  aren't arrays, non-string types). Both clean their input first and keep the text they can find.
+  `cleanTiptapDoc(doc, { isKnownNode, isKnownMark })` is that cleaning step for Tiptap JSON.
 
 ## Harness
 
