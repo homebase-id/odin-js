@@ -45,26 +45,29 @@ export const RichTextRenderer = ({
   if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
   if (!Array.isArray(body)) return <p className={className}>{getFallbackText(body)}</p>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const render = (node: any): ReactNode => {
+  // Entries come from stored posts and are not checked: a string is text, anything that isn't an
+  // object renders nothing, and children that aren't an array count as none
+  const render = (entry: unknown): ReactNode => {
+    if (typeof entry === 'string' || typeof entry === 'number') return renderLeaf({}, String(entry), {});
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const node = entry as Record<string, any>;
+
     if (
       'text' in node &&
       (!('type' in node) || node.type === 'text' || node.type === 'code_line')
     ) {
-      return renderLeaf(node, node.text, {});
+      return renderLeaf(node, typeof node.text === 'string' ? node.text : String(node.text ?? ''), {});
     } else {
       const { type, ...attributes } = node;
 
       return renderElement(
-        { type, attributes },
-        node.children ? (
+        { type: typeof type === 'string' ? type : undefined, attributes },
+        Array.isArray(node.children) ? (
           <>
-            {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              node.children.map((childNode: any, index: number) => (
-                <React.Fragment key={index}>{render(childNode)}</React.Fragment>
-              ))
-            }
+            {node.children.map((childNode: unknown, index: number) => (
+              <React.Fragment key={index}>{render(childNode)}</React.Fragment>
+            ))}
           </>
         ) : undefined
       );
@@ -184,9 +187,11 @@ export const RichTextRenderer = ({
         // TODO: expand with check for attributes?.odinId, and if so check if it is a contact, and if we have a name for them...
         return (
           <a
-            href={(attributes?.url as string) ?? ''}
+            href={typeof attributes?.url === 'string' ? attributes.url : ''}
             target={
-              (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
+              typeof attributes?.url === 'string' && attributes.url.startsWith(window.location.origin)
+                ? '_self'
+                : '_blank'
             }
             rel="noopener noreferrer"
             className="text-primary hover:underline break-words"
@@ -229,7 +234,7 @@ export const RichTextRenderer = ({
                 href={attributes.linkTarget as string}
                 type="secondary"
               >
-                {attributes.linkText as string}
+                {String(attributes.linkText ?? '')}
               </ActionLink>
             </div>
           );
