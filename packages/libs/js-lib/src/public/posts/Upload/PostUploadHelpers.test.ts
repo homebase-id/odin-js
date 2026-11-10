@@ -353,4 +353,79 @@ describe('getPostContentForUpload', () => {
 
         expect(() => getPostContentForUpload(file)).toThrow();
     });
+    describe('Article bodyDoc', () => {
+        const articleFile = (body: Article['body'], bodyDoc: Article['bodyDoc'], abstract = 'abstract') =>
+            ({
+                fileMetadata: {
+                    appData: {
+                        content: {
+                            id: 'id9', channelId: 'chan', caption: 'title', slug: 'slug9', type: 'Article',
+                            abstract, body, bodyDoc,
+                        } as Article,
+                    },
+                },
+            }) as unknown as NewHomebaseFile<Article>;
+        const paragraphs = (n: number) =>
+            Array.from({ length: n }, (_, i) => ({ type: 'p', children: [{ text: `paragraph ${i} ${makeLong('w', 80)}` }] }));
+        const docOf = (n: number) => ({
+            type: 'doc',
+            content: Array.from({ length: n }, (_, i) => ({ type: 'paragraph', content: [{ type: 'text', text: `paragraph ${i} ${makeLong('w', 80)}` }] })),
+        });
+        const bodyDocOf = (doc: Record<string, unknown>) => ({ format: 'tiptap-v1' as const, doc, slateHash: 'ab'.repeat(32) });
+
+        const textPayloadOf = async (payloads: { key: string; payload: Blob | File }[]) => {
+            const text = payloads.find((p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY);
+            return text ? JSON.parse(await (text.payload as Blob).text()) : undefined;
+        };
+
+        it('keeps body and bodyDoc in the header when the whole article fits', () => {
+            const bodyDoc = bodyDocOf(docOf(2));
+            const { headerContent, additionalPayloads } = getPostContentForUpload(articleFile(paragraphs(2), bodyDoc));
+            expect(additionalPayloads).toEqual([]);
+            const header = JSON.parse(headerContent);
+            expect(header.body).toEqual(paragraphs(2));
+            expect(header.bodyDoc).toEqual(bodyDoc);
+        });
+
+        it('moves bodyDoc into the text payload with body when the article is too big', async () => {
+            const bodyDoc = bodyDocOf(docOf(60));
+            const { headerContent, additionalPayloads } = getPostContentForUpload(articleFile(paragraphs(60), bodyDoc));
+            const header = JSON.parse(headerContent);
+            expect(header.body).toBeUndefined();
+            expect(header.bodyDoc).toBeUndefined();
+            const text = await textPayloadOf(additionalPayloads);
+            expect(text.body).toEqual(paragraphs(60));
+            expect(text.bodyDoc).toEqual(bodyDoc);
+            // What readers do: merge the text payload over the header
+            expect({ ...header, ...text }).toMatchObject({ body: paragraphs(60), bodyDoc });
+        });
+
+        it('moves both when body alone would fit the header but bodyDoc does not', async () => {
+            // A long abstract forces the split; the body is small, its document is not
+            const bodyDoc = bodyDocOf(docOf(5));
+            const body = [{ type: 'p', children: [{ text: 'short' }] }];
+            const { headerContent, additionalPayloads } = getPostContentForUpload(
+                articleFile(body, bodyDoc, makeLong('a', 15000))
+            );
+            const header = JSON.parse(headerContent);
+            expect(header.body).toBeUndefined();
+            expect(header.bodyDoc).toBeUndefined();
+            const text = await textPayloadOf(additionalPayloads);
+            expect(text.body).toEqual(body);
+            expect(text.bodyDoc).toEqual(bodyDoc);
+        });
+
+        it('keeps both in the header when together they are small, even on the split path', async () => {
+            const bodyDoc = bodyDocOf({ type: 'doc', content: [] });
+            const body = [{ type: 'p', children: [{ text: 'x' }] }];
+            const { headerContent, additionalPayloads } = getPostContentForUpload(
+                articleFile(body, bodyDoc, makeLong('a', 15000))
+            );
+            const header = JSON.parse(headerContent);
+            expect(header.body).toEqual(body);
+            expect(header.bodyDoc).toEqual(bodyDoc);
+            const text = await textPayloadOf(additionalPayloads);
+            expect(Object.keys(text)).toEqual(['type', 'abstract']);
+        });
+    });
 });

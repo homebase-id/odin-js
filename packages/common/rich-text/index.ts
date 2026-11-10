@@ -16,3 +16,12 @@ export {
   type CleanTiptapOptions,
   type SlateNode,
 } from './src/slate';
+export {
+  BODY_DOC_FORMAT,
+  articleDocOf,
+  readingTimeOf,
+  slateHash,
+  toStoredArticleBody,
+  type StoredArticleBody,
+  type StoredBodyDoc,
+} from './src/stored';

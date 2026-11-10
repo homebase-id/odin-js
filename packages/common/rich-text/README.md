@@ -35,6 +35,17 @@ Issue numbers in comments (`#316`, …) are journal's.
   aren't arrays, non-string types). Both clean their input first and keep the text they can find.
   `cleanTiptapDoc(doc, { isKnownNode, isKnownMark })` is that cleaning step for Tiptap JSON.
 
+## Stored articles
+
+`src/stored.ts` follows js-lib's `Article.bodyDoc`: the document is stored next to `body`.
+
+- `toStoredArticleBody(doc)` returns `{ body, bodyDoc }`: `body` is `tiptapToSlate(doc)` and
+  `bodyDoc.slateHash` the lowercase hex SHA-256 of `JSON.stringify(body)`.
+- `articleDocOf(content)` returns `bodyDoc.doc` when its format is `tiptap-v1` and the hash still
+  matches `body`; otherwise (no `bodyDoc`, unknown format, or `body` edited by an old client)
+  `slateToTiptap(body)`.
+- `readingTimeOf(doc)` counts words at 200 a minute, in the shape of `ReadTimeStats`.
+
 ## Harness
 
 `npm test` runs `test/slate.test.ts` on every file in `test/fixtures`:

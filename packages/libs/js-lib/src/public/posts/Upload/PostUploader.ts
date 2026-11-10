@@ -398,6 +398,16 @@ const patchPost = async <T extends PostContent>(
     });
   }
 
+  // A text payload left from an earlier version would be merged over the new header by readers
+  if (
+    !additionalPayloads?.some((p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY) &&
+    file.fileMetadata?.payloads?.some((pyld) => pyld.key === POST_FULL_TEXT_PAYLOAD_KEY)
+  ) {
+    deletedPayloads.push({
+      key: POST_FULL_TEXT_PAYLOAD_KEY,
+    });
+  }
+
   const instructionSet: UpdateInstructionSet = odinId
     ? {
       transferIv: getRandom16ByteArray(),
