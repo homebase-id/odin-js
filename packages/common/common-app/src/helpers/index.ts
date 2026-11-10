@@ -11,3 +11,4 @@ export * from './planStorage';
 export * from './ownerPaths';
 export * from './driveAdoption';
 export * from './richTextFileKey';
+export * from './nextArticleEditor';

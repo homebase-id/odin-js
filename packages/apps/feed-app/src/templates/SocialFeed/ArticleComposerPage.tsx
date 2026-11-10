@@ -12,6 +12,7 @@ import {
   ChannelOrAclSelector,
   BlockerDialog,
   FEED_ROOT_PATH,
+  isNextArticleEditor,
 } from '@homebase-id/common-app';
 import {
   Arrow,
@@ -22,11 +23,14 @@ import {
   Save,
   OpenLock,
 } from '@homebase-id/common-app/icons';
-import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
+import {
+  ArticleFieldValue,
+  InnerFieldEditors,
+} from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '@homebase-id/common-app';
 import { Article, ReactAccess } from '@homebase-id/js-lib/public';
 import { useArticleComposer } from '@homebase-id/common-app';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@homebase-id/js-lib/core';
 
@@ -35,6 +39,8 @@ export const ArticleComposerPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
+  // ?editor=next turns the next editor on, ?editor=old off; remembered in localStorage
+  const nextEditor = useMemo(() => isNextArticleEditor(window.location.search), []);
 
   const {
     // Actions
@@ -156,12 +162,7 @@ export const ArticleComposerPage = () => {
   );
 
   const handleRTEChange = useCallback(
-    (e: {
-      target: {
-        name: string;
-        value: string | { fileKey: string; type: string } | RichText | undefined;
-      };
-    }) => {
+    (e: { target: { name: string; value: ArticleFieldValue } }) => {
       setNeedsSaving(true);
       setPostFile((oldPostFile) => {
         const dirtyPostFile = { ...oldPostFile };
@@ -182,6 +183,15 @@ export const ArticleComposerPage = () => {
           }
         } else if (e.target.name === 'body') {
           dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
+        } else if (
+          e.target.name === 'bodyDoc' &&
+          e.target.value &&
+          typeof e.target.value === 'object'
+        ) {
+          // The next editor: the document and the Slate copy old clients read, together
+          const { body, bodyDoc } = e.target.value as Pick<Article, 'body' | 'bodyDoc'>;
+          dirtyPostFile.fileMetadata.appData.content.body = body;
+          dirtyPostFile.fileMetadata.appData.content.bodyDoc = bodyDoc;
         }
 
         return {
@@ -285,6 +295,7 @@ export const ArticleComposerPage = () => {
                 files={files}
                 setFiles={setFiles}
                 onChange={handleRTEChange}
+                nextEditor={nextEditor}
               />
 
               <div className="flex flex-col gap-2 sm:flex-row-reverse">

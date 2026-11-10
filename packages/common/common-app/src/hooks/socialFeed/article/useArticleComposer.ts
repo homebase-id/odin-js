@@ -18,6 +18,9 @@ import {
 } from '@homebase-id/js-lib/core';
 import { usePost } from '../post/usePost';
 import { getReadingTime } from '../../../helpers/richTextHelper';
+import { withoutUnusedRteFiles } from '../../../helpers/richTextFileKey';
+// The module itself, not the package index, which brings the whole editor schema along
+import { articleDocOf, readingTimeOf } from '@homebase-id/rich-text/src/stored';
 import { useChannel } from '../channels/useChannel';
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 
@@ -147,6 +150,10 @@ export const useArticleComposer = ({
 
     const targetChannel = explicitTargetChannel || channel;
 
+    // An article from the next editor: its document is what the reader sees (see articleDocOf)
+    const dirtyContent = dirtyPostFile.fileMetadata.appData.content;
+    const doc = dirtyContent.bodyDoc ? await articleDocOf(dirtyContent) : undefined;
+
     // Build postFile
     const toPostFile: NewHomebaseFile<Article> = {
       ...dirtyPostFile,
@@ -161,7 +168,7 @@ export const useArticleComposer = ({
             id: dirtyPostFile.fileMetadata.appData.content.id ?? getNewId(), // Generate new id if there is none
             slug: slugify(dirtyPostFile.fileMetadata.appData.content.caption), // Reset slug to match caption each time
             channelId: targetChannel.fileMetadata.appData.uniqueId as string, // Always update channel to the one in state, shouldn't have changed
-            readingTimeStats: getReadingTime(dirtyPostFile.fileMetadata.appData.content.body),
+            readingTimeStats: doc ? readingTimeOf(doc) : getReadingTime(dirtyContent.body),
           },
         },
       },
@@ -186,7 +193,9 @@ export const useArticleComposer = ({
           ? ((targetChannel as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata
               .appData.content.uniqueId as string)
           : undefined) || (targetChannel.fileMetadata.appData.uniqueId as string),
-      mediaFiles: files,
+      mediaFiles: doc
+        ? withoutUnusedRteFiles(files, doc, [dirtyContent.primaryMediaFile?.fileKey])
+        : files,
     });
 
     if (!uploadResult) throw new Error('Failed to save post');

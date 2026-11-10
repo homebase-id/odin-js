@@ -14,3 +14,40 @@ export const getNextRteFileKey = (files: { key?: string }[]): string => {
   }
   return `${RTE_FILE_KEY_PREFIX}${max + 1}`;
 };
+
+/** `files` with `file` added under the next unused inline image key, and that key. */
+export const appendRteFile = <T extends { key?: string }>(
+  files: T[],
+  file: Blob
+): { files: (T | { file: Blob; key: string })[]; key: string } => {
+  const key = getNextRteFileKey(files);
+  return { files: [...files, { file, key }], key };
+};
+
+const fileKeysOf = (
+  node: { attrs?: Record<string, unknown>; content?: unknown[] },
+  keys: Set<string>
+) => {
+  if (typeof node.attrs?.fileKey === 'string') keys.add(node.attrs.fileKey);
+  node.content?.forEach((child) => fileKeysOf(child as typeof node, keys));
+  return keys;
+};
+
+/**
+ * `files` without the inline images added while editing that the document no longer has, so a
+ * removed image isn't uploaded. Payloads already on the server and `keep` (the hero image) stay.
+ */
+export const withoutUnusedRteFiles = <T extends { key?: string }>(
+  files: T[],
+  doc: { content?: unknown[] },
+  keep: (string | undefined)[] = []
+): T[] => {
+  const used = fileKeysOf(doc, new Set());
+  return files.filter(
+    (f) =>
+      !('file' in f) ||
+      !f.key?.startsWith(RTE_FILE_KEY_PREFIX) ||
+      used.has(f.key) ||
+      keep.includes(f.key)
+  );
+};

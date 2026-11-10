@@ -4,7 +4,7 @@ import {
   getChannelDrive,
   RemoteCollaborativeChannelDefinition,
 } from '@homebase-id/js-lib/public';
-import { lazy, useMemo, useState } from 'react';
+import { lazy, useMemo, useRef, useState } from 'react';
 import {
   t,
   ErrorBoundary,
@@ -14,6 +14,7 @@ import {
   useRawImage,
   ImageSelector,
   getNextRteFileKey,
+  appendRteFile,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 
@@ -25,9 +26,19 @@ import {
   NewMediaFile,
 } from '@homebase-id/js-lib/core';
 import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
+import type { ArticleEditorMedia } from '@homebase-id/rich-text-editor/src/next/ArticleEditorContext';
+import type { StoredArticleBody } from '@homebase-id/rich-text/src/stored';
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
+const ArticleEditor = lazy(() => import('@homebase-id/rich-text-editor/src/next/ArticleEditor'));
+
+export type ArticleFieldValue =
+  | string
+  | { fileKey: string; type: string }
+  | RichText
+  | StoredArticleBody
+  | undefined;
 
 export const InnerFieldEditors = ({
   odinId,
@@ -39,20 +50,18 @@ export const InnerFieldEditors = ({
 
   disabled,
   setFiles,
+  nextEditor,
 }: {
   odinId?: string;
   postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
   channel: NewHomebaseFile<ChannelDefinition>;
   files: (NewMediaFile | MediaFile)[];
 
-  onChange: (e: {
-    target: {
-      name: string;
-      value: string | { fileKey: string; type: string } | RichText | undefined;
-    };
-  }) => void;
+  onChange: (e: { target: { name: string; value: ArticleFieldValue } }) => void;
   disabled?: boolean;
   setFiles: (newFiles: (NewMediaFile | MediaFile)[]) => void;
+  /** The body is the next (Tiptap) editor, which writes `body` and `bodyDoc` */
+  nextEditor?: boolean;
 }) => {
   const channelId =
     (channel as HomebaseFile<RemoteCollaborativeChannelDefinition>).fileMetadata.appData.content
@@ -88,6 +97,27 @@ export const InnerFieldEditors = ({
       onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
         setFiles(files.filter((f) => f.key !== fileKey));
         return true;
+      },
+    }),
+    [odinId, postFile.fileId, files, setFiles]
+  );
+
+  // Several images added at once each get their own key: the next one counts the last one
+  const filesRef = useRef(files);
+  filesRef.current = files;
+  const editorMedia: ArticleEditorMedia = useMemo(
+    () => ({
+      odinId,
+      mediaDrive: targetDrive,
+      fileId: postFile.fileId,
+      globalTransitId: postFile.fileMetadata.globalTransitId,
+      lastModified: (postFile as HomebaseFile<unknown>).fileMetadata?.updated,
+      pendingFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+      addImage: (file) => {
+        const { files: newFiles, key } = appendRteFile(filesRef.current, file);
+        filesRef.current = newFiles;
+        setFiles(newFiles);
+        return key;
       },
     }),
     [odinId, postFile.fileId, files, setFiles]
@@ -200,17 +230,29 @@ export const InnerFieldEditors = ({
         <span className="text-sm text-gray-400">{t('Body')}</span>
         <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
           <ErrorBoundary>
-            <RichTextEditor
-              defaultValue={(postFile.fileMetadata.appData.content as Article)?.body}
-              placeholder={t('Start writing...')}
-              mediaOptions={mediaOptions}
-              name="body"
-              onChange={onChange}
-              className="min-h-[50vh]"
-              disabled={disabled}
-              key={postFile.fileId ? 'editor' : 'editor-new'}
-              stickyToolbar={true}
-            />
+            {nextEditor ? (
+              <ArticleEditor
+                article={postFile.fileMetadata.appData.content as Article}
+                media={editorMedia}
+                placeholder={t('Start writing, or type / for blocks')}
+                onChange={(value) => onChange({ target: { name: 'bodyDoc', value } })}
+                className="min-h-[50vh]"
+                disabled={disabled}
+                key={postFile.fileId ? 'editor' : 'editor-new'}
+              />
+            ) : (
+              <RichTextEditor
+                defaultValue={(postFile.fileMetadata.appData.content as Article)?.body}
+                placeholder={t('Start writing...')}
+                mediaOptions={mediaOptions}
+                name="body"
+                onChange={onChange}
+                className="min-h-[50vh]"
+                disabled={disabled}
+                key={postFile.fileId ? 'editor' : 'editor-new'}
+                stickyToolbar={true}
+              />
+            )}
           </ErrorBoundary>
         </div>
       </div>
