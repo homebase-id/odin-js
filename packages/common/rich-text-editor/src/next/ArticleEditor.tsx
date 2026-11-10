@@ -2,18 +2,19 @@
  * The next article editor: journal's Tiptap editor in the feed's article schema
  * (packages/common/rich-text). It opens any article through articleDocOf, so an old Slate body
  * opens converted, and reports each change as the `{ body, bodyDoc }` the article stores.
+ *
+ * It never opens on a document it couldn't read: when articleDocOf fails, or the document doesn't
+ * fit the editor's schema (Tiptap would silently open it empty), it shows an error in place of the
+ * editor and makes no onChange calls, so the stored body can't be overwritten.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EditorContent, useEditor, type Editor } from '@tiptap/react';
 import type { JSONContent } from '@tiptap/core';
 // The modules themselves, not the package index, which brings the whole editor schema along
-import {
-  articleDocOf,
-  toStoredArticleBody,
-  type StoredArticleBody,
-} from '@homebase-id/rich-text/src/stored';
+import { toStoredArticleBody, type StoredArticleBody } from '@homebase-id/rich-text/src/stored';
 import { ArticleEditorContext, type ArticleEditorMedia } from './ArticleEditorContext';
 import { createArticleEditorExtensions } from './editorExtensions';
+import { openableDoc } from './openableDoc';
 import { BubbleMenuToolbar } from './BubbleMenuToolbar';
 import type { MentionItem } from './suggestionLists';
 import { MAX_IMAGE_BYTES, prepareImageForUpload, UnsupportedImageError } from './imageIngest';
@@ -32,7 +33,32 @@ export type ArticleEditorProps = {
   onChange: (value: StoredArticleBody) => void;
 };
 
-const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
+/** The link back to the old editor: this page with `?editor=old`. */
+const oldEditorHref = () => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('editor', 'old');
+    return url.toString();
+  } catch {
+    return '?editor=old';
+  }
+};
+
+const OpenError = () => (
+  <div
+    role="alert"
+    className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
+  >
+    <p className="font-semibold">This article can&apos;t be opened in the new editor.</p>
+    <p className="mt-1">
+      Nothing has been changed. You can edit it in the{' '}
+      <a href={oldEditorHref()} className="underline">
+        old editor
+      </a>
+      .
+    </p>
+  </div>
+);
 
 const ArticleEditorInner = ({
   initialDoc,
@@ -98,14 +124,21 @@ const ArticleEditorInner = ({
 
   // Each change is stored as { body, bodyDoc }; hashing is async, so a late result is dropped
   const changeSeq = useRef(0);
+  // Set if Tiptap still finds the content invalid (it would open it empty): then nothing is stored
+  const invalidContent = useRef(false);
   const editor = useEditor({
     extensions,
     content: initialDoc,
     editable: !disabled,
     immediatelyRender: true,
     shouldRerenderOnTransaction: false,
+    enableContentCheck: true,
+    onContentError: () => {
+      invalidContent.current = true;
+    },
     editorProps: { attributes: { class: 'article-editor-content', 'aria-label': 'Article body' } },
     onUpdate: ({ editor }) => {
+      if (invalidContent.current) return;
       const seq = ++changeSeq.current;
       toStoredArticleBody(editor.getJSON()).then((stored) => {
         if (seq === changeSeq.current) latest.current.onChange(stored);
@@ -114,8 +147,10 @@ const ArticleEditorInner = ({
   });
 
   useEffect(() => {
-    editor?.setEditable(!disabled);
+    if (!invalidContent.current) editor?.setEditable(!disabled);
   }, [editor, disabled]);
+
+  if (invalidContent.current) return <OpenError />;
 
   return (
     <ArticleEditorContext.Provider value={media}>
@@ -136,13 +171,16 @@ const ArticleEditorInner = ({
 };
 
 export const ArticleEditor = ({ article, ...props }: ArticleEditorProps) => {
-  const [initialDoc, setInitialDoc] = useState<JSONContent>();
+  const [initialDoc, setInitialDoc] = useState<JSONContent | 'error'>();
 
   useEffect(() => {
     let current = true;
-    articleDocOf(article as Parameters<typeof articleDocOf>[0]).then(
-      (doc) => current && setInitialDoc(doc.content?.length ? doc : EMPTY_DOC),
-      () => current && setInitialDoc(EMPTY_DOC)
+    openableDoc(article).then(
+      (doc) => current && setInitialDoc(doc),
+      (error) => {
+        console.error('[ArticleEditor] The article could not be opened', error);
+        if (current) setInitialDoc('error');
+      }
     );
     return () => {
       current = false;
@@ -157,6 +195,8 @@ export const ArticleEditor = ({ article, ...props }: ArticleEditorProps) => {
         <div className="h-4 w-3/5 rounded bg-foreground/10" />
       </div>
     );
+
+  if (initialDoc === 'error') return <OpenError />;
 
   return <ArticleEditorInner initialDoc={initialDoc} {...props} />;
 };
