@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPostContentForUpload } from './PostUploadHelpers';
+import { getPostContentForUpload, shouldDeleteStaleTextPayload } from './PostUploadHelpers';
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/constants';
 import { POST_FULL_TEXT_PAYLOAD_KEY } from './PostUploader';
 import type { NewHomebaseFile } from '../../../core/core';
@@ -427,5 +427,58 @@ describe('getPostContentForUpload', () => {
             const text = await textPayloadOf(additionalPayloads);
             expect(Object.keys(text)).toEqual(['type', 'abstract']);
         });
+    });
+});
+
+describe('shouldDeleteStaleTextPayload', () => {
+    const fileOf = (content: Partial<Article>) =>
+        ({
+            fileMetadata: {
+                appData: {
+                    content: { id: 'id1', channelId: 'chan', caption: 'title', slug: 'slug1', type: 'Article', ...content } as Article,
+                },
+                // The caller's local copy knows of no payloads; the server's header is what counts
+                payloads: [],
+            },
+        }) as unknown as NewHomebaseFile<Article>;
+    const uploadedKeys = (file: NewHomebaseFile<Article>) =>
+        getPostContentForUpload(file).additionalPayloads.map((p) => p.key);
+    const decide = (file: NewHomebaseFile<Article>, serverKeys: string[]) =>
+        shouldDeleteStaleTextPayload(file.fileMetadata.appData.content, uploadedKeys(file), serverKeys);
+    const bodyDoc = { format: 'tiptap-v1' as const, doc: { type: 'doc', content: [] }, slateHash: 'ab'.repeat(32) };
+    const serverKeys = [DEFAULT_PAYLOAD_KEY, POST_FULL_TEXT_PAYLOAD_KEY, 'pst_rtei0'];
+
+    it('keeps pst_text on a header-only edit from a feed teaser', () => {
+        // EditPostDialog from the feed: the caption is trimmed to the header, there is no body
+        const teaser = fileOf({ caption: makeLong('c', 390), abstract: 'abstract' });
+        expect(uploadedKeys(teaser)).not.toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(decide(teaser, serverKeys)).toBe(false);
+    });
+
+    it('keeps pst_text when the old editor saves a body that fits the header', () => {
+        const old = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'short' }] }] });
+        expect(decide(old, serverKeys)).toBe(false);
+    });
+
+    it('removes a stale pst_text when the composer saves a bodyDoc that fits the header', () => {
+        const composer = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'x' }] }], bodyDoc });
+        expect(uploadedKeys(composer)).not.toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        // Seen on the server header even though the caller's copy lists no payloads
+        expect(decide(composer, serverKeys)).toBe(true);
+    });
+
+    it('does not delete when the composer writes a new pst_text, which replaces the old one', () => {
+        const big = fileOf({
+            abstract: 'abstract',
+            body: Array.from({ length: 60 }, (_, i) => ({ type: 'p', children: [{ text: `p${i} ${makeLong('w', 80)}` }] })),
+            bodyDoc,
+        });
+        expect(uploadedKeys(big)).toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(decide(big, serverKeys)).toBe(false);
+    });
+
+    it('does nothing when the server has no pst_text', () => {
+        const composer = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'x' }] }], bodyDoc });
+        expect(decide(composer, [DEFAULT_PAYLOAD_KEY])).toBe(false);
     });
 });
