@@ -1,0 +1,47 @@
+{
+  "name": "@homebase-id/rich-text",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tiptap schema shared by the feed's article editor and viewer, from journal's editor",
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "type": "module",
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "type": "tsc --noEmit",
+    "lint": "eslint src index.ts"
+  },
+  "dependencies": {
+    "@homebase-id/js-lib": "*",
+    "@tiptap/core": "3.32.2",
+    "@tiptap/extension-code-block-lowlight": "3.32.2",
+    "@tiptap/extension-image": "3.32.2",
+    "@tiptap/extension-link": "3.32.2",
+    "@tiptap/extension-mathematics": "3.32.2",
+    "@tiptap/extension-mention": "3.32.2",
+    "@tiptap/extension-placeholder": "3.32.2",
+    "@tiptap/extension-subscript": "3.32.2",
+    "@tiptap/extension-superscript": "3.32.2",
+    "@tiptap/extension-table": "3.32.2",
+    "@tiptap/extension-table-cell": "3.32.2",
+    "@tiptap/extension-table-header": "3.32.2",
+    "@tiptap/extension-table-row": "3.32.2",
+    "@tiptap/extension-task-item": "3.32.2",
+    "@tiptap/extension-task-list": "3.32.2",
+    "@tiptap/extension-text-align": "3.32.2",
+    "@tiptap/extension-underline": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/starter-kit": "3.32.2",
+    "@tiptap/suggestion": "3.32.2",
+    "katex": "0.18.11",
+    "lowlight": "3.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.61",
+    "vitest": "^4.1.8"
+  }
+}

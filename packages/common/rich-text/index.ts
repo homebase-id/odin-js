@@ -1,0 +1,9 @@
+export { createBaseExtensions, type ExtensionOptions } from './src/extensions';
+export { ImageSchema } from './src/nodes/imageSchema';
+export { Callout } from './src/nodes/CalloutNode';
+export { CALLOUT_VARIANTS, toCalloutVariant, type CalloutVariant } from './src/nodes/calloutVariants';
+export { Toggle } from './src/nodes/ToggleNode';
+export { LinkPreview } from './src/nodes/LinkPreviewNode';
+export { Gallery } from './src/nodes/GalleryNode';
+export { Footnote, FootnoteReference, Footnotes } from './src/nodes/FootnoteNodes';
+export { FeedMention, Kbd } from './src/nodes/feedMarks';
