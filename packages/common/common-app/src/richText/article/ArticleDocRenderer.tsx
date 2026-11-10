@@ -1,0 +1,505 @@
+/**
+ * Renders a Tiptap document of the shared article schema (packages/common/rich-text) without an
+ * editor. Every node and mark is mapped by hand: nothing from the document is rendered as HTML,
+ * and links only keep http(s) and mailto urls. KaTeX's own output is the one HTML string set.
+ */
+import type { JSONContent } from '@tiptap/core';
+import { renderJSONContentToReactElement, type NodeProps } from '@tiptap/static-renderer/json/react';
+import katex from 'katex';
+import { common, createLowlight } from 'lowlight';
+import { Fragment, ReactNode, useMemo } from 'react';
+import { Image } from '../../media/Image';
+import { Mention } from '../renderer/Mention';
+import type { RichTextRenderer } from '../renderer/RichTextRenderer';
+
+/** The same options RichTextRenderer takes, so call sites can pass one object to either. */
+export type ArticleDocOptions = NonNullable<Parameters<typeof RichTextRenderer>[0]['options']>;
+
+type Node = JSONContent;
+type Props = NodeProps<Node, ReactNode>;
+
+const lowlight = createLowlight(common);
+
+const SAFE_HREF = /^(https?:|mailto:)/i;
+const SAFE_SRC = /^(https?:|data:image\/(png|jpe?g|gif|webp|avif);)/i;
+
+/** The url when it is http(s) or mailto, else undefined. */
+const safeHref = (url: unknown): string | undefined =>
+  typeof url === 'string' && SAFE_HREF.test(url.trim()) ? url.trim() : undefined;
+
+const textOf = (node: Node): string =>
+  node.text ?? (node.content ?? []).map(textOf).join('');
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '') || 'section';
+
+const idSafe = (id: unknown) => String(id ?? '').replace(/[^\w-]/g, '');
+
+type Heading = { node: Node; id: string; level: number; text: string };
+
+/** Heading ids (unique slugs) and footnote numbers (in reference order) of a document. */
+const indexDoc = (doc: Node) => {
+  const headings: Heading[] = [];
+  const slugs = new Map<string, number>();
+  const footnotes = new Map<string, number>();
+  const walk = (node: Node) => {
+    if (node.type === 'heading') {
+      const text = textOf(node).trim();
+      const base = slugify(text);
+      const seen = slugs.get(base) ?? 0;
+      slugs.set(base, seen + 1);
+      headings.push({ node, text, level: Number(node.attrs?.level) || 1, id: seen ? `${base}-${seen + 1}` : base });
+    }
+    if (node.type === 'footnoteReference') {
+      const id = idSafe(node.attrs?.id);
+      if (!footnotes.has(id)) footnotes.set(id, footnotes.size + 1);
+    }
+    node.content?.forEach(walk);
+  };
+  walk(doc);
+  return { headings, footnotes };
+};
+
+const TEXT_ALIGN = ['left', 'center', 'right', 'justify'];
+const blockStyle = (node: Node) => {
+  const align = node.attrs?.textAlign;
+  const indent = Number(node.attrs?.indent) || 0;
+  if (!TEXT_ALIGN.includes(align) && !indent) return undefined;
+  return {
+    textAlign: TEXT_ALIGN.includes(align) ? align : undefined,
+    paddingLeft: indent ? `${indent * 2}rem` : undefined,
+  };
+};
+
+const HEADING_CLASSES: Record<number, string> = {
+  1: 'text-3xl font-semibold mt-8 mb-4',
+  2: 'text-2xl font-semibold mt-8 mb-3',
+  3: 'text-xl font-semibold mt-6 mb-3',
+  4: 'text-lg font-semibold mt-6 mb-2',
+  5: 'text-base font-semibold mt-4 mb-2',
+  6: 'text-sm font-semibold uppercase tracking-wide mt-4 mb-2',
+};
+
+const CALLOUT_CLASSES: Record<string, string> = {
+  info: 'border-sky-500 bg-sky-50 dark:bg-sky-950/40',
+  warning: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40',
+  tip: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40',
+  error: 'border-red-500 bg-red-50 dark:bg-red-950/40',
+};
+const CALLOUT_LABELS: Record<string, string> = {
+  info: 'Info',
+  warning: 'Warning',
+  tip: 'Tip',
+  error: 'Error',
+};
+
+// highlight.js token classes, coloured for light and dark mode
+const HLJS_CLASSES: Record<string, string> = {
+  'hljs-keyword': 'text-purple-700 dark:text-purple-400',
+  'hljs-built_in': 'text-sky-700 dark:text-sky-400',
+  'hljs-type': 'text-sky-700 dark:text-sky-400',
+  'hljs-literal': 'text-orange-700 dark:text-orange-400',
+  'hljs-number': 'text-orange-700 dark:text-orange-400',
+  'hljs-string': 'text-emerald-700 dark:text-emerald-400',
+  'hljs-regexp': 'text-emerald-700 dark:text-emerald-400',
+  'hljs-comment': 'text-slate-500 italic',
+  'hljs-title': 'text-blue-700 dark:text-blue-400',
+  'hljs-attr': 'text-amber-700 dark:text-amber-400',
+  'hljs-attribute': 'text-amber-700 dark:text-amber-400',
+  'hljs-variable': 'text-rose-700 dark:text-rose-400',
+  'hljs-tag': 'text-rose-700 dark:text-rose-400',
+  'hljs-name': 'text-rose-700 dark:text-rose-400',
+  'hljs-meta': 'text-slate-500',
+};
+
+type Hast = {
+  type: string;
+  value?: string;
+  properties?: { className?: string[] };
+  children?: Hast[];
+};
+const hastToReact = (node: Hast, key: number): ReactNode => {
+  if (node.type === 'text') return node.value;
+  const children = node.children?.map(hastToReact);
+  if (node.type !== 'element') return <Fragment key={key}>{children}</Fragment>;
+  const className = node.properties?.className
+    ?.map((name) => HLJS_CLASSES[name])
+    .filter(Boolean)
+    .join(' ');
+  return (
+    <span key={key} className={className || undefined}>
+      {children}
+    </span>
+  );
+};
+
+const CodeBlock = ({ node }: Props) => {
+  const code = textOf(node);
+  const language = String(node.attrs?.language ?? '').trim().split(/\s+/)[0];
+  let highlighted: ReactNode = code;
+  if (language && lowlight.registered(language)) {
+    try {
+      highlighted = hastToReact(lowlight.highlight(language, code) as Hast, 0);
+    } catch {
+      // Plain text it is
+    }
+  }
+  return (
+    <pre className="my-4 overflow-x-auto rounded-lg border bg-slate-100 p-3 text-sm dark:bg-slate-800">
+      <code className="font-mono text-foreground" data-language={language || undefined}>
+        {highlighted}
+      </code>
+    </pre>
+  );
+};
+
+const MathNode = ({ latex, display }: { latex: unknown; display: boolean }) => {
+  const html = useMemo(() => {
+    try {
+      return katex.renderToString(String(latex ?? ''), { displayMode: display, throwOnError: false });
+    } catch {
+      return undefined;
+    }
+  }, [latex, display]);
+  const Tag = display ? 'div' : 'span';
+  if (html === undefined)
+    return <Tag className="font-mono">{String(latex ?? '')}</Tag>;
+  return (
+    <Tag
+      className={display ? 'my-4 overflow-x-auto' : undefined}
+      // KaTeX output, not the document's: KaTeX escapes the latex and has `trust` off
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+};
+
+const ALIGN_CLASSES: Record<string, string> = {
+  left: 'float-left mr-4 mb-2',
+  right: 'float-right ml-4 mb-2',
+  center: 'mx-auto',
+};
+
+export const ArticleDocRenderer = ({
+  doc,
+  odinId,
+  options,
+  className,
+  tableOfContents,
+}: {
+  doc: JSONContent;
+  odinId?: string;
+  options?: ArticleDocOptions;
+  className?: string;
+  /** Show a table of contents above documents with 3 or more headings */
+  tableOfContents?: boolean;
+}) => {
+  const rendered = useMemo(() => {
+    const { headings, footnotes } = indexDoc(doc);
+    const headingIds = new Map(headings.map((heading) => [heading.node, heading.id]));
+
+    const ImageNode = ({ node, parent }: Props) => {
+      const attrs = node.attrs ?? {};
+      const alt = typeof attrs.alt === 'string' ? attrs.alt : undefined;
+      // null shows the alt text, "" no caption, anything else replaces the alt text
+      const caption = attrs.caption === null || attrs.caption === undefined ? alt : attrs.caption;
+      const inGallery = parent?.type === 'gallery';
+      const width = Number(attrs.width) || undefined;
+
+      let img: ReactNode = null;
+      if (attrs.fileKey) {
+        if (!options) return null;
+        const previewThumbnail = options.previewThumbnails?.find(
+          (payload) => payload.key === attrs.fileKey
+        )?.previewThumbnail;
+        img = (
+          <Image
+            targetDrive={options.imageDrive}
+            fileId={(attrs.fileId as string) || options.defaultFileId}
+            globalTransitId={attrs.fileId ? undefined : options.defaultGlobalTransitId}
+            lastModified={options.lastModified}
+            fileKey={attrs.fileKey as string}
+            previewThumbnail={previewThumbnail}
+            odinId={odinId}
+            alt={alt}
+            fit={inGallery ? 'cover' : undefined}
+            className={inGallery ? 'h-full w-full' : 'max-w-full'}
+          />
+        );
+      } else if (typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src)) {
+        img = (
+          <img
+            src={attrs.src}
+            alt={alt ?? ''}
+            loading="lazy"
+            className={inGallery ? 'h-full w-full object-cover' : 'max-w-full'}
+          />
+        );
+      } else return null;
+
+      return (
+        <figure
+          className={
+            inGallery
+              ? 'm-0 overflow-hidden rounded-md'
+              : `my-4 max-w-full ${ALIGN_CLASSES[attrs.align] ?? ''}`
+          }
+          style={!inGallery && width ? { width: `${width}px` } : undefined}
+        >
+          {img}
+          {caption ? (
+            <figcaption className="mt-1 text-center text-sm text-foreground/60">{caption}</figcaption>
+          ) : null}
+        </figure>
+      );
+    };
+
+    const nodeMapping: Record<string, (props: Props) => ReactNode> = {
+      doc: ({ children }) => <>{children}</>,
+      text: ({ node }) => node.text,
+      paragraph: ({ node, children }) => {
+        // A paragraph holding only images is a block of figures, which can't sit in a <p>
+        const onlyImages =
+          !!node.content?.length &&
+          node.content.every((child) => child.type === 'image' || child.type === 'hardBreak');
+        const Tag = onlyImages ? 'div' : 'p';
+        return (
+          <Tag className="mb-3 last:mb-0 flow-root" style={blockStyle(node)}>
+            {children}
+          </Tag>
+        );
+      },
+      heading: ({ node, children }) => {
+        const level = Math.min(6, Math.max(1, Number(node.attrs?.level) || 1));
+        const Tag = `h${level}` as 'h1';
+        return (
+          <Tag id={headingIds.get(node)} className={HEADING_CLASSES[level]} style={blockStyle(node)}>
+            {children}
+          </Tag>
+        );
+      },
+      blockquote: ({ children }) => (
+        <blockquote className="my-4 border-l-4 border-foreground/20 pl-4 text-foreground/80">
+          {children}
+        </blockquote>
+      ),
+      codeBlock: CodeBlock,
+      bulletList: ({ children }) => <ul className="my-3 list-disc pl-6">{children}</ul>,
+      orderedList: ({ node, children }) => (
+        <ol className="my-3 list-decimal pl-6" start={Number(node.attrs?.start) || undefined}>
+          {children}
+        </ol>
+      ),
+      listItem: ({ children }) => <li className="my-1 [&>p]:mb-1">{children}</li>,
+      taskList: ({ children }) => <ul className="my-3 pl-1">{children}</ul>,
+      taskItem: ({ node, children }) => (
+        <li className="my-1 flex items-start gap-2 [&>div>p]:mb-1">
+          <input
+            type="checkbox"
+            checked={!!node.attrs?.checked}
+            readOnly
+            disabled
+            className="mt-1.5"
+            aria-label={node.attrs?.checked ? 'Done' : 'To do'}
+          />
+          <div className={node.attrs?.checked ? 'text-foreground/60 line-through' : undefined}>
+            {children}
+          </div>
+        </li>
+      ),
+      table: ({ children }) => (
+        <div className="my-4 overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm">
+            <tbody>{children}</tbody>
+          </table>
+        </div>
+      ),
+      tableRow: ({ children }) => <tr>{children}</tr>,
+      tableHeader: ({ node, children }) => (
+        <th
+          colSpan={Number(node.attrs?.colspan) || undefined}
+          rowSpan={Number(node.attrs?.rowspan) || undefined}
+          className="border border-foreground/20 bg-foreground/5 px-3 py-2 font-semibold [&>p]:mb-0"
+        >
+          {children}
+        </th>
+      ),
+      tableCell: ({ node, children }) => (
+        <td
+          colSpan={Number(node.attrs?.colspan) || undefined}
+          rowSpan={Number(node.attrs?.rowspan) || undefined}
+          className="border border-foreground/20 px-3 py-2 align-top [&>p]:mb-0"
+        >
+          {children}
+        </td>
+      ),
+      callout: ({ node, children }) => {
+        const variant = CALLOUT_CLASSES[node.attrs?.variant] ? node.attrs?.variant : 'info';
+        return (
+          <aside
+            role="note"
+            aria-label={CALLOUT_LABELS[variant]}
+            data-variant={variant}
+            className={`my-4 rounded-md border-l-4 px-4 py-3 ${CALLOUT_CLASSES[variant]}`}
+          >
+            {children}
+          </aside>
+        );
+      },
+      toggle: ({ node, children }) => (
+        <details className="my-3 rounded-md border border-foreground/10 px-4 py-2">
+          <summary className="cursor-pointer font-medium">{String(node.attrs?.summary ?? '')}</summary>
+          <div className="mt-2">{children}</div>
+        </details>
+      ),
+      image: ImageNode,
+      gallery: ({ node, children }) => {
+        const count = node.content?.length ?? 0;
+        return (
+          <div
+            data-gallery={node.attrs?.layout}
+            className={
+              node.attrs?.layout === 'grid' || node.attrs?.layout === 'masonry'
+                ? `my-4 grid grid-cols-2 gap-2 [&>figure]:aspect-square ${count >= 3 ? 'sm:grid-cols-3' : ''}`
+                : `my-4 grid gap-2 [&>figure]:aspect-[4/3] ${count >= 3 ? 'grid-cols-3' : 'grid-cols-2'}`
+            }
+          >
+            {children}
+          </div>
+        );
+      },
+      linkPreview: ({ node }) => {
+        const url = safeHref(node.attrs?.url);
+        if (!url) return null;
+        let host = url;
+        try {
+          host = new URL(url).hostname;
+        } catch {
+          // Show the url as it is
+        }
+        return (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="my-4 block rounded-lg border border-foreground/15 px-4 py-3 no-underline hover:bg-foreground/5"
+          >
+            <span className="block font-semibold text-foreground">{node.attrs?.title || host}</span>
+            {node.attrs?.description ? (
+              <span className="mt-1 block text-sm text-foreground/70 line-clamp-2">
+                {node.attrs.description}
+              </span>
+            ) : null}
+            <span className="mt-1 block text-xs text-foreground/50">{host}</span>
+          </a>
+        );
+      },
+      horizontalRule: () => <hr className="my-6 border-foreground/20" />,
+      hardBreak: () => <br />,
+      mention: ({ node }) =>
+        typeof node.attrs?.id === 'string' && node.attrs.id ? <Mention odinId={node.attrs.id} /> : null,
+      inlineMath: ({ node }) => <MathNode latex={node.attrs?.latex} display={false} />,
+      blockMath: ({ node }) => <MathNode latex={node.attrs?.latex} display={true} />,
+      footnoteReference: ({ node }) => {
+        const id = idSafe(node.attrs?.id);
+        const n = footnotes.get(id);
+        return (
+          <sup id={`fnref-${id}`}>
+            <a href={`#fn-${id}`} role="doc-noteref" className="text-primary hover:underline">
+              [{n}]
+            </a>
+          </sup>
+        );
+      },
+      footnotes: ({ children }) => (
+        <section role="doc-endnotes" className="mt-8 border-t border-foreground/20 pt-4 text-sm">
+          <ol className="list-decimal pl-6">{children}</ol>
+        </section>
+      ),
+      footnote: ({ node, children }) => {
+        const id = idSafe(node.attrs?.id);
+        return (
+          <li id={`fn-${id}`} value={footnotes.get(id)} className="my-1 [&>p]:mb-1 [&>p]:inline">
+            {children}{' '}
+            {footnotes.has(id) ? (
+              <a href={`#fnref-${id}`} role="doc-backlink" aria-label="Back to reference" className="text-primary">
+                {"\u21A9\uFE0E"}
+              </a>
+            ) : null}
+          </li>
+        );
+      },
+    };
+
+    const markMapping: Record<string, (props: { mark: { attrs?: Record<string, unknown> }; children?: ReactNode }) => ReactNode> = {
+      bold: ({ children }) => <strong className="font-bold">{children}</strong>,
+      italic: ({ children }) => <em>{children}</em>,
+      underline: ({ children }) => <u>{children}</u>,
+      strike: ({ children }) => <del>{children}</del>,
+      code: ({ children }) => (
+        <code className="rounded-md border bg-slate-100 p-[2px_3px_1px] font-mono text-sm text-red-500 dark:bg-slate-800 dark:text-orange-400">
+          {children}
+        </code>
+      ),
+      kbd: ({ children }) => (
+        <kbd className="rounded-md border bg-slate-100 px-1 font-mono text-sm dark:bg-slate-800">
+          {children}
+        </kbd>
+      ),
+      superscript: ({ children }) => <sup>{children}</sup>,
+      subscript: ({ children }) => <sub>{children}</sub>,
+      link: ({ mark, children }) => {
+        const href = safeHref(mark.attrs?.href);
+        if (!href) return <>{children}</>;
+        return (
+          <a
+            href={href}
+            target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
+            rel="noopener noreferrer"
+            className="text-primary hover:underline break-words"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </a>
+        );
+      },
+    };
+
+    const render = renderJSONContentToReactElement<{ type: string; attrs?: Record<string, unknown> }, Node>({
+      nodeMapping,
+      markMapping,
+      // A node or mark this viewer doesn't know keeps its content
+      unhandledNode: ({ node, children }) => (node.text !== undefined ? node.text : <>{children}</>),
+      unhandledMark: ({ children }) => <>{children}</>,
+    });
+
+    return { body: render({ content: doc }), headings };
+  }, [doc, odinId, options]);
+
+  const toc = tableOfContents && rendered.headings.length >= 3 ? rendered.headings : undefined;
+  const topLevel = toc ? Math.min(...toc.map((heading) => heading.level)) : 1;
+
+  return (
+    <div className={`break-words ${className ?? ''}`}>
+      {toc ? (
+        <nav aria-label="Table of contents" className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm">
+          <p className="mb-2 font-semibold">Contents</p>
+          <ol>
+            {toc.map((heading) => (
+              <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
+                <a href={`#${heading.id}`} className="text-primary hover:underline">
+                  {heading.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ) : null}
+      {rendered.body}
+    </div>
+  );
+};

@@ -10,6 +10,7 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Layout, NoLayout } from '../components/ui/Layout/Layout';
 
+import 'katex/dist/katex.min.css';
 import './App.css';
 import {
   DotYouClientProvider,
