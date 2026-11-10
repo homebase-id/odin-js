@@ -13,6 +13,7 @@ import {
   Textarea,
   useRawImage,
   ImageSelector,
+  getNextRteFileKey,
 } from '@homebase-id/common-app';
 import { Arrow } from '@homebase-id/common-app/icons';
 
@@ -27,7 +28,6 @@ import { MediaOptions } from '@homebase-id/rich-text-editor/src/editor/ImagePlug
 const RichTextEditor = lazy(() =>
   import('@homebase-id/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
 
 export const InnerFieldEditors = ({
   odinId,
@@ -80,7 +80,7 @@ export const InnerFieldEditors = ({
       mediaDrive: targetDrive,
       pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
       onAppend: async (file) => {
-        const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
+        const fileKey = getNextRteFileKey(files);
 
         setFiles([...files, { file: file, key: fileKey }]);
         return { fileId: postFile.fileId || '', fileKey: fileKey };
@@ -174,7 +174,7 @@ export const InnerFieldEditors = ({
                       return;
                     }
 
-                    const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
+                    const fileKey = getNextRteFileKey(files);
 
                     setFiles([...files, { file: e.target.value as Blob, key: fileKey }]);
                     onChange({
