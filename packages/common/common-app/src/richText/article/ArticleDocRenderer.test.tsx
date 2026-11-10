@@ -2,7 +2,8 @@ import { expect, test, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { JSONContent } from '@tiptap/core';
 import allBlocks from '../../../../rich-text/test/fixtures/tiptap/all-blocks.json';
-import { ArticleDocRenderer, type ArticleDocOptions } from './ArticleDocRenderer';
+import { ArticleDocRenderer, sanitizeArticleDoc, type ArticleDocOptions } from './ArticleDocRenderer';
+import { slugify, uniqueHeadingIds } from './headingSlugs';
 
 // Browser-only code (window at import time); stand-ins show what they were given
 vi.mock('../../media/Image', () => ({
@@ -11,6 +12,7 @@ vi.mock('../../media/Image', () => ({
   ),
 }));
 vi.mock('../../socialFeed', () => ({ AuthorName: ({ odinId }: { odinId: string }) => odinId }));
+vi.mock('../../ui/Buttons/ActionLink', () => ({ ActionLink: () => null }));
 vi.stubGlobal('window', { location: { origin: 'https://me.example' } });
 
 const options: ArticleDocOptions = {
@@ -116,4 +118,68 @@ test('a table of contents lists 3+ headings with unique ids', () => {
 test('images with a fileKey need the post options', () => {
   const doc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'image', attrs: { fileKey: 'k' } }] }] };
   expect(render(doc, { options: undefined })).not.toContain('<img');
+});
+
+const malformed = {
+  type: 'doc',
+  content: [
+    null,
+    'a string',
+    42,
+    { type: 'constructor', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'under constructor' }] }] },
+    { type: 'valueOf', attrs: { level: 2 } },
+    { type: 'toString', text: 'proto text' },
+    { type: 'paragraph', content: { type: 'text', text: 'object content' } },
+    { type: 'paragraph', content: [null, { type: 'text', text: 7 }, { type: 'text', text: { a: 1 } }, { type: 'text', text: 'marked', marks: [null, { type: 'constructor' }, { type: 'bold' }, 'italic'] }] },
+    { type: 'heading', attrs: 'big', content: [{ type: 'text', text: 'Odd heading' }] },
+    { type: 'bulletList', content: [null, { type: 'listItem', content: 'nope' }, { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }] }] },
+    { type: 'image', attrs: { src: 'https://x.example/a.png', alt: { a: 1 }, caption: ['c'], align: 'constructor' } },
+    { type: 'linkPreview', attrs: { url: 'https://example.com', title: { a: 1 }, description: 7 } },
+    { type: 'callout', attrs: { variant: 'constructor' }, content: [{ type: 'paragraph', content: [{ type: 'text', text: 'in callout' }] }] },
+    { type: 7, content: [{ type: 'text', text: 'dropped' }] },
+  ],
+};
+
+test('sanitizeArticleDoc keeps only known, well-formed nodes', () => {
+  const clean = sanitizeArticleDoc(malformed);
+  const types = (node: JSONContent): string[] => [node.type ?? '', ...(node.content ?? []).flatMap(types)];
+  for (const type of types(clean)) expect(['doc', 'paragraph', 'text', 'heading', 'bulletList', 'listItem', 'image', 'linkPreview', 'callout']).toContain(type);
+  // An unknown node is replaced by its content, so its text stays
+  expect(JSON.stringify(clean)).toContain('under constructor');
+  // Content that isn't an array is dropped; text is a string; unknown and malformed marks go
+  const paragraphs = (clean.content ?? []).filter((node) => node.type === 'paragraph');
+  expect(paragraphs.some((node) => node.content === undefined)).toBe(true);
+  const texts = paragraphs.flatMap((node) => node.content ?? []);
+  expect(texts.map((node) => node.text)).toEqual(expect.arrayContaining(['7', '', 'marked']));
+  expect(texts.find((node) => node.text === 'marked')?.marks).toEqual([{ type: 'bold' }]);
+  // Never a prototype key, and no throw on anything that isn't a document
+  expect(JSON.stringify(clean)).not.toMatch(/"type":"(constructor|valueOf|toString)"/);
+  for (const doc of [null, undefined, 'doc', 3, [], { type: 'doc', content: 'x' }, { type: 'constructor' }])
+    expect(sanitizeArticleDoc(doc)).toEqual({ type: 'doc', content: expect.any(Array) });
+});
+
+test('a malformed document renders without throwing and keeps its text', () => {
+  let html = '';
+  expect(() => (html = render(malformed, { tableOfContents: true }))).not.toThrow();
+  for (const text of ['under constructor', 'marked', '7', 'item', 'in callout', 'Odd heading'])
+    expect(html).toContain(text);
+  expect(html).toContain('<strong class="font-bold">marked</strong>');
+  expect(html).toContain('data-variant="info"');
+  expect(html).not.toContain('[object Object]');
+  expect(html).not.toContain('function');
+  for (const doc of [null, undefined, 'doc', [null], { content: [null] }, { type: 'doc', content: { a: 1 } }])
+    expect(() => render(doc)).not.toThrow();
+});
+
+test('heading slugs follow the reference rule', () => {
+  expect(slugify('Hello, World!')).toBe('hello-world');
+  expect(slugify('  Crème brûlée  ')).toBe('creme-brulee');
+  expect(slugify('Ⅻ ½ ﬁve')).toBe('xii-1-2-five');
+  expect(slugify('日本語の見出し')).toBe('日本語の見出し');
+  expect(slugify('--- ?! ---')).toBe('section');
+  expect(slugify('')).toBe('section');
+  expect(uniqueHeadingIds(['a', 'a', 'a'])).toEqual(['a', 'a-2', 'a-3']);
+  // A generated id is never repeated by a heading whose own slug is that id
+  expect(uniqueHeadingIds(['a', 'a', 'a-2'])).toEqual(['a', 'a-2', 'a-2-2']);
+  expect(uniqueHeadingIds(['a', 'a-2', 'a'])).toEqual(['a', 'a-2', 'a-3']);
 });
