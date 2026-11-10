@@ -7,3 +7,4 @@ export { LinkPreview } from './src/nodes/LinkPreviewNode';
 export { Gallery } from './src/nodes/GalleryNode';
 export { Footnote, FootnoteReference, Footnotes } from './src/nodes/FootnoteNodes';
 export { FeedMention, Kbd } from './src/nodes/feedMarks';
+export { OLD_RENDERER_TYPES, slateToTiptap, tiptapText, tiptapToSlate, type SlateNode } from './src/slate';
