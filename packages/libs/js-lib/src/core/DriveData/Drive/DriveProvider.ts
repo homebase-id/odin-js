@@ -311,7 +311,16 @@ export interface DrivePurgeStatus {
   lastErrorAt?: number;
   /** No job is working on it any more; retryDrivePurge restarts it. */
   stopped: boolean;
+  /**
+   * Where the purge is. `finishing` means no files are left but a deleted drive's last cleanup has not run yet; its
+   * alias stays taken until it has. Absent from servers older than the field.
+   */
+  phase?: DrivePurgePhase;
+  /** When the job runs next, unix ms; after a failure, the retry. Absent once stopped. */
+  nextRunAt?: number;
 }
+
+export type DrivePurgePhase = 'removingFiles' | 'finishing' | 'retrying' | 'stopped';
 
 /** Owner only. Every empty and delete still being purged; empty when nothing is pending. */
 export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DrivePurgeStatus[]> => {

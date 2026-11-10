@@ -58,6 +58,10 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'cannotUpdateNonActiveFile') return t('Cannot update non active file');
   if (errorCode === 'driveAliasAndTypeAlreadyExists')
     return t('Drive alias and type already exists');
+  if (errorCode === 'driveStillBeingDeleted')
+    return t(
+      'A drive with this alias was deleted (for example by uninstalling an app) and is still being removed in the background. Wait until that deletion has finished, or retry it if it stopped, then try again.'
+    );
   if (errorCode === 'invalidGrantNonExistingDrive') return t('Invalid grant non existing drive');
   if (errorCode === 'cannotAllowSubscriptionsOnOwnerOnlyDrive')
     return t('Cannot allow subscriptions on owner only drive');
