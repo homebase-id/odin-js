@@ -161,10 +161,12 @@ export const getPostContentForUpload = <T extends PostContent>(
     if (article.readingTimeStats !== undefined) {
       headerObj.readingTimeStats = article.readingTimeStats;
     }
-    if (article.body !== undefined) {
-      const bodyJson = stringify(article.body);
-      if (stringToUint8Array(bodyJson).length <= TEXT_FIELD_BYTE_LIMIT) {
-        headerObj.body = article.body;
+    // body and bodyDoc stay together: a reader checks one against the other
+    if (article.body !== undefined || article.bodyDoc !== undefined) {
+      const size = (v: unknown) => (v === undefined ? 0 : stringToUint8Array(stringify(v)).length);
+      if (size(article.body) + size(article.bodyDoc) <= TEXT_FIELD_BYTE_LIMIT) {
+        if (article.body !== undefined) headerObj.body = article.body;
+        if (article.bodyDoc !== undefined) headerObj.bodyDoc = article.bodyDoc;
         bodyIncludedInHeader = true;
       }
     }
@@ -236,6 +238,9 @@ export const getPostContentForUpload = <T extends PostContent>(
     }
     if (!bodyIncludedInHeader && article.body !== undefined) {
       textPayloadObj.body = article.body;
+    }
+    if (!bodyIncludedInHeader && article.bodyDoc !== undefined) {
+      textPayloadObj.bodyDoc = article.bodyDoc;
     }
   }
 
