@@ -4,6 +4,20 @@ import { Image } from '../../media/Image';
 import { ActionLink } from '../../ui/Buttons/ActionLink';
 import { highlightQuery } from './HighlightQuery';
 import { AuthorName } from '../../socialFeed';
+import { getPlainTextFromRichText } from '../../helpers/richTextHelper';
+
+// Content that isn't a Slate array (e.g. an object written by another client) must never crash the page
+const getFallbackText = (body: unknown): string => {
+  try {
+    return (
+      getPlainTextFromRichText([body] as Record<string, unknown>[]) ||
+      JSON.stringify(body) ||
+      ''
+    );
+  } catch {
+    return '';
+  }
+};
 
 export const RichTextRenderer = ({
   body,
@@ -29,27 +43,31 @@ export const RichTextRenderer = ({
   className?: string;
 }) => {
   if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
+  if (!Array.isArray(body)) return <p className={className}>{getFallbackText(body)}</p>;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const render = (node: any): ReactNode => {
+  // Entries come from stored posts and are not checked: a string is text, anything that isn't an
+  // object renders nothing, and children that aren't an array count as none
+  const render = (entry: unknown): ReactNode => {
+    if (typeof entry === 'string' || typeof entry === 'number') return renderLeaf({}, String(entry), {});
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const node = entry as Record<string, any>;
+
     if (
       'text' in node &&
       (!('type' in node) || node.type === 'text' || node.type === 'code_line')
     ) {
-      return renderLeaf(node, node.text, {});
+      return renderLeaf(node, typeof node.text === 'string' ? node.text : String(node.text ?? ''), {});
     } else {
       const { type, ...attributes } = node;
 
       return renderElement(
-        { type, attributes },
-        node.children ? (
+        { type: typeof type === 'string' ? type : undefined, attributes },
+        Array.isArray(node.children) ? (
           <>
-            {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              node.children.map((childNode: any, index: number) => (
-                <React.Fragment key={index}>{render(childNode)}</React.Fragment>
-              ))
-            }
+            {node.children.map((childNode: unknown, index: number) => (
+              <React.Fragment key={index}>{render(childNode)}</React.Fragment>
+            ))}
           </>
         ) : undefined
       );
@@ -65,41 +83,37 @@ export const RichTextRenderer = ({
       underline?: boolean;
       strikethrough?: boolean;
       code?: boolean;
+      kbd?: boolean;
       type?: string;
     },
     text: string,
     attributes: Record<string, unknown>
   ) => {
-    let children: ReactNode;
-    const highlightedText = highlightQuery(text, options?.query);
-
-    if (leaf.bold || leaf.strong) {
-      children = <strong className="font-bold">{highlightedText}</strong>;
-    }
+    // Marks nest, so bold + italic renders as both. Innermost first.
+    let children: ReactNode = highlightQuery(text, options?.query);
 
     if (leaf.code) {
       children = (
         <code className="bg-slate-100 p-[2px_3px_1px] rounded-md text-red-500 dark:text-orange-400 font-mono text-sm dark:bg-slate-800 border">
-          {highlightedText}
+          {children}
         </code>
       );
     }
-
-    if (leaf.italic) {
-      children = <em>{highlightedText}</em>;
+    if (leaf.kbd) {
+      children = (
+        <kbd className="bg-slate-100 px-1 rounded-md font-mono text-sm dark:bg-slate-800 border">
+          {children}
+        </kbd>
+      );
     }
-
-    if (leaf.underline) {
-      children = <u>{highlightedText}</u>;
-    }
-
-    if (leaf.strikethrough) {
-      children = <del>{highlightedText}</del>;
-    }
+    if (leaf.bold || leaf.strong) children = <strong className="font-bold">{children}</strong>;
+    if (leaf.italic) children = <em>{children}</em>;
+    if (leaf.underline) children = <u>{children}</u>;
+    if (leaf.strikethrough) children = <del>{children}</del>;
 
     return (
       <span data-type={leaf.type || 'leaf'} {...attributes}>
-        {children || highlightedText}
+        {children}
       </span>
     );
   };
@@ -119,14 +133,13 @@ export const RichTextRenderer = ({
     switch (type) {
       case 'blockquote':
         return (
-          <blockquote {...attributes} className="border-l-4 pl-2">
+          <blockquote className="border-l-4 pl-2">
             {children}
           </blockquote>
         );
       case 'code_block':
         return (
           <code
-            {...attributes}
             className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all dark:bg-slate-800 border"
           >
             {children}
@@ -138,7 +151,6 @@ export const RichTextRenderer = ({
         return (
           // min height so empty code lines are still visible
           <span
-            {...attributes}
             className={[`min-h-4`, lang ? 'contents' : undefined].filter(Boolean).join(' ')}
           >
             {children}
@@ -147,38 +159,39 @@ export const RichTextRenderer = ({
       }
       case 'h1':
         return (
-          <h1 {...attributes} className={'text-2xl'}>
+          <h1 className={'text-2xl'}>
             {children}
           </h1>
         );
       case 'h2':
         return (
-          <h2 {...attributes} className={'text-xl'}>
+          <h2 className={'text-xl'}>
             {children}
           </h2>
         );
       case 'ol':
         return (
-          <ol {...attributes} className="list-decimal pl-5">
+          <ol className="list-decimal pl-5">
             {children}
           </ol>
         );
       case 'ul':
         return (
-          <ul {...attributes} className="list-disc pl-5">
+          <ul className="list-disc pl-5">
             {children}
           </ul>
         );
       case 'li':
-        return <li {...attributes}>{children}</li>;
+        return <li>{children}</li>;
       case 'a':
         // TODO: expand with check for attributes?.odinId, and if so check if it is a contact, and if we have a name for them...
         return (
           <a
-            href={(attributes?.url as string) ?? ''}
-            {...attributes}
+            href={typeof attributes?.url === 'string' ? attributes.url : ''}
             target={
-              (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
+              typeof attributes?.url === 'string' && attributes.url.startsWith(window.location.origin)
+                ? '_self'
+                : '_blank'
             }
             rel="noopener noreferrer"
             className="text-primary hover:underline break-words"
@@ -221,7 +234,7 @@ export const RichTextRenderer = ({
                 href={attributes.linkTarget as string}
                 type="secondary"
               >
-                {attributes.linkText as string}
+                {String(attributes.linkText ?? '')}
               </ActionLink>
             </div>
           );
@@ -230,7 +243,7 @@ export const RichTextRenderer = ({
       case 'p':
       case 'paragraph':
         return (
-          <p {...attributes} className="mb-2 last-of-type:mb-0">
+          <p className="mb-2 last-of-type:mb-0">
             {children}
           </p>
         );
@@ -256,7 +269,7 @@ export const RichTextRenderer = ({
 
       default:
         return children ? (
-          <span {...attributes} data-type={type}>
+          <span data-type={type}>
             {children}
           </span>
         ) : null;
