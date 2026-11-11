@@ -268,6 +268,9 @@ function inlineToSlate(n: TiptapJSONContent, ctx: Ctx): SlateNode[] {
       return [{ text: textField(n.attrs?.latex), code: true }];
     case 'footnoteReference':
       return [{ text: `[${ctx.footnoteNumber(n.attrs?.id)}]` }];
+    case 'noteLink':
+      // A Journal note link the publish didn't rewrite: its label, as text
+      return [{ text: textField(n.attrs?.label) }];
     case 'image':
       return []; // lifted out of the paragraph by `paragraphToSlate`
     default:
@@ -434,10 +437,15 @@ function textOfDoc(n: TiptapJSONContent): string {
   if (n.type === 'text') return n.text ?? '';
   if (n.type === 'hardBreak') return '\n';
   if (n.type === 'mention') return `@${n.attrs?.id ?? ''}`;
+  if (n.type === 'noteLink') return textField(n.attrs?.label);
   if (n.type === 'inlineMath' || n.type === 'blockMath') return String(n.attrs?.latex ?? '');
   if (n.type === 'toggle') return [n.attrs?.summary, ...(n.content ?? []).map(textOfDoc)].filter(Boolean).join('\n');
   if (n.type === 'linkPreview') return String(n.attrs?.title || n.attrs?.url || '');
-  if (n.type === 'image') return String(n.attrs?.caption ?? n.attrs?.alt ?? '');
+  if (n.type === 'image') {
+    // On a line of its own: an image in a paragraph sits between words
+    const caption = String(n.attrs?.caption ?? n.attrs?.alt ?? '');
+    return caption && `\n${caption}\n`;
+  }
   const inline = n.type === 'paragraph' || n.type === 'heading' || n.type === 'codeBlock';
   return (n.content ?? []).map(textOfDoc).join(inline ? '' : '\n');
 }
