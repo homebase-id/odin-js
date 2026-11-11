@@ -131,7 +131,8 @@ const HEADING_CLASSES: Record<number, string> = {
   6: 'text-[0.8125rem] uppercase tracking-[0.05em] font-semibold text-foreground/60 mt-4 mb-2 first:mt-0',
 };
 
-// Journal's variants: info and tip in neutral tones, warning in gold, error in red
+// Journal's variants: info and tip in neutral tones, warning in gold, error in red. Not the shared
+// CALLOUT_CLASSES in calloutVariants.ts: those use theme tokens (collaborative, …) the feed lacks.
 const CALLOUT_CLASSES: Record<CalloutVariant, string> = {
   info: 'border-primary/40 bg-foreground/5 dark:border-indigo-300/50',
   warning: 'border-amber-400 bg-amber-400/10',
@@ -364,6 +365,8 @@ const EditedImage = ({
 }) => {
   const frameRef = useRef<HTMLDivElement>(null);
   const [natural, setNatural] = useState<Size | null>(null);
+  // An image that fails to load shows as it is, rather than staying hidden for good
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -379,8 +382,13 @@ const EditedImage = ({
     const onLoad = (e: Event) => {
       if (e.target instanceof HTMLImageElement) measure(e.target);
     };
+    const onError = () => setFailed(true);
     frame.addEventListener('load', onLoad, true);
-    return () => frame.removeEventListener('load', onLoad, true);
+    frame.addEventListener('error', onError, true);
+    return () => {
+      frame.removeEventListener('load', onLoad, true);
+      frame.removeEventListener('error', onError, true);
+    };
   }, []);
 
   const layers = natural && editLayers(natural, edits);
@@ -388,8 +396,8 @@ const EditedImage = ({
     <div
       ref={frameRef}
       data-edited-image=""
-      className={`w-full ${className ?? ''}`}
-      style={layers ? layers.frame : { visibility: 'hidden' }}
+      className={className ?? 'w-full'}
+      style={layers ? layers.frame : failed ? undefined : { visibility: 'hidden' }}
     >
       <div style={layers?.stage}>
         <div style={layers?.image}>{children}</div>
@@ -404,6 +412,15 @@ const GALLERY_IMAGE_CLASSES: Record<GalleryLayout, string> = {
   grid: 'block aspect-square w-full object-cover',
   masonry: 'block w-full',
   carousel: 'block max-h-72 max-w-full object-contain',
+};
+
+/** An edited image's frame per gallery layout: bounded as the plain image would be. */
+const EDITED_FRAME_CLASSES: Record<GalleryLayout, string> = {
+  row: 'w-full',
+  // centred in the square cell, cut off at its edges like object-cover
+  grid: 'w-full',
+  masonry: 'w-full',
+  carousel: 'mx-auto h-72 w-auto max-w-full',
 };
 
 const ImageNode = ({ node, parent }: Props) => {
@@ -423,7 +440,7 @@ const ImageNode = ({ node, parent }: Props) => {
     ? 'block h-full w-full'
     : layout
       ? GALLERY_IMAGE_CLASSES[layout]
-      : `block rounded-lg ${width ? 'w-full' : 'max-w-full'}`;
+      : `block rounded-lg ${width ? 'w-full' : 'max-w-full'} ${attrs.align === 'center' ? 'mx-auto' : ''}`;
 
   let img: ReactNode;
   if (fileKey) {
@@ -456,16 +473,26 @@ const ImageNode = ({ node, parent }: Props) => {
     );
   }
 
-  // In a paragraph with text it must stay phrasing content: spans, not a figure
-  const inText = parent?.type === 'paragraph' && !isFigureParagraph(parent);
-  const Box = inText ? 'span' : 'figure';
-  const Caption = inText ? 'span' : 'figcaption';
+  const frameClass = layout ? EDITED_FRAME_CLASSES[layout] : 'w-full rounded-lg';
+  const shown =
+    edited && fileKey ? (
+      // Keyed by the source, so a reused instance never keeps another image's size
+      <EditedImage key={fileKey} edits={edits} className={frameClass}>
+        {img}
+      </EditedImage>
+    ) : edited && typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src) ? (
+      <EditedImage key={attrs.src} edits={edits} className={frameClass}>
+        {img}
+      </EditedImage>
+    ) : (
+      img
+    );
   return (
-    <Box
+    <figure
       className={
         layout
           ? 'm-0 block min-w-0'
-          : `my-6 block max-w-full min-[600px]:[width:var(--image-width,auto)] ${own(ALIGN_CLASSES, attrs.align) ?? ''} ${
+          : `my-6 block max-w-full ${width ? 'min-[600px]:[width:var(--image-width)]' : ''} ${own(ALIGN_CLASSES, attrs.align) ?? ''} ${
               attrs.align === 'center' && !width ? 'min-[600px]:w-fit' : ''
             }`
       }
@@ -473,24 +500,22 @@ const ImageNode = ({ node, parent }: Props) => {
       // For the gallery's aspect ratios: the edited image's, read off these
       {...Object.fromEntries(editDataAttrs(edits))}
     >
-      {edited ? (
-        <EditedImage edits={edits} className={layout ? undefined : 'rounded-lg'}>
-          {img}
-        </EditedImage>
+      {layout === 'grid' && edited ? (
+        <div className="flex aspect-square items-center overflow-hidden">{shown}</div>
       ) : (
-        img
+        shown
       )}
       {caption ? (
-        <Caption className="mt-1.5 block text-center text-sm text-foreground/60">{caption}</Caption>
+        <figcaption className="mt-1.5 block text-center text-sm text-foreground/60">
+          {caption}
+        </figcaption>
       ) : null}
-    </Box>
+    </figure>
   );
 };
 
-/** A paragraph holding only images: a block of figures, which can't sit in a <p>. */
-const isFigureParagraph = (node: Node) =>
-  !!node.content?.length &&
-  node.content.every((child) => child.type === 'image' || child.type === 'hardBreak');
+/** A paragraph with an image: a <div>, since an image is a <figure>, which can't sit in a <p> (as the server render). */
+const hasImage = (node: Node) => !!node.content?.some((child) => child.type === 'image');
 
 const Carousel = ({ slides }: { slides: ReactNode[] }) => {
   const scroller = useRef<HTMLDivElement>(null);
@@ -575,7 +600,11 @@ const GalleryNode = ({ node, children }: Props) => {
   const layout = toGalleryLayout(node.attrs?.layout);
   const items = Children.toArray(children);
   const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => (ref.current ? watchGalleryAspect(ref.current) : undefined), []);
+  // Only a row reads the aspect ratios (--ar)
+  useEffect(
+    () => (layout === 'row' && ref.current ? watchGalleryAspect(ref.current) : undefined),
+    [layout]
+  );
 
   if (layout === 'carousel') return <Carousel slides={items} />;
 
@@ -667,7 +696,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   doc: ({ children }) => <>{children}</>,
   text: ({ node }) => node.text,
   paragraph: ({ node, children }) => {
-    const Tag = isFigureParagraph(node) ? 'div' : 'p';
+    const Tag = hasImage(node) ? 'div' : 'p';
     return (
       <Tag className="my-3 flow-root leading-[1.7] first:mt-0 last:mb-0" style={blockStyle(node)}>
         {children}
@@ -823,7 +852,6 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
       </a>
     );
   },
-  // A Journal note link the publish didn't rewrite: its label, as text, and never a journal: link
   horizontalRule: () => <hr className="my-8 border-foreground/20" />,
   hardBreak: () => <br />,
   mention: ({ node }) =>

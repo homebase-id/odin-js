@@ -357,16 +357,32 @@ describe('a note published from Journal', () => {
     expect(html).toContain('src="https://picsum.photos/id/30/400/300"');
   });
 
+  test('never puts a block element inside a <p>', () => {
+    for (const p of html.match(/<p[\s>][\s\S]*?<\/p>/g) ?? [])
+      expect(p).not.toMatch(/<(div|figure|figcaption|pre|table|ul|ol|aside|details)[\s>]/);
+  });
+
+  test('never hides the placeholder of an image it cannot load', () => {
+    const edited = render({
+      type: 'doc',
+      content: [
+        { type: 'image', attrs: { src: 'attachment://x/y', crop: '0.1,0.1,0.5,0.5', alt: 'a' } },
+      ],
+    });
+    expect(edited).toContain('Image not available');
+    expect(edited).not.toContain('visibility:hidden');
+  });
+
   test("applies an image's crop, rotation, flips, width and alignment", () => {
     expect(html).toMatch(
       /<figure[^>]*style="--image-width:480px" data-crop="0.1,0.1,0.6,0.8" data-rotate="90" data-flip="h"/
     );
     expect(html).toMatch(/<figure class="[^"]*min-\[600px\]:mx-auto/);
     expect(html).toMatch(
-      /<span class="[^"]*min-\[600px\]:float-right[^"]*" style="--image-width:240px" data-flip="v"/
+      /<figure class="[^"]*min-\[600px\]:float-right[^"]*" style="--image-width:240px" data-flip="v"/
     );
     expect(html).toMatch(
-      /<span class="[^"]*min-\[600px\]:float-left[^"]*" style="--image-width:200px" data-rotate="180"/
+      /<figure class="[^"]*min-\[600px\]:float-left[^"]*" style="--image-width:200px" data-rotate="180"/
     );
     // Until the image loads, the edited frame is hidden rather than showing the original
     expect(html).toContain(
