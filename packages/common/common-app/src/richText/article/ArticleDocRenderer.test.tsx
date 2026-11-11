@@ -366,7 +366,10 @@ describe('a note published from Journal', () => {
     const edited = render({
       type: 'doc',
       content: [
-        { type: 'image', attrs: { src: 'attachment://x/y', crop: '0.1,0.1,0.5,0.5', alt: 'a' } },
+        {
+          type: 'image',
+          attrs: { src: 'attachment://x/y', crop: { x: 0.1, y: 0.1, w: 0.5, h: 0.5 }, alt: 'a' },
+        },
       ],
     });
     expect(edited).toContain('Image not available');
