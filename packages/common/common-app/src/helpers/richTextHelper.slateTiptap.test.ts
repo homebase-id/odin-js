@@ -62,3 +62,11 @@ describe.each(tiptapFixtures)('Reduced Slate copy of %s', (_name, doc) => {
     expect(types(reduced).filter((t) => t === 'local_image')).toHaveLength(keys.length);
   });
 });
+
+it('the reduced copy of a malformed document keeps its text for the feed', () => {
+  const doc = {
+    type: 'doc',
+    content: [null, { type: 'constructor', content: [{ type: 'paragraph', content: [null, { type: 'text', text: 'kept' }, { type: 'text', text: 2 }] }] }],
+  };
+  expect(getPlainTextFromRichText(tiptapToSlate(doc as never))).toContain('kept2');
+});

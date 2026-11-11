@@ -7,6 +7,10 @@
  * - `tiptapToSlate` writes the reduced copy old clients read from `body`. It only uses the
  *   types the old `RichTextRenderer` knows, so every piece of text still shows, flattened
  *   where the old renderer has no equivalent (tables, callouts, toggles, math, footnotes).
+ *
+ * None of them throws on malformed input (null entries, a string where a node should be, children
+ * that aren't an array, a non-string type): both directions clean their input first and keep
+ * whatever text they can find.
  */
 
 /**
@@ -33,13 +37,50 @@ export const OLD_RENDERER_TYPES = ['p', 'h1', 'h2', 'blockquote', 'code_block', 
 const SLATE_MARKS: Record<string, string> = { bold: 'bold', strong: 'bold', italic: 'italic', underline: 'underline', strikethrough: 'strike', code: 'code', kbd: 'kbd' };
 const TIPTAP_MARKS: Record<string, string> = { bold: 'bold', italic: 'italic', underline: 'underline', strike: 'strikethrough', code: 'code', kbd: 'kbd' };
 
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
+const hasOwn = (map: object, key: unknown): key is string => typeof key === 'string' && Object.hasOwn(map, key);
+const stringOr = <T>(v: unknown, fallback: T): string | T => (typeof v === 'string' ? v : fallback);
+/** A text field as a string: numbers and booleans are kept as their text, anything else is empty. */
+const textField = (v: unknown): string =>
+  typeof v === 'string' ? v : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '';
+
 // ---- Slate -> Tiptap ----
+
+/**
+ * Stored Slate nodes in the shape the converter expects: a string entry is a text leaf, a nested
+ * array is read as its entries, null and other non-objects are skipped, a non-string type is dropped (the node is then read as inline),
+ * a non-string text becomes a string and children that aren't an array are none.
+ */
+function cleanSlate(nodes: unknown): SlateNode[] {
+  if (!Array.isArray(nodes)) return [];
+  const out: SlateNode[] = [];
+  for (const entry of nodes) {
+    if (typeof entry === 'string') {
+      out.push({ text: entry });
+      continue;
+    }
+    if (Array.isArray(entry)) {
+      out.push(...cleanSlate(entry));
+      continue;
+    }
+    if (!isObject(entry)) continue;
+    const node: SlateNode = { ...entry };
+    if (typeof node.type !== 'string') delete node.type;
+    if ('text' in entry) node.text = textField(entry.text);
+    if (Array.isArray(entry.children)) node.children = cleanSlate(entry.children);
+    // A string where the children should be is still text
+    else if (typeof entry.children === 'string') node.children = [{ text: entry.children }];
+    else delete node.children;
+    out.push(node);
+  }
+  return out;
+}
 
 // The WordPress importer writes marks as wrapper elements: `{ type: 'strong', children }`.
 const WRAPPER_MARKS: Record<string, string> = { strong: 'bold', b: 'bold', em: 'italic', i: 'italic', u: 'underline', s: 'strike', del: 'strike', code: 'code', kbd: 'kbd', span: '' };
 
 const isSlateInline = (n: SlateNode) =>
-  !n.type || n.type === 'text' || n.type === 'a' || n.type === 'mention' || n.type in WRAPPER_MARKS;
+  !n.type || n.type === 'text' || n.type === 'a' || n.type === 'mention' || hasOwn(WRAPPER_MARKS, n.type);
 
 function inlineToTiptap(n: SlateNode, marks: Mark[]): TiptapJSONContent[] {
   if (n.type === 'mention') return typeof n.value === 'string' && n.value ? [{ type: 'mention', attrs: { id: n.value, label: null } }] : [];
@@ -49,7 +90,7 @@ function inlineToTiptap(n: SlateNode, marks: Mark[]): TiptapJSONContent[] {
     const children = n.children?.length ? n.children : [{ text: String(n.text ?? n.url ?? '') }];
     return children.flatMap((c) => inlineToTiptap(c, [...marks, link]));
   }
-  if (n.type && n.type in WRAPPER_MARKS) {
+  if (hasOwn(WRAPPER_MARKS, n.type)) {
     const mark = WRAPPER_MARKS[n.type];
     return (n.children ?? []).flatMap((c) => inlineToTiptap(c, mark ? [...marks, { type: mark }] : marks));
   }
@@ -92,7 +133,7 @@ const textOf = (n: SlateNode): string =>
 
 function imageNode(n: SlateNode, caption: string | null = null): TiptapJSONContent {
   return n.type === 'local_image'
-    ? { type: 'image', attrs: { fileKey: n.fileKey ?? null, fileId: n.fileId ?? null, ...(caption ? { caption } : {}) } }
+    ? { type: 'image', attrs: { fileKey: stringOr(n.fileKey, null), fileId: stringOr(n.fileId, null), ...(caption ? { caption } : {}) } }
     : { type: 'image', attrs: { src: String(n.url ?? n.src ?? ''), ...(caption ? { caption } : {}) } };
 }
 
@@ -120,7 +161,7 @@ function blockToTiptap(n: SlateNode): TiptapJSONContent[] {
       return [{ type: 'blockquote', content: blocksToTiptap(n.children).length ? blocksToTiptap(n.children) : [{ type: 'paragraph' }] }];
     case 'code_block': {
       const code = (n.children ?? []).map(textOf).join('\n');
-      return [{ type: 'codeBlock', attrs: { language: (n.lang as string) || null }, ...(code ? { content: [{ type: 'text', text: code }] } : {}) }];
+      return [{ type: 'codeBlock', attrs: { language: stringOr(n.lang, '') || null }, ...(code ? { content: [{ type: 'text', text: code }] } : {}) }];
     }
     case 'ul':
     case 'ol': {
@@ -150,15 +191,60 @@ function blockToTiptap(n: SlateNode): TiptapJSONContent[] {
   }
 }
 
-/** A Tiptap document for any stored Slate body (array, plain string or nothing). */
+/** A Tiptap document for any stored Slate body (array, plain string or nothing). Never throws. */
 export function slateToTiptap(body: string | SlateNode[] | undefined | null): TiptapJSONContent {
   const content =
     typeof body === 'string'
       ? body.split('\n').map((line) => paragraph(line ? [{ type: 'text', text: line }] : []))
       : Array.isArray(body)
-        ? blocksToTiptap(body)
+        ? blocksToTiptap(cleanSlate(body))
         : [];
   return { type: 'doc', content: content.length ? content : [{ type: 'paragraph' }] };
+}
+
+// ---- Tiptap JSON, cleaned ----
+
+export type CleanTiptapOptions = {
+  /** Node types to keep; any other node is replaced by its content. Default: every string type. */
+  isKnownNode?: (type: string) => boolean;
+  /** Mark types to keep; any other mark is dropped. Default: every string type. */
+  isKnownMark?: (type: string) => boolean;
+};
+
+/**
+ * A well-formed copy of a Tiptap document: only plain objects with a string type, `content` and
+ * `marks` only when they are arrays, `attrs` only when it is an object, and `text` as a string.
+ * A node of an unknown type is replaced by its (cleaned) content, so its text stays. The result is
+ * always a `doc`; a root that isn't one becomes its only child.
+ */
+export function cleanTiptapDoc(doc: unknown, options: CleanTiptapOptions = {}): TiptapJSONContent {
+  const knownNode = options.isKnownNode ?? (() => true);
+  const knownMark = options.isKnownMark ?? (() => true);
+
+  const marksOf = (marks: unknown[]) =>
+    marks.flatMap((m) =>
+      isObject(m) && typeof m.type === 'string' && knownMark(m.type)
+        ? [{ type: m.type, ...(isObject(m.attrs) ? { attrs: m.attrs } : {}) }]
+        : []
+    );
+  const nodes = (list: unknown): TiptapJSONContent[] => (Array.isArray(list) ? list.flatMap(node) : []);
+  const node = (n: unknown): TiptapJSONContent[] => {
+    if (!isObject(n) || typeof n.type !== 'string') return [];
+    if (!knownNode(n.type)) return nodes(n.content);
+    const out: TiptapJSONContent = { type: n.type };
+    if (isObject(n.attrs)) out.attrs = n.attrs;
+    if ('text' in n) out.text = textField(n.text);
+    if (Array.isArray(n.content)) out.content = nodes(n.content);
+    if (Array.isArray(n.marks)) {
+      const marks = marksOf(n.marks);
+      if (marks.length) out.marks = marks;
+    }
+    return [out];
+  };
+
+  if (!isObject(doc)) return { type: 'doc', content: [] };
+  if (doc.type === 'doc' || doc.type === undefined) return { type: 'doc', content: nodes(doc.content) };
+  return { type: 'doc', content: node(doc) };
 }
 
 // ---- Tiptap -> Slate (the reduced copy) ----
@@ -170,16 +256,16 @@ function inlineToSlate(n: TiptapJSONContent, ctx: Ctx): SlateNode[] {
   switch (n.type) {
     case 'text': {
       const leaf: SlateNode = { text: n.text ?? '' };
-      for (const m of n.marks ?? []) if (TIPTAP_MARKS[m.type]) leaf[TIPTAP_MARKS[m.type]] = true;
+      for (const m of n.marks ?? []) if (hasOwn(TIPTAP_MARKS, m.type)) leaf[TIPTAP_MARKS[m.type]] = true;
       const link = n.marks?.find((m) => m.type === 'link');
-      return [link ? { type: 'a', url: link.attrs?.href ?? '', children: [leaf] } : leaf];
+      return [link ? { type: 'a', url: stringOr(link.attrs?.href, ''), children: [leaf] } : leaf];
     }
     case 'hardBreak':
       return [{ text: '\n' }];
     case 'mention':
-      return [{ type: 'mention', value: n.attrs?.id ?? '', children: emptyLeaf() }];
+      return [{ type: 'mention', value: stringOr(n.attrs?.id, ''), children: emptyLeaf() }];
     case 'inlineMath':
-      return [{ text: n.attrs?.latex ?? '', code: true }];
+      return [{ text: textField(n.attrs?.latex), code: true }];
     case 'footnoteReference':
       return [{ text: `[${ctx.footnoteNumber(n.attrs?.id)}]` }];
     case 'image':
@@ -213,10 +299,12 @@ const textBlock = (type: string, content: TiptapJSONContent[] | undefined, ctx: 
 });
 
 function imageToSlate(img: TiptapJSONContent): SlateNode[] {
-  const { fileKey, fileId, src, alt, caption } = img.attrs ?? {};
+  const attrs = img.attrs ?? {};
+  const [fileKey, fileId, src, alt] = [attrs.fileKey, attrs.fileId, attrs.src, attrs.alt].map((v) => stringOr(v, undefined));
+  const caption = attrs.caption === null ? null : stringOr(attrs.caption, undefined);
   const out: SlateNode[] = [];
   if (fileKey) out.push({ type: 'local_image', fileKey, ...(fileId ? { fileId } : {}), children: emptyLeaf() });
-  else if (src && !String(src).startsWith('data:')) out.push({ type: 'p', children: [{ type: 'a', url: src, children: [{ text: alt || src }] }] });
+  else if (src && !src.startsWith('data:')) out.push({ type: 'p', children: [{ type: 'a', url: src, children: [{ text: alt || src }] }] });
   // null caption shows the alt text; "" hides it.
   const shown = caption ?? alt;
   if (shown) out.push({ type: 'p', children: [{ text: shown, italic: true }] });
@@ -327,8 +415,9 @@ type Ctx = { footnoteNumber: (id: unknown) => number };
 
 const blocksToSlate = (blocks: TiptapJSONContent[] | undefined, ctx: Ctx) => (blocks ?? []).flatMap((b) => blockToSlate(b, ctx));
 
-/** The reduced Slate copy of a Tiptap document, for old clients reading `body`. */
-export function tiptapToSlate(doc: TiptapJSONContent): SlateNode[] {
+/** The reduced Slate copy of a Tiptap document, for old clients reading `body`. Never throws. */
+export function tiptapToSlate(input: TiptapJSONContent): SlateNode[] {
+  const doc = cleanTiptapDoc(input);
   // Footnotes are numbered by their order in the footnotes section.
   const ids = (doc.content ?? []).filter((b) => b.type === 'footnotes').flatMap((s) => (s.content ?? []).map((fn) => fn.attrs?.id));
   const ctx: Ctx = { footnoteNumber: (id) => ids.indexOf(id) + 1 || ids.length + 1 };
@@ -336,15 +425,19 @@ export function tiptapToSlate(doc: TiptapJSONContent): SlateNode[] {
   return out.length ? out : [{ type: 'p', children: emptyLeaf() }];
 }
 
-/** Plain text of a Tiptap document, block by block: for reading time and the harness. */
-export function tiptapText(n: TiptapJSONContent): string {
+/** Plain text of a Tiptap document, block by block: for reading time and the harness. Never throws. */
+export function tiptapText(doc: TiptapJSONContent): string {
+  return textOfDoc(cleanTiptapDoc(doc));
+}
+
+function textOfDoc(n: TiptapJSONContent): string {
   if (n.type === 'text') return n.text ?? '';
   if (n.type === 'hardBreak') return '\n';
   if (n.type === 'mention') return `@${n.attrs?.id ?? ''}`;
   if (n.type === 'inlineMath' || n.type === 'blockMath') return String(n.attrs?.latex ?? '');
-  if (n.type === 'toggle') return [n.attrs?.summary, ...(n.content ?? []).map(tiptapText)].filter(Boolean).join('\n');
+  if (n.type === 'toggle') return [n.attrs?.summary, ...(n.content ?? []).map(textOfDoc)].filter(Boolean).join('\n');
   if (n.type === 'linkPreview') return String(n.attrs?.title || n.attrs?.url || '');
   if (n.type === 'image') return String(n.attrs?.caption ?? n.attrs?.alt ?? '');
   const inline = n.type === 'paragraph' || n.type === 'heading' || n.type === 'codeBlock';
-  return (n.content ?? []).map(tiptapText).join(inline ? '' : '\n');
+  return (n.content ?? []).map(textOfDoc).join(inline ? '' : '\n');
 }
