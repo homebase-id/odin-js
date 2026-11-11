@@ -97,3 +97,14 @@ export function watchGalleryAspect(root: HTMLElement): () => void {
     observer.disconnect();
   };
 }
+
+/** The carousel slide `scroller` shows. */
+export const slideIndex = (scroller: HTMLElement, count: number) =>
+  Math.max(0, Math.min(count - 1, Math.round(scroller.scrollLeft / (scroller.clientWidth || 1))));
+
+/** Scrolls a carousel to slide `index` of `count`, clamped; no animation under reduced motion. */
+export function scrollToSlide(scroller: HTMLElement, index: number, count: number) {
+  const to = Math.max(0, Math.min(count - 1, index));
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  scroller.scrollTo?.({ left: to * scroller.clientWidth, behavior: reduce ? 'auto' : 'smooth' });
+}

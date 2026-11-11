@@ -305,10 +305,8 @@ const textsOf = (node: JSONContent): string[] => [
 
 describe('a note published from Journal', () => {
   const doc = journalNote as JSONContent;
-  let html = '';
-  test('renders without throwing', () => {
-    expect(() => (html = render(doc, { tableOfContents: true }))).not.toThrow();
-  });
+  // Rendered once for every test below; a throw fails the suite
+  const html = render(doc, { tableOfContents: true });
 
   test('drops no text', () => {
     const text = visibleText(html);
