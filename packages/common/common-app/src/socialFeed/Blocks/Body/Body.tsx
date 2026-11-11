@@ -6,7 +6,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { ReactNode, useMemo, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
-import { RichTextRenderer } from '../../../richText';
+import { ArticleBody, RichTextRenderer } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
 import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { usePostBody } from '../../../hooks/socialFeed/post/usePostBody';
@@ -68,8 +68,8 @@ export const PostBody = ({
             onExpand={() => setIsExpanded(true)}
           >
             <div className="rich-text-content leading-relaxed">
-              <RichTextRenderer
-                body={articlePost?.body}
+              <ArticleBody
+                article={articlePost}
                 options={
                   fileId
                     ? {
