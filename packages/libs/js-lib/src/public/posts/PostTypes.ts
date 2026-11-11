@@ -149,8 +149,23 @@ export interface PostContent {
 export interface Article extends PostContent {
   abstract: string;
   body: string | Record<string, unknown>[];
+  /**
+   * The Tiptap document of an article written in Journal; `body` is then its reduced Slate copy for
+   * old clients (see `toStoredArticleBody`).
+   * Read `doc` only when `format` is known and `slateHash` matches the `body` read with it, since an
+   * old client that edits `body` leaves this behind unchanged.
+   */
+  bodyDoc?: ArticleBodyDoc;
   type: 'Article';
   readingTimeStats?: ReadTimeStats;
+}
+
+export interface ArticleBodyDoc {
+  format: 'tiptap-v1';
+  /** Tiptap JSON (`TiptapJSONContent`) in the schema of Journal's editor */
+  doc: Record<string, unknown>;
+  /** Lowercase hex SHA-256 of the UTF-8 bytes of JSON.stringify(body) when this was written */
+  slateHash: string;
 }
 
 export interface ReadTimeStats {

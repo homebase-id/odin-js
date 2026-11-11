@@ -40,6 +40,7 @@ import {
   getPayloadsAndThumbnailsForNewPostMedia,
   getUploadFileMetadata,
   hasConflictingSlug,
+  shouldDeleteStaleTextPayload,
 } from './PostUploadHelpers';
 
 export const POST_LINKS_PAYLOAD_KEY = 'pst_links';
@@ -320,7 +321,8 @@ const updatePost = async <T extends PostContent>(
     channelId,
     newMediaFiles,
     deletedMediaFiles,
-    onUpdate
+    onUpdate,
+    header.fileMetadata.payloads?.map((p) => p.key) ?? []
   );
 };
 
@@ -331,7 +333,9 @@ const patchPost = async <T extends PostContent>(
   channelId: string,
   newMediaFiles?: NewMediaFile[],
   deletedMediaFiles?: MediaFile[],
-  onUpdate?: (progress: number) => void
+  onUpdate?: (progress: number) => void,
+  /** The payload keys of the header just fetched from the server */
+  serverPayloadKeys: string[] = []
 ): Promise<UpdateResult> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const encrypt = !(
@@ -395,6 +399,20 @@ const patchPost = async <T extends PostContent>(
   ) {
     deletedPayloads.push({
       key: DEFAULT_PAYLOAD_KEY,
+    });
+  }
+
+  // A text payload left from an earlier version would be merged over the new header by readers;
+  // removed only for content with a bodyDoc, see shouldDeleteStaleTextPayload
+  if (
+    shouldDeleteStaleTextPayload(
+      file.fileMetadata.appData.content,
+      additionalPayloads?.map((p) => p.key) ?? [],
+      serverPayloadKeys
+    )
+  ) {
+    deletedPayloads.push({
+      key: POST_FULL_TEXT_PAYLOAD_KEY,
     });
   }
 

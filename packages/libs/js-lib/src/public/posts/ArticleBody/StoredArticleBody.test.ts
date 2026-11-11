@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import type { Article } from '../PostTypes';
 import { slateToTiptap, type TiptapJSONContent } from './SlateTiptap';
 import { articleDocOf, readingTimeOf, toStoredArticleBody } from './StoredArticleBody';
 
@@ -16,7 +17,8 @@ describe('stored article body', () => {
   });
 
   it('round-trips through storage', async () => {
-    const stored = await toStoredArticleBody(doc);
+    // Typed as the Article fields, so the two stay in step
+    const stored: Pick<Article, 'body' | 'bodyDoc'> = await toStoredArticleBody(doc);
     // As a reader gets it back: JSON in the header or the text payload
     const read = JSON.parse(JSON.stringify(stored));
     expect(await articleDocOf(read)).toEqual(doc);

@@ -161,10 +161,12 @@ export const getPostContentForUpload = <T extends PostContent>(
     if (article.readingTimeStats !== undefined) {
       headerObj.readingTimeStats = article.readingTimeStats;
     }
-    if (article.body !== undefined) {
-      const bodyJson = stringify(article.body);
-      if (stringToUint8Array(bodyJson).length <= TEXT_FIELD_BYTE_LIMIT) {
-        headerObj.body = article.body;
+    // body and bodyDoc stay together: a reader checks one against the other
+    if (article.body !== undefined || article.bodyDoc !== undefined) {
+      const size = (v: unknown) => (v === undefined ? 0 : stringToUint8Array(stringify(v)).length);
+      if (size(article.body) + size(article.bodyDoc) <= TEXT_FIELD_BYTE_LIMIT) {
+        if (article.body !== undefined) headerObj.body = article.body;
+        if (article.bodyDoc !== undefined) headerObj.bodyDoc = article.bodyDoc;
         bodyIncludedInHeader = true;
       }
     }
@@ -236,6 +238,9 @@ export const getPostContentForUpload = <T extends PostContent>(
     }
     if (!bodyIncludedInHeader && article.body !== undefined) {
       textPayloadObj.body = article.body;
+    }
+    if (!bodyIncludedInHeader && article.bodyDoc !== undefined) {
+      textPayloadObj.bodyDoc = article.bodyDoc;
     }
   }
 
@@ -332,3 +337,23 @@ export const getUploadFileMetadata = async <T extends PostContent>(
 
   return { metadata, defaultPayload, additionalPayloads };
 };
+
+/**
+ * Whether a post update deletes the post's `pst_text` payload. Only when the content being uploaded
+ * carries a `bodyDoc`, the upload writes no new `pst_text`, and the server still has one: readers
+ * would merge that leftover over the new header. Only Journal writes `bodyDoc` when it publishes,
+ * and it always holds the full article. Any other update leaves `pst_text` alone, as before: a
+ * caller that only holds the header (a feed teaser with its caption trimmed and no body) would
+ * otherwise destroy the full text.
+ *
+ * `serverPayloadKeys` are the keys of the header the update has just fetched from the server, not
+ * of the caller's copy, so a payload another device added is seen too.
+ */
+export const shouldDeleteStaleTextPayload = (
+  content: PostContent | undefined,
+  uploadedPayloadKeys: string[],
+  serverPayloadKeys: string[]
+): boolean =>
+  !!(content as Partial<Article> | undefined)?.bodyDoc &&
+  !uploadedPayloadKeys.includes(POST_FULL_TEXT_PAYLOAD_KEY) &&
+  serverPayloadKeys.includes(POST_FULL_TEXT_PAYLOAD_KEY);
