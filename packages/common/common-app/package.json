@@ -29,14 +29,20 @@
     "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "*"
+    "@homebase-id/js-lib": "*",
+    "@tiptap/core": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/static-renderer": "3.32.2",
+    "katex": "0.18.11",
+    "lowlight": "3.3.0"
   },
   "peerDependencies": {
     "@tanstack/query-sync-storage-persister": "5.51.1",
     "@tanstack/react-query-persist-client": "5.51.1",
     "@tanstack/react-query": "5.51.1",
     "idb-keyval": "^6.2.1",
-    "react": "^18.3.1"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3"
