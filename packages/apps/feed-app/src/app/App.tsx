@@ -30,6 +30,7 @@ const IncomingCollaborativeChannelPage = lazy(
   () => import('../templates/SocialFeed/IncomingCollaborativeChannelPage')
 );
 
+import 'katex/dist/katex.min.css';
 import './App.css';
 
 const AUTH_PATH = FEED_ROOT_PATH + '/auth';

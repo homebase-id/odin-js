@@ -11,6 +11,7 @@ import {
   t,
   PostMeta,
   RichTextRenderer,
+  ArticleBody,
   PostInteracts,
   MediaGallery,
   EmbeddedPostContent,
@@ -190,9 +191,10 @@ export const PostDetailCard = ({
         ) : (
           post.type === 'Article' && (
             <div className="rich-text-content mb-5 leading-relaxed">
-              <RichTextRenderer
+              <ArticleBody
                 odinId={odinId}
-                body={(post as Article)?.body}
+                article={post as Article}
+                tableOfContents={true}
                 options={
                   postFile && postFile.fileId
                     ? {

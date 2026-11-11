@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 import { Image } from '../../media/Image';
 import { ActionLink } from '../../ui/Buttons/ActionLink';
 import { highlightQuery } from './HighlightQuery';
-import { AuthorName } from '../../socialFeed';
+import { Mention } from './Mention';
 import { getPlainTextFromRichText } from '../../helpers/richTextHelper';
 
 // Content that isn't a Slate array (e.g. an object written by another client) must never crash the page
@@ -249,23 +249,9 @@ export const RichTextRenderer = ({
         );
 
       case 'mention':
-        if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
-          const domainRegex =
-            /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
-
-          if (domainRegex.test(attributes.value))
-            return (
-              <a
-                href={`https://${attributes.value}`}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-primary hover:underline break-words"
-              >
-                @<AuthorName odinId={attributes.value} excludeLink={true} />
-              </a>
-            );
-          else return <span className="break-all text-primary">@{attributes.value}</span>;
-        } else return <></>;
+        if (attributes && 'value' in attributes && typeof attributes.value === 'string')
+          return <Mention odinId={attributes.value} />;
+        return <></>;
 
       default:
         return children ? (
