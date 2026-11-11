@@ -12,6 +12,7 @@ export * from './posts/Reaction/PostCommentReactionManager';
 export * from './posts/Reaction/PostEmojiReactionManager';
 export * from './posts/ArticleBody/SlateTiptap';
 export * from './posts/ArticleBody/StoredArticleBody';
+export * from './posts/ArticleBody/CodeLanguage';
 
 // File
 export * from './file/FileProvider';

@@ -44,3 +44,17 @@ test('does not throw on malformed entries in an array body', () => {
   expect(() => render([{ type: 'a', url: 5, children: [{ text: 'link' }] }])).not.toThrow();
   expect(() => render([{ type: 'link', linkText: { a: 1 }, linkTarget: 'https://x' }])).not.toThrow();
 });
+
+test('links only to http(s), mailto or a same-site path', () => {
+  vi.stubGlobal('window', { location: { origin: 'https://me.test' } });
+  const html = render([
+    { type: 'p', children: [{ type: 'a', url: 'javascript:alert(1)', children: [{ text: 'bad' }] }] },
+    { type: 'p', children: [{ type: 'a', url: '/posts/x', children: [{ text: 'ok' }] }] },
+  ]);
+  expect(html).not.toContain('javascript:');
+  expect(html).toContain('href="/posts/x"');
+  expect(render([{ type: 'link', linkText: 'Read more', linkTarget: 'javascript:alert(1)' }])).toContain(
+    '<p>Read more</p>'
+  );
+  vi.unstubAllGlobals();
+});

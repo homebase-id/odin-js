@@ -1,6 +1,8 @@
 import type { JSONContent } from '@tiptap/core';
 import { articleDocOf, type Article } from '@homebase-id/js-lib/public';
 import { useEffect, useState } from 'react';
+// With the lazy viewer chunk, so every app that shows an article (owner-app too) styles its math
+import 'katex/dist/katex.min.css';
 import { RichTextRenderer } from '../renderer/RichTextRenderer';
 import { ArticleDocRenderer, type ArticleDocOptions } from './ArticleDocRenderer';
 

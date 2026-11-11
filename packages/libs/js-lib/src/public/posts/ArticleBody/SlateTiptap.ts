@@ -12,6 +12,7 @@
  * that aren't an array, a non-string type): both directions clean their input first and keep
  * whatever text they can find.
  */
+import { codeLanguage } from './CodeLanguage';
 
 /**
  * A Tiptap (ProseMirror) JSON node, as `editor.getJSON()` writes it. The same shape as
@@ -157,8 +158,11 @@ function blockToTiptap(n: SlateNode): TiptapJSONContent[] {
     case 'p':
     case 'paragraph':
       return [paragraph(inlines(n.children))];
-    case 'blockquote':
-      return [{ type: 'blockquote', content: blocksToTiptap(n.children).length ? blocksToTiptap(n.children) : [{ type: 'paragraph' }] }];
+    case 'blockquote': {
+      // converted once: twice per level made nesting exponential
+      const content = blocksToTiptap(n.children);
+      return [{ type: 'blockquote', content: content.length ? content : [{ type: 'paragraph' }] }];
+    }
     case 'code_block': {
       const code = (n.children ?? []).map(textOf).join('\n');
       return [{ type: 'codeBlock', attrs: { language: stringOr(n.lang, '') || null }, ...(code ? { content: [{ type: 'text', text: code }] } : {}) }];
@@ -230,6 +234,13 @@ export function cleanTiptapDoc(doc: unknown, options: CleanTiptapOptions = {}): 
   const nodes = (list: unknown): TiptapJSONContent[] => (Array.isArray(list) ? list.flatMap(node) : []);
   const node = (n: unknown): TiptapJSONContent[] => {
     if (!isObject(n) || typeof n.type !== 'string') return [];
+    // A Journal note link the publish didn't rewrite: its label, as text with its marks, for every
+    // reader. ponytail: Journal-only, so before isKnownNode; an option if a reader ever wants it kept
+    if (n.type === 'noteLink') {
+      const label = isObject(n.attrs) ? textField(n.attrs.label) : '';
+      const marks = Array.isArray(n.marks) ? marksOf(n.marks) : [];
+      return label ? [{ type: 'text', text: label, ...(marks.length ? { marks } : {}) }] : [];
+    }
     if (!knownNode(n.type)) return nodes(n.content);
     const out: TiptapJSONContent = { type: n.type };
     if (isObject(n.attrs)) out.attrs = n.attrs;
@@ -365,7 +376,7 @@ function blockToSlate(n: TiptapJSONContent, ctx: Ctx): SlateNode[] {
     case 'codeBlock':
     case 'blockMath': {
       const code = n.type === 'blockMath' ? String(n.attrs?.latex ?? '') : (n.content ?? []).map((c) => c.text ?? '').join('');
-      const lang = n.type === 'blockMath' ? 'latex' : n.attrs?.language;
+      const lang = n.type === 'blockMath' ? 'latex' : codeLanguage(n.attrs?.language);
       return [{ type: 'code_block', ...(lang ? { lang } : {}), children: code.split('\n').map((line) => ({ type: 'code_line', children: [{ text: line }] })) }];
     }
     case 'bulletList':
@@ -437,7 +448,11 @@ function textOfDoc(n: TiptapJSONContent): string {
   if (n.type === 'inlineMath' || n.type === 'blockMath') return String(n.attrs?.latex ?? '');
   if (n.type === 'toggle') return [n.attrs?.summary, ...(n.content ?? []).map(textOfDoc)].filter(Boolean).join('\n');
   if (n.type === 'linkPreview') return String(n.attrs?.title || n.attrs?.url || '');
-  if (n.type === 'image') return String(n.attrs?.caption ?? n.attrs?.alt ?? '');
+  if (n.type === 'image') {
+    // On a line of its own: an image in a paragraph sits between words
+    const caption = String(n.attrs?.caption ?? n.attrs?.alt ?? '');
+    return caption && `\n${caption}\n`;
+  }
   const inline = n.type === 'paragraph' || n.type === 'heading' || n.type === 'codeBlock';
   return (n.content ?? []).map(textOfDoc).join(inline ? '' : '\n');
 }

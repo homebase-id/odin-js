@@ -10,11 +10,43 @@
  * from the article (heading ids, footnote numbers, the post's options) comes through a context.
  */
 import type { JSONContent } from '@tiptap/core';
-import { renderJSONContentToReactElement, type NodeProps } from '@tiptap/static-renderer/json/react';
+import {
+  renderJSONContentToReactElement,
+  type NodeProps,
+} from '@tiptap/static-renderer/json/react';
 import katex from 'katex';
 import { common, createLowlight } from 'lowlight';
-import { createContext, Fragment, ReactNode, useContext, useMemo } from 'react';
-import { cleanTiptapDoc } from '@homebase-id/js-lib/public';
+import {
+  Children,
+  createContext,
+  Fragment,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
+import { cleanTiptapDoc, codeLanguage } from '@homebase-id/js-lib/public';
+import { LANGUAGE_ALIASES, liveBlockKind, svgDataUri } from './codeInfo';
+import { toCalloutVariant, type CalloutVariant } from './calloutVariants';
+import {
+  editDataAttrs,
+  editLayers,
+  hasEdits,
+  readEdits,
+  type ImageEdits,
+  type Size,
+} from './imageEdits';
+import {
+  galleryRowBreaks,
+  scrollToSlide,
+  slideIndex,
+  toGalleryLayout,
+  watchGalleryAspect,
+  type GalleryLayout,
+} from './galleryLayout';
 import { slugify, uniqueHeadingIds } from './headingSlugs';
 import { Image } from '../../media/Image';
 import { Mention } from '../renderer/Mention';
@@ -27,6 +59,8 @@ type Node = JSONContent;
 type Props = NodeProps<Node, ReactNode>;
 
 const lowlight = createLowlight(common);
+// As in Journal: a react block is highlighted as JavaScript (svg is already an alias of xml)
+lowlight.registerAlias(LANGUAGE_ALIASES);
 
 const SAFE_HREF = /^(https?:|mailto:)/i;
 const SAFE_SRC = /^(https?:|data:image\/(png|jpe?g|gif|webp|avif);)/i;
@@ -69,7 +103,11 @@ const indexDoc = (doc: Node) => {
   walk(doc);
   const ids = uniqueHeadingIds(found.map((heading) => slugify(heading.text)));
   const headings: Heading[] = found.map((heading, i) => ({ ...heading, id: ids[i] }));
-  return { headings, headingIds: new Map(headings.map((heading) => [heading.node, heading.id])), footnotes };
+  return {
+    headings,
+    headingIds: new Map(headings.map((heading) => [heading.node, heading.id])),
+    footnotes,
+  };
 };
 
 const TEXT_ALIGN = ['left', 'center', 'right', 'justify'];
@@ -83,35 +121,38 @@ const blockStyle = (node: Node) => {
   };
 };
 
+// Journal's sizes (its `.prose` rules in src/index.css): h5 and h6 sit below the body size
 const HEADING_CLASSES: Record<number, string> = {
-  1: 'text-3xl font-semibold mt-8 mb-4',
-  2: 'text-2xl font-semibold mt-8 mb-3',
-  3: 'text-xl font-semibold mt-6 mb-3',
-  4: 'text-lg font-semibold mt-6 mb-2',
-  5: 'text-base font-semibold mt-4 mb-2',
-  6: 'text-sm font-semibold uppercase tracking-wide mt-4 mb-2',
+  1: 'text-[2.5rem] leading-tight font-semibold mt-8 mb-4 first:mt-0',
+  2: 'text-[1.75rem] leading-snug font-semibold mt-7 mb-3 first:mt-0',
+  3: 'text-xl font-semibold mt-6 mb-2 first:mt-0',
+  4: 'text-lg font-semibold mt-5 mb-2 first:mt-0',
+  5: 'text-[0.9375rem] tracking-[0.01em] font-semibold mt-4 mb-2 first:mt-0',
+  6: 'text-[0.8125rem] uppercase tracking-[0.05em] font-semibold text-foreground/60 mt-4 mb-2 first:mt-0',
 };
 
-const CALLOUT_CLASSES: Record<string, string> = {
-  info: 'border-sky-500 bg-sky-50 dark:bg-sky-950/40',
-  warning: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40',
-  tip: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40',
-  error: 'border-red-500 bg-red-50 dark:bg-red-950/40',
+// Journal's variants: info and tip in neutral tones, warning in gold, error in red. Not the shared
+// CALLOUT_CLASSES in calloutVariants.ts: those use theme tokens (collaborative, …) the feed lacks.
+const CALLOUT_CLASSES: Record<CalloutVariant, string> = {
+  info: 'border-primary/40 bg-foreground/5 dark:border-indigo-300/50',
+  warning: 'border-amber-400 bg-amber-400/10',
+  tip: 'border-foreground/40 bg-foreground/[0.03]',
+  error: 'border-red-500 bg-red-500/10',
 };
-const CALLOUT_LABELS: Record<string, string> = {
+const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   info: 'Info',
   warning: 'Warning',
   tip: 'Tip',
   error: 'Error',
 };
 // The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in its colours
-const CALLOUT_ICON_CLASSES: Record<string, string> = {
-  info: 'text-sky-600 dark:text-sky-400',
+const CALLOUT_ICON_CLASSES: Record<CalloutVariant, string> = {
+  info: 'text-foreground',
   warning: 'text-amber-600 dark:text-amber-400',
-  tip: 'text-emerald-600 dark:text-emerald-400',
+  tip: 'text-foreground/60',
   error: 'text-red-600 dark:text-red-400',
 };
-const CALLOUT_ICON_PATHS: Record<string, ReactNode> = {
+const CALLOUT_ICON_PATHS: Record<CalloutVariant, ReactNode> = {
   info: (
     <>
       <circle cx="12" cy="12" r="10" />
@@ -141,7 +182,7 @@ const CALLOUT_ICON_PATHS: Record<string, ReactNode> = {
     </>
   ),
 };
-const CalloutIcon = ({ variant }: { variant: string }) => (
+const CalloutIcon = ({ variant }: { variant: CalloutVariant }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -150,14 +191,16 @@ const CalloutIcon = ({ variant }: { variant: string }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     aria-hidden="true"
-    className={`mt-1 h-4 w-4 shrink-0 ${CALLOUT_ICON_CLASSES[variant]}`}
+    className={`mt-[1.1rem] h-4 w-4 shrink-0 ${CALLOUT_ICON_CLASSES[variant]}`}
   >
     {CALLOUT_ICON_PATHS[variant]}
   </svg>
 );
 
 /** Links: the theme colour, lighter in dark mode, where it is too dark to read on the background. */
-const LINK_CLASS = 'text-primary dark:text-indigo-300 hover:underline';
+const LINK_COLOR = 'text-primary dark:text-indigo-300';
+/** Links in the text are underlined, as in Journal. */
+const LINK_CLASS = `${LINK_COLOR} underline underline-offset-2 hover:opacity-70`;
 
 // highlight.js token classes, coloured for light and dark mode
 const HLJS_CLASSES: Record<string, string> = {
@@ -199,9 +242,11 @@ const hastToReact = (node: Hast, key: number): ReactNode => {
   );
 };
 
-const CodeBlock = ({ node }: Props) => {
-  const code = textOf(node);
-  const language = String(node.attrs?.language ?? '').trim().split(/\s+/)[0];
+const PRE_CLASS =
+  'overflow-x-auto rounded-lg border border-foreground/15 bg-slate-100 p-4 text-sm leading-relaxed dark:bg-slate-800';
+
+/** Code, highlighted when its language is one lowlight knows. `language` is a bare word. */
+const Code = ({ code, language }: { code: string; language?: string }) => {
   let highlighted: ReactNode = code;
   if (language && lowlight.registered(language)) {
     try {
@@ -211,25 +256,73 @@ const CodeBlock = ({ node }: Props) => {
     }
   }
   return (
-    <pre className="my-4 overflow-x-auto rounded-lg border bg-slate-100 p-3 text-sm dark:bg-slate-800">
-      <code className="font-mono text-foreground" data-language={language || undefined}>
+    <pre className={PRE_CLASS}>
+      <code className="font-mono text-foreground" data-language={language}>
         {highlighted}
       </code>
     </pre>
   );
 };
 
+const LIVE_BLOCK_LABELS: Record<string, string> = {
+  mermaid: 'Diagram — shown as code',
+  svg: 'Drawing — shown as code',
+  html: 'Interactive block — shown as code',
+  react: 'Interactive block — shown as code',
+};
+
+/**
+ * A code block. Its `language` is the fence's whole info string as Journal keeps it
+ * (`html id=k3f9 wide`): only its first word is read, and only as a bare word. Journal's live
+ * blocks can't run here (yet): an svg drawing shows as an image, which never runs its scripts,
+ * and the rest show as their code under a label saying so.
+ */
+const CodeBlock = ({ node }: Props) => {
+  const code = textOf(node);
+  const language = codeLanguage(node.attrs?.language) || undefined;
+  const live = language ? liveBlockKind(language) : null;
+
+  if (live === 'svg' && code.trim())
+    return (
+      <figure data-live-block="svg" className="my-4">
+        {/* Svg art is mostly dark on transparent: in dark mode it sits on light paper */}
+        <div className="flex justify-center rounded-lg dark:bg-slate-100 dark:p-2">
+          <img src={svgDataUri(code)} alt="" className="max-h-[32rem] max-w-full" />
+        </div>
+        <details className="mt-1">
+          <summary className="cursor-pointer text-xs text-foreground/60">View source</summary>
+          {/* Plain text: highlighting source nobody opens would cost as much as the drawing */}
+          <pre className="mt-2 overflow-x-auto rounded-lg bg-foreground/5 p-3 text-sm">
+            <code>{code}</code>
+          </pre>
+        </details>
+      </figure>
+    );
+
+  return (
+    <div className="my-4" data-live-block={live ?? undefined}>
+      {live ? <p className="mb-1 text-xs text-foreground/60">{LIVE_BLOCK_LABELS[live]}</p> : null}
+      <Code code={code} language={language} />
+    </div>
+  );
+};
+
 const MathNode = ({ latex, display }: { latex: unknown; display: boolean }) => {
   const html = useMemo(() => {
     try {
-      return katex.renderToString(String(latex ?? ''), { displayMode: display, throwOnError: false });
+      return katex.renderToString(String(latex ?? ''), {
+        displayMode: display,
+        throwOnError: false,
+        // untrusted input: bound sizes and macro expansion so a formula can't paint over the page
+        maxSize: 20,
+        maxExpand: 200,
+      });
     } catch {
       return undefined;
     }
   }, [latex, display]);
   const Tag = display ? 'div' : 'span';
-  if (html === undefined)
-    return <Tag className="font-mono">{String(latex ?? '')}</Tag>;
+  if (html === undefined) return <Tag className="font-mono">{String(latex ?? '')}</Tag>;
   return (
     <Tag
       className={display ? 'my-4 overflow-x-auto' : undefined}
@@ -239,10 +332,12 @@ const MathNode = ({ latex, display }: { latex: unknown; display: boolean }) => {
   );
 };
 
+// Journal's share page: the width and the float only from 600px; below it every image is a
+// full-width block
 const ALIGN_CLASSES: Record<string, string> = {
-  left: 'float-left mr-4 mb-2',
-  right: 'float-right ml-4 mb-2',
-  center: 'mx-auto',
+  left: 'min-[600px]:float-left min-[600px]:mr-4 min-[600px]:mb-2 min-[600px]:mt-0',
+  right: 'min-[600px]:float-right min-[600px]:ml-4 min-[600px]:mb-2 min-[600px]:mt-0',
+  center: 'min-[600px]:mx-auto',
 };
 
 /** What the node components need from the article being rendered. */
@@ -257,18 +352,100 @@ const ArticleDocContext = createContext<ArticleDocContextValue>({
   footnotes: new Map(),
 });
 
+/**
+ * An image with its crop, rotate and flip applied in CSS only (Journal's EditedImage, with the
+ * layers from imageEdits.ts). The natural size comes from whichever <img> loads inside; until then
+ * the image lays out unedited and hidden, so it never flashes the original.
+ */
+const EditedImage = ({
+  edits,
+  className,
+  children,
+}: {
+  edits: ImageEdits;
+  className?: string;
+  children: ReactNode;
+}) => {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [natural, setNatural] = useState<Size | null>(null);
+  // An image that fails to load shows as it is, rather than staying hidden for good
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    // The largest wins: OdinImage shows a tiny blurred preview before the real image
+    const measure = (img: HTMLImageElement) => {
+      const { naturalWidth: width, naturalHeight: height } = img;
+      if (width && height)
+        setNatural((prev) => (prev && prev.width >= width ? prev : { width, height }));
+    };
+    frame.querySelectorAll('img').forEach((img) => img.complete && measure(img));
+    // load doesn't bubble, but it does pass through the capture phase
+    const onLoad = (e: Event) => {
+      if (e.target instanceof HTMLImageElement) measure(e.target);
+    };
+    const onError = () => setFailed(true);
+    frame.addEventListener('load', onLoad, true);
+    frame.addEventListener('error', onError, true);
+    return () => {
+      frame.removeEventListener('load', onLoad, true);
+      frame.removeEventListener('error', onError, true);
+    };
+  }, []);
+
+  const layers = natural && editLayers(natural, edits);
+  return (
+    <div
+      ref={frameRef}
+      data-edited-image=""
+      className={className ?? 'w-full'}
+      style={layers ? layers.frame : failed ? undefined : { visibility: 'hidden' }}
+    >
+      <div style={layers?.stage}>
+        <div style={layers?.image}>{children}</div>
+      </div>
+    </div>
+  );
+};
+
+/** How an image sits in each gallery layout, as on Journal's share page. */
+const GALLERY_IMAGE_CLASSES: Record<GalleryLayout, string> = {
+  row: 'block w-full',
+  grid: 'block aspect-square w-full object-cover',
+  masonry: 'block w-full',
+  carousel: 'block max-h-72 max-w-full object-contain',
+};
+
+/** An edited image's frame per gallery layout: bounded as the plain image would be. */
+const EDITED_FRAME_CLASSES: Record<GalleryLayout, string> = {
+  row: 'w-full',
+  // centred in the square cell, cut off at its edges like object-cover
+  grid: 'w-full',
+  masonry: 'w-full',
+  carousel: 'mx-auto h-72 w-auto max-w-full',
+};
+
 const ImageNode = ({ node, parent }: Props) => {
   const { options, odinId } = useContext(ArticleDocContext);
   const attrs = node.attrs ?? {};
   const alt = str(attrs.alt);
   // null shows the alt text, "" no caption, anything else replaces the alt text
   const caption = attrs.caption === null || attrs.caption === undefined ? alt : str(attrs.caption);
-  const inGallery = parent?.type === 'gallery';
-  const width = Number(attrs.width) || undefined;
+  const layout = parent?.type === 'gallery' ? toGalleryLayout(parent.attrs?.layout) : undefined;
+  const width = Number(attrs.width) > 0 ? Number(attrs.width) : undefined;
   const fileKey = str(attrs.fileKey);
   const fileId = str(attrs.fileId);
+  const edits = readEdits(attrs);
+  const edited = hasEdits(edits);
+  // Filling its box: an edited frame, or the width the author gave it
+  const imgClass = edited
+    ? 'block h-full w-full'
+    : layout
+      ? GALLERY_IMAGE_CLASSES[layout]
+      : `block rounded-lg ${width ? 'w-full' : 'max-w-full'} ${attrs.align === 'center' ? 'mx-auto' : ''}`;
 
-  let img: ReactNode = null;
+  let img: ReactNode;
   if (fileKey) {
     if (!options) return null;
     const previewThumbnail = options.previewThumbnails?.find(
@@ -284,8 +461,8 @@ const ImageNode = ({ node, parent }: Props) => {
         previewThumbnail={previewThumbnail}
         odinId={odinId}
         alt={alt}
-        fit={inGallery ? 'cover' : undefined}
-        className={inGallery ? 'h-full w-full' : 'max-w-full'}
+        fit={layout === 'grid' && !edited ? 'cover' : undefined}
+        className={imgClass}
       />
     );
   } else if (typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src)) {
@@ -294,25 +471,176 @@ const ImageNode = ({ node, parent }: Props) => {
         src={attrs.src}
         alt={alt ?? ''}
         loading="lazy"
-        className={inGallery ? 'h-full w-full object-cover' : 'max-w-full'}
+        referrerPolicy="no-referrer"
+        className={imgClass}
       />
     );
-  } else return null;
+  } else {
+    // A source this page can't load, such as a Journal attachment the publish didn't rewrite
+    img = (
+      <span className="block rounded-lg border border-dashed border-foreground/25 px-3 py-6 text-center text-sm text-foreground/50">
+        Image not available
+      </span>
+    );
+  }
 
+  const frameClass = layout ? EDITED_FRAME_CLASSES[layout] : 'w-full rounded-lg';
+  const shown =
+    edited && fileKey ? (
+      // Keyed by the source, so a reused instance never keeps another image's size
+      <EditedImage key={fileKey} edits={edits} className={frameClass}>
+        {img}
+      </EditedImage>
+    ) : edited && typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src) ? (
+      <EditedImage key={attrs.src} edits={edits} className={frameClass}>
+        {img}
+      </EditedImage>
+    ) : (
+      img
+    );
   return (
     <figure
       className={
-        inGallery
-          ? 'm-0 overflow-hidden rounded-md'
-          : `my-4 max-w-full ${own(ALIGN_CLASSES, attrs.align) ?? ''}`
+        layout
+          ? 'm-0 block min-w-0'
+          : `my-6 block max-w-full ${width ? 'min-[600px]:[width:var(--image-width)]' : ''} ${own(ALIGN_CLASSES, attrs.align) ?? ''} ${
+              attrs.align === 'center' && !width ? 'min-[600px]:w-fit' : ''
+            }`
       }
-      style={!inGallery && width ? { width: `${width}px` } : undefined}
+      style={!layout && width ? ({ '--image-width': `${width}px` } as CSSProperties) : undefined}
+      // For the gallery's aspect ratios: the edited image's, read off these
+      {...Object.fromEntries(editDataAttrs(edits))}
     >
-      {img}
+      {layout === 'grid' && edited ? (
+        <div className="flex aspect-square items-center overflow-hidden">{shown}</div>
+      ) : (
+        shown
+      )}
       {caption ? (
-        <figcaption className="mt-1 text-center text-sm text-foreground/60">{caption}</figcaption>
+        <figcaption className="mt-1.5 block text-center text-sm text-foreground/60">
+          {caption}
+        </figcaption>
       ) : null}
     </figure>
+  );
+};
+
+/** A paragraph with an image: a <div>, since an image is a <figure>, which can't sit in a <p> (as the server render). */
+const hasImage = (node: Node) => !!node.content?.some((child) => child.type === 'image');
+
+const Carousel = ({ slides }: { slides: ReactNode[] }) => {
+  const scroller = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState(0);
+  const onScroll = () => {
+    if (scroller.current) setCurrent(slideIndex(scroller.current, slides.length));
+  };
+  const show = (index: number) => {
+    if (scroller.current) scrollToSlide(scroller.current, index, slides.length);
+  };
+  const button =
+    'flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 leading-none disabled:opacity-40 hover:bg-foreground/5';
+  return (
+    <div
+      className="my-6"
+      role="group"
+      aria-roledescription="carousel"
+      aria-label="Image gallery"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        show(current + (e.key === 'ArrowRight' ? 1 : -1));
+      }}
+    >
+      <div
+        ref={scroller}
+        onScroll={onScroll}
+        data-gallery="carousel"
+        className="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&>*]:flex [&>*]:h-80 [&>*]:shrink-0 [&>*]:grow-0 [&>*]:basis-full [&>*]:snap-center [&>*]:flex-col [&>*]:items-center [&>*]:justify-center"
+      >
+        {slides}
+      </div>
+      {slides.length > 1 ? (
+        <div className="mt-2 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            aria-label="Previous image"
+            className={button}
+            disabled={current === 0}
+            onClick={() => show(current - 1)}
+          >
+            ‹
+          </button>
+          <div className="flex gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Show image ${i + 1} of ${slides.length}`}
+                aria-current={i === current || undefined}
+                className={`h-2 w-2 rounded-full bg-foreground ${i === current ? 'opacity-80' : 'opacity-30'}`}
+                onClick={() => show(i)}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            aria-label="Next image"
+            className={button}
+            disabled={current >= slides.length - 1}
+            onClick={() => show(current + 1)}
+          >
+            ›
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+const GALLERY_CLASSES: Record<Exclude<GalleryLayout, 'carousel'>, string> = {
+  // Each image grows by its aspect ratio (--ar, set once it loads), so a row's images share one height
+  row: 'flex flex-wrap items-start gap-x-2 max-[480px]:gap-x-1 [&>figure]:[flex:var(--ar,1)_1_0%]',
+  grid: 'grid grid-cols-3 gap-2 max-[480px]:grid-cols-2 max-[480px]:gap-1',
+  masonry:
+    'columns-3 gap-2 max-[480px]:columns-2 max-[480px]:gap-1 [&>figure]:mb-2 [&>figure]:break-inside-avoid max-[480px]:[&>figure]:mb-1',
+};
+
+/** An image gallery in one of Journal's layouts: row, grid, masonry or carousel. */
+const GalleryNode = ({ node, children }: Props) => {
+  const layout = toGalleryLayout(node.attrs?.layout);
+  const items = Children.toArray(children);
+  const ref = useRef<HTMLDivElement>(null);
+  // Only a row reads the aspect ratios (--ar)
+  useEffect(
+    () => (layout === 'row' && ref.current ? watchGalleryAspect(ref.current) : undefined),
+    [layout]
+  );
+
+  if (layout === 'carousel') return <Carousel slides={items} />;
+
+  let content: ReactNode[] = items;
+  if (layout === 'row') {
+    // Rows end at a break: the `wide` ones above 480px, the `narrow` ones (pairs) at or below it
+    const breaks = new Map(galleryRowBreaks(items.length).map((b) => [b.index, b.modes]));
+    content = items.flatMap((item, i) => {
+      const modes = breaks.get(i);
+      if (!modes) return [item];
+      const show = `${modes.includes('wide') ? 'min-[481px]:block' : ''} ${modes.includes('narrow') ? 'max-[480px]:block' : ''}`;
+      return [
+        <span
+          key={`break-${i}`}
+          aria-hidden="true"
+          className={`hidden h-2 max-[480px]:h-1 [flex:0_0_100%] ${show}`}
+        />,
+        item,
+      ];
+    });
+  }
+  return (
+    <div ref={ref} data-gallery={layout} className={`my-6 ${GALLERY_CLASSES[layout]}`}>
+      {content}
+    </div>
   );
 };
 
@@ -321,7 +649,11 @@ const HeadingNode = ({ node, children }: Props) => {
   const level = Math.min(6, Math.max(1, Number(node.attrs?.level) || 1));
   const Tag = `h${level}` as 'h1';
   return (
-    <Tag id={headingIds.get(node)} className={HEADING_CLASSES[level]} style={blockStyle(node)}>
+    <Tag
+      id={headingIds.get(node)}
+      className={`scroll-mt-20 ${HEADING_CLASSES[level]}`}
+      style={blockStyle(node)}
+    >
       {children}
     </Tag>
   );
@@ -331,8 +663,12 @@ const FootnoteReferenceNode = ({ node }: Props) => {
   const { footnotes } = useContext(ArticleDocContext);
   const id = idSafe(node.attrs?.id);
   return (
-    <sup id={`fnref-${id}`}>
-      <a href={`#fn-${id}`} role="doc-noteref" className={LINK_CLASS}>
+    <sup id={`fnref-${id}`} className="scroll-mt-20">
+      <a
+        href={`#fn-${id}`}
+        role="doc-noteref"
+        className={`${LINK_COLOR} font-semibold no-underline`}
+      >
         [{footnotes.get(id)}]
       </a>
     </sup>
@@ -343,10 +679,19 @@ const FootnoteNode = ({ node, children }: Props) => {
   const { footnotes } = useContext(ArticleDocContext);
   const id = idSafe(node.attrs?.id);
   return (
-    <li id={`fn-${id}`} value={footnotes.get(id)} className="my-1 [&>p]:mb-1 [&>p]:inline">
+    <li
+      id={`fn-${id}`}
+      value={footnotes.get(id)}
+      className="my-1 scroll-mt-20 [&>p]:my-1 [&>p]:inline"
+    >
       {children}{' '}
       {footnotes.has(id) ? (
-        <a href={`#fnref-${id}`} role="doc-backlink" aria-label="Back to reference" className="text-primary dark:text-indigo-300">
+        <a
+          href={`#fnref-${id}`}
+          role="doc-backlink"
+          aria-label="Back to reference"
+          className="text-foreground/50 no-underline"
+        >
           {'↩︎'}
         </a>
       ) : null}
@@ -354,54 +699,66 @@ const FootnoteNode = ({ node, children }: Props) => {
   );
 };
 
+/** Nested bullet lists go circle, then square; a task list keeps no marker. */
+const BULLET_CLASS =
+  'my-4 list-disc pl-6 [&_ul:not([data-type])]:list-[circle] [&_ul_ul:not([data-type])]:list-[square]';
+
 const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   doc: ({ children }) => <>{children}</>,
   text: ({ node }) => node.text,
   paragraph: ({ node, children }) => {
-    // A paragraph holding only images is a block of figures, which can't sit in a <p>
-    const onlyImages =
-      !!node.content?.length &&
-      node.content.every((child) => child.type === 'image' || child.type === 'hardBreak');
-    const Tag = onlyImages ? 'div' : 'p';
+    const Tag = hasImage(node) ? 'div' : 'p';
     return (
-      <Tag className="mb-3 last:mb-0 flow-root" style={blockStyle(node)}>
+      <Tag className="my-3 flow-root leading-[1.7] first:mt-0 last:mb-0" style={blockStyle(node)}>
         {children}
       </Tag>
     );
   },
   heading: HeadingNode,
   blockquote: ({ children }) => (
-    <blockquote className="my-4 border-l-4 border-foreground/20 pl-4 text-foreground/80">
+    <blockquote className="my-6 border-l-[3px] border-foreground/20 pl-4 text-foreground/80">
       {children}
     </blockquote>
   ),
   codeBlock: CodeBlock,
-  bulletList: ({ children }) => <ul className="my-3 list-disc pl-6">{children}</ul>,
+  bulletList: ({ children }) => <ul className={BULLET_CLASS}>{children}</ul>,
   orderedList: ({ node, children }) => (
-    <ol className="my-3 list-decimal pl-6" start={Number(node.attrs?.start) || undefined}>
+    <ol className="my-4 list-decimal pl-6" start={Number(node.attrs?.start) || undefined}>
       {children}
     </ol>
   ),
-  listItem: ({ children }) => <li className="my-1 [&>p]:mb-1">{children}</li>,
-  taskList: ({ children }) => <ul className="my-3 pl-1">{children}</ul>,
+  listItem: ({ children }) => <li className="my-1 [&>p]:my-0">{children}</li>,
+  taskList: ({ parent, children }) => (
+    <ul
+      data-type="taskList"
+      className={`list-none ${parent?.type === 'taskItem' ? 'mt-1 pl-6' : 'my-4 pl-0'}`}
+    >
+      {children}
+    </ul>
+  ),
   taskItem: ({ node, children }) => (
-    <li className="my-1 flex items-start gap-2 [&>div>p]:mb-1">
+    <li className="my-1 flex items-start gap-2">
       <input
         type="checkbox"
         checked={!!node.attrs?.checked}
         readOnly
         disabled
-        className="mt-1.5"
+        className="mt-[0.3rem] h-[1.1rem] w-[1.1rem] shrink-0 accent-primary"
         aria-label={node.attrs?.checked ? 'Done' : 'To do'}
       />
-      <div className={node.attrs?.checked ? 'text-foreground/60 line-through' : undefined}>
+      {/* Only the item's own text is struck through, not the items nested in it */}
+      <div
+        className={`min-w-0 flex-1 [&>p]:my-0 ${
+          node.attrs?.checked ? '[&>p]:text-foreground/60 [&>p]:line-through' : ''
+        }`}
+      >
         {children}
       </div>
     </li>
   ),
   table: ({ children }) => (
-    <div className="my-4 overflow-x-auto">
-      <table className="w-full border-collapse text-left text-sm">
+    <div className="my-4 max-w-full overflow-x-auto">
+      <table className="w-auto border-collapse text-left">
         <tbody>{children}</tbody>
       </table>
     </div>
@@ -411,7 +768,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     <th
       colSpan={Number(node.attrs?.colspan) || undefined}
       rowSpan={Number(node.attrs?.rowspan) || undefined}
-      className="border border-foreground/20 bg-foreground/5 px-3 py-2 font-semibold [&>p]:mb-0"
+      className="border border-foreground/20 bg-foreground/5 px-3 py-2 align-top font-semibold text-foreground/85 [&>p+p]:mt-3 [&>p]:my-0"
     >
       {children}
     </th>
@@ -420,54 +777,51 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     <td
       colSpan={Number(node.attrs?.colspan) || undefined}
       rowSpan={Number(node.attrs?.rowspan) || undefined}
-      className="border border-foreground/20 px-3 py-2 align-top [&>p]:mb-0"
+      className="border border-foreground/20 px-3 py-2 align-top [&>p+p]:mt-3 [&>p]:my-0"
     >
       {children}
     </td>
   ),
   callout: ({ node, children }) => {
-    const variant = own(CALLOUT_CLASSES, node.attrs?.variant) ? (node.attrs?.variant as string) : 'info';
+    const variant = toCalloutVariant(node.attrs?.variant);
     return (
       <aside
         role="note"
         aria-label={CALLOUT_LABELS[variant]}
         data-variant={variant}
-        className={`my-4 flex gap-2 rounded-md border-l-4 px-4 py-3 ${CALLOUT_CLASSES[variant]}`}
+        className={`my-4 flex gap-2 rounded-md border-l-4 px-3 ${CALLOUT_CLASSES[variant]}`}
       >
         <CalloutIcon variant={variant} />
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 py-3">{children}</div>
       </aside>
     );
   },
   toggle: ({ node, children }) => {
     const summary = String(node.attrs?.summary ?? '').trim();
     return (
-      <details className="my-3 rounded-md border border-foreground/10 px-4 py-2">
-        <summary className="cursor-pointer font-medium">
+      <details className="group my-3">
+        <summary className="flex cursor-pointer list-none items-center gap-1 rounded font-medium [&::-webkit-details-marker]:hidden">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="h-4 w-4 shrink-0 text-foreground/60 transition-transform group-open:rotate-90"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
           {/* Without a title, a muted one, as the editor's placeholder shows it */}
           {summary || <span className="font-normal text-foreground/50">Details</span>}
         </summary>
-        <div className="mt-2">{children}</div>
+        <div className="mt-1 pl-5">{children}</div>
       </details>
     );
   },
   image: ImageNode,
-  gallery: ({ node, children }) => {
-    const count = node.content?.length ?? 0;
-    const layout = str(node.attrs?.layout);
-    return (
-      <div
-        data-gallery={layout}
-        className={
-          layout === 'grid' || layout === 'masonry'
-            ? `my-4 grid grid-cols-2 gap-2 [&>figure]:aspect-square ${count >= 3 ? 'sm:grid-cols-3' : ''}`
-            : `my-4 grid gap-2 [&>figure]:aspect-[4/3] ${count >= 3 ? 'grid-cols-3' : 'grid-cols-2'}`
-        }
-      >
-        {children}
-      </div>
-    );
-  },
+  gallery: GalleryNode,
   linkPreview: ({ node }) => {
     const url = safeHref(node.attrs?.url);
     if (!url) return null;
@@ -477,23 +831,40 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     } catch {
       // Show the url as it is
     }
+    const title = str(node.attrs?.title);
     const description = str(node.attrs?.description);
+    const image = str(node.attrs?.image);
     return (
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="my-4 block rounded-lg border border-foreground/15 px-4 py-3 no-underline hover:bg-foreground/5"
+        className="my-4 flex flex-col overflow-hidden rounded-lg border border-foreground/15 no-underline hover:bg-foreground/5 min-[481px]:flex-row"
       >
-        <span className="block font-semibold text-foreground">{str(node.attrs?.title) || host}</span>
-        {description ? (
-          <span className="mt-1 block text-sm text-foreground/70 line-clamp-2">{description}</span>
+        {image && SAFE_SRC.test(image) ? (
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="h-40 w-full shrink-0 object-cover min-[481px]:h-auto min-[481px]:w-40"
+          />
         ) : null}
-        <span className="mt-1 block text-xs text-foreground/50">{host}</span>
+        <span className="block min-w-0 flex-1 p-3">
+          <span className="block truncate font-medium text-foreground">{title || host}</span>
+          {description ? (
+            <span className="mt-0.5 block text-sm text-foreground/60 line-clamp-2">
+              {description}
+            </span>
+          ) : null}
+          {title ? (
+            <span className="mt-1 block truncate text-xs text-foreground/60">{host}</span>
+          ) : null}
+        </span>
       </a>
     );
   },
-  horizontalRule: () => <hr className="my-6 border-foreground/20" />,
+  horizontalRule: () => <hr className="my-8 border-foreground/20" />,
   hardBreak: () => <br />,
   mention: ({ node }) =>
     typeof node.attrs?.id === 'string' && node.attrs.id ? <Mention odinId={node.attrs.id} /> : null,
@@ -501,7 +872,10 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   blockMath: ({ node }) => <MathNode latex={node.attrs?.latex} display={true} />,
   footnoteReference: FootnoteReferenceNode,
   footnotes: ({ children }) => (
-    <section role="doc-endnotes" className="mt-8 border-t border-foreground/20 pt-4 text-sm">
+    <section
+      role="doc-endnotes"
+      className="mt-10 border-t border-foreground/20 pt-2 text-[0.875em]"
+    >
       <ol className="list-decimal pl-6">{children}</ol>
     </section>
   ),
@@ -517,7 +891,7 @@ const markMapping: Record<
   underline: ({ children }) => <u>{children}</u>,
   strike: ({ children }) => <del>{children}</del>,
   code: ({ children }) => (
-    <code className="rounded-md border bg-slate-100 p-[2px_3px_1px] font-mono text-sm text-red-500 dark:bg-slate-800 dark:text-orange-400">
+    <code className="rounded-[0.3rem] bg-slate-100 px-[0.4rem] py-[0.2rem] font-mono text-[0.875rem] text-foreground dark:bg-slate-800">
       {children}
     </code>
   ),
@@ -599,12 +973,18 @@ export const ArticleDocRenderer = ({
     <ArticleDocContext.Provider value={context}>
       <div className={`break-words ${className ?? ''}`}>
         {toc ? (
-          <nav aria-label="Table of contents" className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm">
+          <nav
+            aria-label="Table of contents"
+            className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm"
+          >
             <p className="mb-2 font-semibold">Contents</p>
             <ol>
               {toc.map((heading) => (
-                <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
-                  <a href={`#${heading.id}`} className={LINK_CLASS}>
+                <li
+                  key={heading.id}
+                  style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}
+                >
+                  <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
                     {heading.text}
                   </a>
                 </li>

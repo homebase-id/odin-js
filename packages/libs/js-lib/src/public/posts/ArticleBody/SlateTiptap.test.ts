@@ -104,7 +104,8 @@ const stripIds = (nodes: SlateNode[]): SlateNode[] =>
   });
 
 describe('the structure check', () => {
-  it.each(tiptapFixtures)('accepts %s', (_name, doc) => expectValid(doc));
+  // Journal's notes also hold noteLink, a node only Journal's own schema has
+  it.each(tiptapFixtures.filter(([name]) => !name.startsWith('journal-')))('accepts %s', (_name, doc) => expectValid(doc));
 
   it('rejects what the schema would', () => {
     expect(problems({ type: 'doc', content: [] })).not.toEqual([]);
@@ -216,5 +217,15 @@ describe('malformed input never throws', () => {
     };
     expect(tiptapText(doc as never)).toBe('kept2');
     expect(JSON.stringify(tiptapToSlate(doc as never))).toContain('kept2');
+  });
+});
+
+describe('untrusted nesting', () => {
+  it('converts 30 nested blockquotes in linear time', () => {
+    let node: Record<string, unknown> = { type: 'p', children: [{ text: 'deep' }] };
+    for (let i = 0; i < 30; i++) node = { type: 'blockquote', children: [node] };
+    const start = Date.now();
+    expect(JSON.stringify(slateToTiptap([node] as never))).toContain('deep');
+    expect(Date.now() - start).toBeLessThan(500); // was minutes: each level converted its children twice
   });
 });
