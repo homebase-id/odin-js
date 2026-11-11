@@ -10,6 +10,7 @@ export * from './posts/Channel/PostChannelManager';
 export * from './posts/Channel/PostCollaborativeChannelsManager';
 export * from './posts/Reaction/PostCommentReactionManager';
 export * from './posts/Reaction/PostEmojiReactionManager';
+export * from './posts/ArticleBody/SlateTiptap';
 
 // File
 export * from './file/FileProvider';
