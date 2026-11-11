@@ -7,6 +7,13 @@ import { Mention } from './Mention';
 import { getPlainTextFromRichText } from '../../helpers/richTextHelper';
 
 // Content that isn't a Slate array (e.g. an object written by another client) must never crash the page
+/** http(s), mailto or a same-site path; anything else (javascript:, data:, a non-string) is no link */
+const linkHref = (url: unknown): string | undefined => {
+  if (typeof url !== 'string') return undefined;
+  const u = url.trim();
+  return /^(https?:|mailto:)/i.test(u) || (u.startsWith('/') && !u.startsWith('//')) ? u : undefined;
+};
+
 const getFallbackText = (body: unknown): string => {
   try {
     return (
@@ -187,7 +194,7 @@ export const RichTextRenderer = ({
         // TODO: expand with check for attributes?.odinId, and if so check if it is a contact, and if we have a name for them...
         return (
           <a
-            href={typeof attributes?.url === 'string' ? attributes.url : ''}
+            href={linkHref(attributes?.url) ?? ''}
             target={
               typeof attributes?.url === 'string' && attributes.url.startsWith(window.location.origin)
                 ? '_self'
@@ -227,11 +234,13 @@ export const RichTextRenderer = ({
         return <></>;
       case 'link':
         if (attributes && 'linkText' in attributes && attributes && 'linkTarget' in attributes) {
+          const href = linkHref(attributes.linkTarget);
+          if (!href) return <p>{String(attributes.linkText ?? '')}</p>;
           return (
             <div className="flex">
               <ActionLink
                 className="break-all my-2 w-auto rounded-md px-3 py-2 text-left"
-                href={attributes.linkTarget as string}
+                href={href}
                 type="secondary"
               >
                 {String(attributes.linkText ?? '')}

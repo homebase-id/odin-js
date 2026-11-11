@@ -158,8 +158,11 @@ function blockToTiptap(n: SlateNode): TiptapJSONContent[] {
     case 'p':
     case 'paragraph':
       return [paragraph(inlines(n.children))];
-    case 'blockquote':
-      return [{ type: 'blockquote', content: blocksToTiptap(n.children).length ? blocksToTiptap(n.children) : [{ type: 'paragraph' }] }];
+    case 'blockquote': {
+      // converted once: twice per level made nesting exponential
+      const content = blocksToTiptap(n.children);
+      return [{ type: 'blockquote', content: content.length ? content : [{ type: 'paragraph' }] }];
+    }
     case 'code_block': {
       const code = (n.children ?? []).map(textOf).join('\n');
       return [{ type: 'codeBlock', attrs: { language: stringOr(n.lang, '') || null }, ...(code ? { content: [{ type: 'text', text: code }] } : {}) }];

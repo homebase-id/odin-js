@@ -313,6 +313,9 @@ const MathNode = ({ latex, display }: { latex: unknown; display: boolean }) => {
       return katex.renderToString(String(latex ?? ''), {
         displayMode: display,
         throwOnError: false,
+        // untrusted input: bound sizes and macro expansion so a formula can't paint over the page
+        maxSize: 20,
+        maxExpand: 200,
       });
     } catch {
       return undefined;
@@ -463,7 +466,15 @@ const ImageNode = ({ node, parent }: Props) => {
       />
     );
   } else if (typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src)) {
-    img = <img src={attrs.src} alt={alt ?? ''} loading="lazy" className={imgClass} />;
+    img = (
+      <img
+        src={attrs.src}
+        alt={alt ?? ''}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        className={imgClass}
+      />
+    );
   } else {
     // A source this page can't load, such as a Journal attachment the publish didn't rewrite
     img = (
@@ -835,6 +846,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
             src={image}
             alt=""
             loading="lazy"
+            referrerPolicy="no-referrer"
             className="h-40 w-full shrink-0 object-cover min-[481px]:h-auto min-[481px]:w-40"
           />
         ) : null}
