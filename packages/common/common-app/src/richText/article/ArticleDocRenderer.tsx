@@ -104,6 +104,60 @@ const CALLOUT_LABELS: Record<string, string> = {
   tip: 'Tip',
   error: 'Error',
 };
+// The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in its colours
+const CALLOUT_ICON_CLASSES: Record<string, string> = {
+  info: 'text-sky-600 dark:text-sky-400',
+  warning: 'text-amber-600 dark:text-amber-400',
+  tip: 'text-emerald-600 dark:text-emerald-400',
+  error: 'text-red-600 dark:text-red-400',
+};
+const CALLOUT_ICON_PATHS: Record<string, ReactNode> = {
+  info: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
+    </>
+  ),
+  warning: (
+    <>
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </>
+  ),
+  tip: (
+    <>
+      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+    </>
+  ),
+  error: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m15 9-6 6" />
+      <path d="m9 9 6 6" />
+    </>
+  ),
+};
+const CalloutIcon = ({ variant }: { variant: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className={`mt-1 h-4 w-4 shrink-0 ${CALLOUT_ICON_CLASSES[variant]}`}
+  >
+    {CALLOUT_ICON_PATHS[variant]}
+  </svg>
+);
+
+/** Links: the theme colour, lighter in dark mode, where it is too dark to read on the background. */
+const LINK_CLASS = 'text-primary dark:text-indigo-300 hover:underline';
 
 // highlight.js token classes, coloured for light and dark mode
 const HLJS_CLASSES: Record<string, string> = {
@@ -278,7 +332,7 @@ const FootnoteReferenceNode = ({ node }: Props) => {
   const id = idSafe(node.attrs?.id);
   return (
     <sup id={`fnref-${id}`}>
-      <a href={`#fn-${id}`} role="doc-noteref" className="text-primary hover:underline">
+      <a href={`#fn-${id}`} role="doc-noteref" className={LINK_CLASS}>
         [{footnotes.get(id)}]
       </a>
     </sup>
@@ -292,7 +346,7 @@ const FootnoteNode = ({ node, children }: Props) => {
     <li id={`fn-${id}`} value={footnotes.get(id)} className="my-1 [&>p]:mb-1 [&>p]:inline">
       {children}{' '}
       {footnotes.has(id) ? (
-        <a href={`#fnref-${id}`} role="doc-backlink" aria-label="Back to reference" className="text-primary">
+        <a href={`#fnref-${id}`} role="doc-backlink" aria-label="Back to reference" className="text-primary dark:text-indigo-300">
           {'↩︎'}
         </a>
       ) : null}
@@ -378,18 +432,25 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
         role="note"
         aria-label={CALLOUT_LABELS[variant]}
         data-variant={variant}
-        className={`my-4 rounded-md border-l-4 px-4 py-3 ${CALLOUT_CLASSES[variant]}`}
+        className={`my-4 flex gap-2 rounded-md border-l-4 px-4 py-3 ${CALLOUT_CLASSES[variant]}`}
       >
-        {children}
+        <CalloutIcon variant={variant} />
+        <div className="min-w-0 flex-1">{children}</div>
       </aside>
     );
   },
-  toggle: ({ node, children }) => (
-    <details className="my-3 rounded-md border border-foreground/10 px-4 py-2">
-      <summary className="cursor-pointer font-medium">{String(node.attrs?.summary ?? '')}</summary>
-      <div className="mt-2">{children}</div>
-    </details>
-  ),
+  toggle: ({ node, children }) => {
+    const summary = String(node.attrs?.summary ?? '').trim();
+    return (
+      <details className="my-3 rounded-md border border-foreground/10 px-4 py-2">
+        <summary className="cursor-pointer font-medium">
+          {/* Without a title, a muted one, as the editor's placeholder shows it */}
+          {summary || <span className="font-normal text-foreground/50">Details</span>}
+        </summary>
+        <div className="mt-2">{children}</div>
+      </details>
+    );
+  },
   image: ImageNode,
   gallery: ({ node, children }) => {
     const count = node.content?.length ?? 0;
@@ -475,7 +536,7 @@ const markMapping: Record<
         href={href}
         target={href.startsWith(window.location.origin) ? '_self' : '_blank'}
         rel="noopener noreferrer"
-        className="text-primary hover:underline break-words"
+        className={`${LINK_CLASS} break-words`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -543,7 +604,7 @@ export const ArticleDocRenderer = ({
             <ol>
               {toc.map((heading) => (
                 <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
-                  <a href={`#${heading.id}`} className="text-primary hover:underline">
+                  <a href={`#${heading.id}`} className={LINK_CLASS}>
                     {heading.text}
                   </a>
                 </li>
