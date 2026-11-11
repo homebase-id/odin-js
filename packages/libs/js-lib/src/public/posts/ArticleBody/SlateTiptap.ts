@@ -231,10 +231,12 @@ export function cleanTiptapDoc(doc: unknown, options: CleanTiptapOptions = {}): 
   const nodes = (list: unknown): TiptapJSONContent[] => (Array.isArray(list) ? list.flatMap(node) : []);
   const node = (n: unknown): TiptapJSONContent[] => {
     if (!isObject(n) || typeof n.type !== 'string') return [];
-    // A Journal note link the publish didn't rewrite: its label, as text, for every reader
+    // A Journal note link the publish didn't rewrite: its label, as text with its marks, for every
+    // reader. ponytail: Journal-only, so before isKnownNode; an option if a reader ever wants it kept
     if (n.type === 'noteLink') {
       const label = isObject(n.attrs) ? textField(n.attrs.label) : '';
-      return label ? [{ type: 'text', text: label }] : [];
+      const marks = Array.isArray(n.marks) ? marksOf(n.marks) : [];
+      return label ? [{ type: 'text', text: label, ...(marks.length ? { marks } : {}) }] : [];
     }
     if (!knownNode(n.type)) return nodes(n.content);
     const out: TiptapJSONContent = { type: n.type };
