@@ -21,7 +21,6 @@ import {
   createContext,
   Fragment,
   ReactNode,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -29,8 +28,9 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import { cleanTiptapDoc } from '@homebase-id/js-lib/public';
-import { liveBlockKind, parseCodeInfo, svgDataUri } from './codeInfo';
+import { cleanTiptapDoc, codeLanguage } from '@homebase-id/js-lib/public';
+import { LANGUAGE_ALIASES, liveBlockKind, svgDataUri } from './codeInfo';
+import { toCalloutVariant, type CalloutVariant } from './calloutVariants';
 import {
   editDataAttrs,
   editLayers,
@@ -41,6 +41,8 @@ import {
 } from './imageEdits';
 import {
   galleryRowBreaks,
+  scrollToSlide,
+  slideIndex,
   toGalleryLayout,
   watchGalleryAspect,
   type GalleryLayout,
@@ -58,7 +60,7 @@ type Props = NodeProps<Node, ReactNode>;
 
 const lowlight = createLowlight(common);
 // As in Journal: a react block is highlighted as JavaScript (svg is already an alias of xml)
-lowlight.registerAlias({ javascript: ['react'] });
+lowlight.registerAlias(LANGUAGE_ALIASES);
 
 const SAFE_HREF = /^(https?:|mailto:)/i;
 const SAFE_SRC = /^(https?:|data:image\/(png|jpe?g|gif|webp|avif);)/i;
@@ -130,26 +132,26 @@ const HEADING_CLASSES: Record<number, string> = {
 };
 
 // Journal's variants: info and tip in neutral tones, warning in gold, error in red
-const CALLOUT_CLASSES: Record<string, string> = {
+const CALLOUT_CLASSES: Record<CalloutVariant, string> = {
   info: 'border-primary/40 bg-foreground/5 dark:border-indigo-300/50',
   warning: 'border-amber-400 bg-amber-400/10',
   tip: 'border-foreground/40 bg-foreground/[0.03]',
   error: 'border-red-500 bg-red-500/10',
 };
-const CALLOUT_LABELS: Record<string, string> = {
+const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   info: 'Info',
   warning: 'Warning',
   tip: 'Tip',
   error: 'Error',
 };
 // The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in its colours
-const CALLOUT_ICON_CLASSES: Record<string, string> = {
+const CALLOUT_ICON_CLASSES: Record<CalloutVariant, string> = {
   info: 'text-foreground',
   warning: 'text-amber-600 dark:text-amber-400',
   tip: 'text-foreground/60',
   error: 'text-red-600 dark:text-red-400',
 };
-const CALLOUT_ICON_PATHS: Record<string, ReactNode> = {
+const CALLOUT_ICON_PATHS: Record<CalloutVariant, ReactNode> = {
   info: (
     <>
       <circle cx="12" cy="12" r="10" />
@@ -179,7 +181,7 @@ const CALLOUT_ICON_PATHS: Record<string, ReactNode> = {
     </>
   ),
 };
-const CalloutIcon = ({ variant }: { variant: string }) => (
+const CalloutIcon = ({ variant }: { variant: CalloutVariant }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -276,12 +278,8 @@ const LIVE_BLOCK_LABELS: Record<string, string> = {
  */
 const CodeBlock = ({ node }: Props) => {
   const code = textOf(node);
-  const info = node.attrs?.language;
-  const language =
-    parseCodeInfo(info)
-      .language?.toLowerCase()
-      .replace(/[^a-z0-9_+#.-]/g, '') || undefined;
-  const live = liveBlockKind(info);
+  const language = codeLanguage(node.attrs?.language) || undefined;
+  const live = language ? liveBlockKind(language) : null;
 
   if (live === 'svg' && code.trim())
     return (
@@ -292,9 +290,10 @@ const CodeBlock = ({ node }: Props) => {
         </div>
         <details className="mt-1">
           <summary className="cursor-pointer text-xs text-foreground/60">View source</summary>
-          <div className="mt-2">
-            <Code code={code} language="xml" />
-          </div>
+          {/* Plain text: highlighting source nobody opens would cost as much as the drawing */}
+          <pre className="mt-2 overflow-x-auto rounded-lg bg-foreground/5 p-3 text-sm">
+            <code>{code}</code>
+          </pre>
         </details>
       </figure>
     );
@@ -496,14 +495,11 @@ const isFigureParagraph = (node: Node) =>
 const Carousel = ({ slides }: { slides: ReactNode[] }) => {
   const scroller = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
-  const onScroll = useCallback(() => {
-    const el = scroller.current;
-    if (el) setCurrent(Math.round(el.scrollLeft / (el.clientWidth || 1)));
-  }, []);
+  const onScroll = () => {
+    if (scroller.current) setCurrent(slideIndex(scroller.current, slides.length));
+  };
   const show = (index: number) => {
-    const el = scroller.current;
-    const to = Math.max(0, Math.min(slides.length - 1, index));
-    el?.scrollTo?.({ left: to * el.clientWidth, behavior: 'smooth' });
+    if (scroller.current) scrollToSlide(scroller.current, index, slides.length);
   };
   const button =
     'flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 leading-none disabled:opacity-40 hover:bg-foreground/5';
@@ -747,9 +743,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     </td>
   ),
   callout: ({ node, children }) => {
-    const variant = own(CALLOUT_CLASSES, node.attrs?.variant)
-      ? (node.attrs?.variant as string)
-      : 'info';
+    const variant = toCalloutVariant(node.attrs?.variant);
     return (
       <aside
         role="note"
@@ -830,7 +824,6 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     );
   },
   // A Journal note link the publish didn't rewrite: its label, as text, and never a journal: link
-  noteLink: ({ node }) => str(node.attrs?.label) ?? null,
   horizontalRule: () => <hr className="my-8 border-foreground/20" />,
   hardBreak: () => <br />,
   mention: ({ node }) =>

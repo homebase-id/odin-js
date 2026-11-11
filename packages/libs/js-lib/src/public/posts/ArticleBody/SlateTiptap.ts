@@ -12,6 +12,7 @@
  * that aren't an array, a non-string type): both directions clean their input first and keep
  * whatever text they can find.
  */
+import { codeLanguage } from './CodeLanguage';
 
 /**
  * A Tiptap (ProseMirror) JSON node, as `editor.getJSON()` writes it. The same shape as
@@ -230,6 +231,11 @@ export function cleanTiptapDoc(doc: unknown, options: CleanTiptapOptions = {}): 
   const nodes = (list: unknown): TiptapJSONContent[] => (Array.isArray(list) ? list.flatMap(node) : []);
   const node = (n: unknown): TiptapJSONContent[] => {
     if (!isObject(n) || typeof n.type !== 'string') return [];
+    // A Journal note link the publish didn't rewrite: its label, as text, for every reader
+    if (n.type === 'noteLink') {
+      const label = isObject(n.attrs) ? textField(n.attrs.label) : '';
+      return label ? [{ type: 'text', text: label }] : [];
+    }
     if (!knownNode(n.type)) return nodes(n.content);
     const out: TiptapJSONContent = { type: n.type };
     if (isObject(n.attrs)) out.attrs = n.attrs;
@@ -268,9 +274,6 @@ function inlineToSlate(n: TiptapJSONContent, ctx: Ctx): SlateNode[] {
       return [{ text: textField(n.attrs?.latex), code: true }];
     case 'footnoteReference':
       return [{ text: `[${ctx.footnoteNumber(n.attrs?.id)}]` }];
-    case 'noteLink':
-      // A Journal note link the publish didn't rewrite: its label, as text
-      return [{ text: textField(n.attrs?.label) }];
     case 'image':
       return []; // lifted out of the paragraph by `paragraphToSlate`
     default:
@@ -368,7 +371,7 @@ function blockToSlate(n: TiptapJSONContent, ctx: Ctx): SlateNode[] {
     case 'codeBlock':
     case 'blockMath': {
       const code = n.type === 'blockMath' ? String(n.attrs?.latex ?? '') : (n.content ?? []).map((c) => c.text ?? '').join('');
-      const lang = n.type === 'blockMath' ? 'latex' : n.attrs?.language;
+      const lang = n.type === 'blockMath' ? 'latex' : codeLanguage(n.attrs?.language);
       return [{ type: 'code_block', ...(lang ? { lang } : {}), children: code.split('\n').map((line) => ({ type: 'code_line', children: [{ text: line }] })) }];
     }
     case 'bulletList':
@@ -437,7 +440,6 @@ function textOfDoc(n: TiptapJSONContent): string {
   if (n.type === 'text') return n.text ?? '';
   if (n.type === 'hardBreak') return '\n';
   if (n.type === 'mention') return `@${n.attrs?.id ?? ''}`;
-  if (n.type === 'noteLink') return textField(n.attrs?.label);
   if (n.type === 'inlineMath' || n.type === 'blockMath') return String(n.attrs?.latex ?? '');
   if (n.type === 'toggle') return [n.attrs?.summary, ...(n.content ?? []).map(textOfDoc)].filter(Boolean).join('\n');
   if (n.type === 'linkPreview') return String(n.attrs?.title || n.attrs?.url || '');
