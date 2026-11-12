@@ -65,6 +65,8 @@ export const getKnownOdinErrorMessages = (error: unknown): string | undefined =>
   if (errorCode === 'invalidGrantNonExistingDrive') return t('Invalid grant non existing drive');
   if (errorCode === 'cannotAllowSubscriptionsOnOwnerOnlyDrive')
     return t('Cannot allow subscriptions on owner only drive');
+  if (errorCode === 'cannotAllowSubscriptionsOnDriveThatBlocksEnumeration')
+    return t('A drive that hides its file list cannot allow subscriptions.');
 
   // Drive errors 41xx
   if (errorCode === 'cannotOverwriteNonExistentFile')

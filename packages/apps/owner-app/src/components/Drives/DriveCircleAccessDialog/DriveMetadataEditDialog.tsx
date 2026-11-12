@@ -5,6 +5,7 @@ import {Arrow} from '@homebase-id/common-app/icons';
 import {
     t,
     ActionButton,
+    ActionButtonState,
     usePortal,
     Label,
     CheckboxToggle,
@@ -15,6 +16,7 @@ import {
 import {ErrorNotification} from '@homebase-id/common-app';
 import {DialogWrapper} from '@homebase-id/common-app';
 import {useDrive} from '../../../hooks/drives/useDrive';
+import {sendListingAndSubscriptionChanges} from './sendListingAndSubscriptionChanges';
 
 const dictionariesEqual = (
     a: { [key: string]: string } | undefined,
@@ -24,6 +26,39 @@ const dictionariesEqual = (
     const bKeys = Object.keys(b || {});
     return aKeys.length === bKeys.length && aKeys.every((key) => (a || {})[key] === (b || {})[key]);
 };
+
+/** One drive option. With `lockedHint` the box is greyed out and can't be changed, and the hint says why. */
+const ToggleRow = ({
+                       label,
+                       hint,
+                       lockedHint,
+                       checked,
+                       onChange,
+                   }: {
+    label: string;
+    hint: string;
+    lockedHint?: string;
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+}) => (
+    <div
+        className={`flex flex-row items-center justify-between gap-2 rounded-lg ${
+            lockedHint ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''
+        }`}>
+        <Label>
+            {label}
+            <small className="block text-sm text-slate-400">{lockedHint ?? hint}</small>
+        </Label>
+
+        <div>
+            <CheckboxToggle
+                disabled={!!lockedHint}
+                checked={checked}
+                onChange={(e) => onChange(e.currentTarget.checked)}
+            />
+        </div>
+    </div>
+);
 
 const DriveMetadataEditDialog = ({
                                      title,
@@ -46,43 +81,23 @@ const DriveMetadataEditDialog = ({
 }) => {
     const target = usePortal('modal-container');
     const {
-        editAnonymousRead: {
-            mutateAsync: updateAnonymousRead,
-            error: updateAnonymousReadError,
-            status: updateAnonymousReadStatus,
-            reset: resetAnonymousRead,
-        },
-        editAllowSubscriptions: {
-            mutateAsync: updateAllowSubscription,
-            error: updateAllowSubscriptionError,
-            status: updateAllowSubscriptionStatus,
-            reset: resetAllowSubscription,
-        },
-        editAllowCdn: {
-            mutateAsync: updateAllowCdn,
-            error: updateAllowCdnError,
-            status: updateAllowCdnStatus,
-            reset: resetAllowCdn,
-        },
-        editDescription: {
-            mutateAsync: updateDescription,
-            error: updateDescriptionError,
-            status: updateDescriptionStatus,
-            reset: resetDescription,
-        },
-        editArchiveStatus: {
-            mutateAsync: updateDriveArchiveFlag,
-            error: updateDriveArchiveFlagError,
-            status: updateDriveArchiveFlagStatus,
-            reset: resetDriveArchiveFlag,
-        },
-        editAttributes: {
-            mutateAsync: updateAttributes,
-            error: updateAttributesError,
-            status: updateAttributesStatus,
-            reset: resetAttributes,
-        },
+        editAnonymousRead,
+        editAllowSubscriptions,
+        editAllowCdn,
+        editBlockEnumeration,
+        editDescription,
+        editAttributes,
+        editArchiveStatus,
     } = useDrive();
+    const mutations = [
+        editAnonymousRead,
+        editAllowSubscriptions,
+        editAllowCdn,
+        editBlockEnumeration,
+        editDescription,
+        editAttributes,
+        editArchiveStatus,
+    ];
 
     const [allowAnonymousReads, setAllowAnonymousReads] = useState(
         driveDefinition.allowAnonymousReads
@@ -93,24 +108,19 @@ const DriveMetadataEditDialog = ({
 
     const [allowSubscriptions, setAllowSubscriptions] = useState(driveDefinition.allowSubscriptions);
     const [allowCdn, setAllowCdn] = useState(driveDefinition.allowCdn);
+    const savedBlockEnumeration = !!driveDefinition.blockEnumeration;
+    const [blockEnumeration, setBlockEnumeration] = useState(savedBlockEnumeration);
     const [metadata, setMetadata] = useState(driveDefinition.metadata);
     const [attributes, setAttributes] = useState(driveDefinition.attributes);
 
     if (!isOpen) return null;
 
+    const isSystemDrive = driveDefinition.isSystemDrive;
+
     const dialog = (
         <DialogWrapper title={title} onClose={onCancel}>
             <>
-                <ErrorNotification
-                    error={
-                        updateAnonymousReadError ||
-                        updateAllowSubscriptionError ||
-                        updateAllowCdnError ||
-                        updateDescriptionError ||
-                        updateAttributesError ||
-                        updateDriveArchiveFlagError
-                    }
-                />
+                <ErrorNotification error={mutations.find((mutation) => mutation.error)?.error}/>
                 <form
                     onSubmit={async (e) => {
                         e.preventDefault();
@@ -126,23 +136,35 @@ const DriveMetadataEditDialog = ({
 
                         if (allowAnonymousReads !== driveDefinition.allowAnonymousReads)
                             pending.push(
-                                updateAnonymousRead({
+                                editAnonymousRead.mutateAsync({
                                     targetDrive,
                                     newAllowAnonymousRead: allowAnonymousReads,
                                 })
                             );
 
-                        if (allowSubscriptions !== driveDefinition.allowSubscriptions)
-                            pending.push(
-                                updateAllowSubscription({
-                                    targetDrive,
-                                    newAllowSubscriptions: allowSubscriptions,
-                                })
-                            );
+                        pending.push(
+                            sendListingAndSubscriptionChanges(
+                                allowSubscriptions,
+                                allowSubscriptions !== driveDefinition.allowSubscriptions
+                                    ? () =>
+                                        editAllowSubscriptions.mutateAsync({
+                                            targetDrive,
+                                            newAllowSubscriptions: allowSubscriptions,
+                                        })
+                                    : undefined,
+                                blockEnumeration !== savedBlockEnumeration
+                                    ? () =>
+                                        editBlockEnumeration.mutateAsync({
+                                            targetDrive,
+                                            newBlockEnumeration: blockEnumeration,
+                                        })
+                                    : undefined
+                            )
+                        );
 
                         if (allowCdn !== driveDefinition.allowCdn)
                             pending.push(
-                                updateAllowCdn({
+                                editAllowCdn.mutateAsync({
                                     targetDrive,
                                     newAllowCdn: allowCdn,
                                 })
@@ -150,7 +172,7 @@ const DriveMetadataEditDialog = ({
 
                         if (metadata !== driveDefinition.metadata)
                             pending.push(
-                                updateDescription({
+                                editDescription.mutateAsync({
                                     targetDrive,
                                     newDescription: metadata,
                                 })
@@ -158,15 +180,15 @@ const DriveMetadataEditDialog = ({
 
                         if (!dictionariesEqual(attributes, driveDefinition.attributes))
                             pending.push(
-                                updateAttributes({
+                                editAttributes.mutateAsync({
                                     targetDrive,
                                     newAttributes: attributes,
                                 })
                             );
 
-                        if (!driveDefinition.isSystemDrive && isArchived !== driveDefinition.isArchived)
+                        if (!isSystemDrive && isArchived !== driveDefinition.isArchived)
                             pending.push(
-                                updateDriveArchiveFlag({
+                                editArchiveStatus.mutateAsync({
                                     targetDrive,
                                     newArchived: isArchived,
                                 })
@@ -179,111 +201,69 @@ const DriveMetadataEditDialog = ({
                             return;
                         }
 
-                        resetAnonymousRead();
-                        resetAllowSubscription();
-                        resetAllowCdn();
-                        resetDescription();
-                        resetAttributes();
-                        resetDriveArchiveFlag();
+                        mutations.forEach((mutation) => mutation.reset());
                         onConfirm();
                     }}
                 >
                     <div className="flex flex-col gap-3">
-                        <div
-                            className={`flex flex-row items-center justify-between gap-2 rounded-lg ${
-                                driveDefinition.isSystemDrive
-                                    ? 'opacity-50 cursor-not-allowed bg-slate-50'
-                                    : ''
-                            }`}>
-                            <Label>
-                                {t('Allow anonymous reads')}
-                                <small className="block text-sm text-slate-400">
-                                    {driveDefinition.isSystemDrive
-                                        ? t('Read mode of system drives cannot be changed.')
-                                        : t(
-                                            'Can the drive be read by anonymous users? Individual files can still be stricter.'
-                                        )}
-                                </small>
-                            </Label>
+                        <ToggleRow
+                            label={t('Allow anonymous reads')}
+                            hint={t(
+                                'Can the drive be read by anonymous users? Individual files can still be stricter.'
+                            )}
+                            lockedHint={
+                                isSystemDrive ? t('Read mode of system drives cannot be changed.') : undefined
+                            }
+                            checked={allowAnonymousReads}
+                            onChange={setAllowAnonymousReads}
+                        />
 
-                            <div>
-                                <CheckboxToggle
-                                    disabled={driveDefinition.isSystemDrive}
-                                    defaultChecked={driveDefinition.allowAnonymousReads}
-                                    onChange={(e) => setAllowAnonymousReads(e.currentTarget.checked)}
-                                />
-                            </div>
-                        </div>
+                        <ToggleRow
+                            label={t('Archive Drive')}
+                            hint={t(
+                                'Is the drive archived? When set, the drive will disappear from everywhere except here. Apps cannot read or write to the drive.'
+                            )}
+                            lockedHint={isSystemDrive ? t('System drives cannot be archived.') : undefined}
+                            checked={isArchived}
+                            onChange={setIsArchived}
+                        />
 
-                        <div
-                            className={`flex flex-row items-center justify-between gap-2 rounded-lg ${
-                                driveDefinition.isSystemDrive
-                                    ? 'opacity-50 cursor-not-allowed bg-slate-50'
-                                    : ''
-                            }`}>
-                            <Label>
-                                {t('Archive Drive')}
-                                <small className="block text-sm text-slate-400">
-                                    {driveDefinition.isSystemDrive
-                                        ? t('System drives cannot be archived.')
-                                        : t(
-                                            'Is the drive archived? When set, the drive will disappear from everywhere except here. Apps cannot read or write to the drive.'
-                                        )}
-                                </small>
-                            </Label>
+                        <ToggleRow
+                            label={t('Allow subscriptions')}
+                            hint={t(
+                                'Can the drive be subscribed to? Subscriptions are used to notify users of new files.'
+                            )}
+                            lockedHint={
+                                isSystemDrive
+                                    ? t('Subscription mode of system drives cannot be changed.')
+                                    : blockEnumeration
+                                        ? t('Turn off "Hide the file list" to allow subscriptions.')
+                                        : undefined
+                            }
+                            checked={allowSubscriptions}
+                            onChange={setAllowSubscriptions}
+                        />
 
-                            <div>
-                                <CheckboxToggle
-                                    disabled={driveDefinition.isSystemDrive}
-                                    defaultChecked={driveDefinition.isArchived}
-                                    onChange={(e) => setIsArchived(e.currentTarget.checked)}
-                                />
-                            </div>
-                        </div>
+                        <ToggleRow
+                            label={t('Hide the file list')}
+                            hint={t("Only you and your apps can list this drive's files. Others need a direct link.")}
+                            lockedHint={
+                                isSystemDrive
+                                    ? t('This setting of system drives cannot be changed.')
+                                    : allowSubscriptions
+                                        ? t('Turn off "Allow subscriptions" to hide the file list.')
+                                        : undefined
+                            }
+                            checked={blockEnumeration}
+                            onChange={setBlockEnumeration}
+                        />
 
-                        <div
-                            className={`flex flex-row items-center justify-between gap-2 rounded-lg ${
-                                driveDefinition.isSystemDrive
-                                    ? 'opacity-50 cursor-not-allowed bg-slate-50'
-                                    : ''
-                            }`}>
-                            <Label>
-                                {t('Allow subscriptions')}
-                                <small className="block text-sm text-slate-400">
-                                    {driveDefinition.isSystemDrive
-                                        ? t('Subscription mode of system drives cannot be changed.')
-                                        : t(
-                                            'Can the drive be subscribed to? Subscriptions are used to notify users of new files.'
-                                        )}
-                                </small>
-                            </Label>
-
-                            <div>
-                                <CheckboxToggle
-                                    disabled={driveDefinition.isSystemDrive}
-                                    defaultChecked={driveDefinition.allowSubscriptions}
-                                    onChange={(e) => setAllowSubscriptions(e.currentTarget.checked)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex flex-row items-center justify-between gap-2">
-                            <Label>
-                                {t('Allow CDN')}
-                                <small className="block text-sm text-slate-400">
-                                    {t(
-                                        "Allow the CDN to read and cache this drive's payloads and thumbnails."
-                                    )}
-                                </small>
-                            </Label>
-
-                            <div>
-                                <CheckboxToggle
-                                    defaultChecked={driveDefinition.allowCdn}
-                                    onChange={(e) => setAllowCdn(e.currentTarget.checked)}
-                                />
-                            </div>
-                        </div>
+                        <ToggleRow
+                            label={t('Allow CDN')}
+                            hint={t("Allow the CDN to read and cache this drive's payloads and thumbnails.")}
+                            checked={allowCdn}
+                            onChange={setAllowCdn}
+                        />
 
                         <div>
                             <Label>{t('Metadata')}</Label>
@@ -304,12 +284,9 @@ const DriveMetadataEditDialog = ({
                     <div className="flex flex-col gap-2 py-3 sm:flex-row-reverse">
                         <ActionButton
                             icon={Arrow}
-                            state={mergeStates(
-                                mergeStates(updateAnonymousReadStatus, updateAllowSubscriptionStatus),
-                                mergeStates(
-                                    mergeStates(updateAllowCdnStatus, updateDescriptionStatus),
-                                    mergeStates(updateAttributesStatus, updateDriveArchiveFlagStatus)
-                                )
+                            state={mutations.reduce<ActionButtonState>(
+                                (state, mutation) => mergeStates(state, mutation.status),
+                                'idle'
                             )}
                         >
                             {confirmText || t('Save')}

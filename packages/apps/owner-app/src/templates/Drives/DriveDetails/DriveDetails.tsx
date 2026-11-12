@@ -204,9 +204,9 @@ const DriveDetails = () => {
                 <ul>
                     {driveDef.allowAnonymousReads ? <li>{t('Allow Anonymous Reads')}</li> : null}
 
-                    {/* BE is never reporting allowSubscriptions */}
                     {driveDef.allowSubscriptions ? <li>{t('Allow subscriptions')}</li> : null}
                     {driveDef.allowCdn ? <li>{t('Allow CDN')}</li> : null}
+                    {driveDef.blockEnumeration ? <li>{t('Hide the file list')}</li> : null}
                     {driveDef.isArchived ? <li>{t('Drive is Archived')}</li> : null}
                     {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
                     {modelLabel ? <li>{modelLabel}</li> : null}
@@ -381,13 +381,16 @@ const DriveDetails = () => {
             <FileBrowser targetDrive={targetDriveInfo} systemFileType="Standard" key="Standard"/>
             <FileBrowser targetDrive={targetDriveInfo} systemFileType="Comment" key="Comment"/>
 
-            <DriveMetadataEditDialog
-                driveDefinition={driveDef}
-                isOpen={isDriveEditOpen}
-                onCancel={() => setIsDriveEditOpen(false)}
-                onConfirm={() => setIsDriveEditOpen(false)}
-                title={`${t('Edit metadata')} ${driveDef.name}`}
-            />
+            {/* Mounted only while open, so each opening starts from the drive as it is now, not as it was the first time */}
+            {isDriveEditOpen ? (
+                <DriveMetadataEditDialog
+                    driveDefinition={driveDef}
+                    isOpen={isDriveEditOpen}
+                    onCancel={() => setIsDriveEditOpen(false)}
+                    onConfirm={() => setIsDriveEditOpen(false)}
+                    title={`${t('Edit metadata')} ${driveDef.name}`}
+                />
+            ) : null}
 
             <DriveCircleAccessDialog
                 driveDefinition={driveDef}
