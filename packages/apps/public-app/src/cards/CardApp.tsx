@@ -69,11 +69,21 @@ const whenPainted = async (element: HTMLElement, onError: (error: unknown) => vo
   await nextFrame();
 };
 
-// html-to-image's toCanvas, minus its unbounded decode() and rAF waits (see untilFrame)
+// html-to-image's toCanvas, minus its unbounded decode() and rAF waits (see untilFrame).
+// WebKit misdraws box-shadows when a canvas draws an SVG foreignObject (always on iOS, scaled on macOS), so the
+// snapshot is laid out at the output size with CSS zoom and rasterized by createImageBitmap, then copied 1:1.
 const rasterize = async (element: HTMLElement) => {
   const { toSvg } = await import('html-to-image');
   const { offsetWidth: width, offsetHeight: height } = element;
-  const svg = await toSvg(element, { filter: snapshotFilter });
+  const ratio = Math.max(2, 1080 / width);
+  const canvasWidth = Math.round(width * ratio);
+  const canvasHeight = Math.round(height * ratio);
+  const svg = await toSvg(element, {
+    filter: snapshotFilter,
+    width: canvasWidth,
+    height: canvasHeight,
+    style: { width: `${width}px`, height: `${height}px`, zoom: `${canvasWidth / width}` },
+  });
   const image = new Image();
   await new Promise((resolve, reject) => {
     image.onload = resolve;
@@ -81,14 +91,31 @@ const rasterize = async (element: HTMLElement) => {
     image.src = svg;
   });
   await nextFrame();
-  const ratio = Math.max(2, 1080 / width);
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(width * ratio);
-  canvas.height = Math.round(height * ratio);
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('no 2d canvas');
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvas;
+  const draw = (source: CanvasImageSource) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('no 2d canvas');
+    context.drawImage(source, 0, 0);
+    return { canvas, context };
+  };
+  const bitmap = await createImageBitmap(image).catch(() => undefined);
+  if (bitmap) {
+    const { canvas, context } = draw(bitmap);
+    if (isExportable(context)) return canvas;
+  }
+  // Chrome taints a canvas drawn from an SVG bitmap, and some browsers can't make one; they draw the image itself
+  return draw(image).canvas;
+};
+
+const isExportable = (context: CanvasRenderingContext2D) => {
+  try {
+    context.getImageData(0, 0, 1, 1);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 // exportPng always shares the compact card; with the page layout on screen it is drawn here at a phone's size
