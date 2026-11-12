@@ -385,6 +385,34 @@ export const editDriveAllowCdn = async (
 };
 
 /**
+ * Owner only. When on, only the owner, the owner's apps and the server may list the drive's files; anyone else reaches
+ * a file only by an address they were given. The server refuses it on a system drive (403), and together with
+ * allowSubscriptions (400, cannotAllowSubscriptionsOnDriveThatBlocksEnumeration).
+ */
+export const editDriveBlockEnumeration = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newBlockEnumeration: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newBlockEnumeration', newBlockEnumeration);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    blockEnumeration: newBlockEnumeration,
+  };
+
+  return client
+    .post('/drive/mgmt/set-block-enumeration', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:editDriveBlockEnumeration]', error);
+      throw error;
+    });
+};
+
+/**
  * Hands a drive that belongs to no app to one that does, and gives it the slug it answers to
  * under that app.
  *
