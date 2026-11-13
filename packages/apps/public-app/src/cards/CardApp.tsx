@@ -91,7 +91,7 @@ const rasterize = async (element: HTMLElement) => {
   return canvas;
 };
 
-// exportPng always shares the compact card; with the page layout on screen it is drawn here at a phone's size
+// exportPng always draws the compact card here, off screen at a phone's size, clear of the padding the host puts on the on-screen one
 const EXPORT_FRAME: CSSProperties = {
   position: 'fixed',
   top: 0,
@@ -140,14 +140,9 @@ const CardApp = ({ host }: { host: CardHost }) => {
   const main = useRef<HTMLElement>(null);
   const snapshot = useRef<HTMLDivElement>(null);
   const failure = useRef<unknown>();
-  const onScreenIsPage = useRef(wide);
   const onCardError = (error: unknown) => {
     failure.current = error;
   };
-
-  useEffect(() => {
-    onScreenIsPage.current = wide;
-  }, [wide]);
 
   useEffect(() => {
     const post = (event: CardEvent) => {
@@ -187,22 +182,16 @@ const CardApp = ({ host }: { host: CardHost }) => {
     };
 
     const capture = async () => {
-      const offScreen = onScreenIsPage.current;
-      if (offScreen) {
-        failure.current = undefined;
-        flushSync(() => setExporting(true));
-      }
+      failure.current = undefined;
+      flushSync(() => setExporting(true));
       let canvas: HTMLCanvasElement;
       try {
-        const element = (offScreen ? snapshot.current?.firstElementChild : rendered()) as
-          | HTMLElement
-          | null
-          | undefined;
+        const element = snapshot.current?.firstElementChild as HTMLElement | null | undefined;
         if (!element) throw failure.current ?? new Error('exportPng before render');
-        if (offScreen) await whenPainted(element, postError);
+        await whenPainted(element, postError);
         canvas = await rasterize(element);
       } finally {
-        if (offScreen) flushSync(() => setExporting(false));
+        flushSync(() => setExporting(false));
       }
       post({
         type: 'png',
