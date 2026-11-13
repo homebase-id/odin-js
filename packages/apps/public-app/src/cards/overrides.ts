@@ -1,9 +1,11 @@
 import {
+  BACKGROUNDS,
   BLOCK_KINDS,
   FONT_STACKS,
   PRESENTATIONS,
   SHAPES,
   SOCIALS,
+  type BackgroundId,
   type BlockKind,
   type CardDesign,
   type FontId,
@@ -22,6 +24,7 @@ import {
  *   blocks    [{ kind "links"|"moments"|"posts", presentation "bare"|"boxed"|"row"|"button" }]
  *             existing kinds only, first mention wins; listed order is the order, unlisted kinds are hidden
  *   socials   "glyphs"|"bar"|"wordmark"|"handles"
+ *   background "default"|"none"|"circles"|"blobs"|"dots"|"waves"|"lines"; "default" keeps the preset's own art
  */
 export type CardOverrides = {
   palette?: Partial<CardDesign['palette']>;
@@ -29,6 +32,7 @@ export type CardOverrides = {
   portraits?: Partial<Portrait>[];
   blocks?: { kind: BlockKind; presentation?: Presentation }[];
   socials?: SocialsVariant;
+  background?: BackgroundId | 'default';
 };
 
 const DISPLAY_CASES = ['none', 'upper', 'italic-2nd-line'] as const;
@@ -134,6 +138,9 @@ export const applyOverrides = (preset: CardDesign, overrides: unknown): CardDesi
 
   const socials = oneOf(SOCIALS, overrides.socials);
   if (socials) design.socials = socials;
+
+  const background = oneOf(BACKGROUNDS, overrides.background);
+  if (background) design.background = background;
 
   return design;
 };

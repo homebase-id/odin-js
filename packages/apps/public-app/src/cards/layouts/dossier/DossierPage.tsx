@@ -10,7 +10,7 @@ import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardSocials } from '../../parts/Socials';
 import { CardName } from '../../parts/Type';
-import { DossierAudience, hairline, LocationLine, SectionLabel } from './DossierParts';
+import { hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: WebDossier.dc.html, drawn at 1120px; fluid between 768 and 1440
 
@@ -21,7 +21,6 @@ const ink = 'text-[color:var(--card-ink)]';
 const muted = 'text-[color:var(--card-muted)]';
 const tracked = 'uppercase tracking-[0.18em]';
 // One tracked space of the label face either side of the slash
-const SLASH = 'ms-[1ch] gap-[calc(1ch+0.18em)]';
 
 const initials = ({ firstName, surName, odinId }: CardData) => {
   const letters = [firstName, surName]
@@ -71,11 +70,6 @@ const TopBar = ({ data }: { data: CardData }) => {
           <span aria-hidden className="flex-shrink-0 whitespace-nowrap">
             {initials(data)} / {t('File')} 001
           </span>
-          <DossierAudience
-            data={data}
-            lines="max-lg:!line-clamp-3"
-            className={`${SLASH} before:content-['/']`}
-          />
         </div>
         {/* One file line tall, so the nav stays centred on the first line when the file line wraps */}
         <div className="flex h-4 flex-shrink-0 items-center gap-8">

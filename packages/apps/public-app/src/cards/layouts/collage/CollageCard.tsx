@@ -3,7 +3,7 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print } from './frames';
+import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
 
 export const CollageCard = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
@@ -42,10 +42,6 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
             {data.headline}
           </p>
         ) : null}
-        <AudienceTape
-          audience={data.audience}
-          className="ml-1 mt-3 max-w-[min(100%-1.5rem,15rem)] text-[19px]"
-        />
       </div>
 
       <CardBlocks
