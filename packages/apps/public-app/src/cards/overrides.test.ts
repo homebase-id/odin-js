@@ -23,6 +23,15 @@ describe('applyOverrides', () => {
     }
   });
 
+  it('reads the background pattern; default and unknown values keep the preset', () => {
+    for (const background of ['none', 'circles', 'blobs', 'dots', 'waves', 'lines']) {
+      expect(applyOverrides(board, { background }).background).toBe(background);
+    }
+    for (const background of ['default', 'bogus', 3]) {
+      expect(applyOverrides(board, { background })).toEqual(board);
+    }
+  });
+
   it('applies valid overrides', () => {
     const design = applyOverrides(board, {
       palette: { ground: '#112233', accent: '#ABCDEF' },

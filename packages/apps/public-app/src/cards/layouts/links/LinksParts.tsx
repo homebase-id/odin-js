@@ -15,7 +15,6 @@ import { CardBlock, displayUrl, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
 import { BreakAtDots, CardName } from '../../parts/Type';
-import { AudienceChip } from '../../parts/AudienceChip';
 
 const linkHost = (target: string) => {
   try {
@@ -520,15 +519,11 @@ const SIZES = {
     portrait: 'h-[96px] w-[96px]',
     name: 'text-[26px]',
     host: 'text-[13px]',
-    audience: 'text-[11px]',
-    audienceLines: '!line-clamp-1',
   },
   page: {
     portrait: 'h-[128px] w-[128px]',
     name: 'text-[32px]',
     host: 'text-[14px]',
-    audience: 'text-[12px]',
-    audienceLines: '!line-clamp-1 md:!line-clamp-2',
   },
 } as const;
 
@@ -548,7 +543,7 @@ export const LinksIdentity = ({
     : 'items-center text-center';
   return (
     <div className={`relative flex w-full flex-col ${align}`}>
-      <div aria-hidden className={WASH} />
+      {design.background ? null : <div aria-hidden className={WASH} />}
       {portrait && image ? (
         <CardPortrait
           portrait={portrait}
@@ -576,13 +571,6 @@ export const LinksIdentity = ({
           <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
-      <AudienceChip
-        audience={data.audience}
-        className={`mt-4 max-w-[min(85%,22rem)] flex-shrink-0 gap-1.5 rounded-[var(--links-tile-radius)] bg-[color:color-mix(in_srgb,var(--card-ink)_7%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
-        textClassName={sizes.audienceLines}
-        hug
-        glyphClassName="h-5 w-[1.15em]"
-      />
       <SocialButtons
         design={design}
         data={data}

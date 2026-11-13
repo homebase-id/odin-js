@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import './fonts.css';
+import { CardBackground } from './parts/Background';
 import { cardVars, type LayoutId, type LayoutProps } from './CardDesign';
 import { PosterPage } from './layouts/poster/PosterPage';
 import { BoardPage } from './layouts/board/BoardPage';
@@ -19,6 +20,7 @@ export const CardPage = ({ design, data }: LayoutProps) => {
   const Layout = PAGES[design.layout];
   return (
     <div style={cardVars(design)} className="relative isolate min-h-screen overflow-hidden">
+      <CardBackground design={design} />
       <Layout design={design} data={data} />
     </div>
   );

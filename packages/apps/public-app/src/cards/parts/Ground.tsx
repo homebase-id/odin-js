@@ -54,8 +54,8 @@ export const CardGround = ({ design, data }: LayoutProps) => {
           />
         </>
       ) : null}
-      {ground.art === 'circles' ? <CirclesArt /> : null}
-      {ground.art === 'speckle' ? <SpeckleArt /> : null}
+      {!design.background && ground.art === 'circles' ? <CirclesArt /> : null}
+      {!design.background && ground.art === 'speckle' ? <SpeckleArt /> : null}
     </div>
   );
 };
