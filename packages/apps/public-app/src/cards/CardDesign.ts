@@ -27,7 +27,22 @@ export const BLOCK_KINDS = ['links', 'moments', 'posts'] as const;
 export const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
 export const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
 export const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;
-export const BACKGROUNDS = ['none', 'circles', 'blobs', 'dots', 'waves', 'lines'] as const;
+export const BACKGROUNDS = [
+  'none',
+  'circles',
+  'blobs',
+  'dots',
+  'waves',
+  'lines',
+  'rings',
+  'grid',
+  'checker',
+  'zigzag',
+  'confetti',
+  'contours',
+  'halftone',
+  'sparkles',
+] as const;
 export type BackgroundId = (typeof BACKGROUNDS)[number];
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 export type Presentation = (typeof PRESENTATIONS)[number];

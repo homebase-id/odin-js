@@ -4,6 +4,25 @@ import type { BackgroundId, CardDesign } from '../CardDesign';
 const W = 100;
 const H = 160;
 
+// Mirrored in chat-kmp CardBackgrounds.kt.
+const CONFETTI: [number, number][] = [
+  [0.15, 0.1],
+  [0.7, 0.18],
+  [0.4, 0.32],
+  [0.85, 0.45],
+  [0.2, 0.55],
+  [0.6, 0.68],
+  [0.3, 0.85],
+  [0.8, 0.9],
+];
+const SPARKLES: [number, number, number][] = [
+  [0.2, 0.15, 0.08],
+  [0.75, 0.3, 0.12],
+  [0.35, 0.55, 0.06],
+  [0.8, 0.7, 0.09],
+  [0.15, 0.85, 0.1],
+];
+
 const SHAPES: Partial<Record<BackgroundId, ReactNode>> = {
   circles: (
     <>
@@ -64,6 +83,109 @@ const SHAPES: Partial<Record<BackgroundId, ReactNode>> = {
         return <line key={i} x1={x} y1={H} x2={x + W * 0.6} y2={0} />;
       })}
     </g>
+  ),
+  rings: (
+    <g fill="none" stroke="currentColor" strokeWidth={W * 0.03}>
+      {[1, 2, 3, 4].map((k) => (
+        <circle key={k} cx={W * 0.15} cy={H * 0.85} r={W * 0.25 * k} />
+      ))}
+    </g>
+  ),
+  grid: (
+    <g stroke="currentColor" strokeWidth={W * 0.015}>
+      {[1, 2, 3, 4].map((i) => (
+        <line key={`v${i}`} x1={(W * i) / 5} y1={0} x2={(W * i) / 5} y2={H} />
+      ))}
+      {[1, 2, 3, 4, 5, 6, 7].map((j) => (
+        <line key={`h${j}`} x1={0} y1={(H * j) / 8} x2={W} y2={(H * j) / 8} />
+      ))}
+    </g>
+  ),
+  checker: (
+    <>
+      {[0, 1, 2, 3, 4].flatMap((c) =>
+        [0, 1, 2, 3, 4, 5, 6, 7]
+          .filter((r) => (c + r) % 2 === 0)
+          .map((r) => (
+            <rect
+              key={`${c}-${r}`}
+              x={(c * W) / 5}
+              y={(r * H) / 8}
+              width={W / 5}
+              height={H / 8}
+              fill="currentColor"
+            />
+          ))
+      )}
+    </>
+  ),
+  zigzag: (
+    <g fill="none" stroke="currentColor" strokeWidth={H * 0.025}>
+      {[0, 1, 2, 3, 4].map((k) => {
+        const y = H * (0.15 + k * 0.18);
+        const points = [0, 1, 2, 3, 4]
+          .map((i) => `${(W * i) / 4},${i % 2 === 0 ? y : y + H * 0.06}`)
+          .join(' ');
+        return <polyline key={k} points={points} />;
+      })}
+    </g>
+  ),
+  confetti: (
+    <>
+      {CONFETTI.map(([cx, cy]) => {
+        const t = W * 0.07;
+        const x = W * cx;
+        const y = H * cy;
+        return (
+          <path
+            key={`${cx}-${cy}`}
+            fill="currentColor"
+            d={`M${x} ${y - t}L${x + t} ${y + t}L${x - t} ${y + t}Z`}
+          />
+        );
+      })}
+    </>
+  ),
+  contours: (
+    <g fill="none" stroke="currentColor" strokeWidth={W * 0.02}>
+      {[1, 2, 3, 4].map((k) => (
+        <ellipse key={`a${k}`} cx={W * 0.7} cy={H * 0.35} rx={W * 0.15 * k} ry={H * 0.08 * k} />
+      ))}
+      {[1, 2, 3].map((k) => (
+        <ellipse key={`b${k}`} cx={W * 0.2} cy={H * 0.8} rx={W * 0.15 * k} ry={H * 0.08 * k} />
+      ))}
+    </g>
+  ),
+  halftone: (
+    <>
+      {[0, 1, 2, 3, 4, 5].flatMap((c) =>
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((r) => (
+          <circle
+            key={`${c}-${r}`}
+            cx={W * (0.08 + c * 0.168)}
+            cy={H * (0.05 + r * 0.1)}
+            r={W * (0.01 + r * 0.007)}
+            fill="currentColor"
+          />
+        ))
+      )}
+    </>
+  ),
+  sparkles: (
+    <>
+      {SPARKLES.map(([cx, cy, size]) => {
+        const x = W * cx;
+        const y = H * cy;
+        const t = W * size;
+        return (
+          <path
+            key={`${cx}-${cy}`}
+            fill="currentColor"
+            d={`M${x} ${y - t}Q${x} ${y} ${x + t} ${y}Q${x} ${y} ${x} ${y + t}Q${x} ${y} ${x - t} ${y}Q${x} ${y} ${x} ${y - t}Z`}
+          />
+        );
+      })}
+    </>
   ),
 };
 
