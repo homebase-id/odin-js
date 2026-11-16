@@ -2,7 +2,6 @@ import {
   BACKGROUNDS,
   BLOCK_KINDS,
   FONT_STACKS,
-  PORTRAIT_SIZES,
   PRESENTATIONS,
   SHAPES,
   SOCIALS,
@@ -20,8 +19,7 @@ import {
  * Every key is optional; anything invalid is dropped and the preset's value stays. Unknown keys are ignored.
  *   palette   { ground, ink, muted, accent, surface, surfaceInk }  each "#rrggbb"
  *   type      { display, text, label } each a FONT_STACKS key; displayCase "none"|"upper"|"italic-2nd-line"
- *   portraits [{ source "photo"|"header", shape "circle"|"square"|"rounded"|"ellipse",
- *               size "small"|"medium"|"large" (absent = medium, each design's own size), ring 0..12,
+ *   portraits [{ source "photo"|"header", shape "circle"|"square"|"rounded"|"ellipse", ring 0..12,
  *               shadow "soft"|"hard", tilt -15..15, tape bool, mono bool }]  (max 2; replaces the preset's list)
  *   blocks    [{ kind "links"|"moments"|"posts", presentation "bare"|"boxed"|"row"|"button" }]
  *             existing kinds only, first mention wins; listed order is the order, unlisted kinds are hidden
@@ -69,7 +67,6 @@ const portrait = (raw: unknown, base: Portrait | undefined): Portrait | undefine
   return {
     ...base,
     ...defined({
-      size: oneOf(PORTRAIT_SIZES, raw.size),
       ring: inRange(raw.ring, 0, 12),
       shadow: oneOf(SHADOWS, raw.shadow),
       tilt: inRange(raw.tilt, -15, 15),

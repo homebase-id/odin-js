@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { LayoutProps, Portrait, PortraitSize } from '../../CardDesign';
+import type { LayoutProps, Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 
@@ -10,11 +10,8 @@ type Frame = { portrait: Portrait; image: CardPhoto | undefined; alt: string };
 // eslint-disable-next-line react-refresh/only-export-components
 export const collageFrames = ({ design, data }: LayoutProps): [Frame?, Frame?] => {
   const name = ownerName(data);
-  // One size on the print scales the cut-out with it unless the cut-out names its own
-  const printSize = design.portraits[0]?.size;
-  const [print, cutout] = design.portraits.map((portrait, index) => ({
-    portrait:
-      index === 1 && !portrait.size && printSize ? { ...portrait, size: printSize } : portrait,
+  const [print, cutout] = design.portraits.map((portrait) => ({
+    portrait,
     image: portraitImage(portrait, data),
     alt: portrait.source === 'photo' ? name : '',
   }));
@@ -25,25 +22,6 @@ export const collageFrames = ({ design, data }: LayoutProps): [Frame?, Frame?] =
 // display name when there is no first name
 // eslint-disable-next-line react-refresh/only-export-components
 export const firstNameOnly = (data: CardData): CardData => ({ ...data, surName: undefined });
-
-// Print and cut-out widths per size; medium is the width each layout always drew
-// eslint-disable-next-line react-refresh/only-export-components
-export const PRINT_WIDTHS = {
-  card: { small: 'w-[40%]', medium: 'w-[49%]', large: 'w-[56%]' },
-  page: { small: 'w-[66%]', medium: 'w-[80%]', large: 'w-[90%]' },
-} satisfies Record<'card' | 'page', Record<PortraitSize, string>>;
-// eslint-disable-next-line react-refresh/only-export-components
-export const CUTOUT_WIDTHS = {
-  card: { small: 'w-[30%]', medium: 'w-[38%]', large: 'w-[40%]' },
-  page: { small: 'w-[50%]', medium: 'w-[61%]', large: 'w-[68%]' },
-} satisfies Record<'card' | 'page', Record<PortraitSize, string>>;
-// The page's cut-out overlaps the print from the right, so a narrower one starts further in
-// eslint-disable-next-line react-refresh/only-export-components
-export const CUTOUT_OFFSETS: Record<PortraitSize, string> = {
-  small: 'ml-[50%]',
-  medium: 'ml-[39%]',
-  large: 'ml-[32%]',
-};
 
 const FRAME_SHADOWS = {
   soft: 'shadow-[0_4px_12px_rgba(0,0,0,0.2)]',

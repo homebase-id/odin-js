@@ -10,16 +10,7 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-import {
-  collageFrames,
-  CUTOUT_OFFSETS,
-  CUTOUT_WIDTHS,
-  Cutout,
-  firstNameOnly,
-  Print,
-  PRINT_WIDTHS,
-  Tape,
-} from './frames';
+import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -170,7 +161,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 {print ? (
                   <Print
                     {...print}
-                    className={`mt-11 px-[9px] pb-9 pt-[9px] ${PRINT_WIDTHS.page[print.portrait.size ?? 'medium']}`}
+                    className="mt-11 w-[80%] px-[9px] pb-9 pt-[9px]"
                     tapeClassName="-top-3.5 left-1/2 h-6 w-[35%] -translate-x-1/2 -rotate-3"
                   />
                 ) : null}
@@ -178,11 +169,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   <Cutout
                     {...cutout}
                     ring={7}
-                    className={`${CUTOUT_WIDTHS.page[cutout.portrait.size ?? 'medium']} ${
-                      print
-                        ? `-mt-2 ${CUTOUT_OFFSETS[cutout.portrait.size ?? 'medium']}`
-                        : 'ml-[10%] mt-11'
-                    }`}
+                    className={`w-[61%] ${print ? '-mt-2 ml-[39%]' : 'ml-[10%] mt-11'}`}
                   />
                 ) : null}
               </div>

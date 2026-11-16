@@ -264,7 +264,7 @@ describe('png export snapshot', () => {
   });
 });
 
-describe('portrait shape and size', () => {
+describe('portrait shape', () => {
   const photo = { src: 'https://img.example/frodo.jpg' };
   const withPhoto = { ...data, photo, header: photo } as CardData;
   const draw = (layout: keyof typeof CARD_PRESETS, portraits: unknown, wide = false) => {
@@ -302,36 +302,5 @@ describe('portrait shape and size', () => {
     const html = draw('board', [{ shape: 'rounded' }]);
     expect(html).toContain('rounded-[22%]');
     expect(html).not.toContain('rounded-full');
-  });
-
-  const SIZES = {
-    board: ['h-[84px]', 'h-[112px]', 'h-[152px]'],
-    links: ['h-[72px]', 'h-[96px]', 'h-[132px]'],
-    dossier: ['h-[60px]', 'h-20', 'h-28'],
-    collage: ['w-[40%]', 'w-[49%]', 'w-[56%]'],
-  } as const;
-
-  it.each(DRAWN)('%s sizes: absent equals medium, small and large differ', (layout) => {
-    const [small, medium, large] = SIZES[layout];
-    const absent = draw(layout, [{ shape: 'circle' }]);
-    expect(absent).toContain(medium);
-    expect(draw(layout, [{ size: 'medium' }])).toContain(medium);
-    expect(draw(layout, [{ size: 'small' }])).toContain(small);
-    expect(draw(layout, [{ size: 'small' }])).not.toContain(medium);
-    expect(draw(layout, [{ size: 'large' }])).toContain(large);
-    expect(draw(layout, [{ size: 'large' }])).not.toContain(medium);
-    expect(draw(layout, [{ size: 'bogus' }])).toContain(medium);
-  });
-
-  it('the wide pages size their portrait too', () => {
-    expect(draw('board', [{ size: 'large' }], true)).toContain('h-[190px]');
-    expect(draw('links', [{ size: 'small' }], true)).toContain('h-[96px]');
-    expect(draw('dossier', [{ size: 'large' }], true)).toContain('h-[250px]');
-    expect(draw('collage', [{ size: 'large' }], true)).toContain('w-[90%]');
-  });
-
-  it('collage scales the cut-out with the print unless it names its own size', () => {
-    expect(draw('collage', [{ size: 'large' }, {}])).toContain('w-[40%]');
-    expect(draw('collage', [{ size: 'large' }, { size: 'small' }])).toContain('w-[30%]');
   });
 });

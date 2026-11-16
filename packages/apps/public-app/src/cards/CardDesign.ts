@@ -27,8 +27,6 @@ export const BLOCK_KINDS = ['links', 'moments', 'posts'] as const;
 export const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
 export const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
 export const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;
-export const PORTRAIT_SIZES = ['small', 'medium', 'large'] as const;
-export type PortraitSize = (typeof PORTRAIT_SIZES)[number];
 export const BACKGROUNDS = [
   'none',
   'circles',
@@ -53,7 +51,6 @@ export type SocialsVariant = (typeof SOCIALS)[number];
 export type Portrait = {
   source: 'photo' | 'header';
   shape: (typeof SHAPES)[number];
-  size?: PortraitSize;
   ring?: number;
   shadow?: 'soft' | 'hard';
   tilt?: number;
