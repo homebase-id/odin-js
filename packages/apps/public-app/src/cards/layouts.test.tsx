@@ -263,3 +263,75 @@ describe('png export snapshot', () => {
     expect(snapshotFilter({ nodeType: 3 } as unknown as Node)).toBe(true);
   });
 });
+
+describe('portrait shape and size', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const withPhoto = { ...data, photo, header: photo } as CardData;
+  const draw = (layout: keyof typeof CARD_PRESETS, portraits: unknown, wide = false) => {
+    const design = applyOverrides(CARD_PRESETS[layout], { portraits });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={withPhoto} />
+        ) : (
+          <HomebaseCard design={design} data={withPhoto} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const DRAWN = ['board', 'collage', 'dossier', 'links'] as const;
+
+  it.each(DRAWN)(
+    '%s draws circle, square, rounded and ellipse as four different shapes',
+    (layout) => {
+      const outputs = (['circle', 'square', 'rounded', 'ellipse'] as const).map((shape) =>
+        draw(layout, [{ shape }])
+      );
+      expect(new Set(outputs).size).toBe(4);
+    }
+  );
+
+  it.each(DRAWN)('%s ellipse is a non-square box, so it cannot render as a circle', (layout) => {
+    expect(draw(layout, [{ shape: 'ellipse' }])).toContain('aspect-[88/112]');
+    expect(draw(layout, [{ shape: 'circle' }])).not.toContain(
+      'absolute inset-y-0 left-1/2 aspect-[88/112]'
+    );
+  });
+
+  it('rounded keeps a corner radius proportional to the box, not the circle radius', () => {
+    const html = draw('board', [{ shape: 'rounded' }]);
+    expect(html).toContain('rounded-[22%]');
+    expect(html).not.toContain('rounded-full');
+  });
+
+  const SIZES = {
+    board: ['h-[84px]', 'h-[112px]', 'h-[152px]'],
+    links: ['h-[72px]', 'h-[96px]', 'h-[132px]'],
+    dossier: ['h-[60px]', 'h-20', 'h-28'],
+    collage: ['w-[40%]', 'w-[49%]', 'w-[56%]'],
+  } as const;
+
+  it.each(DRAWN)('%s sizes: absent equals medium, small and large differ', (layout) => {
+    const [small, medium, large] = SIZES[layout];
+    const absent = draw(layout, [{ shape: 'circle' }]);
+    expect(absent).toContain(medium);
+    expect(draw(layout, [{ size: 'medium' }])).toContain(medium);
+    expect(draw(layout, [{ size: 'small' }])).toContain(small);
+    expect(draw(layout, [{ size: 'small' }])).not.toContain(medium);
+    expect(draw(layout, [{ size: 'large' }])).toContain(large);
+    expect(draw(layout, [{ size: 'large' }])).not.toContain(medium);
+    expect(draw(layout, [{ size: 'bogus' }])).toContain(medium);
+  });
+
+  it('the wide pages size their portrait too', () => {
+    expect(draw('board', [{ size: 'large' }], true)).toContain('h-[190px]');
+    expect(draw('links', [{ size: 'small' }], true)).toContain('h-[96px]');
+    expect(draw('dossier', [{ size: 'large' }], true)).toContain('h-[250px]');
+    expect(draw('collage', [{ size: 'large' }], true)).toContain('w-[90%]');
+  });
+
+  it('collage scales the cut-out with the print unless it names its own size', () => {
+    expect(draw('collage', [{ size: 'large' }, {}])).toContain('w-[40%]');
+    expect(draw('collage', [{ size: 'large' }, { size: 'small' }])).toContain('w-[30%]');
+  });
+});

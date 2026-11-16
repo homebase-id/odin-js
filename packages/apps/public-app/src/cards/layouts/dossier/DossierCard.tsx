@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { t } from '@homebase-id/common-app';
-import type { BlockKind, LayoutProps } from '../../CardDesign';
+import type { BlockKind, LayoutProps, PortraitSize } from '../../CardDesign';
 import { CardBlocks, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { CardSocials } from '../../parts/Socials';
@@ -9,6 +9,12 @@ import { ownerName } from '../../useCardData';
 import { hairline, LocationLine, SectionLabel } from './DossierParts';
 
 // Reference: the fourth card in Anatomy.dc.html (262px wide), scaled ~1.3x for a 390px phone
+
+const CARD_SIZES: Record<PortraitSize, string> = {
+  small: 'h-[60px] w-[60px]',
+  medium: 'h-20 w-20',
+  large: 'h-28 w-28',
+};
 
 export const DossierCard = ({ design, data }: LayoutProps) => {
   const elsewhereId = useId();
@@ -28,7 +34,7 @@ export const DossierCard = ({ design, data }: LayoutProps) => {
             portrait={portrait}
             image={portraitImage(portrait, data)}
             alt={ownerName(data)}
-            className="h-20 w-20 flex-shrink-0"
+            className={`flex-shrink-0 ${CARD_SIZES[portrait.size ?? 'medium']}`}
           />
         ) : null}
         <div className="min-w-0 pt-0.5">

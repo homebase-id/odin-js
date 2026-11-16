@@ -2,7 +2,7 @@ import { useId, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@homebase-id/common-app';
 import { Globe, ImageIcon, type IconProps } from '@homebase-id/common-app/icons';
-import { CARD_FOCUS, type LayoutProps } from '../../CardDesign';
+import { CARD_FOCUS, type LayoutProps, type PortraitSize } from '../../CardDesign';
 import { ownerName, type CardData, type CardPost } from '../../useCardData';
 import { displayUrl, isUsableLink } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
@@ -105,6 +105,12 @@ const TopBar = ({ data }: { data: CardData }) => {
   );
 };
 
+const PAGE_SIZES: Record<PortraitSize, string> = {
+  small: 'h-[140px] w-[140px]',
+  medium: 'h-[190px] w-[190px]',
+  large: 'h-[250px] w-[250px]',
+};
+
 const Identity = ({ design, data }: LayoutProps) => {
   const [portrait] = design.portraits;
   return (
@@ -114,7 +120,7 @@ const Identity = ({ design, data }: LayoutProps) => {
           portrait={portrait}
           image={portraitImage(portrait, data)}
           alt={ownerName(data)}
-          className="mb-7 h-[190px] w-[190px]"
+          className={`mb-7 ${PAGE_SIZES[portrait.size ?? 'medium']}`}
         />
       ) : null}
       <CardName

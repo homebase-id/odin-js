@@ -1,4 +1,4 @@
-import type { LayoutProps } from '../../CardDesign';
+import type { LayoutProps, PortraitSize } from '../../CardDesign';
 import { ownerName } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 import { BreakAtDots, CardName } from '../../parts/Type';
@@ -10,7 +10,11 @@ import { CardSocials } from '../../parts/Socials';
 // `nameGap` only applies below a portrait; without one the name sits at the top of the column.
 const SIZES = {
   card: {
-    portrait: 'h-[112px] w-[112px]',
+    portrait: {
+      small: 'h-[84px] w-[84px]',
+      medium: 'h-[112px] w-[112px]',
+      large: 'h-[152px] w-[152px]',
+    } satisfies Record<PortraitSize, string>,
     ring: 1,
     name: 'text-[24px]',
     nameGap: 'mt-4',
@@ -19,7 +23,11 @@ const SIZES = {
     socials: 'mt-6',
   },
   page: {
-    portrait: 'h-[140px] w-[140px]',
+    portrait: {
+      small: 'h-[104px] w-[104px]',
+      medium: 'h-[140px] w-[140px]',
+      large: 'h-[190px] w-[190px]',
+    } satisfies Record<PortraitSize, string>,
     ring: 1.5,
     name: 'text-[32px]',
     nameGap: 'mt-5',
@@ -46,7 +54,7 @@ export const BoardProfile = ({
           portrait={portrait.ring ? { ...portrait, ring: portrait.ring * sizes.ring } : portrait}
           image={image}
           alt={ownerName(data)}
-          className={`flex-shrink-0 ${sizes.portrait}`}
+          className={`flex-shrink-0 ${sizes.portrait[portrait.size ?? 'medium']}`}
         />
       ) : null}
       <CardName

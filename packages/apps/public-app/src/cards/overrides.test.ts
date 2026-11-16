@@ -101,6 +101,23 @@ describe('applyOverrides', () => {
     ).toEqual({ ...preset, ring: 12, tilt: -15, tape: true });
   });
 
+  it('reads the portrait size; absent or unknown values leave the preset untouched', () => {
+    for (const size of ['small', 'medium', 'large']) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0]).toEqual({
+        ...board.portraits[0],
+        size,
+      });
+    }
+    for (const size of ['huge', 'Large', 3, null, true, {}]) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0]).toEqual(
+        board.portraits[0]
+      );
+    }
+    expect(
+      applyOverrides(board, { portraits: [{ shape: 'square' }] }).portraits[0]
+    ).not.toHaveProperty('size');
+  });
+
   it('keeps the preset blocks and portraits when nothing valid remains', () => {
     const design = applyOverrides(board, { blocks: [{ kind: 'x' }], portraits: [1, 2] });
     expect(design.blocks).toEqual(board.blocks);

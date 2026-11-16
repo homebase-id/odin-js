@@ -7,6 +7,7 @@ import {
   type CardDesign,
   type LayoutProps,
   type Portrait,
+  type PortraitSize,
   type Presentation,
 } from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
@@ -516,12 +517,20 @@ const SocialButtons = ({ design, data, className }: LayoutProps & { className: s
 
 const SIZES = {
   card: {
-    portrait: 'h-[96px] w-[96px]',
+    portrait: {
+      small: 'h-[72px] w-[72px]',
+      medium: 'h-[96px] w-[96px]',
+      large: 'h-[132px] w-[132px]',
+    } satisfies Record<PortraitSize, string>,
     name: 'text-[26px]',
     host: 'text-[13px]',
   },
   page: {
-    portrait: 'h-[128px] w-[128px]',
+    portrait: {
+      small: 'h-[96px] w-[96px]',
+      medium: 'h-[128px] w-[128px]',
+      large: 'h-[176px] w-[176px]',
+    } satisfies Record<PortraitSize, string>,
     name: 'text-[32px]',
     host: 'text-[14px]',
   },
@@ -549,7 +558,7 @@ export const LinksIdentity = ({
           portrait={portrait}
           image={image}
           alt={ownerName(data)}
-          className={`mb-4 flex-shrink-0 ${sizes.portrait}`}
+          className={`mb-4 flex-shrink-0 ${sizes.portrait[portrait.size ?? 'medium']}`}
         />
       ) : null}
       <CardName

@@ -3,7 +3,7 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
+import { collageFrames, CUTOUT_WIDTHS, Cutout, firstNameOnly, Print, PRINT_WIDTHS } from './frames';
 
 export const CollageCard = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
@@ -17,7 +17,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
           {print ? (
             <Print
               {...print}
-              className="ml-[1%] w-[49%] p-2 pb-8"
+              className={`ml-[1%] p-2 pb-8 ${PRINT_WIDTHS.card[print.portrait.size ?? 'medium']}`}
               tapeClassName="-top-2.5 left-1/2 h-5 w-[38%] -translate-x-1/2 -rotate-3"
             />
           ) : null}
@@ -25,7 +25,7 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
             <Cutout
               {...cutout}
               ring={4}
-              className={`ml-auto mr-[1%] w-[38%] ${print ? 'mt-[18%]' : ''}`}
+              className={`ml-auto mr-[1%] ${CUTOUT_WIDTHS.card[cutout.portrait.size ?? 'medium']} ${print ? 'mt-[18%]' : ''}`}
             />
           ) : null}
         </div>
