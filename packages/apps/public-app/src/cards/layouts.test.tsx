@@ -263,3 +263,44 @@ describe('png export snapshot', () => {
     expect(snapshotFilter({ nodeType: 3 } as unknown as Node)).toBe(true);
   });
 });
+
+describe('portrait shape', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const withPhoto = { ...data, photo, header: photo } as CardData;
+  const draw = (layout: keyof typeof CARD_PRESETS, portraits: unknown, wide = false) => {
+    const design = applyOverrides(CARD_PRESETS[layout], { portraits });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={withPhoto} />
+        ) : (
+          <HomebaseCard design={design} data={withPhoto} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const DRAWN = ['board', 'collage', 'dossier', 'links'] as const;
+
+  it.each(DRAWN)(
+    '%s draws circle, square, rounded and ellipse as four different shapes',
+    (layout) => {
+      const outputs = (['circle', 'square', 'rounded', 'ellipse'] as const).map((shape) =>
+        draw(layout, [{ shape }])
+      );
+      expect(new Set(outputs).size).toBe(4);
+    }
+  );
+
+  it.each(DRAWN)('%s ellipse is a non-square box, so it cannot render as a circle', (layout) => {
+    expect(draw(layout, [{ shape: 'ellipse' }])).toContain('aspect-[88/112]');
+    expect(draw(layout, [{ shape: 'circle' }])).not.toContain(
+      'absolute inset-y-0 left-1/2 aspect-[88/112]'
+    );
+  });
+
+  it('rounded keeps a corner radius proportional to the box, not the circle radius', () => {
+    const html = draw('board', [{ shape: 'rounded' }]);
+    expect(html).toContain('rounded-[22%]');
+    expect(html).not.toContain('rounded-full');
+  });
+});
