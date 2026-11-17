@@ -183,6 +183,14 @@
   line-height: 1.5;
 }
 
+/*
+ * A dark frame in a dark page: the same colour scheme on both sides of the frame, or the browser
+ * paints the frame opaque in its own dark grey rather than letting the page's paper show through.
+ */
+.dark .article-prose [data-live-block] iframe {
+  color-scheme: dark;
+}
+
 /* Covers and top-level galleries take up to 880px of the 680px column */
 @media (min-width: 1024px) {
   .article-wide,
