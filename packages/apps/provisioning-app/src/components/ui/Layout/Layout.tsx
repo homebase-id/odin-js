@@ -13,7 +13,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      <div className={`flex min-h-screen flex-col bg-page-background text-foreground`}>
+      <div className={`flex min-h-screen flex-col text-foreground`}>
         <Header />
         {children}
         <Footer />

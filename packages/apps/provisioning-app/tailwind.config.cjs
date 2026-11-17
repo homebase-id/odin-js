@@ -9,8 +9,6 @@ module.exports = {
     extend: {
       colors: {
         ...legacyColors,
-        button: 'rgb(99 101 241 / <alpha-value>)',
-        'button-text': 'rgb(255 255 255 / <alpha-value>)',
       },
       keyframes: {
         slowding: {
