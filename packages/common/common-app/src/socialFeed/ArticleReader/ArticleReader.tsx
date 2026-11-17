@@ -37,7 +37,7 @@ import {
   ToGroupBlock,
   useCanReact,
   useChannelLink,
-  useCommentSummary,
+  useCommentCount,
   useEmojiSummary,
 } from '../../..';
 import { ArrowLeft, Bubble, Heart } from '../../ui/Icons';
@@ -423,12 +423,7 @@ const ArticleCounts = ({
     [postFile.fileMetadata.reactionPreview]
   );
   const { data: emojis } = useEmojiSummary({ context, reactionPreview: preview.reactions }).fetch;
-  const { data: comments } = useCommentSummary({
-    authorOdinId: context.odinId,
-    channelId: context.channelId,
-    postGlobalTransitId: context.target.globalTransitId,
-    reactionPreview: preview.comments,
-  }).fetch;
+  const comments = useCommentCount(context, preview.comments);
 
   const reactions = emojis?.totalCount || 0;
   const canComment = reactAccess === undefined || reactAccess === true || reactAccess === 'comment';

@@ -6,10 +6,12 @@ import {
   EmojiReactionSummary,
 } from '@homebase-id/js-lib/public';
 import { Suspense, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   t,
   useCanReact,
   useCommentSummary,
+  useCommentCount,
   useComments,
   useEmojiSummary,
   HOME_ROOT_PATH,
@@ -38,6 +40,7 @@ export const PostInteracts = ({
   excludeComments,
   className,
   login,
+  commentsHref,
 }: {
   odinId: string;
   postFile: HomebaseFile<PostContent>;
@@ -51,6 +54,8 @@ export const PostInteracts = ({
   excludeComments?: boolean;
   className?: string;
   login?: () => void;
+  /** Link the comment count here instead of showing the comments inline */
+  commentsHref?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
@@ -120,7 +125,14 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          {!postDisabledComment && !excludeComments ? (
+          {excludeComments ? null : commentsHref ? (
+            <CommentsLink
+              href={commentsHref}
+              canComment={!postDisabledComment}
+              context={reactionContext}
+              reactionPreview={parsedReactionPreview.comments}
+            />
+          ) : !postDisabledComment ? (
             <button
               className={`inline-flex items-center hover:text-black dark:hover:text-white ${
                 !toggleable ? 'pointer-events-none' : ''
@@ -135,7 +147,7 @@ export const PostInteracts = ({
               <span className="sr-only">{t('Toggle comments')}</span>
             </button>
           ) : null}
-          {!showSummary && !excludeComments ? (
+          {!showSummary && !commentsHref && !excludeComments ? (
             <CommentSummary
               context={reactionContext}
               reactionPreview={parsedReactionPreview.comments}
@@ -144,7 +156,7 @@ export const PostInteracts = ({
           ) : null}
         </div>
       </div>
-      {excludeComments ? null : isExpanded ? (
+      {excludeComments || commentsHref ? null : isExpanded ? (
         <div
           className="grid cursor-default grid-flow-row gap-2  pb-4"
           onClick={(e) => e.stopPropagation()}
@@ -312,6 +324,34 @@ export const CommentSummary = ({
       </button>
     </>
   ) : null;
+};
+
+/** The 💬 and its count, linking to the comments: while they are open, or when there are some, as in the reader. */
+const CommentsLink = ({
+  href,
+  canComment,
+  context,
+  reactionPreview,
+}: {
+  href: string;
+  canComment: boolean;
+  context: ReactionContext;
+  reactionPreview?: CommentsReactionSummary;
+}) => {
+  const count = useCommentCount(context, reactionPreview);
+  if (!canComment && !count) return null;
+
+  return (
+    <Link
+      to={href}
+      onAuxClick={(e) => e.stopPropagation()}
+      className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
+    >
+      <Bubble className="inline-block h-6 w-6" />
+      {count ? <span>{count}</span> : null}
+      <span className="sr-only">{t('comments')}</span>
+    </Link>
+  );
 };
 
 const CommentTeaserList = ({

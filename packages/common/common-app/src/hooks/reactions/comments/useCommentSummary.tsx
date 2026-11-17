@@ -1,6 +1,6 @@
 import { InfiniteData, QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UseCommentsVal } from './useComments';
-import { CommentsReactionSummary } from '@homebase-id/js-lib/public';
+import { CommentsReactionSummary, ReactionContext } from '@homebase-id/js-lib/public';
 import { formatGuidId } from '@homebase-id/js-lib/helpers';
 
 export const useCommentSummary = ({
@@ -58,6 +58,18 @@ export const useCommentSummary = ({
     }),
   };
 };
+
+/** How many comments a post has, for the 💬 counts: its reaction preview's until they are loaded. */
+export const useCommentCount = (
+  context: ReactionContext,
+  reactionPreview?: CommentsReactionSummary
+) =>
+  useCommentSummary({
+    authorOdinId: context.odinId,
+    channelId: context.channelId,
+    postGlobalTransitId: context.target.globalTransitId,
+    reactionPreview,
+  }).fetch.data;
 
 export const invalidateCommentSummary = (
   queryClient: QueryClient,
