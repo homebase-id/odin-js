@@ -80,7 +80,7 @@ const PhoneQrDialog = ({ onClose }: { onClose: () => void }) => {
           <StoreQr store="ios" />
           <StoreQr store="android" />
         </div>
-        <p className="text-slate-400">{t("Point your phone's camera at a code.")}</p>
+        <p className="text-muted-foreground">{t("Point your phone's camera at a code.")}</p>
       </div>
     </DialogWrapper>,
     target
@@ -90,8 +90,8 @@ const PhoneQrDialog = ({ onClose }: { onClose: () => void }) => {
 // The small section under a card's download. Both cards have one, so they stand the same height
 // side by side.
 const CardSection = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
-    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+  <div className="flex flex-col gap-2 border-t pt-4">
+    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
     {children}
   </div>
 );
@@ -140,7 +140,7 @@ export const HomebaseAppCard = ({ name = t('Homebase') }: { name?: string }) => 
       ) : (
         <>
           <StoreBadge store={platform} />
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             {t('Also for Mac, Windows and Linux:')}{' '}
             <SecondaryLink href={GET_APPS_PATH}>{t('open this on your computer')}</SecondaryLink>
           </p>
@@ -164,7 +164,7 @@ export const FileSyncAppCard = ({ name = t('File sync') }: { name?: string }) =>
         <div className="flex flex-col gap-4">
           <DesktopDownload app={FILE_SYNC_DESKTOP} />
           <CardSection label={t('After installing')}>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               {t(
                 '{0} has no window. Open it, then choose "Log in to Homebase…" from its icon in the menu bar or taskbar.',
                 name
@@ -173,7 +173,7 @@ export const FileSyncAppCard = ({ name = t('File sync') }: { name?: string }) =>
           </CardSection>
         </div>
       ) : (
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           {t('For Mac, Windows and Linux. Open your owner console on your computer to install it.')}
         </p>
       )}
@@ -202,7 +202,7 @@ const AppCard = ({
         <p className="leading-snug text-foreground/70">{what}</p>
       </div>
     </div>
-    <p className="text-sm text-slate-400">{why}</p>
+    <p className="text-sm text-muted-foreground">{why}</p>
     <div className="mt-auto flex flex-col gap-2">{children}</div>
   </div>
 );

@@ -40,7 +40,7 @@ export const DesktopDownload = ({ app }: { app: DesktopApp }) => {
         {t('Download for')} {OS_LABEL[target.os]}
         {hasArchChoice ? ` (${archLabel(target.arch)})` : ''}
       </ActionLink>
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-muted-foreground">
         {hasArchChoice ? (
           <>
             <button className="hover:underline" onClick={() => setArchOverride(otherArch)}>

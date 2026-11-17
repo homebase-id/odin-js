@@ -147,7 +147,7 @@ const MemberLookupSelection = ({
       >
         {!membersLoading ? (
           !members?.pages?.[activePage - 1]?.results?.length ? (
-            <p className="py-2 text-slate-400">{t('No connections found')}</p>
+            <p className="py-2 text-muted-foreground">{t('No connections found')}</p>
           ) : (
             members?.pages?.[activePage - 1].results?.map((member) => {
               const checked = defaultSelection.includes(member.odinId);

@@ -97,7 +97,7 @@ const AppCard = ({
     isDisabled={app.isRevoked}
   >
     {app.isRevoked ? (
-      <p className="mb-2 text-sm text-red-600 dark:text-red-400">{t('Revoked')}</p>
+      <p className="mb-2 text-sm text-destructive">{t('Revoked')}</p>
     ) : null}
 
     {/* Owning and authorizing are different relations and an app can be in either or both: it
@@ -125,7 +125,7 @@ const AppCard = ({
     {/* The app's half of every drive address it owns. Absent on hosts without the column, and on
         apps that own nothing addressable -- shown only when it is real. */}
     {app.appSlug ? (
-      <p className="mt-3 text-sm text-slate-400">
+      <p className="mt-3 text-sm text-muted-foreground">
         <span className="break-all font-mono">/apps/{app.appSlug}</span>
       </p>
     ) : null}
@@ -156,12 +156,12 @@ const OwnerConsoleCard = ({
     share cached answers. A line while they load, so the cards do not jump; greyed when nothing is stored. */
 const DrivesUsage = ({ drives }: { drives: DriveDefinition[] }) => {
   const { total } = useDriveSizes(drives);
-  if (!total) return <p className="mt-3 text-sm text-slate-400">…</p>;
+  if (!total) return <p className="mt-3 text-sm text-muted-foreground">…</p>;
 
   return (
     <DriveSize
       {...total}
-      className={`mt-3 text-sm ${total.size === 0 ? 'text-slate-400' : 'text-slate-500 dark:text-slate-400'}`}
+      className="mt-3 text-sm text-muted-foreground"
     />
   );
 };
@@ -170,11 +170,11 @@ const DrivesUsage = ({ drives }: { drives: DriveDefinition[] }) => {
     make cards differ in height for a reason the reader cannot see. */
 const Tally = ({ icon, count, label }: { icon: React.ReactNode; count: number; label: string }) => (
   <>
-    <dt className={`flex flex-row items-center gap-2 ${count === 0 ? 'text-slate-400' : ''}`}>
+    <dt className={`flex flex-row items-center gap-2 ${count === 0 ? 'text-muted-foreground' : ''}`}>
       {icon}
       <span className="tabular-nums">{count}</span>
     </dt>
-    <dd className={count === 0 ? 'text-slate-400' : ''}>{label}</dd>
+    <dd className={count === 0 ? 'text-muted-foreground' : ''}>{label}</dd>
   </>
 );
 

@@ -41,7 +41,7 @@ export const AlreadyInstalled = ({
     <section className="my-20">
       <div className="container mx-auto">
         <div className="max-w-[35rem]">
-          <h1 className="mb-5 text-4xl dark:text-white">
+          <h1 className="mb-5 text-4xl">
             {t('Already installed')}:
             <AppName name={app.name} origin={app.corsHostName} />
           </h1>

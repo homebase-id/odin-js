@@ -197,7 +197,7 @@ const AppDetails = () => {
                   <button
                     type="button"
                     onClick={() => setShowAllDevices(!showAllDevices)}
-                    className="mr-auto text-sm text-slate-400 hover:underline"
+                    className="mr-auto text-sm text-muted-foreground hover:underline"
                   >
                     {showAllDevices
                       ? t('Show fewer')
@@ -206,7 +206,7 @@ const AppDetails = () => {
                 ) : null}
               </>
             ) : (
-              <p className="text-slate-400">{t('No devices currently logged in')}</p>
+              <p className="text-muted-foreground">{t('No devices currently logged in')}</p>
             )}
           </div>
         </Section>
@@ -216,17 +216,17 @@ const AppDetails = () => {
         <div className="flex flex-col gap-3">
           <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
             <Fact label={t('App id')}>
-              <span className="break-all font-mono text-slate-400">{app.appId}</span>
+              <span className="break-all font-mono text-muted-foreground">{app.appId}</span>
             </Fact>
             <Fact label={t('Slug')}>
               {app.appSlug ? (
                 <span className="break-all font-mono">{app.appSlug}</span>
               ) : (
-                <span className="text-slate-400">{t('None')}</span>
+                <span className="text-muted-foreground">{t('None')}</span>
               )}
             </Fact>
             <Fact label={t('CORS host')}>
-              {app.corsHostName || <span className="text-slate-400">{t('None')}</span>}
+              {app.corsHostName || <span className="text-muted-foreground">{t('None')}</span>}
             </Fact>
             <Fact label={t('Revoked')}>
               {app.isRevoked || app.grant?.isRevoked ? t('Yes') : t('No')}
@@ -256,7 +256,7 @@ const AppDetails = () => {
         title={
           <>
             {t('What this app brought with it:')}
-            <small className="block text-sm text-slate-400">
+            <small className="block text-sm text-muted-foreground">
               {t('The drives and circles this app owns, whoever may reach them')}
             </small>
           </>
@@ -273,10 +273,10 @@ const AppDetails = () => {
               {ownedDrives.length && ownedDriveSizes.total ? (
                 <DriveSize
                   {...ownedDriveSizes.total}
-                  className="block text-sm font-normal text-slate-500 dark:text-slate-400"
+                  className="block text-sm font-normal text-muted-foreground"
                 />
               ) : null}
-              <small className="block max-w-prose text-sm font-normal text-slate-400">
+              <small className="block max-w-prose text-sm font-normal text-muted-foreground">
                 {t(
                   'Drives this app created and names. Owning one does not by itself let the app read or write it -- that comes from the grants below.'
                 )}
@@ -296,7 +296,7 @@ const AppDetails = () => {
               ))}
             </div>
           ) : (
-            <p className="text-slate-400">{t('No drives owned by this app')}</p>
+            <p className="text-muted-foreground">{t('No drives owned by this app')}</p>
           )}
         </Section>
 
@@ -310,7 +310,7 @@ const AppDetails = () => {
                   <div className="flex flex-row">
                     <Link
                       to={getOwnerCirclePath(circle.appId, circle.id ?? '')}
-                      className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+                      className="flex flex-row hover:text-foreground hover:underline"
                     >
                       <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
                       <div className="mr-2 flex flex-col">
@@ -324,7 +324,7 @@ const AppDetails = () => {
               ))}
             </div>
           ) : (
-            <p className="text-slate-400">{t('No circles owned by this app')}</p>
+            <p className="text-muted-foreground">{t('No circles owned by this app')}</p>
           )}
         </Section>
       </div>
@@ -333,7 +333,7 @@ const AppDetails = () => {
         title={
           <>
             {t('The app itself:')}
-            <small className="block text-sm text-slate-400">
+            <small className="block text-sm text-muted-foreground">
               {t('This describes what the app is allowed to access')}
             </small>
           </>
@@ -360,7 +360,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto text-slate-400">
+              <p className="my-auto text-muted-foreground">
                 {t("This app doesn't have any special permissions")}
               </p>
             </div>
@@ -371,7 +371,7 @@ const AppDetails = () => {
           title={
             <>
               {t('Drives')}
-              <small className="block max-w-prose text-sm font-normal text-slate-400">
+              <small className="block max-w-prose text-sm font-normal text-muted-foreground">
                 {t('What this app may read and write, including drives other apps own.')}
               </small>
             </>
@@ -394,7 +394,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto text-slate-400">{t("This app doesn't have any access")}</p>
+              <p className="my-auto text-muted-foreground">{t("This app doesn't have any access")}</p>
             </div>
           )}
         </Section>
@@ -404,7 +404,7 @@ const AppDetails = () => {
         title={
           <>
             {t('Access your connections get')}
-            <small className="block text-sm text-slate-400">
+            <small className="block text-sm text-muted-foreground">
               {t(
                 'Pick which of your circles this app should work with. Everyone in those circles gets the access shown below -- the drives and permissions listed -- so they can use this app with you. Take a circle off this list and its members lose that access.'
               )}
@@ -440,7 +440,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto text-slate-400">{t("This app doesn't have any access")}</p>
+              <p className="my-auto text-muted-foreground">{t("This app doesn't have any access")}</p>
             </div>
           )}
         </Section>
@@ -464,7 +464,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto text-slate-400">
+              <p className="my-auto text-muted-foreground">
                 {t("This app doesn't have any drive access for circles")}
               </p>
             </div>
@@ -496,7 +496,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto text-slate-400">
+              <p className="my-auto text-muted-foreground">
                 {t("This app doesn't have any special access for circles")}
               </p>
             </div>
@@ -508,12 +508,12 @@ const AppDetails = () => {
         title={
           <>
             {t('Danger zone')}
-            <small className="block text-sm font-normal text-slate-400">
+            <small className="block text-sm font-normal text-muted-foreground">
               {t('Revoking can be undone. Uninstalling cannot.')}
             </small>
           </>
         }
-        className="border-red-500/60 dark:border-red-500/60"
+        className="border-destructive/60"
       >
         <div className="flex flex-col gap-5">
           <DangerAction
@@ -758,8 +758,8 @@ const DangerAction = ({
   <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
     <div className="flex-grow">
       <p className="font-medium">{title}</p>
-      <p className="text-sm text-slate-500">{description}</p>
-      {hint ? <p className="text-sm text-slate-400">{hint}</p> : null}
+      <p className="text-sm text-muted-foreground">{description}</p>
+      {hint ? <p className="text-sm text-muted-foreground">{hint}</p> : null}
     </div>
     <div className="flex-shrink-0">{children}</div>
   </div>
@@ -815,7 +815,7 @@ const EnrollmentOffer = ({ appId, circle }: { appId?: string; circle: CircleDefi
 
   return (
     <div className="ml-9 mt-1 flex flex-row flex-wrap items-center gap-2 text-sm">
-      <span className="text-slate-400">
+      <span className="text-muted-foreground">
         {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
       </span>
       <button

@@ -7,12 +7,12 @@ import { PasswordInput } from '../../components/Password/PasswordInput';
  */
 export const ZkPasswordField = ({ onChange }: { onChange: (password: string) => void }) => (
   <div className="my-6">
-    <p className="mb-2 text-slate-600 dark:text-slate-400">
+    <p className="mb-2 text-muted-foreground">
       {t(
         'This app asked for private drives. Enter your password to create them: only your own devices will hold their keys, not the server.'
       )}
     </p>
-    <Label htmlFor="zk-password" className="text-sm leading-7 dark:text-gray-400">
+    <Label htmlFor="zk-password" className="text-sm leading-7">
       {t('Password')}
     </Label>
     <PasswordInput

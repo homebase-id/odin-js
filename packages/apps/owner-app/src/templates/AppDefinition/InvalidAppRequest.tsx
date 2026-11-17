@@ -30,20 +30,20 @@ export const InvalidAppRequest = ({
     <section className="my-20">
       <div className="container mx-auto">
         <div className="max-w-[35rem]">
-          <h1 className="mb-5 text-4xl dark:text-white">
+          <h1 className="mb-5 text-4xl">
             {t('This request can not be completed')}
           </h1>
 
           <p className="mb-4">
             {app}
-            {origin ? <span className="text-slate-400"> ({origin})</span> : null}{' '}
+            {origin ? <span className="text-muted-foreground"> ({origin})</span> : null}{' '}
             {t(
               'sent a request your identity can not accept. This is not something you can fix: the app needs to be updated. Please let its developer know.'
             )}
           </p>
 
           {problems.length ? (
-            <div className="mb-6 rounded-md bg-slate-100 p-4 text-sm dark:bg-slate-800">
+            <div className="mb-6 rounded-md bg-surface-container-high p-4 text-sm">
               <p className="mb-2 font-semibold">{t('For the developer')}:</p>
               <ul className="list-disc pl-5">
                 {problems.map((problem) => (
@@ -52,7 +52,7 @@ export const InvalidAppRequest = ({
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-slate-500">
+              <p className="mt-3 text-muted-foreground">
                 {t(
                   'Slugs (as, ds, ts) must be lowercase letters, digits and hyphens, 1-14 characters, not starting or ending with a hyphen.'
                 )}

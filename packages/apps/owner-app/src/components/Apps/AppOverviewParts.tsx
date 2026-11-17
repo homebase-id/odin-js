@@ -81,19 +81,19 @@ export const Collapsible = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col rounded-lg border border-gray-200 border-opacity-80 dark:border-gray-700">
+    <div className="flex flex-col rounded-lg border border-opacity-80">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        className="flex flex-row items-center gap-2 rounded-lg p-3 text-left font-medium hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="flex flex-row items-center gap-2 rounded-lg p-3 text-left font-medium hover:bg-surface-container-high"
         title={isOpen ? t('Collapse') : t('Expand')}
       >
         <Triangle
           className={`h-3 w-3 flex-shrink-0 transition-transform ${isOpen ? 'rotate-90' : ''}`}
         />
         <span>{title}</span>
-        {count !== undefined ? <span className="text-slate-400">{count}</span> : null}
+        {count !== undefined ? <span className="text-muted-foreground">{count}</span> : null}
       </button>
       <div className={`flex flex-col gap-3 px-3 pb-3 ${isOpen ? '' : 'hidden'}`}>{children}</div>
     </div>
@@ -102,7 +102,7 @@ export const Collapsible = ({
 
 export const PanelBlock = ({ label, children }: { label: string; children: ReactNode }) => (
   <div>
-    <h4 className="mb-1 text-sm font-medium text-slate-400">{label}</h4>
+    <h4 className="mb-1 text-sm font-medium text-muted-foreground">{label}</h4>
     {children}
   </div>
 );
@@ -208,14 +208,14 @@ export const CircleMemberIdentitiesDialog = ({
       onClose={onClose}
       title={
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-normal text-slate-500 dark:text-slate-400">{appName}</span>
+          <span className="text-sm font-normal text-muted-foreground">{appName}</span>
           <span>{t('Access your connections get')}</span>
 
           <div className="flex flex-row flex-wrap items-center gap-2 text-sm font-normal">
             {circles.map((circle) => (
               <HybridLink
                 href={getOwnerCirclePath(circle.appId, circle.id ?? '')}
-                className="flex flex-row items-center gap-1 rounded bg-slate-200 px-2 py-0.5 hover:underline dark:bg-slate-800"
+                className="flex flex-row items-center gap-1 rounded bg-surface-container-highest px-2 py-0.5 hover:underline"
                 key={circle.id}
               >
                 <CirclesIcon className="h-4 w-4 flex-shrink-0" />
@@ -254,7 +254,7 @@ export const CircleMemberIdentitiesDialog = ({
               )}
               {/* Only worth naming the route in when there is more than one it could have been. */}
               {circles.length > 1 ? (
-                <span className="text-sm text-slate-400">{`${t('via')} ${viaCircles.join(', ')}`}</span>
+                <span className="text-sm text-muted-foreground">{`${t('via')} ${viaCircles.join(', ')}`}</span>
               ) : null}
             </li>
           ))}
@@ -297,7 +297,7 @@ export const CircleOverview = ({
 
   return (
     <div
-      className={`flex flex-col gap-3 rounded-lg border border-gray-200 border-opacity-80 p-4 dark:border-gray-700 ${
+      className={`flex flex-col gap-3 rounded-lg border border-opacity-80 p-4 ${
         circle.disabled ? 'opacity-50' : ''
       }`}
     >
@@ -313,14 +313,14 @@ export const CircleOverview = ({
             {circle.name}
           </span>
           {isSystemCircle ? (
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            <span className="rounded bg-surface-container-high px-2 py-0.5 text-xs text-muted-foreground">
               {t('Built-in')}
             </span>
           ) : null}
         </span>
       </HybridLink>
 
-      {circle.description ? <small className="text-slate-400">{circle.description}</small> : null}
+      {circle.description ? <small className="text-muted-foreground">{circle.description}</small> : null}
 
       <Collapsible title={t('Details')}>
         <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
@@ -336,12 +336,12 @@ export const CircleOverview = ({
                   >
                     {owningApp.name}
                   </HybridLink>
-                  <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                  <span className="text-muted-foreground">{` ${t('(app)')}`}</span>
                 </>
               ) : (
                 <>
                   <span className="break-all font-mono">{circle.appId}</span>
-                  <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                  <span className="text-muted-foreground">{` ${t('(app, no longer registered)')}`}</span>
                 </>
               )
             ) : (
@@ -371,7 +371,7 @@ export const CircleOverview = ({
 
           {circle.id ? (
             <Fact label={t('Id')}>
-              <span className="break-all font-mono text-slate-400">{circle.id}</span>
+              <span className="break-all font-mono text-muted-foreground">{circle.id}</span>
             </Fact>
           ) : null}
         </dl>
@@ -404,10 +404,10 @@ export const Fact = ({
   children: ReactNode;
 }) => (
   <>
-    <dt className="text-slate-400">{label}</dt>
+    <dt className="text-muted-foreground">{label}</dt>
     <dd>
       {children}
-      {hint ? <small className="block max-w-prose text-slate-400">{hint}</small> : null}
+      {hint ? <small className="block max-w-prose text-muted-foreground">{hint}</small> : null}
     </dd>
   </>
 );
@@ -466,9 +466,9 @@ export const PermissionKeyList = ({ keys }: { keys: number[] }) => {
   if (!keys.length) return <SubtleMessage>{t('No permissions')}</SubtleMessage>;
 
   return (
-    <ul className="flex flex-row flex-wrap gap-2 text-sm text-slate-400">
+    <ul className="flex flex-row flex-wrap gap-2 text-sm text-muted-foreground">
       {keys.map((key) => (
-        <li key={key} className="rounded bg-slate-100 px-2 py-0.5 dark:bg-slate-800">
+        <li key={key} className="rounded bg-surface-container-high px-2 py-0.5">
           {t(getPermissionKeyName(key))}
         </li>
       ))}
@@ -521,7 +521,7 @@ export const DriveGrantRow = ({
 
   return (
     <div className="flex flex-row items-center">
-      <HardDrive className="mr-3 h-5 w-5 flex-shrink-0 text-slate-400" />
+      <HardDrive className="mr-3 h-5 w-5 flex-shrink-0 text-muted-foreground" />
       {drive ? (
         <HybridLink
           href={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
@@ -530,7 +530,7 @@ export const DriveGrantRow = ({
           <DriveLabel drive={drive} permission={permission} extra={storageKeyLabel} />
         </HybridLink>
       ) : (
-        <span className="text-slate-400">
+        <span className="text-muted-foreground">
           {targetDrive?.alias ? (
             <span className="break-all font-mono">{targetDrive.alias}</span>
           ) : (
@@ -555,8 +555,8 @@ export const DriveLabel = ({
   <span>
     {drive.name}
     {drive.driveSlug ? (
-      <span className="ml-2 break-all font-mono text-sm text-slate-400">{drive.driveSlug}</span>
+      <span className="ml-2 break-all font-mono text-sm text-muted-foreground">{drive.driveSlug}</span>
     ) : null}
-    <span className="text-slate-400">{`: ${permission}${extra ? `, ${extra}` : ''}`}</span>
+    <span className="text-muted-foreground">{`: ${permission}${extra ? `, ${extra}` : ''}`}</span>
   </span>
 );

@@ -167,19 +167,19 @@ const DataUpgrade = () => {
 
       <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">
         <div className="container mx-auto p-5">
-          <div className="mx-auto max-w-[35rem] dark:text-white">
+          <div className="mx-auto max-w-[35rem]">
             <h1 className="mb-5 text-center text-2xl">{t('Data Upgrade')}</h1>
 
             {isBusy ? (
               <div className="flex flex-col items-center gap-5 py-6 text-center">
-                <Loader className="h-16 w-16 text-indigo-500" />
+                <Loader className="h-16 w-16 text-primary" />
                 <div>
-                  <p className="text-lg dark:text-white">
+                  <p className="text-lg">
                     {phase === 'checking'
                       ? t('Checking for data updates...')
                       : t('Upgrading your data, please wait...')}
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {t('This can take a while. Please keep this page open.')}
                   </p>
                   {versionInfo ? <UpgradeProgress versionInfo={versionInfo} /> : null}
@@ -189,10 +189,10 @@ const DataUpgrade = () => {
 
             {phase === 'done' ? (
               <div className="flex flex-col items-center gap-3 py-6 text-center">
-                <CheckCircle className="h-16 w-16 text-green-500" aria-hidden={true} />
-                <p className="text-lg dark:text-white">{t('Your data is up to date')}</p>
+                <CheckCircle className="h-16 w-16 text-success" aria-hidden={true} />
+                <p className="text-lg">{t('Your data is up to date')}</p>
                 {returnUrl ? (
-                  <p className="text-sm text-slate-400" role="status">
+                  <p className="text-sm text-muted-foreground" role="status">
                     {returned
                       ? t('You can now close this window and go back to the app.')
                       : t('You can now return to the app.')}
@@ -203,7 +203,7 @@ const DataUpgrade = () => {
 
             {phase === 'error' ? (
               <div className="py-4">
-                <p className="text-red-600">
+                <p className="text-destructive">
                   {error || t('Something went wrong while checking for data updates')}
                 </p>
               </div>
@@ -233,16 +233,16 @@ const DataUpgrade = () => {
             ) : null}
 
             {/* Data version details - collapsed by default, below the buttons */}
-            <details className="group mt-8 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
-              <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+            <details className="group mt-8 rounded-lg border bg-background">
+              <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-muted-foreground">
                 <span className="mr-auto">{t('Data version details')}</span>
                 <Chevron className="h-4 w-4 transition-transform group-open:rotate-180" />
               </summary>
-              <div className="border-t px-4 py-4 dark:border-slate-800">
+              <div className="border-t px-4 py-4">
                 {versionInfo ? (
                   <VersionInfoDetails versionInfo={versionInfo} />
                 ) : (
-                  <p className="text-slate-400">{t('Loading...')}</p>
+                  <p className="text-muted-foreground">{t('Loading...')}</p>
                 )}
               </div>
             </details>
@@ -256,13 +256,13 @@ const DataUpgrade = () => {
 // A compact status line shown alongside the spinner while an upgrade is running.
 const UpgradeProgress = ({ versionInfo }: { versionInfo: VersionInfoResult }) => {
   return (
-    <div className="mt-3 text-sm text-slate-400">
+    <div className="mt-3 text-sm text-muted-foreground">
       <p>
         {t('Data version')} {versionInfo.actualDataVersionNumber} &rarr;{' '}
         {versionInfo.serverDataVersionNumber}
       </p>
       {versionInfo.failureCorrelationId ? (
-        <p className="mt-1 text-red-600">
+        <p className="mt-1 text-destructive">
           {t('A previous attempt failed')} ({t('Correlation Id')}:{' '}
           {versionInfo.failureCorrelationId})
         </p>
@@ -277,22 +277,22 @@ const VersionInfoDetails = ({ versionInfo }: { versionInfo: VersionInfoResult })
     <>
       <div className="mb-2">
         <Label>{t('Server Data Version')}</Label>
-        <p className="max-w-lg text-slate-400">{versionInfo.serverDataVersionNumber}</p>
+        <p className="max-w-lg text-muted-foreground">{versionInfo.serverDataVersionNumber}</p>
       </div>
 
       <div className="mb-2">
         <Label>{t('Your Data Version')}</Label>
-        <p className="flex max-w-lg items-center text-slate-400">
+        <p className="flex max-w-lg items-center text-muted-foreground">
           {versionInfo.actualDataVersionNumber}
           {versionInfo.actualDataVersionNumber === versionInfo.serverDataVersionNumber && (
-            <CheckCircle className="ml-2 h-5 w-5 text-green-500" aria-label={t('Versions match')} />
+            <CheckCircle className="ml-2 h-5 w-5 text-success" aria-label={t('Versions match')} />
           )}
         </p>
       </div>
 
       <div className="mb-2">
         <Label>{t('Last Upgraded')}</Label>
-        <p className="max-w-lg text-slate-400">
+        <p className="max-w-lg text-muted-foreground">
           <TimeAgoUtc value={versionInfo.lastUpgraded} showAbsolute={true} absoluteFormat="datetime" />
         </p>
       </div>
@@ -300,14 +300,14 @@ const VersionInfoDetails = ({ versionInfo }: { versionInfo: VersionInfoResult })
       {versionInfo.failedDataVersionNumber != null && (
         <div className="mb-2">
           <Label>{t('Failed Data Version')}</Label>
-          <p className="max-w-lg text-slate-400">{versionInfo.failedDataVersionNumber}</p>
+          <p className="max-w-lg text-muted-foreground">{versionInfo.failedDataVersionNumber}</p>
         </div>
       )}
 
       {versionInfo.lastAttempted != null && (
         <div className="mb-2">
           <Label>{t('Last Attempted')}</Label>
-          <p className="max-w-lg text-slate-400">
+          <p className="max-w-lg text-muted-foreground">
             <TimeAgoUtc
               value={versionInfo.lastAttempted}
               showAbsolute={true}
@@ -320,14 +320,14 @@ const VersionInfoDetails = ({ versionInfo }: { versionInfo: VersionInfoResult })
       {versionInfo.failedBuildVersion && (
         <div className="mb-2">
           <Label>{t('Failed Build Version')}</Label>
-          <p className="max-w-lg text-slate-400">{versionInfo.failedBuildVersion}</p>
+          <p className="max-w-lg text-muted-foreground">{versionInfo.failedBuildVersion}</p>
         </div>
       )}
 
       {versionInfo.failureCorrelationId && (
         <div className="mb-2">
           <Label>{t('Correlation Id')}</Label>
-          <p className="max-w-lg text-slate-400">{versionInfo.failureCorrelationId}</p>
+          <p className="max-w-lg text-muted-foreground">{versionInfo.failureCorrelationId}</p>
         </div>
       )}
     </>
