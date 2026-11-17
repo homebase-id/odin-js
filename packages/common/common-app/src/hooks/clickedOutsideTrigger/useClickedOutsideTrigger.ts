@@ -4,7 +4,7 @@ import { useEffect } from 'react';
  * Hook that alerts clicks outside of the passed ref
  */
 export const useOutsideTrigger = (
-  ref: React.RefObject<HTMLDivElement> | React.RefObject<HTMLDivElement>[] | undefined,
+  ref: React.RefObject<HTMLDivElement | null> | React.RefObject<HTMLDivElement | null>[] | undefined,
   onClick: () => void
 ) => {
   useEffect(() => {

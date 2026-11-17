@@ -15,7 +15,7 @@ const Socials = ({ className }: { className: string }) => {
             rel="noreferrer noopener"
             key={index}
           >
-            {socialLink.icon({ className: 'w-5 h-5' })}
+            <socialLink.icon className="h-5 w-5" />
             <span className="sr-only">{socialLink.copyText}</span>
           </a>
         ))}

@@ -373,7 +373,7 @@ const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
           setIsOpen(!isOpen);
         }}
       >
-        {Heart({className: iconClassName})}
+        <Heart className={iconClassName} />
         <span className={`my-auto ml-3 flex w-full flex-row items-stretch overflow-hidden`}>
           <span>{'Personal data'} </span>
           <button className={`${iconClassName} ml-auto opacity-80 `}>

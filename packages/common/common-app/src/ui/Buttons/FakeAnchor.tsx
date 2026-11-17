@@ -21,6 +21,16 @@ export const FakeAnchor = ({
   const isExternal =
     href?.startsWith('/') && pathname.split('/')[1] !== (href || '/').split('/')[1];
 
+  const open = () => {
+    if (!href) return;
+    if (!href.startsWith('http') && !isExternal) {
+      navigate(href, { preventScrollReset: preventScrollReset });
+      onNavigate && onNavigate();
+    } else {
+      window.location.href = href;
+    }
+  };
+
   return (
     <span
       {...props}
@@ -30,14 +40,19 @@ export const FakeAnchor = ({
           ? (e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (!href.startsWith('http') && !isExternal) {
-                navigate(href, { preventScrollReset: preventScrollReset });
-                onNavigate && onNavigate();
-              } else {
-                window.location.href = href;
-              }
+              open();
             }
           : props.onClick
+      }
+      // Enter opens it, as on a link; only when it has focus itself, not a link or button inside
+      onKeyDown={
+        href
+          ? (e) => {
+              if (e.key !== 'Enter' || e.target !== e.currentTarget) return;
+              e.preventDefault();
+              open();
+            }
+          : props.onKeyDown
       }
       onAuxClick={
         href

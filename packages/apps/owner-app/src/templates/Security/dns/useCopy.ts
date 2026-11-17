@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 // Copy to clipboard with a short-lived "copied" flag for feedback
 export const useCopy = () => {
   const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
   const copy = async (value: string) => {
     try {

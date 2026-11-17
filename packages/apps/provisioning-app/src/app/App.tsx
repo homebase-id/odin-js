@@ -41,7 +41,7 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
         <meta name="description" content={`${config.brandName} - ${config.brandSlogan} `} />
-        <title>Signup | {config.brandName}</title>
+        <title>{`Signup | ${config.brandName}`}</title>
 
         <link rel="apple-touch-icon" sizes="180x180" href={`/${config.id}/apple-touch-icon.png`} />
         <link rel="icon" type="image/png" sizes="32x32" href={`/${config.id}/favicon-32x32.png`} />

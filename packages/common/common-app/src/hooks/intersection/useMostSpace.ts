@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const useMostSpace = (el: React.RefObject<HTMLElement> | undefined, forceRun?: unknown) => {
+export const useMostSpace = (el: React.RefObject<HTMLElement | null> | undefined, forceRun?: unknown) => {
   const [space, setSpace] = useState<{
     verticalSpace: 'top' | 'bottom';
     horizontalSpace: 'left' | 'right';

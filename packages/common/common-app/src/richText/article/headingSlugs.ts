@@ -1,10 +1,12 @@
+import type { JSONContent } from '@tiptap/core';
+
 /**
  * Heading ids of the article viewer (the `id` on h1-h6, which the table of contents links to).
  * This is the reference rule; odin-core ports it to C#, so change both together.
  *
  * 1. The heading's text: the text of every text node under it, in document order, joined with
  *    nothing, then trimmed (String.prototype.trim: Unicode whitespace). Mentions, math, footnote
- *    references and hard breaks add nothing. `indexDoc` in ArticleDocRenderer does this step.
+ *    references and hard breaks add nothing. `articleHeadings` below does this step.
  * 2. Lowercase (String.prototype.toLowerCase: the Unicode default case mapping, no locale).
  * 3. Normalize to NFKD.
  * 4. Strip diacritics: remove the combining marks U+0300 to U+036F.
@@ -36,4 +38,32 @@ export const uniqueHeadingIds = (slugs: string[]): string[] => {
     used.add(id);
     return id;
   });
+};
+
+export type ArticleHeading = { node: JSONContent; id: string; level: number; text: string };
+
+/** The text of every text node under `node`, in document order, joined with nothing (step 1). */
+const textOf = (node: JSONContent): string =>
+  node.type === 'text' ? (node.text ?? '') : (node.content ?? []).map(textOf).join('');
+
+/** A table of contents (the viewer's box, the reader's rail) shows from this many headings on. */
+export const MIN_TOC_HEADINGS = 3;
+
+/**
+ * Every heading of a cleaned document (`cleanTiptapDoc`), depth first in document order, with the
+ * id the article viewer gives it. The viewer calls it on its sanitized document; the reader's rail
+ * reads the headings off the rendered page.
+ */
+export const articleHeadings = (doc: JSONContent): ArticleHeading[] => {
+  const found: Omit<ArticleHeading, 'id'>[] = [];
+  const walk = (node: JSONContent) => {
+    if (node.type === 'heading') {
+      const text = textOf(node).trim();
+      found.push({ node, text, level: Math.min(6, Math.max(1, Number(node.attrs?.level) || 1)) });
+    }
+    node.content?.forEach(walk);
+  };
+  walk(doc);
+  const ids = uniqueHeadingIds(found.map((heading) => slugify(heading.text)));
+  return found.map((heading, i) => ({ ...heading, id: ids[i] }));
 };

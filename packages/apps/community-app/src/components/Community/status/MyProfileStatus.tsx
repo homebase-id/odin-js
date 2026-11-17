@@ -117,7 +117,7 @@ const TooltipHover = ({
   wrapperRef,
   children,
 }: {
-  wrapperRef: React.RefObject<HTMLSpanElement>;
+  wrapperRef: React.RefObject<HTMLSpanElement | null>;
   children: React.ReactNode;
 }) => {
   return (

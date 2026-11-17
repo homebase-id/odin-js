@@ -6,6 +6,8 @@ module.exports = {
     '../../libs/ui-lib/src/**/*.{js,jsx,ts,tsx}',
     '../../common/common-app/src/**/*.{js,jsx,ts,tsx}',
     '../../common/rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
+    // LiveBlock's markup, in articles; its v4-only classes (box-content!, the muted colour) fall back
+    '../../../node_modules/@2002bishwajeet/live-blocks/dist/index.js',
   ],
   theme: {
     extend: {

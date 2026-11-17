@@ -65,6 +65,17 @@ export const ActionGroup = ({
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
+  // Escape closes the menu, and only the menu: a page that goes back on Escape (the article reader) stays
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      setIsOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
   if (!options.length) return null;
 
   useEffect(() => {
@@ -163,7 +174,7 @@ export const ActionGroup = ({
 };
 
 const ActionOption = ({
-  icon,
+  icon: Icon,
   label,
   onClick,
   href,
@@ -186,7 +197,7 @@ const ActionOption = ({
         className={`text-foreground/40 bg-background cursor-not-allowed text-base ${className || ''}`}
       >
         <div className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2">
-          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
+          {Icon && <Icon className="h-5 w-5 my-auto mr-2 flex-shrink-0" />}
           <span className="flex flex-col">
             <span>{label}</span>
             {hint ? <span className="text-xs">{hint}</span> : null}
@@ -232,7 +243,7 @@ const ActionOption = ({
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >
-          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
+          {Icon && <Icon className="h-5 w-5 my-auto mr-2 flex-shrink-0" />}
           <span className={''}>{label}</span>
         </FakeAnchor>
       </li>

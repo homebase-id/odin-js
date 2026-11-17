@@ -33,7 +33,7 @@ const getIntersectionObserver = () => {
 };
 
 export const useIntersection = (
-  elem: React.RefObject<HTMLElement> | undefined,
+  elem: React.RefObject<HTMLElement | null> | undefined,
   callback: () => void,
   keepObserving = false
 ) => {

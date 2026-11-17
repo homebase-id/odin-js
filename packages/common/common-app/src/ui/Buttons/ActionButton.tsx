@@ -140,13 +140,13 @@ const StyledButton = ({
   return <PureButton {...buttonProps} className={classNames.join(' ')} icon={updatedIcon} />;
 };
 
-const PureButton = ({ children, icon, ...props }: PureButtonProps) => {
+const PureButton = ({ children, icon: Icon, ...props }: PureButtonProps) => {
   const hasChildren = !!children;
 
   return (
     <button {...props}>
       {children}
-      {icon && icon({ className: `my-auto ${hasChildren ? 'ml-2' : ''} h-5 w-5` })}
+      {Icon && <Icon className={`my-auto ${hasChildren ? 'ml-2' : ''} h-5 w-5`} />}
     </button>
   );
 };

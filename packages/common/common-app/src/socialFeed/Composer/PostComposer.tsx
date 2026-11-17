@@ -38,8 +38,7 @@ import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
-import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
-import { FEED_ROOT_PATH } from '../../constants';
+import { Globe, Arrow, Lock } from '../../ui/Icons';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
@@ -58,7 +57,6 @@ export const PostComposer = ({
   excludeCustom?: boolean;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
   const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
@@ -231,22 +229,6 @@ export const PostComposer = ({
                 size="square"
                 type="mute"
                 options={[
-                  isOwner
-                    ? {
-                        label: t('Create new article'),
-                        href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
-                        icon: Article,
-                      }
-                    : undefined,
-
-                  isOwner
-                    ? {
-                        label: t('List my articles'),
-                        href: `${FEED_ROOT_PATH}/articles`,
-                        icon: Pencil,
-                      }
-                    : undefined,
-
                   reactAccess === false
                     ? {
                         label: t('Enable reactions'),

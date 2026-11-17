@@ -207,7 +207,8 @@ describe('links design', () => {
   it('holds with no links, with 12 links, and with a very long name', () => {
     expect(html(withLinks(0), true)).toContain('Frodo');
     const twelve = html(withLinks(12));
-    expect(twelve.match(/favicon\.ico/g)).toHaveLength(12);
+    // React 19 SSR adds a <link rel="preload"> per image, so count the img tags only
+    expect(twelve.match(/<img\b[^>]*favicon\.ico/g)).toHaveLength(12);
     const long = 'Bartholomew'.repeat(12);
     expect(html(withLinks(2, { firstName: long, surName: long }), true)).toContain(long);
   });
