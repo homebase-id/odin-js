@@ -13,6 +13,42 @@ const Sidenav = lazy(() =>
   import('@homebase-id/common-app').then((commonApp) => ({ default: commonApp.Sidenav }))
 );
 
+const ROLE_OF_SITE_COLOR: Record<string, string> = {
+  button: 'primary',
+  'button-text': 'primary-contrast',
+};
+
+const mix = (foreground: string, background: string, amount: number) => {
+  const bg = background.split(' ').map(Number);
+  return foreground
+    .split(' ')
+    .map((c, i) => Math.round(Number(c) * amount + bg[i] * (1 - amount)))
+    .join(' ');
+};
+
+// The roles an owner can't pick: the site's text mixed into its background by this much
+const DERIVED_FROM_SITE_COLORS: Record<string, number> = {
+  'muted-foreground': 0.6,
+  outline: 0.45,
+  'outline-variant': 0.2,
+  'surface-container-lowest': 0,
+  'surface-container-low': 0.04,
+  'surface-container': 0.06,
+  'surface-container-high': 0.08,
+  'surface-container-highest': 0.12,
+};
+
+const siteColorVars = (row: Record<string, string>) =>
+  Object.keys(row)
+    .map((key) => `--color-${ROLE_OF_SITE_COLOR[key] ?? key}: ${row[key]};`)
+    .concat(
+      Object.keys(DERIVED_FROM_SITE_COLORS).map(
+        (key) =>
+          `--color-${key}: ${mix(row.foreground, row.background, DERIVED_FROM_SITE_COLORS[key])};`
+      )
+    )
+    .join('');
+
 interface LayoutProps {
   children?: ReactNode;
 }
@@ -53,19 +89,12 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      <style type="text/css">
-        {`:root {
-            ${Object.keys(colors.light)
-              .map((key) => `--color-${key}: ${colors.light[key]};`)
-              .join('')}
-          }`}
-        {`html.dark {
-            ${Object.keys(colors.dark)
-              .map((key) => `--color-${key}: ${colors.dark[key]};`)
-              .join('')}
-          }`}
-        {`html.dark { background-color: rgba(var(--color-page-background)); }`}
-      </style>
+      {colors ? (
+        <style type="text/css">
+          {`:root { ${siteColorVars(colors.light)} }`}
+          {`html.dark { ${siteColorVars(colors.dark)} }`}
+        </style>
+      ) : null}
       <Helmet>
         {imageData || emojiFavicon ? (
           <>

@@ -75,7 +75,7 @@ const BetterLink = ({
         className={`relative m-2 flex flex-row hover:shadow-lg focus:outline-none ${
           style === 'secondary'
             ? `border-gray rounded border hover:bg-background`
-            : `rounded border-0 bg-button text-white transition-colors hover:bg-button hover:bg-opacity-80`
+            : `rounded border-0 bg-primary text-primary-contrast transition-colors hover:bg-primary hover:bg-opacity-80`
         } ${className ?? ''}`}
         target="_blank"
         rel={'noopener noreferrer'}

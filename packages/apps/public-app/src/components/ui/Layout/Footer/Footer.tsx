@@ -24,7 +24,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
         </p>
         <a
           href="/api/v1/version"
-          className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700"
+          className="mt-4 text-sm text-muted-foreground sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-outline-variant sm:py-2 sm:pl-4"
         >
           © {new Date().getFullYear()} | v.
           {getVersion()}

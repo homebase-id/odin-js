@@ -44,7 +44,7 @@ const PreviewPage = () => {
           <h1 className="text-xl">
             <OwnerName />
           </h1>
-          <small className="block text-base text-slate-600">{owner?.status}</small>
+          <small className="block text-base text-muted-foreground">{owner?.status}</small>
         </div>
       </div>
     </section>
