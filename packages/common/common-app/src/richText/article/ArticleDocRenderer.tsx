@@ -2,7 +2,8 @@
  * Renders a Tiptap document in the schema of Journal's editor, as an article published from Journal
  * stores it, without an editor. Every node and mark is mapped by hand: nothing from the document is
  * rendered as HTML, and links only keep http(s) and mailto urls. KaTeX's own output is the one HTML
- * string set.
+ * string set. Journal's live blocks run in `LiveBlock` (@2002bishwajeet/live-blocks), whose html
+ * and react blocks are sandboxed frames.
  *
  * The document comes from a stored post and is not trusted to be well formed: it is cleaned by
  * `sanitizeArticleDoc` before anything reads it. The node and mark mappings are made once, here, so
@@ -18,9 +19,12 @@ import katex from 'katex';
 import { common, createLowlight } from 'lowlight';
 import {
   Children,
+  Component,
   createContext,
   Fragment,
+  lazy,
   ReactNode,
+  Suspense,
   useContext,
   useEffect,
   useMemo,
@@ -29,7 +33,13 @@ import {
   type CSSProperties,
 } from 'react';
 import { cleanTiptapDoc, codeLanguage } from '@homebase-id/js-lib/public';
-import { LANGUAGE_ALIASES, liveBlockKind, svgDataUri } from './codeInfo';
+import {
+  liveBlockKind,
+  parseCodeInfo,
+  svgDataUri,
+  type LiveBlockKind,
+} from '@2002bishwajeet/live-blocks/core';
+import { LANGUAGE_ALIASES } from './codeInfo';
 import { toCalloutVariant, type CalloutVariant } from './calloutVariants';
 import {
   editDataAttrs,
@@ -271,17 +281,73 @@ const LIVE_BLOCK_LABELS: Record<string, string> = {
   react: 'Interactive block — shown as code',
 };
 
+/** The live-block runtime, in a chunk of its own: only an article with a live block loads it. */
+const LiveBlock = lazy(() =>
+  import('@2002bishwajeet/live-blocks').then((module) => ({ default: module.LiveBlock }))
+);
+
+/** Falls back to `fallback` when a live block throws, loading its chunk or rendering. Tries again when `resetKey` changes. */
+class LiveBlockBoundary extends Component<
+  { resetKey: unknown; fallback: ReactNode; children: ReactNode },
+  { failed: boolean; resetKey: unknown }
+> {
+  state = { failed: false, resetKey: this.props.resetKey };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  static getDerivedStateFromProps(props: { resetKey: unknown }, state: { resetKey: unknown }) {
+    return props.resetKey !== state.resetKey ? { failed: false, resetKey: props.resetKey } : null;
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('[ArticleDocRenderer] A live block failed; showing its code instead', error);
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 /**
  * A code block. Its `language` is the fence's whole info string as Journal keeps it
- * (`html id=k3f9 wide`): only its first word is read, and only as a bare word. Journal's live
- * blocks can't run here (yet): an svg drawing shows as an image, which never runs its scripts,
- * and the rest show as their code under a label saying so.
+ * (`html id=k3f9 wide`): only its first word is read, and only as a bare word. A Journal live
+ * block runs in LiveBlock, as Journal's share page shows it. A block's saved state lives in the
+ * note's Yjs doc, not in the Tiptap document an article carries, so it starts from none; LiveBlock
+ * follows the `dark` class on <html> (what useDarkMode sets) for its colour scheme, and asks before
+ * opening a link. While its chunk loads, or when it throws, the block shows as below.
  */
 const CodeBlock = ({ node }: Props) => {
   const code = textOf(node);
-  const language = codeLanguage(node.attrs?.language) || undefined;
-  const live = language ? liveBlockKind(language) : null;
+  const info = str(node.attrs?.language) ?? null;
+  const language = codeLanguage(info) || undefined;
+  const live = liveBlockKind(language ?? null);
+  const shown = <StaticCodeBlock code={code} language={language} live={live} />;
+  if (!live || !code.trim()) return shown;
 
+  return (
+    <LiveBlockBoundary resetKey={code} fallback={shown}>
+      <Suspense fallback={shown}>
+        <LiveBlock kind={live} source={code} wide={parseCodeInfo(info).wide} />
+      </Suspense>
+    </LiveBlockBoundary>
+  );
+};
+
+/**
+ * A code block without its live block: an svg drawing as an image, which never runs its scripts,
+ * and the other live blocks as their code under a label saying so.
+ */
+const StaticCodeBlock = ({
+  code,
+  language,
+  live,
+}: {
+  code: string;
+  language?: string;
+  live: LiveBlockKind | null;
+}) => {
   if (live === 'svg' && code.trim())
     return (
       <figure data-live-block="svg" className="my-4">

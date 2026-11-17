@@ -18,6 +18,21 @@ vi.mock('../../media/Image', () => ({
 }));
 vi.mock('../../socialFeed', () => ({ AuthorName: ({ odinId }: { odinId: string }) => odinId }));
 vi.mock('../../ui/Buttons/ActionLink', () => ({ ActionLink: () => null }));
+const liveBlock = vi.hoisted(() => ({ throws: false }));
+vi.mock('@2002bishwajeet/live-blocks', () => ({
+  LiveBlock: (props: { kind: string; source: string; wide?: boolean; initialState?: string }) => {
+    if (liveBlock.throws) throw new Error('The live block failed');
+    return (
+      <div
+        data-test-live-block={props.kind}
+        data-wide={String(props.wide)}
+        data-initial-state={props.initialState ?? 'none'}
+      >
+        {props.source}
+      </div>
+    );
+  },
+}));
 vi.stubGlobal('window', { location: { origin: 'https://me.example' } });
 
 const options: ArticleDocOptions = {
@@ -426,7 +441,7 @@ describe('a note published from Journal', () => {
     expect(html).toMatch(/<span class="text-purple-700[^"]*">export<\/span>/);
   });
 
-  test('shows live blocks as code under a label, and an svg drawing as an image', () => {
+  test('shows live blocks as code under a label, and an svg drawing as an image, until LiveBlock loads', () => {
     expect(html.match(/Interactive block — shown as code/g)).toHaveLength(2);
     expect(html.match(/Diagram — shown as code/g)).toHaveLength(1);
     expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg[^"]*" alt=""/);
@@ -465,6 +480,42 @@ test('a hostile info string only ever reaches data-language as a bare word', () 
   expect(html).toContain('more code');
   // An empty svg block is an empty code block, not an empty image
   expect(html).not.toContain('data:image/svg');
+});
+
+describe('a live block', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      {
+        type: 'codeBlock',
+        attrs: { language: 'html id=k3f9 wide' },
+        content: [{ type: 'text', text: '<p>Hello</p>' }],
+      },
+    ],
+  };
+
+  test('runs in LiveBlock once its chunk has loaded, wide as its fence says and with no saved state', async () => {
+    // Server rendering shows the Suspense fallback until the lazy chunk has loaded
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block="html"'));
+    const html = render(doc);
+    expect(html).toContain('data-wide="true"');
+    expect(html).toContain('data-initial-state="none"');
+    expect(html).toContain('&lt;p&gt;Hello&lt;/p&gt;');
+    expect(html).not.toContain('shown as code');
+  });
+
+  test('shows as code under its label when LiveBlock throws', async () => {
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block'));
+    liveBlock.throws = true;
+    try {
+      const html = render(doc);
+      expect(html).toContain('Interactive block — shown as code');
+      expect(html).toContain('data-language="html"');
+      expect(html).not.toContain('data-test-live-block');
+    } finally {
+      liveBlock.throws = false;
+    }
+  });
 });
 
 test('an unknown node keeps its text, and an unknown inline atom is dropped without breaking the paragraph', () => {
