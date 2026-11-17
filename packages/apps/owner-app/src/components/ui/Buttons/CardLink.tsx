@@ -22,14 +22,14 @@ const CardLink = ({
   return (
     <HybridLink
       href={href}
-      className={`flex h-full flex-col rounded-md border border-gray-200 border-opacity-60 bg-white transition-colors hover:shadow-md dark:border-gray-800 dark:bg-black hover:dark:shadow-slate-600 ${
+      className={`flex h-full flex-col rounded-md border border-opacity-60 bg-background transition-colors hover:shadow-md ${
         className ?? ''
       } ${isDisabled ? 'opacity-50' : ''}`}
     >
       <div
         className={`flex flex-row ${
           description || children ? '' : 'flex-grow'
-        } items-center bg-slate-100 p-4 dark:bg-slate-900 dark:text-slate-200`}
+        } items-center bg-surface-container-high p-4`}
       >
         <h2 className="flex flex-grow text-xl">{title}</h2>
         {Icon && <Icon className="ml-auto h-4 w-4" />}

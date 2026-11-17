@@ -49,7 +49,7 @@ export const PostTeaser = ({
     <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
       <ErrorBoundary>
         <div
-          className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors dark:border-gray-800 lg:border`}
+          className={`relative flex h-full flex-col rounded-lg border-opacity-60 transition-colors lg:border`}
         >
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">

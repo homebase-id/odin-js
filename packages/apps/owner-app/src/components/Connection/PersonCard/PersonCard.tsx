@@ -26,11 +26,11 @@ const PersonCard = ({
       <div
         className={`h-full overflow-hidden rounded-md border bg-background transition-colors ${
           isChecked
-            ? 'border-2 border-indigo-500 dark:border-indigo-500'
+            ? 'border-2 border-primary'
             : isChecked === false
               ? 'border-2'
-              : 'border-gray-200 border-opacity-60 dark:border-gray-900'
-        } ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
+              : 'border-opacity-60'
+        } ${href ? 'cursor-pointer hover:shadow-md' : ''}`}
         onClick={onClick}
       >
         <ContactImage odinId={odinId} canSave={canSave} />

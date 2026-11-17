@@ -27,7 +27,7 @@ const Dashboard = () => {
     <>
       <PageMeta title={t('Dashboard')} icon={House} />
 
-      <p className="max-w-md text-slate-400">
+      <p className="max-w-md text-muted-foreground">
         Your owner console. Edit your{' '}
         <Link className="underline" to="/owner/profile">
           profile
@@ -85,9 +85,9 @@ const AppWrapper = ({
 
     {options ? (
       <div
-        className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
+        className={`flex flex-row justify-center rounded-b-lg bg-surface-container-high ${
           isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
-        } dark:bg-slate-800`}
+        }`}
       >
         <ActionGroup
           type="mute"

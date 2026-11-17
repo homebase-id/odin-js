@@ -46,7 +46,7 @@ const FaviconSelector = ({
   const [isImageOpen, setIsImageOpen] = useState(false);
 
   return (
-    <div className="grid grid-cols-1 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
+    <div className="grid grid-cols-1 gap-2 py-5 text-center text-muted-foreground md:grid-cols-3 md:gap-5">
       <FaviconOption
         isActive={valueObject && 'emoji' in valueObject}
         label={t('Emoji')}
@@ -130,8 +130,8 @@ const FaviconOption = ({
     <div
       className={`flex cursor-pointer flex-col rounded-md border-2 ${
         isActive
-          ? 'border-indigo-500 bg-white dark:bg-black'
-          : 'border-slate-100 bg-slate-100 dark:border-slate-900 dark:bg-slate-900'
+          ? 'border-primary bg-background'
+          : 'bg-surface-container-high'
       }`}
       onClick={onClick}
     >

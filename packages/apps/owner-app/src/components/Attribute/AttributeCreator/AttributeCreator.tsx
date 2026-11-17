@@ -101,7 +101,7 @@ const AttributeCreator = ({
         <>
           <p className="mb-5 mt-16 text-xl">
             {t('Add new')}
-            <small className="block text-sm text-slate-400">
+            <small className="block text-sm text-muted-foreground">
               {t(`Add the information you want, and keep it secure. You're in control.`)}
             </small>
           </p>
@@ -111,7 +111,7 @@ const AttributeCreator = ({
               .map((option) => (
                 <div
                   key={option.name}
-                  className={`cursor-pointer rounded-md bg-background p-4 hover:shadow-md hover:dark:shadow-slate-600`}
+                  className={`cursor-pointer rounded-md bg-background p-4 hover:shadow-md`}
                   onClick={() => onSelect(option.type)}
                   title={option.description}
                 >

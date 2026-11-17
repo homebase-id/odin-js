@@ -103,7 +103,7 @@ const AttributeGroup = ({
     >
       <span
         onClick={doClose}
-        className={`mb-2 inline-block text-slate-600 transition-opacity dark:text-slate-400 ${
+        className={`mb-2 inline-block text-muted-foreground transition-opacity ${
           isActive ? 'cursor-pointer opacity-100' : 'opacity-0'
         }`}
       >
@@ -112,8 +112,8 @@ const AttributeGroup = ({
       <div
         className={`border-l-[8px] sm:border-l-[16px] ${
           isActive
-            ? 'border-slate-200 border-opacity-40 dark:border-slate-800'
-            : 'border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
+            ? 'border-opacity-40'
+            : 'border-transparent opacity-90 grayscale hover:border-opacity-40'
         } transition-all ${
           isActive ? 'pl-2 sm:pl-5' : '-translate-x-2 md:-translate-x-4 md:hover:translate-x-0'
         }`}
@@ -130,7 +130,7 @@ const AttributeGroup = ({
                 <span
                   key={attr.fileMetadata.appData.content.id ?? 'pending'}
                   title={attr.fileMetadata.appData.content.id ?? 'pending'}
-                  className={`block rounded-lg bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900 ${
+                  className={`block rounded-lg bg-background ${
                     !isActive && index !== 0 ? `absolute` : 'relative z-10'
                   }`}
                   style={
@@ -223,9 +223,9 @@ const AddAnotherButton = ({
     );
 
   return (
-    <div className="relative z-10 mb-2 mt-[-1.6rem] flex text-slate-500 transition-colors hover:text-slate-800 hover:dark:text-slate-100">
+    <div className="relative z-10 mb-2 mt-[-1.6rem] flex text-muted-foreground transition-colors hover:text-foreground">
       <span
-        className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
+        className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-background transition-colors hover:bg-surface-container-high"
         onClick={() => setIsActive(true)}
       >
         <Plus className="m-2 h-5 w-5" />
