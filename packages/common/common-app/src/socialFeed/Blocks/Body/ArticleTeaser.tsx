@@ -1,13 +1,13 @@
 import { Article, getChannelDrive, PostContent } from '@homebase-id/js-lib/public';
 import { HomebaseFile } from '@homebase-id/js-lib/core';
 // Self-hosted, so showing an abstract makes no request to a font CDN
-import '@fontsource-variable/source-serif-4/opsz.css';
+import '@fontsource-variable/inter';
 import { t } from '../../../helpers';
 import { Image } from '../../../media/Image';
 
-const SERIF_STYLE = {
-  fontFamily: "'Source Serif 4 Variable', Georgia, serif",
-  fontOpticalSizing: 'auto',
+// The reader's font (Journal's Inter)
+const ABSTRACT_STYLE = {
+  fontFamily: "'Inter Variable', system-ui, sans-serif",
 } as const;
 
 /** The content block of an article's feed card: title, abstract, reading time and a cover thumbnail */
@@ -36,7 +36,7 @@ export const ArticleTeaser = ({
         {article.abstract ? (
           <p
             className="mt-1 line-clamp-3 text-[16px] leading-[1.55] text-foreground/70"
-            style={SERIF_STYLE}
+            style={ABSTRACT_STYLE}
           >
             {article.abstract}
           </p>
