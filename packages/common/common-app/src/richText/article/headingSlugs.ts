@@ -48,7 +48,8 @@ const textOf = (node: JSONContent): string =>
 
 /**
  * Every heading of a cleaned document (`cleanTiptapDoc`), depth first in document order, with the
- * id the article viewer gives it. The viewer and the reader's table of contents both use this.
+ * id the article viewer gives it. The viewer calls it on its sanitized document; the reader's rail
+ * takes the same list from `articleDocHeadings`, not from a document cleaned another way.
  */
 export const articleHeadings = (doc: JSONContent): ArticleHeading[] => {
   const found: Omit<ArticleHeading, 'id'>[] = [];

@@ -991,6 +991,10 @@ export const sanitizeArticleDoc = (doc: unknown): JSONContent =>
     isKnownMark: (type) => Object.hasOwn(markMapping, type),
   });
 
+/** The headings this viewer renders with ids, for a document as stored: the reader's rail lists them. */
+// eslint-disable-next-line react-refresh/only-export-components
+export const articleDocHeadings = (doc: unknown) => indexDoc(sanitizeArticleDoc(doc)).headings;
+
 /** React elements for a sanitized document. A new renderer each time, so element keys start at 0. */
 const renderDoc = (doc: JSONContent) =>
   renderJSONContentToReactElement<{ type: string; attrs?: Record<string, unknown> }, Node>({

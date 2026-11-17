@@ -4,12 +4,12 @@ import type { JSONContent } from '@tiptap/core';
 import allBlocks from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/all-blocks.json';
 import journalNote from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/journal-note.json';
 import {
+  articleDocHeadings,
   ArticleDocRenderer,
   sanitizeArticleDoc,
   type ArticleDocOptions,
 } from './ArticleDocRenderer';
-import { articleHeadings, slugify, uniqueHeadingIds } from './headingSlugs';
-import { cleanTiptapDoc } from '@homebase-id/js-lib/public';
+import { slugify, uniqueHeadingIds } from './headingSlugs';
 
 // Browser-only code (window at import time); stand-ins show what they were given
 vi.mock('../../media/Image', () => ({
@@ -162,11 +162,34 @@ test('a table of contents lists 3+ headings with unique ids', () => {
 });
 
 test("the reader's heading list has the ids the viewer renders", () => {
-  for (const doc of [allBlocks, journalNote]) {
+  const text = (value: string, marks?: unknown[]) => ({ type: 'text', text: value, marks });
+  const heading = (content: unknown[], level = 2) => ({ type: 'heading', attrs: { level }, content });
+  // Types the viewer doesn't know: a block wrapping a heading, one after it, an inline in one, a mark
+  const unknownTypes = {
+    type: 'doc',
+    content: [
+      heading([text('Intro')]),
+      { type: 'someWidget', content: [heading([text('Intro', [{ type: 'glow' }])], 3)] },
+      { type: 'someWidget', attrs: { id: 'x' } },
+      {
+        type: 'constructor',
+        content: [heading([{ type: 'mystery', content: [text('Res')] }, text('ponses')])],
+      },
+      heading([text('Intro')]),
+    ],
+  };
+
+  for (const doc of [allBlocks, journalNote, unknownTypes]) {
     const rendered = [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
     expect(rendered.length).toBeGreaterThan(0);
-    expect(articleHeadings(cleanTiptapDoc(doc)).map((heading) => heading.id)).toEqual(rendered);
+    expect(articleDocHeadings(doc).map((heading) => heading.id)).toEqual(rendered);
   }
+  expect(articleDocHeadings(unknownTypes).map((heading) => heading.id)).toEqual([
+    'intro',
+    'intro-2',
+    'responses',
+    'intro-3',
+  ]);
 });
 
 test('images with a fileKey need the post options', () => {

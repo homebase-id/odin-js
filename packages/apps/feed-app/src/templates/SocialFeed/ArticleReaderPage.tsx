@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -37,17 +37,11 @@ const ArticleReaderPage = () => {
   const navigate = useNavigate();
   const doClose = () => navigate(state?.referrer || -1, { preventScrollReset: true });
 
-  // The feed was scrolled; the article starts at its top, unless the link names a place in it
+  // The feed was scrolled; the article starts at its top, unless the link names a place in it,
+  // which the reader scrolls to once that is on the page
   useLayoutEffect(() => {
     if (!window.location.hash) window.scrollTo(0, 0);
   }, [identityKey, channelKey, postKey]);
-
-  // Arriving at #responses: there, once the reader is on the page
-  const isLoaded = !!post;
-  useEffect(() => {
-    const id = window.location.hash.slice(1);
-    if (isLoaded && id) document.getElementById(id)?.scrollIntoView();
-  }, [isLoaded]);
 
   if (fetchedPost && !post) return <NotFound />;
 

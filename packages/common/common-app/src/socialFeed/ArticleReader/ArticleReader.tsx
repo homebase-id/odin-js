@@ -12,7 +12,6 @@ import {
   Article,
   articleDocOf,
   ChannelDefinition,
-  cleanTiptapDoc,
   getChannelDrive,
   parseReactionPreview,
   PostContent,
@@ -24,7 +23,7 @@ import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import '@fontsource-variable/source-serif-4/opsz.css';
 import '@fontsource-variable/source-serif-4/opsz-italic.css';
 import '../../richText/article/articleProse.css';
-import { articleHeadings, type ArticleHeading } from '../../richText/article/headingSlugs';
+import type { ArticleHeading } from '../../richText/article/headingSlugs';
 import {
   t,
   ArticleBody,
@@ -45,6 +44,13 @@ import { ArrowLeft, Bubble, Heart } from '../../ui/Icons';
 
 /** Rail and inline box both list the headings from this many on, as ArticleDocRenderer does. */
 const MIN_TOC_HEADINGS = 3;
+
+/**
+ * `#responses`, in the address or on the 💬 link, is the responses. A heading can have that id too
+ * ("Responses"), so the section's own is one no heading slug can be: slugs have no '_'.
+ */
+const RESPONSES_HASH = 'responses';
+const RESPONSES_ID = 'reader_responses';
 
 /**
  * An article as a page of its own, for long reading: the cover, title, abstract and byline, the body
@@ -114,6 +120,7 @@ export const ArticleReader = ({
   const proseRef = useRef<HTMLDivElement>(null);
 
   useEscape(onBack);
+  useArrivalHash(proseRef);
 
   const cover = article.primaryMediaFile
     ? payloads?.find((payload) => payload.key === article.primaryMediaFile?.fileKey)
@@ -256,7 +263,7 @@ export const ArticleReader = ({
 
           {reactionContext ? (
             <section
-              id="responses"
+              id={RESPONSES_ID}
               aria-label={t('Responses')}
               className="mt-12 grid scroll-mt-20 grid-flow-row gap-2"
             >
@@ -351,7 +358,8 @@ const ArticleCounts = ({
       ) : null}
       {canComment || comments ? (
         <a
-          href="#responses"
+          href={`#${RESPONSES_HASH}`}
+          data-responses=""
           className="inline-flex items-center gap-1.5 rounded-md hover:text-foreground"
         >
           <span aria-hidden="true">
@@ -407,8 +415,9 @@ const OnThisPage = ({
 };
 
 /**
- * The headings ArticleDocRenderer gives ids, from the document it shows. None for an article
- * without a `bodyDoc`: its Slate body renders headings without ids.
+ * The headings ArticleDocRenderer gives ids, from the document it shows, sanitized as it does: from
+ * its own chunk, which ArticleBody loads for the same article. None for an article without a
+ * `bodyDoc`: its Slate body renders headings without ids.
  */
 const useArticleHeadings = (article: Pick<Article, 'body' | 'bodyDoc'>) => {
   const [headings, setHeadings] = useState<ArticleHeading[]>([]);
@@ -418,8 +427,8 @@ const useArticleHeadings = (article: Pick<Article, 'body' | 'bodyDoc'>) => {
       return;
     }
     let current = true;
-    articleDocOf(article).then(
-      (doc) => current && setHeadings(articleHeadings(cleanTiptapDoc(doc))),
+    Promise.all([articleDocOf(article), import('../../richText/article/ArticleDocRenderer')]).then(
+      ([doc, { articleDocHeadings }]) => current && setHeadings(articleDocHeadings(doc)),
       () => current && setHeadings([])
     );
     return () => {
@@ -459,12 +468,12 @@ const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLE
       { rootMargin: '-56px 0px -60% 0px' }
     );
 
-    // The body renders once the viewer's chunk is in: observe the headings when they are there
+    // The body renders once the viewer's chunk is in, all of it at once: observe the headings it
+    // has as soon as there are any
     const observe = () => {
-      const elements = ids.map((id) => document.getElementById(id));
-      if (elements.some((element) => !element)) return false;
-      elements.forEach((element) => intersection.observe(element as HTMLElement));
-      return true;
+      const elements = ids.flatMap((id) => document.getElementById(id) ?? []);
+      elements.forEach((element) => intersection.observe(element));
+      return elements.length > 0;
     };
     const mutations = new MutationObserver(() => observe() && mutations.disconnect());
     if (!observe()) mutations.observe(root, { childList: true, subtree: true });
@@ -476,6 +485,38 @@ const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLE
   }, [headings, container]);
 
   return active;
+};
+
+/**
+ * Arriving at a place in the article (`#responses`, a heading's `#id`): there once it is on the page,
+ * and kept there while the body above it renders (the viewer's chunk, then its images), until the
+ * reader scrolls, clicks or types, or 10 seconds pass.
+ */
+const useArrivalHash = (body: RefObject<HTMLElement>) => {
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    const element = body.current;
+    if (!hash || !element) return;
+    let id = hash;
+    try {
+      id = hash === RESPONSES_HASH ? RESPONSES_ID : decodeURIComponent(hash);
+    } catch {
+      // A malformed escape ('%'): the hash as it is
+    }
+
+    // Fires once when observing starts, then each time the body changes height
+    const resize = new ResizeObserver(() => document.getElementById(id)?.scrollIntoView());
+    const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+    const stop = () => {
+      resize.disconnect();
+      clearTimeout(timer);
+      events.forEach((type) => window.removeEventListener(type, stop));
+    };
+    const timer = setTimeout(stop, 10_000);
+    events.forEach((type) => window.addEventListener(type, stop, { passive: true }));
+    resize.observe(element);
+    return stop;
+  }, [body]);
 };
 
 /** Escape goes back, unless it is a field's (typing a response) or a dialog's. */
@@ -505,8 +546,10 @@ const useEscape = (onBack: (() => void) | undefined) => {
 const jumpInPlace = (e: MouseEvent<HTMLElement>) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
     return;
-  const href = (e.target as Element).closest?.('a[href^="#"]')?.getAttribute('href');
-  const target = href && href.length > 1 ? document.getElementById(href.slice(1)) : null;
+  const link = (e.target as Element).closest?.('a[href^="#"]');
+  const href = link?.getAttribute('href');
+  const id = link?.hasAttribute('data-responses') ? RESPONSES_ID : href?.slice(1);
+  const target = id ? document.getElementById(id) : null;
   if (!target) return;
   e.preventDefault();
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
