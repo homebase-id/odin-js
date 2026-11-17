@@ -391,7 +391,7 @@ const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactN
 
   return (
     <header
-      className={`sticky top-0 z-30 border-b bg-[color-mix(in_srgb,var(--article-surface)_90%,transparent)] backdrop-blur-md motion-safe:transition-colors motion-safe:duration-200 ${
+      className={`sticky top-0 z-20 border-b bg-[color-mix(in_srgb,var(--article-surface)_90%,transparent)] backdrop-blur-md motion-safe:transition-colors motion-safe:duration-200 ${
         scrolled ? 'border-foreground/10' : 'border-transparent'
       }`}
     >
