@@ -1,4 +1,4 @@
-import { portraitZoom, type LayoutProps } from '../../CardDesign';
+import type { LayoutProps } from '../../CardDesign';
 import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
@@ -15,10 +15,7 @@ const CONTENT_SCRIM =
   'linear-gradient(to bottom, transparent, color-mix(in srgb, var(--card-ground) 55%, transparent) 80px)';
 
 export const PosterCard = ({ design, data }: LayoutProps) => (
-  <div
-    className="relative flex min-h-[inherit] flex-col justify-end px-6 pb-6"
-    style={{ paddingTop: `${Math.round(45 * portraitZoom(design.portraits[0]?.size))}%` }}
-  >
+  <div className="relative flex min-h-[inherit] flex-col justify-end px-6 pb-6 pt-[45%]">
     <CardGround design={design} data={data} />
     <div className="relative">
       <div

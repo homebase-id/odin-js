@@ -323,7 +323,8 @@ describe('portrait size', () => {
       </MemoryRouter>
     );
   };
-  const LAYOUTS = ['poster', 'board', 'collage', 'dossier', 'links'] as const;
+  // poster has no portrait slot, so the app never sends it a size
+  const LAYOUTS = ['board', 'collage', 'dossier', 'links'] as const;
 
   it.each(LAYOUTS)('%s: medium is the same as no size, small and large differ', (layout) => {
     for (const wide of [false, true]) {
@@ -339,13 +340,6 @@ describe('portrait size', () => {
 
   // The property that actually sets the portrait size on each layout; zoom does not scale percent widths
   const SIZE_PROPERTY = {
-    poster: {
-      card: { small: 'padding-top:36%', large: 'padding-top:56%' },
-      page: {
-        small: 'min-height:calc(clamp(480px,50vw,600px) * 0.8)',
-        large: 'min-height:calc(clamp(480px,50vw,600px) * 1.25)',
-      },
-    },
     board: {
       card: { small: 'zoom:0.8', large: 'zoom:1.25' },
       page: { small: 'zoom:0.8', large: 'zoom:1.25' },

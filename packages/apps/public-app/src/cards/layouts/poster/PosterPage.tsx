@@ -1,12 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { t, useDotYouClientContext } from '@homebase-id/common-app';
-import {
-  CARD_FOCUS as FOCUS,
-  portraitZoom,
-  type LayoutProps,
-  type PortraitSize,
-} from '../../CardDesign';
+import { CARD_FOCUS as FOCUS, type LayoutProps } from '../../CardDesign';
 import type { CardData, CardPost } from '../../useCardData';
 import { CardBlocks, isUsableLink } from '../../parts/Blocks';
 import { CardName } from '../../parts/Type';
@@ -106,17 +101,11 @@ const HeroGround = ({ design, data }: LayoutProps) => {
   );
 };
 
-const heroStyle = (size?: PortraitSize) =>
-  size && size !== 'medium'
-    ? { minHeight: `calc(clamp(480px,50vw,600px) * ${portraitZoom(size)})` }
-    : undefined;
-
 const Hero = ({ design, data, grow }: LayoutProps & { grow: boolean }) => (
   <section
     className={`relative isolate flex min-h-[clamp(480px,50vw,600px)] flex-col justify-end overflow-hidden pb-10 pt-24 ${GUTTER} ${
       grow ? 'flex-1' : ''
     }`}
-    style={heroStyle(design.portraits[0]?.size)}
   >
     <HeroGround design={design} data={data} />
     <div className={INNER}>
