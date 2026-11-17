@@ -1,4 +1,83 @@
 /*
+ * The colours of the article's blocks: Homebase's Material 3 palette, as the chat app has it
+ * (chat-kmp's homebase-common ui/theme/Color.kt), light and dark. Warning has no role there: it is
+ * a Material 3 amber pair. On :root, under names of their own, because the viewer also renders
+ * outside the reader (a post's detail page), and the live-block tokens below are set on <html>.
+ */
+:root {
+  --article-surface: #fbfcff;
+  --article-on-surface: #1b1b1d;
+  --article-surface-variant: #e7ebf3;
+  --article-on-surface-variant: #545863;
+  --article-outline-variant: #cfd4de;
+  --article-primary: #2c58c3;
+  --article-on-primary: #ffffff;
+  --article-primary-container: #d2dffb;
+  --article-on-primary-container: #051845;
+  --article-secondary: #586071;
+  --article-secondary-container: #dce5f9;
+  --article-on-secondary-container: #151d2c;
+  --article-error: #ba1b1b;
+  --article-on-error: #ffffff;
+  --article-error-container: #ffdad4;
+  --article-warning: #855300;
+  --article-warning-container: #ffddb3;
+}
+
+:root.dark {
+  --article-surface: #1b1c1f;
+  --article-on-surface: #e2e1e5;
+  --article-surface-variant: #303133;
+  --article-on-surface-variant: #bebfc5;
+  --article-outline-variant: #3e414a;
+  --article-primary: #b6c5fa;
+  --article-on-primary: #1e2438;
+  --article-primary-container: #464b5c;
+  --article-on-primary-container: #dbe1fc;
+  --article-secondary: #c1c6dd;
+  --article-secondary-container: #414659;
+  --article-on-secondary-container: #dce1f9;
+  --article-error: #ffb4a9;
+  --article-on-error: #690005;
+  --article-error-container: #930006;
+  --article-warning: #ffb951;
+  --article-warning-container: #5e3f00;
+}
+
+/*
+ * Live blocks (@2002bishwajeet/live-blocks) read their theme off <html>, under these names, which
+ * the apps don't use: the reader sets data-article-reader on <html> while it is open. --font-sans
+ * is the font mermaid lays its labels out in; the page's own default font, which Tailwind derives
+ * from --font-sans, stays as it was.
+ */
+:root[data-article-reader] {
+  --background: var(--article-surface);
+  --foreground: var(--article-on-surface);
+  --card: var(--article-surface);
+  --card-foreground: var(--article-on-surface);
+  --popover: var(--article-surface);
+  --popover-foreground: var(--article-on-surface);
+  --muted: var(--article-surface-variant);
+  --muted-foreground: var(--article-on-surface-variant);
+  --border: var(--article-outline-variant);
+  --input: var(--article-outline-variant);
+  --primary: var(--article-primary);
+  --primary-foreground: var(--article-on-primary);
+  --secondary: var(--article-secondary-container);
+  --secondary-foreground: var(--article-on-secondary-container);
+  --accent: var(--article-primary-container);
+  --accent-foreground: var(--article-on-primary-container);
+  --destructive: var(--article-error);
+  --destructive-foreground: var(--article-on-error);
+  --ring: var(--article-primary);
+  --radius: 0.5rem;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --default-font-family:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+/*
  * The article reader's type scale, around Journal's blocks (ArticleDocRenderer), which inherit it:
  * Inter for everything, as in a Journal note (its src/index.css), and the system mono for code.
  * Plain CSS, so it means the same under Tailwind 3 and 4; scoped selectors win over the blocks' own

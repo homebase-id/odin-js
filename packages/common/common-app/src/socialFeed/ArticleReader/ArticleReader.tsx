@@ -124,6 +124,11 @@ export const ArticleReader = ({
 
   useEscape(onBack);
   useArrivalHash(proseRef);
+  // The live blocks' theme, read off <html> (articleProse.css): Homebase's palette while the reader is open
+  useEffect(() => {
+    document.documentElement.setAttribute('data-article-reader', '');
+    return () => document.documentElement.removeAttribute('data-article-reader');
+  }, []);
 
   const cover = article.primaryMediaFile
     ? payloads?.find((payload) => payload.key === article.primaryMediaFile?.fileKey)
@@ -136,9 +141,12 @@ export const ArticleReader = ({
   const openImage = (e: MouseEvent<HTMLElement>) => {
     const trigger = (e.target as Element).closest?.('[data-zoom-image]');
     if (!(trigger instanceof HTMLElement) || !articleRef.current) return;
+    // Masonry columns put images out of document order on the page: the body's carry their place
+    // (the cover has none and comes first)
+    const order = (el: HTMLElement) => Number(el.dataset.zoomOrder ?? -1);
     const triggers = Array.from(
       articleRef.current.querySelectorAll<HTMLElement>('[data-zoom-image]')
-    );
+    ).sort((a, b) => order(a) - order(b));
     const targetDrive = getChannelDrive(article.channelId);
     const images = triggers.map(({ dataset }): LightboxImage => {
       const { fileKey, fileId, globalTransitId, src, alt } = dataset;

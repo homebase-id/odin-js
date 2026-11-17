@@ -89,7 +89,7 @@ test('renders every block of all-blocks.json', () => {
   // Images go through Image with the post's file; captions in figcaption
   expect(html).toContain('<figure');
   expect(html).toContain(
-    '<figcaption class="mt-1.5 block text-center text-sm text-foreground/60">Its caption</figcaption>'
+    '<figcaption class="mt-1.5 block text-center text-sm text-[color:var(--article-on-surface-variant)]">Its caption</figcaption>'
   );
   expect(html).toContain('data-file-key="pst_rtei0" data-file-id="post-file" alt="A photo"');
   expect(html).toContain('style="--image-width:320px"');
@@ -222,6 +222,39 @@ test('with zoomImages, each image that loads is a button carrying what the viewe
   expect(html).toContain('aria-label="First: view full screen"');
   expect(html).toContain('data-src="https://x.example/b.png"');
   expect(html).not.toContain('javascript:');
+});
+
+test('grid and masonry galleries read left to right, and the viewer gets document order', () => {
+  const gallery = (layout: string) => ({
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/0.png' } },
+      {
+        type: 'gallery',
+        attrs: { layout },
+        content: [1, 2, 3, 4, 5].map((n) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${n}.png`, width: n * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  const orders = (html: string) =>
+    [...html.matchAll(/data-src="https:\/\/x\.example\/(\d)\.png" data-zoom-order="(\d)"/g)].map(
+      (m) => `${m[1]}:${m[2]}`
+    );
+
+  // Masonry: dealt into three columns, so the first of each column is 1, 2, 3
+  const masonry = render(gallery('masonry'), { zoomImages: true });
+  expect(srcs(masonry)).toEqual(['0', '1', '4', '2', '5', '3']);
+  expect(orders(masonry).sort()).toEqual(['0:0', '1:1', '2:2', '3:3', '4:4', '5:5']);
+
+  // Grid: one wrapping row in document order, each image flexing by its aspect ratio
+  const grid = render(gallery('grid'));
+  expect(srcs(grid)).toEqual(['0', '1', '2', '3', '4', '5']);
+  expect(grid).toContain('style="flex:3 1 calc(3 * var(--row-height))"');
+  expect(grid).toContain('[flex:10000_1_0px]');
 });
 
 const malformed = {
