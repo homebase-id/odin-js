@@ -1,5 +1,5 @@
 import { markdownToRichText, t } from '../../helpers';
-import { RichTextRenderer } from '../../richText';
+import { RichTextRenderer, captionBlocksClassName } from '../../richText';
 
 export const WritePreviewToggle = ({
   isPreview,
@@ -30,7 +30,10 @@ export const WritePreviewToggle = ({
 export const CaptionPreview = ({ caption }: { caption: string }) => {
   const text = caption.trim();
   return text ? (
-    <RichTextRenderer body={markdownToRichText(text) ?? [{ text }]} className="min-h-12 py-2" />
+    <RichTextRenderer
+      body={markdownToRichText(text) ?? [{ text }]}
+      className={`min-h-12 py-2 ${captionBlocksClassName}`}
+    />
   ) : (
     <p className="min-h-12 py-2 text-muted-foreground">{t('Nothing to preview')}</p>
   );
