@@ -99,16 +99,10 @@ describe('socials variants', () => {
     expect(html.match(/@frodo/g)).toHaveLength(5);
   });
 
-  it('wordmark names the first account and keeps the rest as glyphs', () => {
+  it('wordmark draws a compact named tile per network, first account first', () => {
     const html = renderToStaticMarkup(<CardSocials variant="wordmark" data={data} />);
     expect(html.indexOf('twitter.com')).toBeLessThan(html.indexOf('github.com'));
-    expect(html).toContain('aria-label="github"');
-  });
-
-  it('wordmark on one social renders only the box', () => {
-    const one = { ...data, socials: data.socials.slice(0, 1) };
-    const html = renderToStaticMarkup(<CardSocials variant="wordmark" data={one} />);
-    expect(html).not.toContain('<ul');
+    expect(html.match(/capitalize/g)).toHaveLength(5);
   });
 });
 
@@ -600,6 +594,33 @@ describe('socials on the shared layouts and the collage page', () => {
     const list = /<ul([^>]*data-socials="bar"[^>]*)>/.exec(html);
     expect(list?.[1]).toContain('flex-wrap');
   });
+
+  it.each(LAYOUTS)(
+    '%s: wordmark on the compact card is a wrapping row with every network (3 and 6)',
+    (layout) => {
+      for (const count of [3, 6]) {
+        const socials = Array.from({ length: count }, (_, i) => ({
+          type: `net${i}`,
+          link: `https://net${i}.com/frodo`,
+          children: 'frodo',
+          icon: Icon,
+        }));
+        const design = applyOverrides(CARD_PRESETS[layout], { socials: 'wordmark' });
+        const html = renderToStaticMarkup(
+          <MemoryRouter>
+            <HomebaseCard design={design} data={{ ...data, socials } as unknown as CardData} />
+          </MemoryRouter>
+        );
+        const list = /<ul([^>]*data-socials="wordmark"[^>]*)>(.*?)<\/ul>/.exec(html);
+        expect(list).not.toBeNull();
+        const tokens = (list?.[1].match(/class="([^"]*)"/)?.[1] ?? '').split(' ');
+        expect(tokens).toContain('flex-wrap');
+        expect(tokens).not.toContain('flex-col');
+        for (const s of socials) expect(list?.[2]).toContain(`href="${s.link}"`);
+        expect(list?.[2].match(/capitalize/g)).toHaveLength(count);
+      }
+    }
+  );
 
   it('the collage page follows the chosen style instead of hard-coding two', () => {
     const outputs = (['glyphs', 'bar', 'wordmark', 'handles'] as const).map((s) =>
