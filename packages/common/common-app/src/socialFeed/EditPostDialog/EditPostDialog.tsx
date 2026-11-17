@@ -21,7 +21,7 @@ import { useChannel, usePortal } from '../../hooks';
 import { usePostBody } from '../../hooks/socialFeed/post/usePostBody';
 import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
 import { Save } from '../../ui/Icons';
-import { CaptionPreview, WritePreviewToggle } from '../Composer/PostComposer';
+import { CaptionPreview, WritePreviewToggle } from '../Composer/WritePreview';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
@@ -60,7 +60,7 @@ export const EditPostDialog = ({
   const isFullTextLoaded = !hasFullTextPayload || !!fullPost;
 
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
-  const [isPreview, setIsPreview] = useState(false);
+  const [isPreview, setIsPreview] = useState<boolean>();
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter(
       (p) =>
@@ -140,7 +140,7 @@ export const EditPostDialog = ({
           }}
         >
           <div className="mb-2 flex flex-row justify-end">
-            <WritePreviewToggle isPreview={isPreview} onChange={setIsPreview} />
+            <WritePreviewToggle isPreview={!!isPreview} onChange={setIsPreview} />
           </div>
           {isPreview ? (
             <CaptionPreview caption={postFile.fileMetadata.appData.content.caption} />
@@ -155,6 +155,7 @@ export const EditPostDialog = ({
               }}
               placeholder={t("What's up?")}
               className={`w-full resize-none rounded-md border bg-transparent p-2 relative`}
+              autoFocus={isPreview === false}
               autoCompleters={[AllContactMentionDropdown]}
             />
           )}
