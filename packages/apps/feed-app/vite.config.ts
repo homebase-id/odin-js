@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 const hostConfig = {
   host: 'dev.dotyou.cloud',
@@ -10,7 +11,7 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     ...hostConfig,
     https: {

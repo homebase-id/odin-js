@@ -1,6 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '../../../../common/common-app/src/tailwind-v4-compat.css';
+
+@source '../../../../libs/ui-lib/src';
+@source '../../../../common/common-app/src';
+@source '../../../../common/rich-text-editor/src';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #6366f1;
+  --color-primary-contrast: #fff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-contrast: #000;
+
+  --animate-slowding: slowding 1.2s ease-in-out;
+  @keyframes slowding {
+    0%,
+    60% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+/* These colors read the RGB channels the Layout sets at runtime (`--color-foreground: 22 22 22`).
+   The theme keys share those names, so they are inlined and kept out of :root (`reference`). */
+@theme inline reference {
+  --color-page-background: rgb(var(--color-page-background));
+  --color-background: rgb(var(--color-background));
+  --color-foreground: rgb(var(--color-foreground));
+}
 
 .dark select option {
   background-color: black;
@@ -19,9 +50,9 @@
 }
 
 @layer base {
-  *,
-  ::before,
-  ::after {
-    @apply dark:border-gray-600;
+  .dark *,
+  .dark ::before,
+  .dark ::after {
+    border-color: color-mix(in oklab, var(--color-gray-600) var(--tw-border-alpha, 100%), transparent);
   }
 }
