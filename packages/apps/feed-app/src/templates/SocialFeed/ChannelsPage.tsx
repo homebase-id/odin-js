@@ -69,7 +69,7 @@ export const ChannelsPage = () => {
               <div key={'new'}>
                 <div
                   onClick={() => setIsAddNew(true)}
-                  className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
+                  className="flex cursor-pointer flex-row items-center rounded-md border border-outline-variant bg-background px-4 py-4"
                 >
                   <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
                 </div>
@@ -83,7 +83,7 @@ export const ChannelsPage = () => {
         <div className="px-2 sm:px-10">
           <h2 className="mb-2">
             {t('Collaborative channels')}
-            <small className="block text-sm text-slate-400">
+            <small className="block text-sm text-muted-foreground">
               {t(
                 'You have permissions to write to these channels that are owned by another identity'
               )}
@@ -114,7 +114,7 @@ export const ChannelsPage = () => {
                 setDiscoverCollaborativeChannels(true);
                 setTimeout(() => refetchCollaborativeChannels(), 100);
               }}
-              className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
+              className="flex cursor-pointer flex-row items-center rounded-md border border-outline-variant bg-background px-4 py-4"
             >
               {isRefetchingCollaborativeChannels && discoverCollaborativeChannels ? (
                 <Loader className="mr-2 h-5 w-5" />

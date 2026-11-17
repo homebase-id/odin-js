@@ -76,7 +76,7 @@ export const IncomingCollaborativeChannelPage = () => {
         <div className="px-2 sm:px-10">
           <div className="mb-4 max-w-xl">
             <h2 className="text-xl">{t('Save group channel?')}</h2>
-            <p className="text-slate-400">
+            <p className="text-muted-foreground">
               {t(
                 'By saving, you add a link to the collaborative channel to your feed-app. This allows easy access to post to this channel from your feed-app.'
               )}

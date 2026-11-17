@@ -119,7 +119,7 @@ const SocialFeedMainContent = () => {
   return (
     <>
       {isReactNative ? null : (
-        <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border"/>
+        <PostComposer className="mb-2 w-full rounded-md border-outline-variant bg-background p-4 shadow-sm lg:border"/>
       )}
       {postsLoading ? (
         <div className="flex flex-col gap-4">

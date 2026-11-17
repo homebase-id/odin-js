@@ -69,7 +69,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
 
     return (
         <div
-            className={`w-full break-words rounded-lg ${highlight ? 'bg-indigo-100 dark:bg-indigo-900' : ''} ${className ?? ''}`}
+            className={`w-full break-words rounded-lg ${highlight ? 'bg-primary-container' : ''} ${className ?? ''}`}
             data-odin-id={odinId}
         >
             <ErrorBoundary>
@@ -78,9 +78,9 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                     target="__blank"
                     rel="nofollow noreferrer"
                     preventScrollReset={true}
-                    className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors ${
-                        isArticle ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
-                    } dark:border-gray-800 lg:border`}
+                    className={`relative flex h-full flex-col rounded-lg border-outline-variant transition-colors ${
+                        isArticle ? 'hover:shadow-md hover:dark:shadow-outline-variant' : ''
+                    } lg:border`}
                 >
                     <PostSource postFile={postFile} className="rounded-t-lg"/>
                     <div className={`flex flex-row gap-4 px-3 pt-3 sm:px-4 ${isArticle ? 'pb-2' : 'pb-3'}`}>
@@ -181,7 +181,7 @@ export const NewPostTeaserCard: FC<PostTeaserCardProps> = (props) => {
     return (
         <PostTeaserCard
             {...props}
-            className={`${props.className} pointer-events-none bg-slate-100 dark:bg-slate-600`}
+            className={`${props.className} pointer-events-none bg-surface-container-highest`}
         />
     );
 };
