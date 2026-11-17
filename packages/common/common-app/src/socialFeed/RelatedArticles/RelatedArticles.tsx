@@ -1,9 +1,29 @@
-import { ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
+import { BlogConfig, ChannelDefinition, PostContent } from '@homebase-id/js-lib/public';
 import { PostTeaser } from '../PostListItem/PostTeaser';
+import { ArticleTeaser } from '../Blocks/Body/ArticleTeaser';
+import { FakeAnchor } from '../../ui';
+import { useChannel } from '../../hooks/socialFeed/channels/useChannel';
+import { HOME_ROOT_PATH } from '../../constants';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 import { t } from '../../helpers/i18n/dictionary';
 import { usePostsInfinite } from '../../hooks/socialFeed/post/usePostsInfinite';
 import { ChannelDefinitionVm } from '../../hooks/socialFeed/channels/useChannels';
+
+// An article's own card: the cover when it has one, else text only; every card in a row is as tall as the tallest
+const RelatedArticleCard = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
+  const post = postFile.fileMetadata.appData.content;
+  const { data: channel } = useChannel({ channelKey: post.channelId }).fetch;
+  const slug = channel ? channel.fileMetadata.appData.content.slug : BlogConfig.PublicChannelSlug;
+
+  return (
+    <FakeAnchor
+      href={`${HOME_ROOT_PATH}posts/${slug}/${post.slug ?? post.id}`}
+      className="block h-full rounded-lg border border-gray-200 border-opacity-60 bg-background p-4 transition-colors hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600"
+    >
+      <ArticleTeaser postFile={postFile} />
+    </FakeAnchor>
+  );
+};
 
 export const RelatedArticles = ({
   blog,
@@ -36,13 +56,18 @@ export const RelatedArticles = ({
           {t('Latest posts')}{' '}
           {channel && <small>| {channel.fileMetadata.appData.content.name}</small>}
         </h2>
-        <div className="-m-1 flex flex-row flex-wrap">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
           {filteredBlogPosts.map((postFile) => {
-            return (
+            return postFile.fileMetadata.appData.content.type === 'Article' ? (
+              <RelatedArticleCard
+                postFile={postFile}
+                key={postFile.fileMetadata.appData.content.id}
+              />
+            ) : (
               <PostTeaser
                 postFile={postFile}
                 key={postFile.fileMetadata.appData.content.id}
-                className={`p-1 sm:w-1/2 md:w-1/3`}
+                className="h-full"
                 forceAspectRatio={true}
                 showAuthor={channel?.fileMetadata.appData.content.isCollaborative}
               />
