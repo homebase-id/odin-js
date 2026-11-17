@@ -39,17 +39,16 @@
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
     "@types/jest": "^27.5.2",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/zxcvbn": "^4.4.4",
     "@vitejs/plugin-react": "4.3.1",
-    "autoprefixer": "10.4.20",
     "cross-env": "^7.0.3",
-    "postcss": "8.5.23",
-    "prettier-plugin-tailwindcss": "0.6.6",
-    "tailwindcss": "3.4.10",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "tailwindcss": "^4.3.5",
     "vite-plugin-pwa": "^0.21.1",
     "vitest": "^4.1.8"
   },
