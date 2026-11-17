@@ -76,7 +76,7 @@ test('renders every block of all-blocks.json', () => {
   expect(html).toContain('katex-display');
 
   // Code is highlighted
-  expect(html).toMatch(/<span class="text-\[#a626a4\][^"]*">const<\/span>/);
+  expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">const<\/span>/);
 
   // Tables, task lists, callouts, toggles
   expect(html).toContain('<table');
@@ -603,7 +603,7 @@ describe('a note published from Journal', () => {
     expect(html).not.toContain('k3f9');
     expect(html).not.toMatch(/="[^"]*id=x/);
     // react is highlighted as JavaScript
-    expect(html).toMatch(/<span class="text-\[#a626a4\][^"]*">export<\/span>/);
+    expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">export<\/span>/);
   });
 
   test('shows live blocks as code under a label, and an svg drawing as an image, until LiveBlock loads', () => {

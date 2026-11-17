@@ -124,7 +124,7 @@ export const ArticleReader = ({
 
   useEscape(onBack);
   useArrivalHash(proseRef);
-  // The live blocks' theme, read off <html> (articleProse.css): Homebase's palette while the reader is open
+  // The live blocks' theme, read off <html> (articleProse.css): the article's palette while the reader is open
   useEffect(() => {
     document.documentElement.setAttribute('data-article-reader', '');
     return () => document.documentElement.removeAttribute('data-article-reader');
@@ -170,7 +170,10 @@ export const ArticleReader = ({
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground" onClick={jumpInPlace}>
+    <div
+      className="min-h-screen bg-[var(--article-surface)] text-[color:var(--article-on-surface)]"
+      onClick={jumpInPlace}
+    >
       <ReaderBar onBack={onBack}>
         <PostContextMenu
           odinId={odinId}
@@ -273,7 +276,7 @@ export const ArticleReader = ({
 
           <div
             ref={proseRef}
-            className="article-prose text-foreground/90"
+            className="article-prose"
             data-toc-rail={rail ? '' : undefined}
           >
             <ArticleBody
@@ -388,7 +391,7 @@ const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactN
 
   return (
     <header
-      className={`sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md motion-safe:transition-colors motion-safe:duration-200 ${
+      className={`sticky top-0 z-30 border-b bg-[color-mix(in_srgb,var(--article-surface)_90%,transparent)] backdrop-blur-md motion-safe:transition-colors motion-safe:duration-200 ${
         scrolled ? 'border-foreground/10' : 'border-transparent'
       }`}
     >

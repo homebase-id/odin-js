@@ -1,47 +1,53 @@
 /*
- * The colours of the article's blocks: Homebase's Material 3 palette, as the chat app has it
- * (chat-kmp's homebase-common ui/theme/Color.kt), light and dark. Warning has no role there: it is
- * a Material 3 amber pair. On :root, under names of their own, because the viewer also renders
- * outside the reader (a post's detail page), and the live-block tokens below are set on <html>.
+ * The colours of the article's blocks: Notion's paper look, light and dark. Warm greys for text,
+ * code and table lines; soft tinted callouts, each with an icon in its accent. On :root, under
+ * names of their own, because the viewer also renders outside the reader (a post's detail page),
+ * and the live-block tokens below are set on <html>.
  */
 :root {
-  --article-surface: #fbfcff;
-  --article-on-surface: #1b1b1d;
-  --article-surface-variant: #e7ebf3;
-  --article-on-surface-variant: #545863;
-  --article-outline-variant: #cfd4de;
-  --article-primary: #2c58c3;
+  /* Page and body text */
+  --article-surface: #ffffff;
+  --article-on-surface: #37352f;
+  /* Code blocks and table headers */
+  --article-surface-variant: #f7f6f3;
+  /* Inline code and kbd */
+  --article-surface-container: #f1f1ef;
+  --article-inline-code: #eb5757;
+  /* Muted text and captions */
+  --article-on-surface-variant: #787774;
+  /* Borders and table lines */
+  --article-outline-variant: #e9e9e7;
+  /* Callouts: each accent (the icon) and its container (the background) */
+  --article-primary: #337ea9;
   --article-on-primary: #ffffff;
-  --article-primary-container: #d2dffb;
-  --article-on-primary-container: #051845;
-  --article-secondary: #586071;
-  --article-secondary-container: #dce5f9;
-  --article-on-secondary-container: #151d2c;
-  --article-error: #ba1b1b;
+  --article-primary-container: #e7f3f8;
+  --article-secondary: #448361;
+  --article-secondary-container: #edf3ec;
+  --article-error: #d44c47;
   --article-on-error: #ffffff;
-  --article-error-container: #ffdad4;
-  --article-warning: #855300;
-  --article-warning-container: #ffddb3;
+  --article-error-container: #fdebec;
+  --article-warning: #cb912f;
+  --article-warning-container: #fbf3db;
 }
 
 :root.dark {
-  --article-surface: #1b1c1f;
-  --article-on-surface: #e2e1e5;
-  --article-surface-variant: #303133;
-  --article-on-surface-variant: #bebfc5;
-  --article-outline-variant: #3e414a;
-  --article-primary: #b6c5fa;
-  --article-on-primary: #1e2438;
-  --article-primary-container: #464b5c;
-  --article-on-primary-container: #dbe1fc;
-  --article-secondary: #c1c6dd;
-  --article-secondary-container: #414659;
-  --article-on-secondary-container: #dce1f9;
-  --article-error: #ffb4a9;
-  --article-on-error: #690005;
-  --article-error-container: #930006;
-  --article-warning: #ffb951;
-  --article-warning-container: #5e3f00;
+  --article-surface: #191919;
+  --article-on-surface: #d4d4d4;
+  --article-surface-variant: #202020;
+  --article-surface-container: #2a2a2a;
+  --article-inline-code: #ff7369;
+  --article-on-surface-variant: #9b9b9b;
+  --article-outline-variant: #2f2f2f;
+  --article-primary: #529cca;
+  --article-on-primary: #191919;
+  --article-primary-container: #1b2b36;
+  --article-secondary: #4dab9a;
+  --article-secondary-container: #1d2b25;
+  --article-error: #df5452;
+  --article-on-error: #191919;
+  --article-error-container: #33201f;
+  --article-warning: #ca9849;
+  --article-warning-container: #2e2a1c;
 }
 
 /*
@@ -63,10 +69,10 @@
   --input: var(--article-outline-variant);
   --primary: var(--article-primary);
   --primary-foreground: var(--article-on-primary);
-  --secondary: var(--article-secondary-container);
-  --secondary-foreground: var(--article-on-secondary-container);
-  --accent: var(--article-primary-container);
-  --accent-foreground: var(--article-on-primary-container);
+  --secondary: var(--article-surface-container);
+  --secondary-foreground: var(--article-on-surface);
+  --accent: var(--article-surface-container);
+  --accent-foreground: var(--article-on-surface);
   --destructive: var(--article-error);
   --destructive-foreground: var(--article-on-error);
   --ring: var(--article-primary);

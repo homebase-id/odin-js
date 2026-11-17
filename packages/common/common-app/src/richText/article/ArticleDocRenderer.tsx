@@ -141,24 +141,25 @@ const HEADING_CLASSES: Record<number, string> = {
 };
 
 /*
- * Homebase's palette (the --article-* variables of articleProse.css, light and dark) for the
- * blocks that draw a surface: surface variant behind code and table headers, outline variant for
- * borders and table lines, on-surface variant for muted text. The page and links keep the app's
- * colours.
+ * Notion's paper palette (the --article-* variables of articleProse.css, light and dark) for the
+ * blocks that draw a surface: surface variant behind code blocks and table headers, surface
+ * container behind inline code, outline variant for borders and table lines, on-surface variant for
+ * muted text. Links keep the app's colours.
  */
 const MUTED_BG = 'bg-[var(--article-surface-variant)]';
+const INLINE_CODE_BG = 'bg-[var(--article-surface-container)]';
+const BODY_TEXT = 'text-[color:var(--article-on-surface)]';
 const BORDER = 'border-[color:var(--article-outline-variant)]';
 const MUTED_TEXT = 'text-[color:var(--article-on-surface-variant)]';
 
-// Journal's variants (its calloutVariants.ts) in Homebase's roles: info on the primary container,
-// tip on the secondary one, error on the error one, each with a bar and icon in its accent; warning
-// in an amber pair. Not the shared CALLOUT_CLASSES in calloutVariants.ts: those use theme tokens
-// (collaborative, …) the feed lacks.
+// Journal's variants (its calloutVariants.ts) as Notion tints them: a soft background per variant,
+// body text on it, the icon in the variant's accent, no bar. Not the shared CALLOUT_CLASSES in
+// calloutVariants.ts: those use theme tokens (collaborative, …) the feed lacks.
 const CALLOUT_CLASSES: Record<CalloutVariant, string> = {
-  info: 'border-[color:var(--article-primary)] bg-[var(--article-primary-container)]',
-  warning: 'border-[color:var(--article-warning)] bg-[var(--article-warning-container)]',
-  tip: 'border-[color:var(--article-secondary)] bg-[var(--article-secondary-container)]',
-  error: 'border-[color:var(--article-error)] bg-[var(--article-error-container)]',
+  info: 'bg-[var(--article-primary-container)]',
+  warning: 'bg-[var(--article-warning-container)]',
+  tip: 'bg-[var(--article-secondary-container)]',
+  error: 'bg-[var(--article-error-container)]',
 };
 const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   info: 'Info',
@@ -166,7 +167,7 @@ const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   tip: 'Tip',
   error: 'Error',
 };
-// The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in the bar's colour
+// The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in the variant's accent
 const CALLOUT_ICON_CLASSES: Record<CalloutVariant, string> = {
   info: 'text-[color:var(--article-primary)]',
   warning: 'text-[color:var(--article-warning)]',
@@ -223,16 +224,16 @@ const LINK_COLOR = 'text-primary dark:text-indigo-300';
 /** Links in the text are underlined, as in Journal. */
 const LINK_CLASS = `${LINK_COLOR} underline underline-offset-2 hover:opacity-70`;
 
-// highlight.js token classes in Journal's colours (its src/styles/syntax.css): Atom One Light, and
-// One Dark in dark mode
-const COMMENT = 'italic text-[#a0a1a7] dark:text-[#949aa5]';
-const KEYWORD = 'text-[#a626a4] dark:text-[#c678dd]';
-const NAME = 'text-[#e45649] dark:text-[#e06c75]';
-const LITERAL = 'text-[#0184bc] dark:text-[#56b6c2]';
-const STRING = 'text-[#50a14f] dark:text-[#98c379]';
-const VALUE = 'text-[#986801] dark:text-[#d19a66]';
-const TITLE = 'text-[#4078f2] dark:text-[#61afef]';
-const BUILT_IN = 'text-[#c18401] dark:text-[#e5c07b]';
+// highlight.js token classes in the article's palette: GitHub's light and dark syntax colours, as
+// Notion's code blocks have them
+const COMMENT = 'italic text-[#9b9a97] dark:text-[#7d7d7d]';
+const KEYWORD = 'text-[#d73a49] dark:text-[#ff7b72]';
+const NAME = 'text-[#22863a] dark:text-[#7ee787]';
+const LITERAL = 'text-[#005cc5] dark:text-[#79c0ff]';
+const STRING = 'text-[#22863a] dark:text-[#7ee787]';
+const VALUE = 'text-[#005cc5] dark:text-[#79c0ff]';
+const TITLE = 'text-[#6f42c1] dark:text-[#d2a8ff]';
+const BUILT_IN = 'text-[#e36209] dark:text-[#ffa657]';
 const HLJS_CLASSES: Record<string, string> = {
   'hljs-comment': COMMENT,
   'hljs-quote': COMMENT,
@@ -256,7 +257,7 @@ const HLJS_CLASSES: Record<string, string> = {
   'hljs-selector-class': VALUE,
   'hljs-selector-attr': VALUE,
   'hljs-selector-pseudo': VALUE,
-  'hljs-number': VALUE,
+  'hljs-number': LITERAL,
   'hljs-symbol': TITLE,
   'hljs-bullet': TITLE,
   'hljs-link': `${TITLE} underline`,
@@ -294,7 +295,7 @@ const hastToReact = (node: Hast, key: number): ReactNode => {
   );
 };
 
-const PRE_CLASS = `overflow-x-auto rounded-lg border ${BORDER} ${MUTED_BG} p-4 text-sm leading-relaxed`;
+const PRE_CLASS = `overflow-x-auto rounded-lg ${MUTED_BG} p-4 text-sm leading-relaxed`;
 
 /** Code, highlighted when its language is one lowlight knows. `language` is a bare word. */
 const Code = ({ code, language }: { code: string; language?: string }) => {
@@ -932,7 +933,9 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   },
   heading: HeadingNode,
   blockquote: ({ children }) => (
-    <blockquote className={`my-6 border-l-[3px] ${BORDER} pl-4 text-foreground/80`}>
+    <blockquote
+      className={`my-6 border-l-[3px] border-[color:var(--article-on-surface)] pl-4 text-foreground/80`}
+    >
       {children}
     </blockquote>
   ),
@@ -1007,7 +1010,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
         role="note"
         aria-label={CALLOUT_LABELS[variant]}
         data-variant={variant}
-        className={`my-4 flex gap-2 rounded-md border-l-4 px-3 ${CALLOUT_CLASSES[variant]}`}
+        className={`my-4 flex gap-2 rounded-md px-3 ${BODY_TEXT} ${CALLOUT_CLASSES[variant]}`}
       >
         <CalloutIcon variant={variant} />
         <div className="min-w-0 flex-1 py-3">{children}</div>
@@ -1110,13 +1113,13 @@ const markMapping: Record<
   strike: ({ children }) => <del>{children}</del>,
   code: ({ children }) => (
     <code
-      className={`rounded-[0.3rem] ${MUTED_BG} px-[0.4rem] py-[0.2rem] font-mono text-[0.875rem] text-foreground`}
+      className={`rounded-[0.3rem] ${INLINE_CODE_BG} px-[0.4rem] py-[0.2rem] font-mono text-[0.875rem] text-[color:var(--article-inline-code)]`}
     >
       {children}
     </code>
   ),
   kbd: ({ children }) => (
-    <kbd className={`rounded-md border ${BORDER} ${MUTED_BG} px-1 font-mono text-sm`}>
+    <kbd className={`rounded-md border ${BORDER} ${INLINE_CODE_BG} px-1 font-mono text-sm`}>
       {children}
     </kbd>
   ),
