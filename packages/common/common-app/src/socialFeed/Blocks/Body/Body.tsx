@@ -5,7 +5,7 @@ import {
   getChannelDrive,
 } from '@homebase-id/js-lib/public';
 import { ReactNode, useMemo, useState } from 'react';
-import { ellipsisAtMaxChar, t } from '../../../helpers';
+import { ellipsisAtMaxChar, markdownToRichText, t } from '../../../helpers';
 import { ArticleBody, RichTextRenderer } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
 import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
@@ -100,23 +100,26 @@ export const PostBody = ({
       (!!effectivePost.captionAsRichText && effectivePost.caption.split('\n').length > 7)
     );
   }, [effectivePost, hasFullTextPayload]);
+  const captionAsRichText = useMemo(
+    () =>
+      effectivePost.captionAsRichText ??
+      (hasFullTextPayload ? markdownToRichText(effectivePost.caption) : undefined),
+    [effectivePost, hasFullTextPayload]
+  );
   return (
     <>
       <h1 className="text-foreground">
         {isExpanded || !hasMoreToShowNonArticle ? (
-          effectivePost.captionAsRichText ? (
-            <RichTextRenderer
-              body={effectivePost.captionAsRichText || effectivePost.caption}
-              odinId={odinId}
-            />
+          captionAsRichText ? (
+            <RichTextRenderer body={captionAsRichText || effectivePost.caption} odinId={odinId} />
           ) : (
             <span className="whitespace-pre-wrap">{effectivePost.caption}</span>
           )
         ) : (
           <>
-            {effectivePost.captionAsRichText ? (
+            {captionAsRichText ? (
               <RichTextRenderer
-                body={effectivePost.captionAsRichText}
+                body={captionAsRichText}
                 odinId={odinId}
                 className="line-clamp-[7]"
               />

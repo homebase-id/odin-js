@@ -74,7 +74,7 @@ export const useManagePost = () => {
             });
           };
 
-      postFile.fileMetadata.appData.content.captionAsRichText = markdownToRichText(
+      postFile.fileMetadata.appData.content.captionAsRichText ??= markdownToRichText(
         postFile.fileMetadata.appData.content.caption.trim()
       );
 
