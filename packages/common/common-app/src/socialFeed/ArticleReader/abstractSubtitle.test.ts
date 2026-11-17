@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { abstractSubtitle, openingText } from './abstractSubtitle';
+import { abstractSubtitle, openingExcerpt, openingText } from './abstractSubtitle';
 
 const p = (...texts: string[]) => ({
   type: 'paragraph',
@@ -20,6 +20,28 @@ describe('openingText', () => {
     expect(openingText('Just text')).toBe('Just text');
     expect(openingText(undefined)).toBe('');
     expect(openingText([])).toBe('');
+  });
+});
+
+describe('openingExcerpt', () => {
+  test('joins the first paragraphs and leaves out headings and images', () => {
+    const doc = [
+      { type: 'h1', children: [{ text: 'A title' }] },
+      ...body,
+    ];
+    expect(openingExcerpt(doc)).toBe(
+      'I pressed Enter once on a used mini PC and walked away. Then it set itself up.'
+    );
+  });
+
+  test('stops after the paragraph that reaches the limit, cut at the limit', () => {
+    const long = [p('a'.repeat(50)), p('b'.repeat(50)), p('c'.repeat(50))];
+    expect(openingExcerpt(long, 80)).toBe(`${'a'.repeat(50)} ${'b'.repeat(29)}`);
+  });
+
+  test('is a plain body as it is, and empty without one', () => {
+    expect(openingExcerpt('Just  text')).toBe('Just text');
+    expect(openingExcerpt(undefined)).toBe('');
   });
 });
 

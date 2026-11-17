@@ -24,6 +24,23 @@ export const openingText = (body: string | Record<string, unknown>[] | undefined
   return '';
 };
 
+/** The body's first paragraphs as one line of plain text, headings left out, about `max` characters. */
+export const openingExcerpt = (
+  body: string | Record<string, unknown>[] | undefined,
+  max = 300
+): string => {
+  const blocks =
+    typeof body === 'string'
+      ? [body]
+      : (body ?? []).filter((block) => !/^h\d$/.test(String(block.type ?? ''))).map(textOf);
+  let excerpt = '';
+  for (const block of blocks) {
+    excerpt = `${excerpt} ${block.replace(/\s+/g, ' ').trim()}`.trim();
+    if (excerpt.length >= max) break;
+  }
+  return excerpt.slice(0, max);
+};
+
 /**
  * The abstract to show under an article's title, or undefined when there is none or it only
  * repeats the opening of the body (an article published without a summary of its own gets its first

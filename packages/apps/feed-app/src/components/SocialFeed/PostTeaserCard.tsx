@@ -83,7 +83,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                     } dark:border-gray-800 lg:border`}
                 >
                     <PostSource postFile={postFile} className="rounded-t-lg"/>
-                    <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
+                    <div className={`flex flex-row gap-4 px-3 pt-3 sm:px-4 ${isArticle ? 'pb-2' : 'pb-3'}`}>
                         <div className="flex-shrink-0 py-1">
                             <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
                                 <AuthorImage
@@ -115,9 +115,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                                 />
                             </div>
 
-                            {isArticle ? (
-                                <ArticleTeaser postFile={postFile} odinId={odinId}/>
-                            ) : (
+                            {isArticle ? null : (
                                 <PostBody
                                     post={post}
                                     odinId={odinId}
@@ -129,7 +127,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                             )}
                         </div>
                     </div>
-                    {!isArticle ? (
+                    {isArticle ? (
+                        // Full card width: the cover spans it, under the author row
+                        <div className="px-3 pb-1 sm:px-4">
+                            <ArticleTeaser postFile={postFile} odinId={odinId}/>
+                        </div>
+                    ) : (
                         <>
                             <DoubleClickHeartForMedia
                                 odinId={odinId}
@@ -142,7 +145,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                             />
                             <MediaStillUploading postFile={postFile}/>
                         </>
-                    ) : null}
+                    )}
                     <PostInteracts
                         odinId={odinId || window.location.hostname}
                         postFile={postFile}
