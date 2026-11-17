@@ -1,6 +1,7 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
+  ArticleReader,
   HOME_ROOT_PATH,
   PostDetailCard,
   RelatedArticles,
@@ -16,6 +17,7 @@ import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostDetail = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { channelKey, postKey } = useParams();
   const { data: channel } = useChannel({ channelKey }).fetch;
   const { data: postData, isLoading: postDataLoading } = usePost({
@@ -37,6 +39,45 @@ const PostDetail = () => {
   }
 
   const post = postData?.fileMetadata.appData.content;
+
+  if (postData && post?.type === 'Article') {
+    const state = location.state as Record<string, unknown> | undefined;
+    return (
+      <>
+        <Helmet>
+          <title>
+            {post.caption || channel?.fileMetadata.appData.content.name || ''} | Homebase
+          </title>
+          <meta name="og:title" content={post.caption ?? ''} />
+          <meta name="og:description" content={(post as Article).abstract ?? ''} />
+        </Helmet>
+
+        <ArticleReader
+          channel={channel || undefined}
+          postFile={postData}
+          isOwner={isOwner}
+          isAuthenticated={isAuthenticated}
+          onBack={() => {
+            const referrer = state?.referrer as string | undefined;
+            if (referrer) navigate(referrer);
+            else navigate(-1);
+          }}
+          login={() => setIsLogin(true)}
+        />
+        <div className="container mx-auto sm:px-5">
+          <RelatedArticles blog={postData} channel={channel || undefined} />
+        </div>
+
+        <LoginDialog
+          isOpen={isLogin}
+          onCancel={() => setIsLogin(false)}
+          title={t('Login required')}
+          returnPath={window.location.pathname}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Helmet>
