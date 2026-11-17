@@ -412,20 +412,23 @@ export const CommentList = ({
   threadClassName?: string;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
-  const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
+  const newestFirst = comments?.pages.flatMap((page) => page.comments);
+  // Under a composer at the top the newest come first, so a just-posted one shows right under it;
+  // above one at the bottom, the oldest
+  const flattenedComments = composerFirst ? newestFirst : newestFirst?.reverse();
   const composer = <CommentComposer context={context} canReact={canReact} login={login} />;
+  const older = hasNextPage ? (
+    <a
+      className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
+      onClick={() => fetchNextPage()}
+    >
+      {t('View older')}
+    </a>
+  ) : null;
 
   return (
     <>
-      {composerFirst ? composer : null}
-      {hasNextPage ? (
-        <a
-          className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
-          onClick={() => fetchNextPage()}
-        >
-          {t('View older')}
-        </a>
-      ) : null}
+      {composerFirst ? composer : older}
       {flattenedComments?.map((comment, index) => {
         const key = comment.fileId ?? index;
         const thread = (
@@ -439,7 +442,7 @@ export const CommentList = ({
           <Fragment key={key}>{thread}</Fragment>
         );
       })}
-      {composerFirst ? null : composer}
+      {composerFirst ? older : composer}
     </>
   );
 };

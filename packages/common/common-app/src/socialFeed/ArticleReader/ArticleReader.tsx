@@ -36,9 +36,9 @@ import {
   PrimaryMedia,
   ToGroupBlock,
   useCanReact,
+  type CanReactInfo,
   useChannelLink,
   useCommentCount,
-  useCommentSummary,
   useEmojiSummary,
 } from '../../..';
 import { ArrowLeft, Bubble, Heart } from '../../ui/Icons';
@@ -312,29 +312,12 @@ export const ArticleReader = ({
           </div>
 
           {reactionContext ? (
-            <section
-              id={RESPONSES_ID}
-              aria-labelledby={`${RESPONSES_ID}_title`}
-              className="mt-12 scroll-mt-20"
-            >
-              <ResponsesTitle
-                id={`${RESPONSES_ID}_title`}
-                context={reactionContext}
-                postFile={postFile}
-              />
-              {/* The composer, then the threads, 24px apart; a thread's replies keep their 8px */}
-              <div className="mt-5 flex flex-col gap-6">
-                <Suspense fallback={null}>
-                  <CommentList
-                    context={reactionContext}
-                    canReact={canReact}
-                    login={login}
-                    composerFirst
-                    threadClassName="grid grid-flow-row gap-2"
-                  />
-                </Suspense>
-              </div>
-            </section>
+            <Responses
+              context={reactionContext}
+              postFile={postFile}
+              canReact={canReact}
+              login={login}
+            />
           ) : null}
         </article>
 
@@ -422,6 +405,10 @@ const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactN
   );
 };
 
+/** Whether the post takes comments (its reactAccess allows them). */
+const takesComments = ({ reactAccess }: PostContent) =>
+  reactAccess === undefined || reactAccess === true || reactAccess === 'comment';
+
 /** Reactions and responses, by the byline; the 💬 jumps to the responses. */
 const ArticleCounts = ({
   context,
@@ -432,7 +419,6 @@ const ArticleCounts = ({
   postFile: HomebaseFile<PostContent>;
   className?: string;
 }) => {
-  const { reactAccess } = postFile.fileMetadata.appData.content;
   const preview = useMemo(
     () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
     [postFile.fileMetadata.reactionPreview]
@@ -441,7 +427,6 @@ const ArticleCounts = ({
   const comments = useCommentCount(context, preview.comments);
 
   const reactions = emojis?.totalCount || 0;
-  const canComment = reactAccess === undefined || reactAccess === true || reactAccess === 'comment';
 
   return (
     <div className={`flex items-center gap-4 ${className ?? ''}`}>
@@ -454,7 +439,7 @@ const ArticleCounts = ({
           <span className="sr-only">{t('reactions')}</span>
         </span>
       ) : null}
-      {canComment || comments ? (
+      {takesComments(postFile.fileMetadata.appData.content) || comments ? (
         <a
           href={`#${RESPONSES_HASH}`}
           className="inline-flex items-center gap-1.5 rounded-md hover:text-foreground"
@@ -470,32 +455,51 @@ const ArticleCounts = ({
   );
 };
 
-/** "Responses (n)", with the count the 💬 by the byline shows. */
-const ResponsesTitle = ({
-  id,
+/**
+ * The responses: "Responses (n)", with the count the 💬 by the byline shows, the composer, then the
+ * threads. None at all on a post that takes no comments and has none.
+ */
+const Responses = ({
   context,
   postFile,
+  canReact,
+  login,
 }: {
-  id: string;
   context: ReactionContext;
   postFile: HomebaseFile<PostContent>;
+  canReact?: CanReactInfo;
+  login?: () => void;
 }) => {
   const preview = useMemo(
     () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
     [postFile.fileMetadata.reactionPreview]
   );
-  const { data: count } = useCommentSummary({
-    authorOdinId: context.odinId,
-    channelId: context.channelId,
-    postGlobalTransitId: context.target.globalTransitId,
-    reactionPreview: preview.comments,
-  }).fetch;
+  const count = useCommentCount(context, preview.comments);
+  if (!takesComments(postFile.fileMetadata.appData.content) && !count) return null;
 
   return (
-    <h2 id={id} className="text-[22px] font-[650] leading-[1.35]">
-      {t('Responses')}
-      {count ? <span className="font-normal text-foreground/60"> ({count})</span> : null}
-    </h2>
+    <section
+      id={RESPONSES_ID}
+      aria-labelledby={`${RESPONSES_ID}_title`}
+      className="mt-12 scroll-mt-20"
+    >
+      <h2 id={`${RESPONSES_ID}_title`} className="text-[22px] font-[650] leading-[1.35]">
+        {t('Responses')}
+        {count ? <span className="font-normal text-foreground/60"> ({count})</span> : null}
+      </h2>
+      {/* The composer, then the threads, 24px apart; a thread's replies keep their 8px */}
+      <div className="mt-5 flex flex-col gap-6">
+        <Suspense fallback={null}>
+          <CommentList
+            context={context}
+            canReact={canReact}
+            login={login}
+            composerFirst
+            threadClassName="grid grid-flow-row gap-2"
+          />
+        </Suspense>
+      </div>
+    </section>
   );
 };
 
