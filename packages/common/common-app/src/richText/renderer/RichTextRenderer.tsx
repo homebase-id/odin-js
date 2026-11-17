@@ -26,6 +26,10 @@ const getFallbackText = (body: unknown): string => {
   }
 };
 
+/** className for Markdown captions: bold headings below the post title's size, and a gap between blocks */
+export const captionBlocksClassName =
+  '[&>*+*]:mt-2 [&_p]:mb-0 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:font-semibold';
+
 export const RichTextRenderer = ({
   body,
   odinId,

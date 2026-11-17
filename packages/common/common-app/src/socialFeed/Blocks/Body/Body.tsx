@@ -6,7 +6,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { ReactNode, useMemo, useState } from 'react';
 import { ellipsisAtMaxChar, markdownToRichText, t } from '../../../helpers';
-import { ArticleBody, RichTextRenderer } from '../../../richText';
+import { ArticleBody, RichTextRenderer, captionBlocksClassName } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
 import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { usePostBody } from '../../../hooks/socialFeed/post/usePostBody';
@@ -111,7 +111,11 @@ export const PostBody = ({
       <h1 className="text-foreground">
         {isExpanded || !hasMoreToShowNonArticle ? (
           captionAsRichText ? (
-            <RichTextRenderer body={captionAsRichText || effectivePost.caption} odinId={odinId} />
+            <RichTextRenderer
+              body={captionAsRichText || effectivePost.caption}
+              odinId={odinId}
+              className={captionBlocksClassName}
+            />
           ) : (
             <span className="whitespace-pre-wrap">{effectivePost.caption}</span>
           )
@@ -121,7 +125,7 @@ export const PostBody = ({
               <RichTextRenderer
                 body={captionAsRichText}
                 odinId={odinId}
-                className="line-clamp-[7]"
+                className={`line-clamp-[7] ${captionBlocksClassName}`}
               />
             ) : (
               <span className="whitespace-pre-wrap">
