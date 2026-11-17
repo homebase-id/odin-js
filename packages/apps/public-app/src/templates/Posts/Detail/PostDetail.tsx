@@ -68,8 +68,9 @@ const PostDetail = () => {
           login={() => setIsLogin(true)}
           barEnd={<SiteNav />}
         />
-        <div className="container mx-auto sm:px-5">
-          <RelatedArticles blog={postData} channel={channel || undefined} />
+        {/* On the reader's paper too, so no strip of the site's background shows below the article */}
+        <div className="article-page">
+          <RelatedArticles blog={postData} channel={channel || undefined} onPaper />
         </div>
 
         <LoginDialog

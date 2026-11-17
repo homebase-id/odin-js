@@ -28,9 +28,12 @@ const RelatedArticleCard = ({ postFile }: { postFile: HomebaseFile<PostContent> 
 export const RelatedArticles = ({
   blog,
   channel,
+  onPaper,
 }: {
   blog: HomebaseFile<PostContent>;
   channel: NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition> | undefined;
+  /** Under the article reader: on its page, set off by a hairline rather than a band of its own */
+  onPaper?: boolean;
 }) => {
   const { data: blogPosts } = usePostsInfinite(
     channel ? { channelId: channel.fileMetadata.appData.uniqueId, postType: 'Article' } : {}
@@ -50,7 +53,13 @@ export const RelatedArticles = ({
   if (!filteredBlogPosts?.length) return null;
 
   return (
-    <section className="mt-10 bg-slate-50 pb-10 pt-16 dark:bg-slate-800 dark:bg-opacity-50">
+    <section
+      className={`mt-10 pb-10 pt-16 ${
+        onPaper
+          ? 'border-t border-[color:var(--article-outline-variant)]'
+          : 'bg-slate-50 dark:bg-slate-800 dark:bg-opacity-50'
+      }`}
+    >
       <div className="container mx-auto px-2 sm:px-5">
         <h2 className="mb-10 text-2xl ">
           {t('Latest posts')}{' '}
