@@ -36,18 +36,6 @@
   --color-error-container: 255 218 212;
   --color-error-container-hover: 240 201 195;
   --color-error-container-contrast: 65 0 2;
-
-  /* Sidenav, as chat-kmp's NavigationRail: surfaceContainerHigh, onSurfaceVariant icons, a
-     primaryContainer indicator; the More menu on surfaceContainer, its divider outlineVariant */
-  --color-nav: var(--color-surface-container-high);
-  --color-nav-contrast: var(--color-muted-foreground);
-  --color-nav-active: var(--color-primary-container);
-  --color-nav-active-contrast: var(--color-primary-container-contrast);
-  --color-nav-hover: var(--color-primary-container) / 0.5;
-  --color-nav-more: var(--color-surface-container);
-  --color-nav-outline: var(--color-outline-variant);
-  --color-nav-shadow: 0 0 0 / 0.1;
-  --color-nav-ring: var(--color-nav);
 }
 
 .dark {

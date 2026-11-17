@@ -2,6 +2,7 @@
 @import '../../../../common/common-app/src/tailwind-v4-compat.css';
 @import '../../../../common/common-app/src/theme/tokens.css';
 @import '../../../../common/common-app/src/theme/legacy-indigo.css';
+@import '../../../../common/common-app/src/theme/nav.css';
 
 @source '../../../../libs/ui-lib/src';
 @source '../../../../common/common-app/src';

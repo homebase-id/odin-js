@@ -40,7 +40,7 @@ import {ApiType} from "@homebase-id/js-lib/core";
 const STORAGE_KEY = 'sidenavIsOpen';
 
 const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-nav-hover`;
-const navItemActiveClassname = `bg-nav-active text-nav-active-contrast`;
+const navItemActiveClassname = `bg-nav-active text-nav-active-contrast hover:text-nav-contrast`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
@@ -103,7 +103,7 @@ export const Sidenav = ({
               {canPin ? (
                 <button
                   className={`${navItemClassName} ${
-                    isPinned ? 'md:bg-nav-active rounded-md' : ''
+                    isPinned ? 'md:bg-nav-active md:text-nav-active-contrast rounded-md' : ''
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
