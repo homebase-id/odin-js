@@ -17,37 +17,42 @@ const GlyphList = ({
   variant: SocialsVariant;
   socials: CardData['socials'];
   className?: string;
-}) => (
-  <ul
-    data-socials={variant}
-    className={`flex items-center ${
-      variant === 'bar'
-        ? 'w-fit flex-wrap gap-1 rounded-[1.25rem] bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
-        : 'flex-wrap gap-3'
-    } ${className ?? ''}`}
-  >
-    {socials.map((s) => {
-      const Icon = s.icon;
-      return (
-        <li key={s.link}>
-          <a
-            href={s.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={s.type || hostName(s.link) || s.link}
-            className={
-              variant === 'bar'
-                ? `flex h-9 w-9 items-center justify-center rounded-full hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)] ${CARD_FOCUS}`
-                : `-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`
-            }
-          >
-            <Icon className={variant === 'bar' ? 'h-5 w-5' : 'h-4 w-4'} />
-          </a>
-        </li>
-      );
-    })}
-  </ul>
-);
+}) => {
+  const bar = variant === 'bar';
+  const list = (
+    <ul
+      data-socials={variant}
+      className={`flex flex-wrap items-center ${
+        bar
+          ? 'w-fit gap-1 rounded-[1.25rem] bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
+          : `gap-3 ${className ?? ''}`
+      }`}
+    >
+      {socials.map((s) => {
+        const Icon = s.icon;
+        return (
+          <li key={s.link}>
+            <a
+              href={s.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.type || hostName(s.link) || s.link}
+              className={
+                bar
+                  ? `flex h-9 w-9 items-center justify-center rounded-full hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)] ${CARD_FOCUS}`
+                  : `-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`
+              }
+            >
+              <Icon className={bar ? 'h-5 w-5' : 'h-4 w-4'} />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+  // The caller's spacing goes on a wrapper, so its padding, gap or border can't reshape the pill
+  return bar ? <div className={className}>{list}</div> : list;
+};
 
 export const CardSocials = ({
   variant,
@@ -96,7 +101,6 @@ export const CardSocials = ({
         </a>
       );
     };
-    // The caller draws the first account's large box itself (collage page)
     if (boxOnly) return tile(socials[0], true, className);
     // A wrapping row of compact tiles, so every network stays inside a fixed-height card
     return (

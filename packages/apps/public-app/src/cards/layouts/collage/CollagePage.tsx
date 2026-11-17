@@ -196,7 +196,7 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   data={restData}
                   className={
                     design.socials === 'bar'
-                      ? 'max-w-full flex-wrap'
+                      ? undefined
                       : '!gap-4 text-[color:var(--card-muted)] [&_a:hover]:text-[color:var(--card-ink)] [&_a]:opacity-100 [&_svg]:h-[22px] [&_svg]:w-[22px]'
                   }
                 />

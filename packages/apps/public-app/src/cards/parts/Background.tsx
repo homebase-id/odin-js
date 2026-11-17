@@ -193,7 +193,10 @@ type Rgb = [number, number, number];
 
 const parseColour = (c: string): [number, number, number, number] => {
   const hex = /^#([0-9a-f]{6})$/i.exec(c);
-  if (hex) return [1, 3, 5].map((i) => parseInt(hex[1].slice(i - 1, i + 1), 16)).concat(1) as never;
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    return [n >> 16, (n >> 8) & 255, n & 255, 1];
+  }
   const fn = /^rgba?\(([^)]+)\)$/.exec(c);
   if (!fn) return [0, 0, 0, 1];
   const [r, g, b, a = '1'] = fn[1].split(',').map((v) => v.trim());

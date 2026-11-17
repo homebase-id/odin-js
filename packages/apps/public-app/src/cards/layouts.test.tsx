@@ -565,6 +565,11 @@ describe('socials on the shared layouts and the collage page', () => {
       for (const b of bar) {
         expect(b.attrs).toContain('data-socials="bar"');
         expect(b.tokens).toEqual(expect.arrayContaining(['rounded-[1.25rem]', 'p-1']));
+        // The layout's own padding, gap and border stay off the pill
+        expect(b.tokens.filter((t) => /^!?(p[tblrxy]?|gap|border|flex-1)(-|$)/.test(t))).toEqual([
+          'gap-1',
+          'p-1',
+        ]);
         expect(b.attrs).toContain('color-mix');
         expect(b.inner).toContain('h-9 w-9');
       }
