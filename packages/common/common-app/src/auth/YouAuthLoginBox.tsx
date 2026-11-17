@@ -140,7 +140,7 @@ export const YouAuthLoginBox = ({
       </form>
       <p className="text-center">or</p>
       <a
-        className="my-3 block rounded-md bg-secondary px-4 py-2 text-center text-secondary-contrast hover:brightness-90"
+        className="my-3 block rounded-md bg-surface-container-highest px-4 py-2 text-center text-foreground hover:brightness-90"
         href="https://homebase.id/sign-up"
         target="_blank"
         rel="noopener noreferrer"
