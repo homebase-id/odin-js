@@ -17,28 +17,42 @@ const GlyphList = ({
   variant: SocialsVariant;
   socials: CardData['socials'];
   className?: string;
-}) => (
-  <ul
-    className={`flex flex-wrap items-center ${variant === 'bar' ? 'justify-center gap-5' : 'gap-3'} ${className ?? ''}`}
-  >
-    {socials.map((s) => {
-      const Icon = s.icon;
-      return (
-        <li key={s.link}>
-          <a
-            href={s.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={s.type || hostName(s.link) || s.link}
-            className={`-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`}
-          >
-            <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />
-          </a>
-        </li>
-      );
-    })}
-  </ul>
-);
+}) => {
+  const bar = variant === 'bar';
+  const list = (
+    <ul
+      data-socials={variant}
+      className={`flex flex-wrap items-center ${
+        bar
+          ? 'w-fit gap-1 rounded-[1.25rem] bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
+          : `gap-3 ${className ?? ''}`
+      }`}
+    >
+      {socials.map((s) => {
+        const Icon = s.icon;
+        return (
+          <li key={s.link}>
+            <a
+              href={s.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.type || hostName(s.link) || s.link}
+              className={
+                bar
+                  ? `flex h-9 w-9 items-center justify-center rounded-full hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)] ${CARD_FOCUS}`
+                  : `-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`
+              }
+            >
+              <Icon className={bar ? 'h-5 w-5' : 'h-4 w-4'} />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+  // The caller's spacing goes on a wrapper, so its padding, gap or border can't reshape the pill
+  return bar ? <div className={className}>{list}</div> : list;
+};
 
 export const CardSocials = ({
   variant,
@@ -66,32 +80,38 @@ export const CardSocials = ({
   }
 
   if (variant === 'wordmark') {
-    const [first] = socials;
-    const Icon = first.icon;
-    const rest = boxOnly ? [] : socials.slice(1);
-    const box = (
-      <a
-        href={first.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`flex items-center gap-3 rounded-2xl bg-[var(--card-surface)] px-4 py-3 text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] ${CARD_FOCUS} ${rest.length ? '' : (className ?? '')}`}
-      >
-        <Icon className="h-7 w-7 text-[color:var(--card-accent)]" />
-        <span className="leading-tight">
-          <span className="block font-semibold capitalize">{hostName(first.link)}</span>
-          {typeof first.children === 'string' ? (
-            <span className="block text-sm text-[color:var(--card-muted)]">@{first.children}</span>
-          ) : null}
-        </span>
-      </a>
-    );
-    if (!rest.length) return box;
-    // The box names one account; the others stay reachable as glyphs under it
+    const tile = (s: CardData['socials'][number], large: boolean, cls?: string) => {
+      const Icon = s.icon;
+      return (
+        <a
+          href={s.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center rounded-2xl bg-[var(--card-surface)] text-[color:var(--card-surface-ink)] shadow-[0_6px_16px_-10px_rgba(0,0,0,0.4)] ${CARD_FOCUS} ${
+            large ? 'gap-3 px-4 py-3' : 'gap-2 px-3 py-2 text-sm'
+          } ${cls ?? ''}`}
+        >
+          <Icon className={`text-[color:var(--card-accent)] ${large ? 'h-7 w-7' : 'h-5 w-5'}`} />
+          <span className="leading-tight">
+            <span className="block font-semibold capitalize">{hostName(s.link)}</span>
+            {large && typeof s.children === 'string' ? (
+              <span className="block text-sm text-[color:var(--card-muted)]">@{s.children}</span>
+            ) : null}
+          </span>
+        </a>
+      );
+    };
+    if (boxOnly) return tile(socials[0], true, className);
+    // A wrapping row of compact tiles, so every network stays inside a fixed-height card
     return (
-      <div className={`flex flex-col gap-3 ${className ?? ''}`}>
-        {box}
-        <GlyphList variant="glyphs" socials={rest} className="px-1" />
-      </div>
+      <ul
+        data-socials="wordmark"
+        className={`flex flex-wrap items-center gap-2 ${className ?? ''}`}
+      >
+        {socials.map((s) => (
+          <li key={s.link}>{tile(s, false)}</li>
+        ))}
+      </ul>
     );
   }
 

@@ -1,0 +1,19 @@
+{
+    "cards": {
+        "public": { "visibility": "anonymous", "circleIds": [], "priority": 1000 },
+        "family": { "visibility": "connected", "circleIds": ["cefc4f7cbc8c34762e0f76703e7e174e"], "priority": 10 },
+        "friends": { "visibility": "connected", "circleIds": ["3d594614f445f6b00014e9b77730b833"], "priority": 20 },
+        "work": { "visibility": "connected", "circleIds": ["0f9263536b9fc61ada745644735bfd8f"], "priority": 30 }
+    },
+    "cases": [
+        { "name": "anonymous sees public", "tier": "anonymous", "circleIds": [], "stored": ["public", "family"], "expected": "public" },
+        { "name": "authenticated stranger sees public", "tier": "authenticated", "circleIds": [], "stored": ["family", "public"], "expected": "public" },
+        { "name": "connected in no circle sees public", "tier": "connected", "circleIds": [], "stored": ["public", "family"], "expected": "public" },
+        { "name": "circle beats public", "tier": "connected", "circleIds": ["cefc4f7cbc8c34762e0f76703e7e174e"], "stored": ["public", "family"], "expected": "family" },
+        { "name": "lowest priority wins across circles", "tier": "connected", "circleIds": ["3d594614f445f6b00014e9b77730b833", "cefc4f7cbc8c34762e0f76703e7e174e"], "stored": ["friends", "family", "public"], "expected": "family" },
+        { "name": "circle id spelling is ignored", "tier": "connected", "circleIds": ["3D594614-F445-F6B0-0014-E9B77730B833"], "stored": ["public", "friends"], "expected": "friends" },
+        { "name": "other circle falls back to public", "tier": "connected", "circleIds": ["0f9263536b9fc61ada745644735bfd8f"], "stored": ["public", "family"], "expected": "public" },
+        { "name": "no public card and no circle match", "tier": "connected", "circleIds": [], "stored": ["family"], "expected": null },
+        { "name": "stranger never sees a circle card", "tier": "authenticated", "circleIds": ["cefc4f7cbc8c34762e0f76703e7e174e"], "stored": ["family"], "expected": null }
+    ]
+}

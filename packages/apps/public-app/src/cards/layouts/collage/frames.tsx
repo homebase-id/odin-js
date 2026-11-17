@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { LayoutProps, Portrait } from '../../CardDesign';
+import { portraitZoom, type LayoutProps, type Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 
@@ -43,22 +43,31 @@ export const Tape = ({ className }: { className: string }) => (
   />
 );
 
-const tilt = (deg?: number): CSSProperties | undefined =>
-  deg ? { transform: `rotate(${deg}deg)` } : undefined;
+// Slot widths are percentages of the row, which zoom does not scale, so size scales the width itself
+const scaled = (portrait: Portrait, pct: number) =>
+  Math.round(pct * portraitZoom(portrait.size) * 100) / 100;
+const slotWidth = (portrait: Portrait, pct: number) => `${scaled(portrait, pct)}%`;
+
+const frameStyle = (portrait: Portrait, pct: number): CSSProperties => {
+  const style: CSSProperties = { width: slotWidth(portrait, pct) };
+  if (portrait.tilt) style.transform = `rotate(${portrait.tilt}deg)`;
+  return style;
+};
 
 // A polaroid: the frame carries the tilt, tape and shadow; the picture sits square inside it
 export const Print = ({
   portrait,
   image,
   alt,
+  width,
   className,
   tapeClassName,
-}: Frame & { className: string; tapeClassName: string }) => {
+}: Frame & { width: number; className: string; tapeClassName: string }) => {
   if (!image) return null;
   return (
     <div
       className={`relative bg-[var(--card-surface)] ${portrait.shadow ? FRAME_SHADOWS[portrait.shadow] : ''} ${className}`}
-      style={tilt(portrait.tilt)}
+      style={frameStyle(portrait, width)}
     >
       {portrait.tape ? <Tape className={tapeClassName} /> : null}
       <CardPortrait
@@ -77,10 +86,16 @@ export const Cutout = ({
   image,
   alt,
   ring,
+  width,
+  rightAlign,
   className,
-}: Frame & { ring: number; className: string }) => (
+}: Frame & { ring: number; width: number; rightAlign?: boolean; className: string }) => (
   <CardPortrait
-    portrait={{ ...portrait, ring: portrait.ring ?? ring }}
+    portrait={{ ...portrait, size: undefined, ring: portrait.ring ?? ring }}
+    style={{
+      width: slotWidth(portrait, width),
+      ...(rightAlign ? { marginLeft: `${100 - scaled(portrait, width)}%` } : null),
+    }}
     image={image}
     alt={alt}
     className={`${portrait.shape === 'ellipse' ? 'aspect-[88/112]' : 'aspect-square'} ${className}`}

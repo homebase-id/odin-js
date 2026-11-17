@@ -189,4 +189,15 @@ describe('design resolution', () => {
     }
     expect(resolveEmbedDesign({ card: { overrides } })).toEqual(board);
   });
+
+  it('reads the portrait size and drops anything else', () => {
+    for (const size of ['small', 'medium', 'large']) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0].size).toBe(size);
+    }
+    for (const size of ['huge', 3, null, 'Small']) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0]).toEqual(
+        board.portraits[0]
+      );
+    }
+  });
 });

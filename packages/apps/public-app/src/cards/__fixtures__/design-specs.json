@@ -1,15 +1,42 @@
 {
     "ids": [
+        "links",
         "poster",
         "board",
         "collage",
-        "dossier",
-        "links"
+        "dossier"
     ],
     "specs": {
+        "links": {
+            "options": [
+                "ACCENT",
+                "BACKGROUND",
+                "BLOCK_ORDER",
+                "COLOURS",
+                "DISPLAY_FONT",
+                "PORTRAIT_SHAPE",
+                "PORTRAIT_SIZE",
+                "SOCIALS_STYLE",
+                "TEXT_FONT"
+            ],
+            "portraitSlots": 1,
+            "schemes": [
+                "slate",
+                "mint",
+                "peach",
+                "lavender",
+                "navy",
+                "lemon",
+                "blue",
+                "cobalt",
+                "plum"
+            ]
+        },
         "poster": {
             "options": [
+                "BACKGROUND",
                 "BLOCK_ORDER",
+                "BLOCK_STYLE",
                 "COLOURS",
                 "DISPLAY_FONT",
                 "SOCIALS_STYLE",
@@ -21,16 +48,21 @@
                 "wine",
                 "pine",
                 "cobalt",
-                "rust"
+                "rust",
+                "slate",
+                "plum"
             ]
         },
         "board": {
             "options": [
                 "ACCENT",
+                "BACKGROUND",
                 "BLOCK_ORDER",
+                "BLOCK_STYLE",
                 "COLOURS",
                 "DISPLAY_FONT",
                 "PORTRAIT_SHAPE",
+                "PORTRAIT_SIZE",
                 "SOCIALS_STYLE",
                 "TEXT_FONT"
             ],
@@ -42,16 +74,19 @@
                 "charcoal",
                 "sky",
                 "butter",
-                "blush"
+                "blush",
+                "purple"
             ]
         },
         "collage": {
             "options": [
                 "ACCENT",
+                "BACKGROUND",
                 "BLOCK_ORDER",
                 "COLOURS",
                 "DISPLAY_FONT",
                 "PORTRAIT_SHAPE",
+                "PORTRAIT_SIZE",
                 "SOCIALS_STYLE",
                 "TEXT_FONT"
             ],
@@ -63,16 +98,22 @@
                 "lilac",
                 "kraft",
                 "night",
-                "mono"
+                "mono",
+                "blue",
+                "slate",
+                "ink"
             ]
         },
         "dossier": {
             "options": [
                 "ACCENT",
+                "BACKGROUND",
                 "BLOCK_ORDER",
+                "BLOCK_STYLE",
                 "COLOURS",
                 "DISPLAY_FONT",
                 "PORTRAIT_SHAPE",
+                "PORTRAIT_SIZE",
                 "SOCIALS_STYLE",
                 "TEXT_FONT"
             ],
@@ -84,28 +125,9 @@
                 "graphite",
                 "paper",
                 "blueprint",
-                "sand"
-            ]
-        },
-        "links": {
-            "options": [
-                "ACCENT",
-                "BLOCK_ORDER",
-                "COLOURS",
-                "DISPLAY_FONT",
-                "PORTRAIT_SHAPE",
-                "SOCIALS_STYLE",
-                "TEXT_FONT"
-            ],
-            "portraitSlots": 1,
-            "schemes": [
-                "cloud",
-                "slate",
-                "mint",
-                "peach",
-                "lavender",
-                "navy",
-                "lemon"
+                "sand",
+                "plum",
+                "mist"
             ]
         }
     },
@@ -122,6 +144,11 @@
         "square",
         "rounded",
         "ellipse"
+    ],
+    "portraitSizes": [
+        "small",
+        "medium",
+        "large"
     ],
     "socialsStyles": [
         "glyphs",
@@ -175,25 +202,30 @@
             },
             "0f9263536b9fc61ada745644735bfd8f": {
                 "design": "links",
-                "overrides": {
-                    "palette": {
-                        "ground": "#F1F3F6",
-                        "ink": "#1B1F24",
-                        "muted": "#5C6673",
-                        "surface": "#FFFFFF",
-                        "surfaceInk": "#1B1F24"
-                    }
-                }
+                "overrides": {}
             }
         }
     },
     "schemeGrounds": {
+        "links": [
+            "#1B1F24",
+            "#DDF0E6",
+            "#FBE3D6",
+            "#E7E3F7",
+            "#14213D",
+            "#F8F2C8",
+            "#DCE5F9",
+            "#24489E",
+            "#3A2A58"
+        ],
         "poster": [
             "#0F1626",
             "#2A0E14",
             "#0E1E16",
             "#10215C",
-            "#3A1708"
+            "#3A1708",
+            "#272B36",
+            "#22192F"
         ],
         "board": [
             "#1E5B45",
@@ -202,7 +234,8 @@
             "#23262B",
             "#DCEBFA",
             "#F7E7A6",
-            "#F6D6D9"
+            "#F6D6D9",
+            "#553781"
         ],
         "collage": [
             "#DDE5D3",
@@ -211,7 +244,10 @@
             "#E6DFF0",
             "#C9A882",
             "#1F1C19",
-            "#EDEDED"
+            "#EDEDED",
+            "#C8D5F3",
+            "#3B4459",
+            "#191C24"
         ],
         "dossier": [
             "#0D1B2A",
@@ -220,16 +256,279 @@
             "#2A2D33",
             "#F4F1EA",
             "#12355B",
-            "#E8DCC6"
-        ],
-        "links": [
-            "#F1F3F6",
-            "#1B1F24",
-            "#DDF0E6",
-            "#FBE3D6",
-            "#E7E3F7",
-            "#14213D",
-            "#F8F2C8"
+            "#E8DCC6",
+            "#1E1729",
+            "#EDEFF3"
         ]
+    },
+    "schemeAccents": {
+        "links": {
+            "slate": [
+                "#4FD1C5",
+                "#7FD4E8",
+                "#F2B84B",
+                "#F26B5B"
+            ],
+            "mint": [
+                "#1F7A4A",
+                "#1F6F8F",
+                "#8A5A00",
+                "#B02A47"
+            ],
+            "peach": [
+                "#B4452A",
+                "#8A3F6A",
+                "#1F6F6A",
+                "#7A5200"
+            ],
+            "lavender": [
+                "#5A3FB5",
+                "#B02A6A",
+                "#1F6F8F",
+                "#2E7A4A"
+            ],
+            "navy": [
+                "#7FD4E8",
+                "#F2B84B",
+                "#9BB4FF",
+                "#6BCB77"
+            ],
+            "lemon": [
+                "#7A5200",
+                "#2E6B4A",
+                "#4F4FA8",
+                "#B02A47"
+            ],
+            "blue": [
+                "#2C58C3",
+                "#3A4F78",
+                "#5A3A88",
+                "#006F52"
+            ],
+            "cobalt": [
+                "#D2DFFB",
+                "#B6C5FA",
+                "#D7C9F0",
+                "#B5C9BF"
+            ],
+            "plum": [
+                "#C9B8EA",
+                "#B6C5FA",
+                "#DBE1FC",
+                "#A9C8BF"
+            ]
+        },
+        "poster": {
+            "midnight": [
+                "#7FD4E8",
+                "#8B7CF6",
+                "#4FD1C5",
+                "#F2B84B"
+            ],
+            "wine": [
+                "#F26B5B",
+                "#F2B84B",
+                "#E8A0B4",
+                "#F5C6A5"
+            ],
+            "pine": [
+                "#6BCB77",
+                "#4FD1C5",
+                "#F2B84B",
+                "#C5E86C"
+            ],
+            "cobalt": [
+                "#7FD4E8",
+                "#F2B84B",
+                "#9DB4FF",
+                "#6BCB77"
+            ],
+            "rust": [
+                "#F2B84B",
+                "#F28C5B",
+                "#F5C6A5",
+                "#E8D26B"
+            ],
+            "slate": [
+                "#EEF0F5",
+                "#B6C5FA",
+                "#9FB0D2",
+                "#B7A9D8"
+            ],
+            "plum": [
+                "#F1EDF7",
+                "#C9B8EA",
+                "#A9B6DE",
+                "#9473CA"
+            ]
+        },
+        "board": {
+            "forest": [
+                "#F2B84B",
+                "#9BE3B8",
+                "#7FD4E8",
+                "#F5C6A5"
+            ],
+            "plum": [
+                "#F2B84B",
+                "#E8A0D4",
+                "#B4A5FF",
+                "#7FD4E8"
+            ],
+            "terracotta": [
+                "#F2B84B",
+                "#FFD6A5",
+                "#7FD4E8",
+                "#E8E8E8"
+            ],
+            "charcoal": [
+                "#F26B5B",
+                "#4FD1C5",
+                "#F2B84B",
+                "#B4A5FF"
+            ],
+            "sky": [
+                "#1F6FB5",
+                "#B4553A",
+                "#2E8B6A",
+                "#6A4FC4"
+            ],
+            "butter": [
+                "#8A5A00",
+                "#B4553A",
+                "#2E6B4A",
+                "#4F4FA8"
+            ],
+            "blush": [
+                "#B02A47",
+                "#7A3F8F",
+                "#1F6F6A",
+                "#8A4B00"
+            ],
+            "purple": [
+                "#D7C9F0",
+                "#DBE1FC",
+                "#B6C5FA",
+                "#B5C9BF"
+            ]
+        },
+        "collage": {
+            "sage": [
+                "#3F7A3A",
+                "#B4553A",
+                "#2E6F8F",
+                "#8A5A00"
+            ],
+            "mist": [
+                "#2E6FB5",
+                "#5A4FB5",
+                "#1F7A70",
+                "#B4553A"
+            ],
+            "rose": [
+                "#B02A47",
+                "#8A3F6A",
+                "#1F6F6A",
+                "#A5521F"
+            ],
+            "lilac": [
+                "#6A3FB5",
+                "#B02A6A",
+                "#2E6F8F",
+                "#1F7A5A"
+            ],
+            "kraft": [
+                "#6B2A14",
+                "#1F4A5A",
+                "#3F4F1F",
+                "#5A1F4A"
+            ],
+            "night": [
+                "#F2B84B",
+                "#E8886B",
+                "#9BC47A",
+                "#7FD4E8"
+            ],
+            "mono": [
+                "#1A1A1A",
+                "#C23B2A",
+                "#2E5FB5",
+                "#1F7A4A"
+            ],
+            "blue": [
+                "#1F45A8",
+                "#34486E",
+                "#52347D",
+                "#00634A"
+            ],
+            "slate": [
+                "#B6C5FA",
+                "#C9B8EA",
+                "#A9BBDF",
+                "#A9C8BF"
+            ],
+            "ink": [
+                "#B6C5FA",
+                "#9473CA",
+                "#748EBD",
+                "#7FB3A1"
+            ]
+        },
+        "dossier": {
+            "ink": [
+                "#7FD4E8",
+                "#F2B84B",
+                "#4FD1C5",
+                "#8B7CF6"
+            ],
+            "moss": [
+                "#6BCB77",
+                "#C5E86C",
+                "#F2B84B",
+                "#4FD1C5"
+            ],
+            "oxblood": [
+                "#F26B5B",
+                "#F2B84B",
+                "#E8A0A0",
+                "#F5C6A5"
+            ],
+            "graphite": [
+                "#4FD1C5",
+                "#F2B84B",
+                "#F26B5B",
+                "#8B7CF6"
+            ],
+            "paper": [
+                "#B4553A",
+                "#1F5F8F",
+                "#2E6F4A",
+                "#6A3FB5"
+            ],
+            "blueprint": [
+                "#F2B84B",
+                "#7FD4E8",
+                "#9BE3B8",
+                "#F5C6A5"
+            ],
+            "sand": [
+                "#8A3A14",
+                "#1F5F7A",
+                "#3F6F2E",
+                "#7A2F5F"
+            ],
+            "plum": [
+                "#C9B8EA",
+                "#B6C5FA",
+                "#9473CA",
+                "#8FA6D2"
+            ],
+            "mist": [
+                "#2C58C3",
+                "#425985",
+                "#603E90",
+                "#007A59"
+            ]
+        }
     }
 }
