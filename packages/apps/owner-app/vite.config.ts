@@ -36,8 +36,9 @@ export default defineConfig({
       cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
-      // The repo root: hoisted node_modules hold the reader's fonts (Inter, KaTeX)
-      allow: ['../../..'],
+      // One level up, and the repo root's node_modules: the reader's fonts (Inter, KaTeX) are
+      // hoisted there, and their files are fetched by url, not imported
+      allow: ['..', '../../../node_modules'],
     },
   },
   preview: {

@@ -6,6 +6,7 @@ import {
   HOME_ROOT_PATH,
   OwnerImage,
   OwnerName,
+  useChannel,
   useDotYouClientContext,
   usePost,
   useSiteData,
@@ -14,9 +15,14 @@ import {
 const Header = () => {
   const { owner } = useSiteData().data ?? {};
   const postMatch = useMatch(`${HOME_ROOT_PATH}posts/:channelKey/:postKey`);
-  const { data: post } = usePost(postMatch?.params);
+  const { isLoading: channelLoading } = useChannel({
+    channelKey: postMatch?.params.channelKey,
+  }).fetch;
+  const { data: post, isLoading: postLoading } = usePost(postMatch?.params);
 
-  // An article's reader has a bar of its own, with the site's login in it
+  // An article's reader has a bar of its own, with the site's login in it; until a post's page knows
+  // whether it is an article, no bar, rather than the site's flashing before the reader's
+  if (postMatch && (channelLoading || postLoading)) return null;
   if (post?.fileMetadata.appData.content.type === 'Article') return null;
 
   return (
