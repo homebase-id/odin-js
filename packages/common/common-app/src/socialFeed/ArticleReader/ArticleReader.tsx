@@ -184,18 +184,18 @@ export const ArticleReader = ({
         />
       </ReaderBar>
 
-      {/* The rail from 1280px, when the reader itself has the 83.75rem its grid takes (6.25rem + 848px +
+      {/* The rail from 1280px, when the reader itself has the 83.75rem its grid takes (6.25rem + the article width +
           22rem and the padding): a host's sidebar can narrow it. articleProse.css hides the inline box then */}
       <div
         className={`px-5 pb-24 pt-6 sm:pt-10 ${
           rail
-            ? 'xl:@min-[83.75rem]:grid xl:@min-[83.75rem]:grid-cols-[minmax(6.25rem,1fr)_848px_minmax(22rem,1fr)]'
+            ? 'xl:@min-[83.75rem]:grid xl:@min-[83.75rem]:grid-cols-[minmax(6.25rem,1fr)_var(--article-w)_minmax(22rem,1fr)]'
             : ''
         }`}
       >
         <article
           ref={articleRef}
-          className="mx-auto w-full max-w-[848px] xl:@min-[83.75rem]:col-start-2"
+          className="mx-auto w-full max-w-[var(--article-w)] xl:@min-[83.75rem]:col-start-2"
           onClick={openImage}
         >
           {cover && postFile.fileId ? (

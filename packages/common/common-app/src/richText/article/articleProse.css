@@ -5,6 +5,7 @@
  * and the live-block tokens below are set on <html>.
  */
 :root {
+  --article-w: 848px;
   /* Page and body text */
   --article-surface: #ffffff;
   --article-on-surface: #37352f;
