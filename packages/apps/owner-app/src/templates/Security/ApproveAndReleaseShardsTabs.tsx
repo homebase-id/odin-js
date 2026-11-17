@@ -50,7 +50,7 @@ const ApproveAndReleaseShardsTabs = () => {
 
   return (
     <div className="p-4">
-      {error && <div className="mb-3 text-red-600">{error}</div>}
+      {error && <div className="mb-3 text-destructive">{error}</div>}
       {loading && <div>Loading shard requests…</div>}
       {!loading && requests.length === 0 && (
         <div>No requests at the moment.</div>
@@ -64,20 +64,20 @@ const ApproveAndReleaseShardsTabs = () => {
             >
               <div>
                 <div className="font-medium">{r.dealer}</div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   {formatDateExludingYearIfCurrent(new Date(r.created))}
                 </div>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleApprove(r)}
-                  className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700"
+                  className="px-3 py-1 rounded bg-primary text-primary-contrast hover:brightness-90"
                 >
                   Approve
                 </button>
                 <button
                   onClick={() => handleReject(r)}
-                  className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
+                  className="px-3 py-1 rounded bg-error-container text-error-container-contrast hover:bg-error-container-hover"
                 >
                   Reject
                 </button>

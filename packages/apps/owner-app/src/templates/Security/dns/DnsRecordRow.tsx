@@ -6,11 +6,11 @@ import { useCopy } from './useCopy';
 import { displayType, normalizeValue, relativeHost, stripDot } from './zoneFile';
 
 // Shared by every DNS table (records, DS records) so they read as one family
-export const TABLE_CARD = 'overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700';
+export const TABLE_CARD = 'overflow-hidden rounded-lg border';
 export const TABLE_HEAD_BASE =
-  'bg-gray-50 px-4 py-2 text-xs font-medium text-slate-500 dark:bg-gray-900 dark:text-slate-400';
+  'bg-surface-container-high px-4 py-2 text-xs font-medium text-muted-foreground';
 export const TABLE_HEAD = `hidden ${TABLE_HEAD_BASE} sm:grid`;
-export const MUTED = 'text-slate-500 dark:text-slate-400';
+export const MUTED = 'text-muted-foreground';
 // Text size is left to the caller
 export const LINK =
   'rounded text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
@@ -33,9 +33,9 @@ export const CopyIconButton = ({
       onClick={() => copy(value)}
       title={t('Copy')}
       aria-label={label ? `${t('Copy')} ${label}` : t('Copy')}
-      className={`shrink-0 rounded p-1 text-slate-500 hover:bg-black/10 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-slate-400 dark:hover:bg-white/10 ${className ?? ''}`}
+      className={`shrink-0 rounded p-1 text-muted-foreground hover:bg-foreground/10 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className ?? ''}`}
     >
-      {copied ? <Check className="h-4 w-4 text-green-600" /> : <Clipboard className="h-4 w-4" />}
+      {copied ? <Check className="h-4 w-4 text-success" /> : <Clipboard className="h-4 w-4" />}
     </button>
   );
 };
@@ -46,17 +46,17 @@ const REVEAL = 'sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:op
 const StatusPill = ({ status }: { status: DnsHealthRecord['status'] }) =>
   status === 'success' ? (
     <span title={t('OK')} aria-label={t('OK')} className="inline-flex">
-      <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+      <Check className="h-4 w-4 text-success" />
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800 dark:bg-orange-900/50 dark:text-orange-300">
+    <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-warning-container px-2.5 py-0.5 text-xs font-medium text-warning-container-contrast">
       <Exclamation className="h-3.5 w-3.5" />
       {status === 'incorrectValue' ? t('Incorrect value') : t('Not found')}
     </span>
   );
 
 const TypeBadge = ({ children }: { children: string }) => (
-  <span className="inline-block rounded bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold dark:bg-gray-800">
+  <span className="inline-block rounded bg-surface-container-high px-2 py-0.5 font-mono text-xs font-semibold">
     {children}
   </span>
 );
@@ -88,7 +88,7 @@ const DnsRecordRow = ({
   const isLong = value.length > LONG_VALUE;
 
   return (
-    <div className="group px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900/60">
+    <div className="group px-4 py-3 hover:bg-surface-container-high">
       <div className="grid grid-cols-[1fr_auto] items-start gap-x-4 gap-y-2 sm:grid-cols-[4.5rem_minmax(0,1fr)_minmax(0,2fr)_7.5rem]">
         <div className="sm:pt-0.5">
           <TypeBadge>{displayType(record)}</TypeBadge>
@@ -155,7 +155,7 @@ export const DnsRecordsTable = ({
       <span>{t('Value')}</span>
       <span>{t('Status')}</span>
     </div>
-    <div className="divide-y divide-gray-200 dark:divide-gray-700 sm:border-t sm:border-gray-200 sm:dark:border-gray-700">
+    <div className="divide-y sm:border-t">
       {records.map((record) => (
         <DnsRecordRow
           key={`${record.type}-${record.domain}-${record.value}`}

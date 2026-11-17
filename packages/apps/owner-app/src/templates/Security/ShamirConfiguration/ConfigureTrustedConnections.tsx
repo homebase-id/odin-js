@@ -148,7 +148,7 @@ export const ConfigureTrustedConnections = ({
                 </div>
             ) : (
                 <div className="flex flex-grow items-center justify-center p-5">
-                    <p className="text-slate-400">
+                    <p className="text-muted-foreground">
                         {t("Select trusted connections from your contacts below")}
                     </p>
                 </div>
@@ -181,19 +181,15 @@ const SelectedConnectionItem = ({
     // ✅ Use the same color logic as PlayerListItem
     const trustColor =
         trustLevel === ShardTrustLevel.Critical && player.type === "delegate"
-            ? "text-red-600"
-            : trustLevel === ShardTrustLevel.Medium
-                ? "text-orange-600"
-                : trustLevel === ShardTrustLevel.Low
-                    ? "text-yellow-600"
-                    : "text-green-600";
+            ? "text-destructive"
+            : "";
 
     return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 mb-2">
             <div className="flex items-center gap-3">
                 <ConnectionImage
                     odinId={player.odinId}
-                    className="border border-neutral-200 dark:border-neutral-800"
+                    className="border"
                     size="sm"
                 />
                 <ConnectionName odinId={player.odinId}/>
@@ -208,21 +204,21 @@ const SelectedConnectionItem = ({
                 )}
 
                 {verificationStatus === "loading" ? (
-                    <span className="text-slate-500">{t("Verifying...")}</span>
+                    <span className="text-muted-foreground">{t("Verifying...")}</span>
                 ) : verificationStatus === "notReviewed" ? (
-                    <span className="text-xs text-red-600">
+                    <span className="text-xs text-destructive">
                         {t("{0} hasn't reviewed your connection yet, so they can't hold a shard", player.odinId)}
                     </span>
                 ) : (
                     verificationStatus !== "valid" && verificationStatus !== "moot" && (
-                        <span className="text-xs text-red-600">
+                        <span className="text-xs text-destructive">
                             {t("⚠ Unavailable")}
                         </span>
                     )
                 )}
 
                 {!canApprove && verificationStatus !== "loading" && (
-                    <span className="text-xs text-orange-600">
+                    <span className="text-xs text-muted-foreground">
                         {t("Can't approve until they log in to Homebase again")}
                     </span>
                 )}
@@ -231,7 +227,7 @@ const SelectedConnectionItem = ({
                     <select
                         value={player.type}
                         onChange={(e) => onTypeChange(e.target.value as PlayerType)}
-                        className="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:bg-slate-800"
+                        className="rounded border bg-background px-2 py-1 text-sm"
                     >
                         <option value={PlayerType.Automatic}>
                             {playerTypeText(PlayerType.Automatic)}
@@ -249,7 +245,7 @@ const SelectedConnectionItem = ({
                 {allowRemove && (
                     <button
                         onClick={onRemove}
-                        className="text-red-600 hover:text-red-800 text-sm sm:text-xs sm:bg-red-500 sm:px-2 sm:py-1 sm:rounded sm:text-white sm:hover:bg-red-600"
+                        className="text-destructive text-sm sm:text-xs sm:bg-destructive sm:px-2 sm:py-1 sm:rounded sm:text-destructive-contrast sm:hover:bg-destructive-hover"
                     >
                         {t("Remove")}
                     </button>

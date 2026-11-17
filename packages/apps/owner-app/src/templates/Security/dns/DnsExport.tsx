@@ -61,7 +61,7 @@ export const NameserverSetup = ({
       {isApex ? (
         <>
           <p>{t('At your registrar, set these custom nameservers:')}</p>
-          <div className={`${TABLE_CARD} divide-y divide-gray-200 dark:divide-gray-700`}>
+          <div className={`${TABLE_CARD} divide-y`}>
             {nameservers.map((ns) => (
               <div key={ns} className="flex items-center gap-1 px-4 py-2">
                 <span className="break-all font-mono text-sm">{ns}</span>
@@ -149,7 +149,7 @@ export const RecordSetup = ({
       <ol className="flex flex-col gap-2.5">
         {steps.map((step, i) => (
           <li key={step} className="flex items-start gap-3 text-sm">
-            <span className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-medium dark:bg-gray-700">
+            <span className="mt-px flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-container-highest text-xs font-medium">
               {i + 1}
             </span>
             <span>{t(step)}</span>

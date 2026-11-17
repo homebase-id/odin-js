@@ -26,7 +26,7 @@ export const PlayerListItem = ({
         <ListItemWrapper {...props}>
             <ConnectionImage
                 odinId={player.odinId as string}
-                className="border border-neutral-200 dark:border-neutral-800"
+                className="border"
                 size="sm"
             />
 
@@ -35,7 +35,7 @@ export const PlayerListItem = ({
                 {/* Left: Player name */}
                 <div>
                     <ConnectionName odinId={player.odinId as string}/>
-                    <span className="ml-3 text-sm text-slate-400">({playerTypeText(player.type)})</span>
+                    <span className="ml-3 text-sm text-muted-foreground">({playerTypeText(player.type)})</span>
                 </div>
 
                 {/* Right: Verification + Trust + Retry */}
@@ -43,7 +43,7 @@ export const PlayerListItem = ({
                     {/* Verification status */}
                     <div className="flex items-center gap-2 justify-end">
                         <StatusIcon status={status}/>
-                        <span className="text-sm text-slate-700 dark:text-slate-300">
+                        <span className="text-sm text-foreground">
                             {status === "valid" && t("Shard verified")}
                             {status === "invalid" && t("Shard invalid")}
                             {status === "notConnected" && t("Not connected")}
@@ -56,12 +56,8 @@ export const PlayerListItem = ({
                         <div
                             className={`flex items-center gap-2 justify-end text-sm ${
                                 trustLevel === ShardTrustLevel.Critical && player.type === "delegate" || isMissing
-                                    ? "text-red-600"
-                                    : trustLevel === ShardTrustLevel.Medium
-                                        ? "text-orange-600"
-                                        : trustLevel === ShardTrustLevel.Low
-                                            ? "text-yellow-600"
-                                            : "text-green-600"
+                                    ? "text-destructive"
+                                    : ""
                             }`}
                         >
                             {trustEmoji(trustLevel)} {trustLabel(trustLevel, player.type)}
@@ -77,7 +73,7 @@ export const PlayerListItem = ({
                                     e.stopPropagation();
                                     onRetry();
                                 }}
-                                className="text-xs text-blue-600 hover:underline"
+                                className="text-xs text-primary hover:underline"
                             >
                                 {t("Retry Verification")}
                             </button>
@@ -102,7 +98,7 @@ const ListItemWrapper = ({
         <div
             onClick={onClick}
             className={`flex w-full cursor-pointer flex-row items-center gap-2 rounded-lg px-1 py-2 sm:gap-3 sm:px-3 sm:py-4 transition-colors hover:bg-primary/20 ${
-                isActive ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
+                isActive ? "bg-surface-container-highest" : "bg-transparent"
             }`}
         >
             {children}
@@ -140,7 +136,7 @@ const StatusIcon = ({status}: { status: Status }) => {
     if (status === "valid") {
         return (
             <svg
-                className="h-5 w-5 text-green-600"
+                className="h-5 w-5 text-success"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-label="Valid"
@@ -163,7 +159,7 @@ const StatusIcon = ({status}: { status: Status }) => {
     }
     return (
         <svg
-            className="h-5 w-5 text-red-600"
+            className="h-5 w-5 text-destructive"
             viewBox="0 0 24 24"
             fill="none"
             aria-label="Invalid"

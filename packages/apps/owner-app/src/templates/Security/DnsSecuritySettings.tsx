@@ -74,7 +74,7 @@ export const DnsSecuritySettings = () => {
         title={
           <div className="flex flex-col">
             {t('DNS')}
-            <small className="text-sm text-gray-400">
+            <small className="text-sm text-muted-foreground">
               {t('The DNS records and DNSSEC state of your domain')}
             </small>
           </div>
@@ -372,7 +372,7 @@ const DsTable = ({ dsRecords, copyable }: { dsRecords: DsRecord[]; copyable?: bo
           <th className="px-4 py-2 font-medium">{t('Digest')}</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-200 border-t border-gray-200 font-mono dark:divide-gray-700 dark:border-gray-700">
+      <tbody className="divide-y border-t font-mono">
         {dsRecords.map((ds) => (
           <tr key={`${ds.keyTag}-${ds.digestType}-${ds.digest}`} className="group align-top">
             <CopyCell value={`${ds.keyTag}`} label={t('Key tag')} copyable={copyable} />

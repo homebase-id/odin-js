@@ -66,13 +66,13 @@ export const Step2SelectPlayers = ({
         <>
             <Label>{t("Selected Trusted Contacts")}</Label>
 
-            <div className="mb-3 text-gray-400">
+            <div className="mb-3 text-muted-foreground">
                 {t(
                     "Choose 3–7 trusted contacts to help recover your account. You will set security options next."
                 )}
             </div>
 
-            <div className="mb-3 text-gray-400">
+            <div className="mb-3 text-muted-foreground">
                 {t("Selected")}: {players?.length} (3–7 {t("recommended")})
             </div>
 
@@ -140,7 +140,7 @@ export const ConnectionListItem = ({
         <ListItemWrapper {...props}>
             <ConnectionImage
                 odinId={odinId}
-                className="border border-neutral-200 dark:border-neutral-800"
+                className="border"
                 size="sm"
             />
             <ConnectionName odinId={odinId} />
@@ -161,7 +161,7 @@ const ListItemWrapper = ({
         <div
             onClick={onClick}
             className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
-                isActive ? "bg-slate-200 dark:bg-slate-800" : "bg-transparent"
+                isActive ? "bg-surface-container-highest" : "bg-transparent"
             }`}
         >
             {children}

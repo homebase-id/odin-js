@@ -85,9 +85,9 @@ const FirstRun = () => {
                 <section className="body-font flex h-full pt-24">
                     <div className="container m-auto h-full max-w-[35rem] p-5">
                         <form onSubmit={doNext}>
-                            <h1 className="mb-5 text-4xl dark:text-white">
+                            <h1 className="mb-5 text-4xl">
                                 Homebase | Setup
-                                <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                                <small className="block break-all text-muted-foreground sm:break-normal">
                                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                                 </small>
                             </h1>
@@ -98,7 +98,7 @@ const FirstRun = () => {
                             ) : (
                                 <>
                                     <div className="mb-2">
-                                        <Label htmlFor="password" className="text-sm leading-7 dark:text-gray-400">
+                                        <Label htmlFor="password" className="text-sm leading-7">
                                             {t('Password')}
                                         </Label>
                                         <PasswordInput
@@ -116,7 +116,7 @@ const FirstRun = () => {
                                     <div className="mb-4">
                                         <Label
                                             htmlFor="retypepassword"
-                                            className="text-sm leading-7 dark:text-gray-400"
+                                            className="text-sm leading-7"
                                         >
                                             {t('Retype Password')}
                                         </Label>
@@ -130,7 +130,7 @@ const FirstRun = () => {
                                             autoComplete="new-password"
                                         />
                                         {password !== retypePassword && retypePassword !== '' ? (
-                                            <p className="font-semibold text-red-800 dark:text-red-200">
+                                            <p className="font-semibold text-destructive">
                                                 {t("Passwords don't match")}
                                             </p>
                                         ) : null}
@@ -145,7 +145,7 @@ const FirstRun = () => {
                                                 onChange={(e) => setShouldUseAutomatedPasswordRecovery(e.currentTarget.checked)}/>
                                             <Label
                                                 htmlFor="enableAutomatedPasswordRecovery"
-                                                className="ml-5 inline text-sm leading-7 dark:text-gray-400">
+                                                className="ml-5 inline text-sm leading-7">
                                                 {t('Enable Automatic Password Recovery')}
                                             </Label>
                                         </div>)}
