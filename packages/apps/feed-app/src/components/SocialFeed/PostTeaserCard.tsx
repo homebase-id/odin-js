@@ -54,7 +54,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
         channelKey: channelId,
     }).fetch;
 
-    const postPath = `preview/${isExternal ? odinId : identity}/${
+    // An article opens in the reader; media in the preview
+    const postPath = `${post.type === 'Article' ? 'read' : 'preview'}/${isExternal ? odinId : identity}/${
         channel?.fileMetadata.appData.uniqueId
     }/${post.id}`;
     const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself

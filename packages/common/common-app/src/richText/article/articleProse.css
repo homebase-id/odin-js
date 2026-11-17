@@ -1,0 +1,208 @@
+/*
+ * The colours of the article's blocks: Notion's paper look, light and dark. Warm greys for text,
+ * code and table lines; soft tinted callouts, each with an icon in its accent. On :root, under
+ * names of their own, because the viewer also renders outside the reader (a post's detail page),
+ * and the live-block tokens below are set on <html>.
+ */
+:root {
+  /* Page and body text */
+  --article-surface: #ffffff;
+  --article-on-surface: #37352f;
+  /* Code blocks and table headers */
+  --article-surface-variant: #f7f6f3;
+  /* Inline code and kbd */
+  --article-surface-container: #f1f1ef;
+  --article-inline-code: #eb5757;
+  /* Muted text and captions */
+  --article-on-surface-variant: #73726e;
+  /* Borders and table lines */
+  --article-outline-variant: #e9e9e7;
+  /* Callouts: each accent (the icon) and its container (the background) */
+  --article-primary: #337ea9;
+  --article-on-primary: #ffffff;
+  --article-primary-container: #e7f3f8;
+  --article-secondary: #448361;
+  --article-secondary-container: #edf3ec;
+  --article-error: #d44c47;
+  --article-on-error: #ffffff;
+  --article-error-container: #fdebec;
+  --article-warning: #cb912f;
+  --article-warning-container: #fbf3db;
+  /* The page and body text as the apps' RGB channels (--color-background: 22 22 22) */
+  --article-surface-rgb: 255 255 255;
+  --article-on-surface-rgb: 55 53 47;
+}
+
+:root.dark {
+  --article-surface: #191919;
+  --article-on-surface: #d4d4d4;
+  --article-surface-variant: #202020;
+  --article-surface-container: #2a2a2a;
+  --article-inline-code: #ff7369;
+  --article-on-surface-variant: #9b9b9b;
+  --article-outline-variant: #2f2f2f;
+  --article-primary: #529cca;
+  --article-on-primary: #191919;
+  --article-primary-container: #1b2b36;
+  --article-secondary: #4dab9a;
+  --article-secondary-container: #1d2b25;
+  --article-error: #df5452;
+  --article-on-error: #191919;
+  --article-error-container: #33201f;
+  --article-warning: #ca9849;
+  --article-warning-container: #2e2a1c;
+  --article-surface-rgb: 25 25 25;
+  --article-on-surface-rgb: 212 212 212;
+}
+
+/*
+ * The reader's page: the article's paper and ink, edge to edge. The apps' colour channels are
+ * redefined inside it only, so what it holds (the bar, responses, menus) draws in them too.
+ */
+.article-page {
+  --color-background: var(--article-surface-rgb);
+  --color-page-background: var(--article-surface-rgb);
+  --color-foreground: var(--article-on-surface-rgb);
+  background-color: var(--article-surface);
+  color: var(--article-on-surface);
+}
+
+/* Around it while it is open: the canvas past the page's edges, as when overscrolled */
+:root[data-article-reader],
+:root[data-article-reader] body {
+  background-color: var(--article-surface);
+}
+
+/*
+ * Live blocks (@2002bishwajeet/live-blocks) read their theme off <html>, under these names, which
+ * the apps don't use: the reader sets data-article-reader on <html> while it is open. --font-sans
+ * is the font mermaid lays its labels out in; the page's own default font, which Tailwind derives
+ * from --font-sans, stays as it was.
+ */
+:root[data-article-reader] {
+  --background: var(--article-surface);
+  --foreground: var(--article-on-surface);
+  --card: var(--article-surface);
+  --card-foreground: var(--article-on-surface);
+  --popover: var(--article-surface);
+  --popover-foreground: var(--article-on-surface);
+  --muted: var(--article-surface-variant);
+  --muted-foreground: var(--article-on-surface-variant);
+  --border: var(--article-outline-variant);
+  --input: var(--article-outline-variant);
+  --primary: var(--article-primary);
+  --primary-foreground: var(--article-on-primary);
+  --secondary: var(--article-surface-container);
+  --secondary-foreground: var(--article-on-surface);
+  --accent: var(--article-surface-container);
+  --accent-foreground: var(--article-on-surface);
+  --destructive: var(--article-error);
+  --destructive-foreground: var(--article-on-error);
+  --ring: var(--article-primary);
+  --radius: 0.5rem;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --default-font-family:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+}
+
+/*
+ * The article reader's type scale, around Journal's blocks (ArticleDocRenderer), which inherit it:
+ * Inter for everything, as in a Journal note (its src/index.css), and the system mono for code.
+ * Plain CSS, so it means the same under Tailwind 3 and 4; scoped selectors win over the blocks' own
+ * utilities.
+ */
+.article-font,
+.article-prose {
+  font-family: 'Inter Variable', system-ui, sans-serif;
+}
+
+.article-prose {
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+@media (min-width: 640px) {
+  .article-prose {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+}
+
+/* Paragraphs set their own line height; here they take the scale's */
+.article-prose p {
+  line-height: inherit;
+}
+
+.article-prose :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 600;
+}
+
+/* A note's own h1 stays a step below the article title (44px) */
+.article-prose h1 {
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+@media (min-width: 640px) {
+  .article-prose h1 {
+    font-size: 32px;
+  }
+}
+
+.article-prose h2 {
+  font-size: 28px;
+  line-height: 1.5;
+}
+
+.article-prose h3 {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.article-prose h4 {
+  font-size: 18px;
+}
+
+.article-prose table {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.article-prose figcaption {
+  font-size: 14px;
+}
+
+/*
+ * A live block's frame copies the font of the element around it, and can't load webfonts: the
+ * system sans at Journal's line height, rather than Inter it would fall back from.
+ */
+.article-prose [data-live-block] {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+/*
+ * A dark frame in a dark page: the same colour scheme on both sides of the frame, or the browser
+ * paints the frame opaque in its own dark grey rather than letting the page's paper show through.
+ */
+.dark .article-prose [data-live-block] iframe {
+  color-scheme: dark;
+}
+
+/* Covers, top-level galleries and wide live blocks take 880px of the 680px column */
+@media (min-width: 1024px) {
+  .article-wide,
+  .article-prose > div > [data-gallery],
+  .article-prose > div > [aria-roledescription='carousel'],
+  .article-prose > div > [data-live-block-wide] {
+    margin-inline: calc((680px - 880px) / 2);
+  }
+}
+
+/* With the "On this page" rail beside the article, the box above the body would repeat it */
+@media (min-width: 1280px) {
+  .article-prose[data-toc-rail] [data-article-toc] {
+    display: none;
+  }
+}

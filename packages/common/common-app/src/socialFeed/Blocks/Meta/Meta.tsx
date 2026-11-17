@@ -13,6 +13,11 @@ import { Persons, UserX, Times, Flag, Link, Trash, Lock } from '../../../ui/Icon
 import { FEED_ROOT_PATH, HOME_ROOT_PATH } from '../../../constants';
 import { useDotYouClientContext } from '../../../hooks';
 
+type PostMetaChannel =
+  | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+  | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+  | undefined;
+
 interface PostMetaWithPostFileProps {
   odinId?: string;
   authorOdinId?: string;
@@ -64,16 +69,8 @@ export const PostMeta = ({
     minute: 'numeric',
   };
 
-  const isPostToMyCollaborativeChannel =
-    authorOdinId !== (odinId || loggedInIdentity) && (odinId || loggedInIdentity) && authorOdinId;
   const isAuthor = authorOdinId === loggedInIdentity;
-
-  const isConnected = useIsConnected(odinId).data;
-  const channelLink = channel
-    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
-        channel.fileMetadata.appData.content.slug
-      }${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`
-    : undefined;
+  const channelLink = useChannelLink(odinId, channel);
 
   return (
     <div
@@ -104,26 +101,68 @@ export const PostMeta = ({
       ) : null}
 
       {excludeContextMenu || !postFile ? null : (
-        <>
-          {isPostToMyCollaborativeChannel ? (
-            <GroupChannelActions
-              odinId={odinId}
-              postFile={postFile}
-              channel={channel}
-              channelLink={channelLink}
-            />
-          ) : (!odinId && isOwner) || isAuthor ? (
-            <Suspense>
-              <OwnerActions postFile={postFile} channel={channel} />
-            </Suspense>
-          ) : odinId ? (
-            // <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
-            <ExternalActions odinId={odinId} postFile={postFile} />
-          ) : null}
-        </>
+        <PostContextMenu
+          odinId={odinId}
+          authorOdinId={authorOdinId}
+          postFile={postFile}
+          channel={channel}
+        />
       )}
     </div>
   );
+};
+
+/** The public page of a channel, logged on as the viewer when they are connected to its owner. */
+// eslint-disable-next-line react-refresh/only-export-components
+export const useChannelLink = (odinId: string | undefined, channel: PostMetaChannel) => {
+  const loggedInIdentity = useDotYouClientContext().getLoggedInIdentity();
+  const isConnected = useIsConnected(odinId).data;
+  return channel
+    ? `${odinId ? new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getRoot() : ''}${HOME_ROOT_PATH}posts/${
+        channel.fileMetadata.appData.content.slug
+      }${isConnected && loggedInIdentity ? '?youauth-logon=' + loggedInIdentity : ''}`
+    : undefined;
+};
+
+/**
+ * A post's ⋯ menu: the author's actions, those of a collaborative channel, or (in the feed) a
+ * follower's. PostMeta shows it after the date; a page can show it on its own.
+ */
+export const PostContextMenu = ({
+  odinId,
+  authorOdinId,
+  postFile,
+  channel,
+}: {
+  odinId?: string;
+  authorOdinId?: string;
+  postFile: HomebaseFile<PostContent>;
+  channel?: PostMetaChannel;
+}) => {
+  const dotYouClient = useDotYouClientContext();
+  const isOwner = dotYouClient.isOwner();
+  const loggedInIdentity = dotYouClient.getLoggedInIdentity();
+  const channelLink = useChannelLink(odinId, channel);
+
+  const isPostToMyCollaborativeChannel =
+    authorOdinId !== (odinId || loggedInIdentity) && (odinId || loggedInIdentity) && authorOdinId;
+  const isAuthor = authorOdinId === loggedInIdentity;
+
+  return isPostToMyCollaborativeChannel ? (
+    <GroupChannelActions
+      odinId={odinId}
+      postFile={postFile}
+      channel={channel}
+      channelLink={channelLink}
+    />
+  ) : (!odinId && isOwner) || isAuthor ? (
+    <Suspense>
+      <OwnerActions postFile={postFile} channel={channel} />
+    </Suspense>
+  ) : odinId ? (
+    // <ExternalActions odinId={odinId} channel={channel} postFile={postFile} />
+    <ExternalActions odinId={odinId} postFile={postFile} />
+  ) : null;
 };
 
 export const ToGroupBlock = ({

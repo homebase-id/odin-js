@@ -47,6 +47,8 @@ export const SocialFeed = () => {
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
     else document.documentElement.classList.remove('overflow-hidden');
+    // Leaving with the preview open (an article's preview goes on to the reader) must leave the page scrollable
+    return () => document.documentElement.classList.remove('overflow-hidden');
   }, [postKey]);
 
   const isDesktop = document.documentElement.clientWidth >= 1024;
