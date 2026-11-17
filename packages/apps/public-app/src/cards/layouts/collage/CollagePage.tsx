@@ -190,11 +190,17 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   {data.headline}
                 </p>
               ) : null}
-              <CardSocials
-                variant={wordmark ? 'glyphs' : design.socials}
-                data={restData}
-                className="!gap-4 pl-3 pt-[22px] text-[color:var(--card-muted)] [&_a:hover]:text-[color:var(--card-ink)] [&_a]:opacity-100 [&_svg]:h-[22px] [&_svg]:w-[22px]"
-              />
+              <div className="pl-3 pt-[22px]">
+                <CardSocials
+                  variant={wordmark ? 'glyphs' : design.socials}
+                  data={restData}
+                  className={
+                    design.socials === 'bar'
+                      ? 'max-w-full flex-wrap'
+                      : '!gap-4 text-[color:var(--card-muted)] [&_a:hover]:text-[color:var(--card-ink)] [&_a]:opacity-100 [&_svg]:h-[22px] [&_svg]:w-[22px]'
+                  }
+                />
+              </div>
             </div>
 
             {hasAside ? (

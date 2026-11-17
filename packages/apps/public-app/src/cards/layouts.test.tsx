@@ -497,11 +497,29 @@ describe('socials on the shared layouts and the collage page', () => {
 
   it.each(LAYOUTS)('%s: bar is a connected pill and glyphs are not, on card and page', (layout) => {
     for (const wide of [false, true]) {
-      const bar = draw(layout, 'bar', wide);
-      const glyphs = draw(layout, 'glyphs', wide);
-      expect(bar).toContain('data-socials="bar"');
-      expect(glyphs).toContain('data-socials="glyphs"');
-      expect(glyphs).not.toContain('data-socials="bar"');
+      const socialLists = (html: string) =>
+        [...html.matchAll(/<ul([^>]*data-socials[^>]*)>(.*?)<\/ul>/g)].map((m) => ({
+          attrs: m[1],
+          inner: m[2],
+          tokens: (m[1].match(/class="([^"]*)"/)?.[1] ?? '').split(' '),
+        }));
+      const bar = socialLists(draw(layout, 'bar', wide));
+      const glyphs = socialLists(draw(layout, 'glyphs', wide));
+      expect(bar.length).toBeGreaterThan(0);
+      expect(glyphs.length).toBe(bar.length);
+      for (const b of bar) {
+        expect(b.attrs).toContain('data-socials="bar"');
+        expect(b.tokens).toEqual(expect.arrayContaining(['rounded-full', 'p-1']));
+        expect(b.attrs).toContain('color-mix');
+        expect(b.inner).toContain('h-9 w-9');
+      }
+      for (const g of glyphs) {
+        expect(g.attrs).toContain('data-socials="glyphs"');
+        expect(g.tokens).not.toContain('rounded-full');
+        expect(g.tokens).not.toContain('p-1');
+        expect(g.attrs).not.toContain('color-mix');
+        expect(g.inner).not.toContain('h-9 w-9');
+      }
     }
   });
 

@@ -51,7 +51,7 @@ const slotWidth = (portrait: Portrait, pct: number) => `${scaled(portrait, pct)}
 const frameStyle = (portrait: Portrait, pct: number): CSSProperties => {
   const style: CSSProperties = { width: slotWidth(portrait, pct) };
   if (portrait.tilt) style.transform = `rotate(${portrait.tilt}deg)`;
-  return Object.keys(style).length ? style : undefined;
+  return style;
 };
 
 // A polaroid: the frame carries the tilt, tape and shadow; the picture sits square inside it
