@@ -5,7 +5,7 @@ import {
   CommentsReactionSummary,
   EmojiReactionSummary,
 } from '@homebase-id/js-lib/public';
-import { Suspense, useMemo, useState } from 'react';
+import { Fragment, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   t,
@@ -400,34 +400,49 @@ export const CommentList = ({
   context,
   canReact,
   login,
+  composerFirst,
+  threadClassName,
 }: {
   context: ReactionContext;
   canReact?: CanReactInfo;
   login?: () => void;
+  /** The composer above the comments instead of below them */
+  composerFirst?: boolean;
+  /** Each comment and its replies in a box of their own, with this class */
+  threadClassName?: string;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
-  const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
+  const newestFirst = comments?.pages.flatMap((page) => page.comments);
+  // Under a composer at the top the newest come first, so a just-posted one shows right under it;
+  // above one at the bottom, the oldest
+  const flattenedComments = composerFirst ? newestFirst : newestFirst?.reverse();
+  const composer = <CommentComposer context={context} canReact={canReact} login={login} />;
+  const older = hasNextPage ? (
+    <a
+      className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
+      onClick={() => fetchNextPage()}
+    >
+      {t('View older')}
+    </a>
+  ) : null;
 
   return (
     <>
-      {hasNextPage ? (
-        <a
-          className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
-          onClick={() => fetchNextPage()}
-        >
-          {t('View older')}
-        </a>
-      ) : null}
-      {flattenedComments?.map((comment, index) => (
-        <Comment
-          context={context}
-          canReact={canReact}
-          commentData={comment}
-          key={comment.fileId ?? index}
-          isThread={false}
-        />
-      ))}
-      <CommentComposer context={context} canReact={canReact} login={login} />
+      {composerFirst ? composer : older}
+      {flattenedComments?.map((comment, index) => {
+        const key = comment.fileId ?? index;
+        const thread = (
+          <Comment context={context} canReact={canReact} commentData={comment} isThread={false} />
+        );
+        return threadClassName ? (
+          <div className={threadClassName} key={key}>
+            {thread}
+          </div>
+        ) : (
+          <Fragment key={key}>{thread}</Fragment>
+        );
+      })}
+      {composerFirst ? older : composer}
     </>
   );
 };
