@@ -1,10 +1,10 @@
 import { ReactNode } from 'react';
 
 const TONES = {
-  idle: { text: 'text-slate-500 dark:text-slate-400', dot: 'bg-slate-400' },
-  checking: { text: 'text-slate-500 dark:text-slate-400', dot: 'bg-slate-400 animate-pulse' },
-  ok: { text: 'text-green-600 dark:text-green-400', dot: 'bg-green-500' },
-  bad: { text: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' },
+  idle: { text: 'text-muted-foreground', dot: 'bg-outline' },
+  checking: { text: 'text-muted-foreground', dot: 'bg-outline animate-pulse' },
+  ok: { text: 'text-success', dot: 'bg-success' },
+  bad: { text: 'text-destructive', dot: 'bg-destructive' },
 } as const;
 
 export type StatusTone = keyof typeof TONES;

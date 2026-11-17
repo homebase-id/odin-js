@@ -48,12 +48,11 @@ function App() {
         <link rel="icon" type="image/png" sizes="16x16" href={`/${config.id}/favicon-16x16.png`} />
         <link rel="manifest" href={`/${config.id}/site.webmanifest`} />
         <meta name="msapplication-TileColor" content="#2b5797" />
-        <meta name="theme-color" content="#ff0000" />
       </Helmet>
       {isRoutingToRegionHost ? (
         // Deliberately not <Layout>: its header and footer render <Link>, which
         // needs the Router this branch exists to avoid mounting
-        <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <div className="flex min-h-screen flex-col bg-page-background text-foreground">
           <Loader className="m-auto h-20 w-20" />
         </div>
       ) : (

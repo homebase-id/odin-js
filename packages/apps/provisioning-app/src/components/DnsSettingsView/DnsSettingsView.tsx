@@ -107,7 +107,7 @@ const DnsSettingsView = ({
             <RecordView key={record.name} record={record} domain={domain} showStatus={manualShowStatus} />
           ))}
           {hasOptionalRecords ? (
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-3 text-sm text-muted-foreground">
               {t(
                 'That is everything your identity needs. Email has its own DNS records - if you want email on this domain later, your owner console lists them under Security, Email.'
               )}
@@ -222,17 +222,17 @@ const AccordionSection = ({
   children: ReactNode;
 }) => {
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-700">
+    <div className="rounded-lg border border-outline-variant">
       <button
         type="button"
         onClick={onOpen}
         className={`flex w-full flex-row items-center gap-3 px-5 py-4 text-left text-xl ${
-          isOpen ? '' : 'text-slate-500 dark:text-slate-400'
+          isOpen ? '' : 'text-muted-foreground'
         }`}
       >
         {title}
         {badge ? (
-          <span className="rounded-full bg-indigo-100 px-3 py-0.5 text-sm text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
+          <span className="rounded-full bg-secondary px-3 py-0.5 text-sm text-secondary-contrast">
             {badge}
           </span>
         ) : null}
@@ -265,7 +265,7 @@ const NsDelegationBlock = ({
     <div className="flex flex-col gap-4">
       {isApexDomain ? (
         <>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground">
             {t(
               `Replace your domain's nameservers at your registrar with the two below (remove any others). Homebase then manages all DNS records for you - including any future ones (e.g. email) - so you never have to touch DNS again.`
             )}
@@ -277,7 +277,7 @@ const NsDelegationBlock = ({
           </Alert>
         </>
       ) : (
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-muted-foreground">
           {t(
             `Add these NS records for "${subLabel}" in the ${registrableDomain} zone at your DNS host. Homebase then manages all DNS records for ${domain} - including any future ones (e.g. email) - so you never have to touch DNS again.`
           )}
@@ -322,21 +322,21 @@ const NameServerView = ({
         className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
           showStatus
             ? isGood
-              ? 'bg-green-100 dark:bg-green-900'
+              ? 'bg-success/10'
               : errorStates.includes(simpleStatus)
-                ? 'bg-orange-100 dark:bg-orange-900'
-                : 'bg-gray-100 dark:bg-gray-800'
-            : 'bg-gray-100 dark:bg-gray-800'
+                ? 'bg-warning-container text-warning-container-contrast'
+                : 'bg-surface-container-high'
+            : 'bg-surface-container-high'
         } px-4 py-3 font-mono text-base shadow-sm`}
       >
-        <span className="text-slate-400">{t('Nameserver')} {index + 1}</span>
+        <span className="text-muted-foreground">{t('Nameserver')} {index + 1}</span>
         <ClickToCopy>{record.value}</ClickToCopy>
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
               isInCorrectvalue
-                ? 'cursor-pointer text-indigo-500 hover:underline'
-                : `${!isGood ? 'text-orange-600 dark:text-orange-400' : ''}`
+                ? 'cursor-pointer text-primary hover:underline'
+                : `${!isGood && !errorStates.includes(simpleStatus) ? 'text-warning' : ''}`
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >
@@ -364,7 +364,7 @@ const NameServerView = ({
         >
           <p className="mb-4">
             {t('Your domain should use only the Homebase nameservers, but it currently lists:')}
-            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono dark:bg-orange-900 text-base">
+            <span className="mt-1 block bg-warning-container px-4 py-3 font-mono text-warning-container-contrast text-base">
               {delegationFound.join(', ')}
             </span>
           </p>
@@ -409,7 +409,7 @@ const ApexInfoBlock = ({
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">
-        Point your domain <span className="rounded-md bg-slate-100 px-2 dark:bg-slate-700">{yourDomain}</span> to
+        Point your domain <span className="rounded-md bg-surface-container-high px-2">{yourDomain}</span> to
         Homebase
       </p>
       {aliasARecord ? (
@@ -419,7 +419,7 @@ const ApexInfoBlock = ({
             <br />
             {t('Point ALIAS, ANAME, or flattened CNAME record to')} {aliasARecord.value}
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             If your DNS provider supports ALIAS, ANAME, or flattened CNAME records, use this
             recommended configuration, which is more resilient than the fallback option.
           </p>
@@ -438,7 +438,7 @@ const ApexInfoBlock = ({
             <br />
             {t('Point A record to')} {fallbackARecord?.value}
           </p>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             {delegationHint ??
               t(
                 'If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use this fallback option.'
@@ -482,7 +482,7 @@ const SubdomainInfoBlock = ({
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">
-        Point your domain <span className="rounded-md bg-slate-100 px-2 dark:bg-slate-700">{yourDomain}</span> to
+        Point your domain <span className="rounded-md bg-surface-container-high px-2">{yourDomain}</span> to
         Homebase
       </p>
       {aliasARecord ? (
@@ -562,11 +562,11 @@ const RecordView = ({
         className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
           showStatus
             ? isGood
-              ? 'bg-green-100 dark:bg-green-900'
+              ? 'bg-success/10'
               : errorStates.includes(simpleStatus)
-                ? 'bg-orange-100 dark:bg-orange-900'
-                : 'bg-gray-100 dark:bg-gray-800'
-            : 'bg-gray-100 dark:bg-gray-800'
+                ? 'bg-warning-container text-warning-container-contrast'
+                : 'bg-surface-container-high'
+            : 'bg-surface-container-high'
         } px-4 py-3 font-mono text-base shadow-sm`}
       >
         <ClickToCopy value={recordValue}>
@@ -575,7 +575,7 @@ const RecordView = ({
           ) : (
             <>
               {[record.name, subDomain].filter(Boolean).join('.')}
-              <span className={record.name ? `text-slate-400` : ''}>.{registrableDomain}.</span>
+              <span className={record.name ? `text-muted-foreground` : ''}>.{registrableDomain}.</span>
             </>
           )}
         </ClickToCopy>
@@ -585,8 +585,8 @@ const RecordView = ({
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
               isInCorrectvalue
-                ? 'cursor-pointer text-indigo-500 hover:underline'
-                : `${!isGood ? 'text-orange-600 dark:text-orange-400' : ''}`
+                ? 'cursor-pointer text-primary hover:underline'
+                : `${!isGood && !errorStates.includes(simpleStatus) ? 'text-warning' : ''}`
             }`}
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >
@@ -621,14 +621,14 @@ const RecordView = ({
         >
           <p className="mb-4">
             Expected value:
-            <span className="mt-1 block bg-gray-100 px-4 py-3 font-mono dark:bg-gray-800 text-base">
+            <span className="mt-1 block bg-surface-container-high px-4 py-3 font-mono text-base">
               {record.value}
               {hideDotOnValue ? '' : '.'}
             </span>
           </p>
           <p>
             But we have found this:{' '}
-            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono dark:bg-orange-900 text-base">
+            <span className="mt-1 block bg-warning-container px-4 py-3 font-mono text-warning-container-contrast text-base">
               {Object.values(record.records)[0]}
             </span>
           </p>
@@ -655,7 +655,7 @@ const ClickToCopy = (props: { children: string } | { children: ReactNode; value:
       <p>{children}</p>
       {copied && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="rounded-lg bg-slate-800/80 px-2 py-1 text-sm text-white dark:bg-slate-600/80">
+          <span className="rounded-lg bg-foreground/80 px-2 py-1 text-sm text-background">
             {t('Copied')}
           </span>
         </div>

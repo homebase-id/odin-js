@@ -11,13 +11,13 @@ interface CardProps {
 
 export const Card = ({ title, announceChanges, className = '', children }: CardProps) => (
   <div
-    className={`rounded-lg border border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800 ${className}`}
+    className={`rounded-lg border border-outline-variant bg-background px-4 ${className}`}
     aria-live={announceChanges ? 'polite' : undefined}
   >
     {title ? (
-      <p className="flex flex-row items-center gap-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+      <p className="flex flex-row items-center gap-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         {title}
-        <span className="h-px flex-grow bg-slate-200 dark:bg-slate-700" />
+        <span className="h-px flex-grow bg-outline-variant" />
       </p>
     ) : null}
     {children}
@@ -34,7 +34,7 @@ export const CardRow = ({
   children: ReactNode;
 }) => (
   <div
-    className={`flex flex-row items-center gap-3 border-b border-slate-200 py-3 transition-opacity last:border-b-0 dark:border-slate-700/60 ${
+    className={`flex flex-row items-center gap-3 border-b border-outline-variant py-3 transition-opacity last:border-b-0 ${
       isDimmed ? 'opacity-50' : ''
     }`}
   >

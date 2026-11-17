@@ -35,11 +35,11 @@ const ActionLink: FC<ActionLinkProps> = ({
   const Icon = (props: { className: string }) => (icon ? icon(props) : null);
   const colorClasses =
     state === 'error'
-      ? 'bg-red-500 hover:bg-red-600 text-white'
+      ? 'bg-destructive hover:bg-destructive-hover text-destructive-contrast'
       : type === 'secondary'
         ? config.secondaryClassName
         : type === 'remove'
-          ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
+          ? 'bg-error-container hover:bg-error-container-hover text-error-container-contrast'
           : type === 'mute'
             ? ''
             : config.primaryClassName;
