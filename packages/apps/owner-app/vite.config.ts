@@ -36,8 +36,9 @@ export default defineConfig({
       cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
-      // Allow serving files from one level up to the project root
-      allow: ['..'],
+      // One level up, and the repo root's node_modules: the reader's fonts (Inter, KaTeX) are
+      // hoisted there, and their files are fetched by url, not imported
+      allow: ['..', '../../../node_modules'],
     },
   },
   preview: {

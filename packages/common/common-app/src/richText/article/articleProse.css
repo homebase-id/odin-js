@@ -200,9 +200,12 @@
   }
 }
 
-/* With the "On this page" rail beside the article, the box above the body would repeat it */
+/* With the "On this page" rail beside the article, the box above the body would repeat it; the rail
+   shows from 1280px once ArticleReader itself is 73.25rem wide */
 @media (min-width: 1280px) {
-  .article-prose[data-toc-rail] [data-article-toc] {
-    display: none;
+  @container (min-width: 73.25rem) {
+    .article-prose[data-toc-rail] [data-article-toc] {
+      display: none;
+    }
   }
 }
