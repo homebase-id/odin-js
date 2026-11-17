@@ -369,7 +369,7 @@ export const ChannelOrAclSelector = React.forwardRef(
       // return a different 'loading-select', so we can still use the defaultChannelValue once the channels are loaded
       return (
         <select
-          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${className ?? ''}`}
+          className={`cursor-pointer rounded-md border border-outline bg-background px-3 py-2 text-sm ${className ?? ''}`}
           defaultValue={defaultChannelValue}
           key={'loading-select'}
         >
@@ -428,7 +428,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     return (
       <>
         <select
-          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${
+          className={`cursor-pointer rounded-md border border-outline bg-background px-3 py-2 text-sm ${
             disabled ? 'pointer-events-none opacity-50' : ''
           } ${className ?? ''}`}
           defaultValue={
