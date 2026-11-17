@@ -1,6 +1,8 @@
 /* WebDrop - Mission Impossible theme. Pure CSS: no fonts fetched, no images beyond the logo,
    no libraries. Built to survive a strict CSP untouched. */
 
+@import '../../../common/common-app/src/theme/homebase-m3.css';
+
 :root {
   --ground: #0a0a0a;
   --panel: #111214;
@@ -23,6 +25,11 @@
 html,
 body {
   height: 100%;
+}
+
+/* Each theme's ground is on the body, so the page needs it too, past the fold */
+html {
+  background-color: transparent;
 }
 
 body {
@@ -425,15 +432,15 @@ body::after {
 /* The quiet, professional face - for the hotel clerk who would read scanlines as a hacker site. */
 
 body.theme-clean {
-  --ground: #ffffff;
-  --panel: #f8f9fa;
-  --line: #dadce0;
-  --ink: #202124;
-  --dim: #5f6368;
-  --signal: #1a73e8;
-  --signal-glow: rgba(26, 115, 232, 0.25);
-  --ok: #188038;
-  --amber: #f9ab00;
+  --ground: rgb(var(--color-page-background));
+  --panel: rgb(var(--color-background));
+  --line: rgb(var(--color-outline-variant));
+  --ink: rgb(var(--color-foreground));
+  --dim: rgb(var(--color-muted-foreground));
+  --signal: rgb(var(--color-primary));
+  --signal-glow: rgb(var(--color-primary) / 0.25);
+  --ok: rgb(var(--color-success));
+  --amber: rgb(var(--color-warning));
   --mono: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -460,11 +467,11 @@ body.theme-clean .destructed .glitch::after {
 }
 
 body.theme-clean .destructed .glitch {
-  color: #d93025;
+  color: rgb(var(--color-destructive));
 }
 
 body.theme-clean .countdown.critical {
-  color: #d93025;
+  color: rgb(var(--color-destructive));
   text-shadow: none;
 }
 
@@ -475,7 +482,7 @@ body.theme-clean .countdown.amber {
 
 body.theme-clean .open-button {
   border-radius: 8px;
-  color: #ffffff;
+  color: rgb(var(--color-primary-contrast));
   box-shadow: none;
   letter-spacing: 0.05em;
   text-indent: 0.05em;
@@ -845,18 +852,18 @@ body.theme-clean .destroy-button {
 }
 
 body.theme-clean .cta-button {
-  color: #ffffff;
+  color: rgb(var(--color-primary-contrast));
   box-shadow: none;
 }
 
 body.theme-clean .destroy-button {
-  color: #d93025;
-  border-color: #d93025;
+  color: rgb(var(--color-destructive));
+  border-color: rgb(var(--color-destructive));
 }
 
 body.theme-clean .destroy-button:hover {
-  background: #d93025;
-  color: #ffffff;
+  background: rgb(var(--color-destructive));
+  color: rgb(var(--color-destructive-contrast));
 }
 
 .diagnostic {
