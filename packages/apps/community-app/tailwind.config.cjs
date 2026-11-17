@@ -14,8 +14,6 @@ module.exports = {
     extend: {
       colors: {
         ...legacyColors,
-        primary: 'rgb(var(--color-primary) / <alpha-value>)',
-        'primary-contrast': 'rgb(var(--color-primary-contrast) / <alpha-value>)',
       },
       keyframes: {
         slowding: {

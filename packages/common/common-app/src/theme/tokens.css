@@ -1,19 +1,12 @@
-/*
-  common-app's colour tokens as Tailwind 4 utilities (bg-primary, text-nav-contrast...). Each reads
-  the RGB channels of the same name, set by the app's theme file (homebase-m3.css or
-  legacy-indigo.css) or its Layout, so an opacity modifier (bg-primary/20) still works. The theme
-  keys share those names, so they are inlined and kept out of :root (`reference`).
-*/
+/* common-app's colour tokens as Tailwind 4 utilities, from the RGB channels the theme file sets */
 @theme inline reference {
   --color-page-background: rgb(var(--color-page-background));
   --color-background: rgb(var(--color-background));
   --color-foreground: rgb(var(--color-foreground));
   --color-muted-foreground: rgb(var(--color-muted-foreground));
-  --color-subtle-foreground: rgb(var(--color-subtle-foreground));
 
   --color-primary: rgb(var(--color-primary));
   --color-primary-contrast: rgb(var(--color-primary-contrast));
-  --color-primary-contrast-subtle: rgb(var(--color-primary-contrast-subtle));
   --color-secondary: rgb(var(--color-secondary));
   --color-secondary-contrast: rgb(var(--color-secondary-contrast));
   --color-surface-container-lowest: rgb(var(--color-surface-container-lowest));
@@ -30,9 +23,6 @@
   --color-nav-contrast: rgb(var(--color-nav-contrast));
   --color-nav-active: rgb(var(--color-nav-active));
   --color-nav-active-contrast: rgb(var(--color-nav-active-contrast));
-  --color-nav-hover: rgb(var(--color-nav-hover));
   --color-nav-more: rgb(var(--color-nav-more));
   --color-nav-outline: rgb(var(--color-nav-outline));
-  --color-nav-shadow: rgb(var(--color-nav-shadow));
-  --color-nav-ring: rgb(var(--color-nav-ring));
 }

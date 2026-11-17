@@ -85,7 +85,7 @@ const RequiredSecurityGroupRadioGroup = ({
         onClick={() => onChange && onChange(props.value)}
       >
         {props.name}
-        <small className={`block text-sm ${checked ? 'text-primary-contrast-subtle' : 'text-subtle-foreground'}`}>
+        <small className={`block text-sm ${checked ? 'text-primary-contrast/80' : 'text-muted-foreground'}`}>
           {props.description}
         </small>
       </button>

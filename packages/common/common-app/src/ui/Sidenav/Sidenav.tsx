@@ -39,8 +39,9 @@ import {ApiType} from "@homebase-id/js-lib/core";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
-const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-nav-hover`;
-const navItemActiveClassname = `bg-nav-active text-nav-active-contrast hover:text-nav-contrast`;
+const navItemBaseClassName = `my-1 py-2 px-2 flex rounded-md`;
+const navItemClassName = `${navItemBaseClassName} hover:bg-nav-contrast/10`;
+const navItemActiveClassname = `${navItemBaseClassName} bg-nav-active text-nav-active-contrast`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
@@ -226,7 +227,7 @@ const MoreItems = ({
       </a>
 
       <div
-        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md shadow-nav-shadow ${moreBg} ${
+        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md dark:shadow-black/30 ${moreBg} ${
           isOpen ? '' : 'hidden'
         }`}
         onClick={() => setIsOpen(false)}
@@ -282,7 +283,7 @@ const NavItem = ({
   return (
     <NavLink
       className={({isActive}) =>
-        `${navItemClassName} ${isActive && navItemActiveClassname} relative`
+        `${isActive ? navItemActiveClassname : navItemClassName} relative`
       }
       to={to}
       end={end}
@@ -364,7 +365,7 @@ const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
     <>
       <NavLink
         className={({isActive}) =>
-          `${navItemClassName} ${isActive && navItemActiveClassname} relative`
+          `${isActive ? navItemActiveClassname : navItemClassName} relative`
         }
         to={`${OWNER_ROOT}/profile`}
         onClick={(e) => {
@@ -429,7 +430,7 @@ const SecurityMenuItem = () => {
     <div className="relative">
       <NavItem icon={Shield} label={'Security'} to={`${OWNER_ROOT}/security`}/>
       {needsAttention && (
-        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-nav-ring"/>
+        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-nav"/>
       )}
     </div>
   );

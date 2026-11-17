@@ -1,16 +1,10 @@
-/*
-  The indigo look of the apps not on Homebase's Material 3 colours (feed, public, community,
-  provisioning): the values of common-app's colour tokens, as the Tailwind classes they replaced,
-  in RGB channels. tokens.css (Tailwind 4) and tailwind-legacy-colors.cjs (Tailwind 3) turn them
-  into colour utilities. page-background, background and foreground come from each app's Layout.
-*/
+/* The indigo look of the apps not on Material 3 yet; each app's Layout sets the page colours */
 
 /* The var() references resolve on <html>, so they rely on .dark being set there */
 :root {
   --color-primary: 99 102 241; /* indigo-500 */
   --color-primary-contrast: 255 255 255;
-  --color-primary-contrast-subtle: 203 213 225; /* slate-300 */
-  --color-subtle-foreground: 100 116 139; /* slate-500 */
+  --color-muted-foreground: 100 116 139; /* slate-500 */
   --color-secondary: var(--color-background);
   --color-secondary-contrast: var(--color-foreground);
   --color-surface-container-high: 241 245 249; /* slate-100 */
