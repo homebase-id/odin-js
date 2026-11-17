@@ -15,6 +15,7 @@ import {
     ToGroupBlock,
     useDotYouClientContext,
     PostSource,
+    ArticleTeaser,
 } from '@homebase-id/common-app';
 import {useNavigate} from 'react-router-dom';
 import {DoubleClickHeartForMedia} from '@homebase-id/common-app';
@@ -58,7 +59,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
     const postPath = `${post.type === 'Article' ? 'read' : 'preview'}/${isExternal ? odinId : identity}/${
         channel?.fileMetadata.appData.uniqueId
     }/${post.id}`;
-    const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+    const isArticle = post.type === 'Article';
+    const clickable = isArticle; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
     const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
@@ -113,28 +115,34 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                                 />
                             </div>
 
-                            <PostBody
-                                post={post}
-                                odinId={odinId}
-                                fileId={postFile.fileId}
-                                globalTransitId={postFile.fileMetadata.globalTransitId}
-                                lastModified={postFile.fileMetadata.updated}
-                                payloads={postFile.fileMetadata.payloads}
-                            />
+                            {isArticle ? (
+                                <ArticleTeaser postFile={postFile} odinId={odinId}/>
+                            ) : (
+                                <PostBody
+                                    post={post}
+                                    odinId={odinId}
+                                    fileId={postFile.fileId}
+                                    globalTransitId={postFile.fileMetadata.globalTransitId}
+                                    lastModified={postFile.fileMetadata.updated}
+                                    payloads={postFile.fileMetadata.payloads}
+                                />
+                            )}
                         </div>
                     </div>
-                    <DoubleClickHeartForMedia
-                        odinId={odinId}
-                        postFile={postFile}
-                        // Clicks don't propogate to the parent container because of the Double Tap listener
-                        onClick={(e, index) => {
-                            if (post.type !== 'Article')
-                                navigate(`${postPath}/${index}`, {state: {referrer: window.location.pathname}});
-                            else navigate(postPath, {state: {referrer: window.location.pathname}});
-                        }}
-                        className="mb-4"
-                    />
-                    <MediaStillUploading postFile={postFile}/>
+                    {!isArticle ? (
+                        <>
+                            <DoubleClickHeartForMedia
+                                odinId={odinId}
+                                postFile={postFile}
+                                // Clicks don't propogate to the parent container because of the Double Tap listener
+                                onClick={(e, index) => {
+                                    navigate(`${postPath}/${index}`, {state: {referrer: window.location.pathname}});
+                                }}
+                                className="mb-4"
+                            />
+                            <MediaStillUploading postFile={postFile}/>
+                        </>
+                    ) : null}
                     <PostInteracts
                         odinId={odinId || window.location.hostname}
                         postFile={postFile}
@@ -142,6 +150,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                         showSummary={showSummary}
                         isAuthenticated={true}
                         isOwner={true}
+                        commentsHref={isArticle ? `${postPath}#responses` : undefined}
                     />
                 </FakeAnchor>
             </ErrorBoundary>

@@ -6,6 +6,7 @@ import {
   EmojiReactionSummary,
 } from '@homebase-id/js-lib/public';
 import { Suspense, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   t,
   useCanReact,
@@ -38,6 +39,7 @@ export const PostInteracts = ({
   excludeComments,
   className,
   login,
+  commentsHref,
 }: {
   odinId: string;
   postFile: HomebaseFile<PostContent>;
@@ -51,6 +53,8 @@ export const PostInteracts = ({
   excludeComments?: boolean;
   className?: string;
   login?: () => void;
+  /** Link the comment count here instead of showing the comments inline */
+  commentsHref?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
@@ -120,7 +124,20 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          {!postDisabledComment && !excludeComments ? (
+          {excludeComments ? null : !postDisabledComment && commentsHref ? (
+            <Link
+              to={commentsHref}
+              onAuxClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
+            >
+              <Bubble className="inline-block h-6 w-6" />
+              <CommentCount
+                context={reactionContext}
+                reactionPreview={parsedReactionPreview.comments}
+              />
+              <span className="sr-only">{t('comments')}</span>
+            </Link>
+          ) : !postDisabledComment ? (
             <button
               className={`inline-flex items-center hover:text-black dark:hover:text-white ${
                 !toggleable ? 'pointer-events-none' : ''
@@ -135,7 +152,7 @@ export const PostInteracts = ({
               <span className="sr-only">{t('Toggle comments')}</span>
             </button>
           ) : null}
-          {!showSummary && !excludeComments ? (
+          {!showSummary && !commentsHref && !excludeComments ? (
             <CommentSummary
               context={reactionContext}
               reactionPreview={parsedReactionPreview.comments}
@@ -144,7 +161,7 @@ export const PostInteracts = ({
           ) : null}
         </div>
       </div>
-      {excludeComments ? null : isExpanded ? (
+      {excludeComments || commentsHref ? null : isExpanded ? (
         <div
           className="grid cursor-default grid-flow-row gap-2  pb-4"
           onClick={(e) => e.stopPropagation()}
@@ -312,6 +329,23 @@ export const CommentSummary = ({
       </button>
     </>
   ) : null;
+};
+
+const CommentCount = ({
+  context,
+  reactionPreview,
+}: {
+  context: ReactionContext;
+  reactionPreview?: CommentsReactionSummary;
+}) => {
+  const { data: totalCount } = useCommentSummary({
+    authorOdinId: context.odinId,
+    channelId: context.channelId,
+    postGlobalTransitId: context.target.globalTransitId,
+    reactionPreview: reactionPreview,
+  }).fetch;
+
+  return totalCount ? <span>{totalCount}</span> : null;
 };
 
 const CommentTeaserList = ({

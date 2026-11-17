@@ -21,6 +21,7 @@ export * from './Blocks/Media/DoubleClickHeartForMedia';
 
 export * from './Blocks/Body/Body';
 export * from './Blocks/Body/EmbeddedPostContent';
+export * from './Blocks/Body/ArticleTeaser';
 
 export * from './Blocks/Meta/Meta';
 export * from './Blocks/Meta/PostSource';
