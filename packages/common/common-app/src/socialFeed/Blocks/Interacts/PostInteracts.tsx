@@ -5,7 +5,7 @@ import {
   CommentsReactionSummary,
   EmojiReactionSummary,
 } from '@homebase-id/js-lib/public';
-import { Suspense, useMemo, useState } from 'react';
+import { Fragment, Suspense, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   t,
@@ -427,21 +427,16 @@ export const CommentList = ({
         </a>
       ) : null}
       {flattenedComments?.map((comment, index) => {
+        const key = comment.fileId ?? index;
         const thread = (
-          <Comment
-            context={context}
-            canReact={canReact}
-            commentData={comment}
-            key={comment.fileId ?? index}
-            isThread={false}
-          />
+          <Comment context={context} canReact={canReact} commentData={comment} isThread={false} />
         );
         return threadClassName ? (
-          <div className={threadClassName} key={comment.fileId ?? index}>
+          <div className={threadClassName} key={key}>
             {thread}
           </div>
         ) : (
-          thread
+          <Fragment key={key}>{thread}</Fragment>
         );
       })}
       {composerFirst ? null : composer}

@@ -329,7 +329,7 @@ export const ArticleReader = ({
                     context={reactionContext}
                     canReact={canReact}
                     login={login}
-                    composerFirst={true}
+                    composerFirst
                     threadClassName="grid grid-flow-row gap-2"
                   />
                 </Suspense>
