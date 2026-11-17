@@ -1,4 +1,4 @@
-/* The Sidenav in the apps without homebase-m3.css: the chat app's grey Material 3 NavigationRail */
+/* The Sidenav in the legacy community app, which doesn't use homebase-m3.css: the chat app's grey Material 3 NavigationRail */
 
 :root {
   --color-nav: 232 236 244; /* surfaceContainerHigh */

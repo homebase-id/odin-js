@@ -95,7 +95,7 @@ const ProfileNav = () => {
               </p>
               <button
                 onClick={doLogout}
-                className="mt-2 block w-full rounded border-0 bg-primary px-4 py-2 text-primary-contrast hover:brightness-90 focus:outline-none"
+                className="mt-2 block w-full rounded border-0 bg-primary px-4 py-2 text-primary-contrast hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 {t('logout')}
               </button>

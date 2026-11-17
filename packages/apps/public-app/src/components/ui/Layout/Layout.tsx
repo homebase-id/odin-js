@@ -1,10 +1,11 @@
-import { FC, ReactNode, Suspense, lazy } from 'react';
+import { FC, ReactNode, Suspense, lazy, useEffect, useState } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Toaster, useDotYouClientContext, useRawImage } from '@homebase-id/common-app';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { HomePageConfig } from '@homebase-id/js-lib/public';
+import { RGB_TRIPLE, siteColorVars } from './siteColorVars';
 
 const faviconSvg = (emoji: string) =>
   `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`;
@@ -12,42 +13,6 @@ const faviconSvg = (emoji: string) =>
 const Sidenav = lazy(() =>
   import('@homebase-id/common-app').then((commonApp) => ({ default: commonApp.Sidenav }))
 );
-
-const ROLE_OF_SITE_COLOR: Record<string, string> = {
-  button: 'primary',
-  'button-text': 'primary-contrast',
-};
-
-const mix = (foreground: string, background: string, amount: number) => {
-  const bg = background.split(' ').map(Number);
-  return foreground
-    .split(' ')
-    .map((c, i) => Math.round(Number(c) * amount + bg[i] * (1 - amount)))
-    .join(' ');
-};
-
-// The roles an owner can't pick: the site's text mixed into its background by this much
-const DERIVED_FROM_SITE_COLORS: Record<string, number> = {
-  'muted-foreground': 0.6,
-  outline: 0.45,
-  'outline-variant': 0.2,
-  'surface-container-lowest': 0,
-  'surface-container-low': 0.04,
-  'surface-container': 0.06,
-  'surface-container-high': 0.08,
-  'surface-container-highest': 0.12,
-};
-
-const siteColorVars = (row: Record<string, string>) =>
-  Object.keys(row)
-    .map((key) => `--color-${ROLE_OF_SITE_COLOR[key] ?? key}: ${row[key]};`)
-    .concat(
-      Object.keys(DERIVED_FROM_SITE_COLORS).map(
-        (key) =>
-          `--color-${key}: ${mix(row.foreground, row.background, DERIVED_FROM_SITE_COLORS[key])};`
-      )
-    )
-    .join('');
 
 interface LayoutProps {
   children?: ReactNode;
@@ -85,6 +50,23 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
     imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
   }).fetch;
 
+  const [pageBackground, setPageBackground] = useState<string>();
+  useEffect(() => {
+    const root = document.documentElement;
+    const read = () =>
+      setPageBackground(getComputedStyle(root).getPropertyValue('--color-page-background').trim());
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, [colors]);
+
+  useEffect(() => {
+    if (!RGB_TRIPLE.test(pageBackground ?? '')) return;
+    // The static index.html pair is only the first-paint fallback; the browser would keep using it
+    document.querySelectorAll('meta[name="theme-color"]:not([data-rh])').forEach((m) => m.remove());
+  }, [pageBackground]);
+
   const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
 
   return (
@@ -96,6 +78,9 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
         </style>
       ) : null}
       <Helmet>
+        {RGB_TRIPLE.test(pageBackground ?? '') ? (
+          <meta name="theme-color" content={`rgb(${pageBackground!.replace(/ /g, ',')})`} />
+        ) : null}
         {imageData || emojiFavicon ? (
           <>
             <link rel="shortcut icon" href={imageData?.url || emojiFavicon}></link>
