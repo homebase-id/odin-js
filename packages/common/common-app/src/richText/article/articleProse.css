@@ -40,6 +40,19 @@
   font-weight: 650;
 }
 
+/* A note's own h1 stays a step below the article title (44px) */
+.article-prose h1 {
+  font-size: 26px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .article-prose h1 {
+    font-size: 32px;
+  }
+}
+
 .article-prose h2 {
   font-size: 28px;
   line-height: 1.3;
