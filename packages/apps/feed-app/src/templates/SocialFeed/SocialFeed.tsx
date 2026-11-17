@@ -8,7 +8,7 @@ import {
   t,
   useRemoveNotifications,
 } from '@homebase-id/common-app';
-import { Feed, Article, Ellipsis, Quote } from '@homebase-id/common-app/icons';
+import { Feed, Ellipsis, Quote } from '@homebase-id/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -47,6 +47,8 @@ export const SocialFeed = () => {
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
     else document.documentElement.classList.remove('overflow-hidden');
+    // Leaving with the preview open (an article's preview goes on to the reader) must leave the page scrollable
+    return () => document.documentElement.classList.remove('overflow-hidden');
   }, [postKey]);
 
   const isDesktop = document.documentElement.clientWidth >= 1024;
@@ -54,7 +56,7 @@ export const SocialFeed = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Feed')} | Homebase</title>
+        <title>{`${t('Feed')} | Homebase`}</title>
       </Helmet>
       <ExtendPermissionDialog
         appName={t('Homebase Feed')}
@@ -71,11 +73,6 @@ export const SocialFeed = () => {
             <ActionGroup
               type="secondary"
               options={[
-                {
-                  label: t('Articles'),
-                  href: `${FEED_ROOT_PATH}/articles`,
-                  icon: Article,
-                },
                 {
                   label: t('Channels'),
                   href: `${FEED_ROOT_PATH}/channels`,

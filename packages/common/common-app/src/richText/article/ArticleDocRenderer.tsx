@@ -2,7 +2,8 @@
  * Renders a Tiptap document in the schema of Journal's editor, as an article published from Journal
  * stores it, without an editor. Every node and mark is mapped by hand: nothing from the document is
  * rendered as HTML, and links only keep http(s) and mailto urls. KaTeX's own output is the one HTML
- * string set.
+ * string set. Journal's live blocks run in `LiveBlock` (@2002bishwajeet/live-blocks), whose html
+ * and react blocks are sandboxed frames.
  *
  * The document comes from a stored post and is not trusted to be well formed: it is cleaned by
  * `sanitizeArticleDoc` before anything reads it. The node and mark mappings are made once, here, so
@@ -18,21 +19,32 @@ import katex from 'katex';
 import { common, createLowlight } from 'lowlight';
 import {
   Children,
+  Component,
   createContext,
   Fragment,
+  lazy,
   ReactNode,
+  Suspense,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
 } from 'react';
 import { cleanTiptapDoc, codeLanguage } from '@homebase-id/js-lib/public';
-import { LANGUAGE_ALIASES, liveBlockKind, svgDataUri } from './codeInfo';
+import {
+  liveBlockKind,
+  parseCodeInfo,
+  svgDataUri,
+  type LiveBlockKind,
+} from '@2002bishwajeet/live-blocks/core';
+import { LANGUAGE_ALIASES } from './codeInfo';
 import { toCalloutVariant, type CalloutVariant } from './calloutVariants';
 import {
   editDataAttrs,
+  editedSize,
   editLayers,
   hasEdits,
   readEdits,
@@ -40,6 +52,8 @@ import {
   type Size,
 } from './imageEdits';
 import {
+  columnsAt,
+  galleryColumns,
   galleryRowBreaks,
   scrollToSlide,
   slideIndex,
@@ -47,7 +61,8 @@ import {
   watchGalleryAspect,
   type GalleryLayout,
 } from './galleryLayout';
-import { slugify, uniqueHeadingIds } from './headingSlugs';
+import { articleHeadings, MIN_TOC_HEADINGS, type ArticleHeading } from './headingSlugs';
+import { t } from '../../helpers/i18n/dictionary';
 import { Image } from '../../media/Image';
 import { Mention } from '../renderer/Mention';
 import type { RichTextRenderer } from '../renderer/RichTextRenderer';
@@ -80,33 +95,28 @@ const textOf = (node: Node): string =>
 
 const idSafe = (id: unknown) => String(id ?? '').replace(/[^\w-]/g, '');
 
-type Heading = { node: Node; id: string; level: number; text: string };
-
 /**
- * Heading ids (unique slugs) and footnote numbers (in reference order) of a document, walked depth
- * first in document order. Takes a sanitized document.
+ * Heading ids (unique slugs), footnote numbers (in reference order) and image positions of a
+ * document, walked depth first in document order. Takes a sanitized document.
  */
 const indexDoc = (doc: Node) => {
-  const found: Omit<Heading, 'id'>[] = [];
   const footnotes = new Map<string, number>();
+  const images = new Map<Node, number>();
   const walk = (node: Node) => {
-    if (node.type === 'heading') {
-      const text = textOf(node).trim();
-      found.push({ node, text, level: Math.min(6, Math.max(1, Number(node.attrs?.level) || 1)) });
-    }
     if (node.type === 'footnoteReference') {
       const id = idSafe(node.attrs?.id);
       if (!footnotes.has(id)) footnotes.set(id, footnotes.size + 1);
     }
+    if (node.type === 'image') images.set(node, images.size);
     node.content?.forEach(walk);
   };
   walk(doc);
-  const ids = uniqueHeadingIds(found.map((heading) => slugify(heading.text)));
-  const headings: Heading[] = found.map((heading, i) => ({ ...heading, id: ids[i] }));
+  const headings = articleHeadings(doc);
   return {
     headings,
     headingIds: new Map(headings.map((heading) => [heading.node, heading.id])),
     footnotes,
+    images,
   };
 };
 
@@ -128,16 +138,29 @@ const HEADING_CLASSES: Record<number, string> = {
   3: 'text-xl font-semibold mt-6 mb-2 first:mt-0',
   4: 'text-lg font-semibold mt-5 mb-2 first:mt-0',
   5: 'text-[0.9375rem] tracking-[0.01em] font-semibold mt-4 mb-2 first:mt-0',
-  6: 'text-[0.8125rem] uppercase tracking-[0.05em] font-semibold text-foreground/60 mt-4 mb-2 first:mt-0',
+  6: 'text-[0.8125rem] uppercase tracking-[0.05em] font-semibold text-[color:var(--article-on-surface-variant)] mt-4 mb-2 first:mt-0',
 };
 
-// Journal's variants: info and tip in neutral tones, warning in gold, error in red. Not the shared
-// CALLOUT_CLASSES in calloutVariants.ts: those use theme tokens (collaborative, …) the feed lacks.
+/*
+ * Notion's paper palette (the --article-* variables of articleProse.css, light and dark) for the
+ * blocks that draw a surface: surface variant behind code blocks and table headers, surface
+ * container behind inline code, outline variant for borders and table lines, on-surface variant for
+ * muted text. Links keep the app's colours.
+ */
+const MUTED_BG = 'bg-[var(--article-surface-variant)]';
+const INLINE_CODE_BG = 'bg-[var(--article-surface-container)]';
+const BODY_TEXT = 'text-[color:var(--article-on-surface)]';
+const BORDER = 'border-[color:var(--article-outline-variant)]';
+const MUTED_TEXT = 'text-[color:var(--article-on-surface-variant)]';
+
+// Journal's variants (its calloutVariants.ts) as Notion tints them: a soft background per variant,
+// body text on it, the icon in the variant's accent, no bar. Not the shared CALLOUT_CLASSES in
+// calloutVariants.ts: those use theme tokens (collaborative, …) the feed lacks.
 const CALLOUT_CLASSES: Record<CalloutVariant, string> = {
-  info: 'border-primary/40 bg-foreground/5 dark:border-indigo-300/50',
-  warning: 'border-amber-400 bg-amber-400/10',
-  tip: 'border-foreground/40 bg-foreground/[0.03]',
-  error: 'border-red-500 bg-red-500/10',
+  info: 'bg-[var(--article-primary-container)]',
+  warning: 'bg-[var(--article-warning-container)]',
+  tip: 'bg-[var(--article-secondary-container)]',
+  error: 'bg-[var(--article-error-container)]',
 };
 const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   info: 'Info',
@@ -145,12 +168,12 @@ const CALLOUT_LABELS: Record<CalloutVariant, string> = {
   tip: 'Tip',
   error: 'Error',
 };
-// The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in its colours
+// The editor's icons (lucide's info, triangle-alert, lightbulb and circle-x) in the variant's accent
 const CALLOUT_ICON_CLASSES: Record<CalloutVariant, string> = {
-  info: 'text-foreground',
-  warning: 'text-amber-600 dark:text-amber-400',
-  tip: 'text-foreground/60',
-  error: 'text-red-600 dark:text-red-400',
+  info: 'text-[color:var(--article-primary)]',
+  warning: 'text-[color:var(--article-warning)]',
+  tip: 'text-[color:var(--article-secondary)]',
+  error: 'text-[color:var(--article-error)]',
 };
 const CALLOUT_ICON_PATHS: Record<CalloutVariant, ReactNode> = {
   info: (
@@ -202,23 +225,49 @@ const LINK_COLOR = 'text-primary dark:text-indigo-300';
 /** Links in the text are underlined, as in Journal. */
 const LINK_CLASS = `${LINK_COLOR} underline underline-offset-2 hover:opacity-70`;
 
-// highlight.js token classes, coloured for light and dark mode
+// highlight.js token classes in the article's palette: GitHub's light and dark syntax colours, as
+// Notion's code blocks have them
+const COMMENT = 'italic text-[#9b9a97] dark:text-[#7d7d7d]';
+const KEYWORD = 'text-[#d73a49] dark:text-[#ff7b72]';
+const NAME = 'text-[#22863a] dark:text-[#7ee787]';
+const LITERAL = 'text-[#005cc5] dark:text-[#79c0ff]';
+const STRING = 'text-[#22863a] dark:text-[#7ee787]';
+const VALUE = 'text-[#005cc5] dark:text-[#79c0ff]';
+const TITLE = 'text-[#6f42c1] dark:text-[#d2a8ff]';
+const BUILT_IN = 'text-[#e36209] dark:text-[#ffa657]';
 const HLJS_CLASSES: Record<string, string> = {
-  'hljs-keyword': 'text-purple-700 dark:text-purple-400',
-  'hljs-built_in': 'text-sky-700 dark:text-sky-400',
-  'hljs-type': 'text-sky-700 dark:text-sky-400',
-  'hljs-literal': 'text-orange-700 dark:text-orange-400',
-  'hljs-number': 'text-orange-700 dark:text-orange-400',
-  'hljs-string': 'text-emerald-700 dark:text-emerald-400',
-  'hljs-regexp': 'text-emerald-700 dark:text-emerald-400',
-  'hljs-comment': 'text-slate-500 italic',
-  'hljs-title': 'text-blue-700 dark:text-blue-400',
-  'hljs-attr': 'text-amber-700 dark:text-amber-400',
-  'hljs-attribute': 'text-amber-700 dark:text-amber-400',
-  'hljs-variable': 'text-rose-700 dark:text-rose-400',
-  'hljs-tag': 'text-rose-700 dark:text-rose-400',
-  'hljs-name': 'text-rose-700 dark:text-rose-400',
-  'hljs-meta': 'text-slate-500',
+  'hljs-comment': COMMENT,
+  'hljs-quote': COMMENT,
+  'hljs-doctag': KEYWORD,
+  'hljs-keyword': KEYWORD,
+  'hljs-formula': KEYWORD,
+  'hljs-section': NAME,
+  'hljs-name': NAME,
+  'hljs-selector-tag': NAME,
+  'hljs-deletion': NAME,
+  'hljs-subst': NAME,
+  'hljs-literal': LITERAL,
+  'hljs-string': STRING,
+  'hljs-regexp': STRING,
+  'hljs-addition': STRING,
+  'hljs-attribute': STRING,
+  'hljs-attr': VALUE,
+  'hljs-variable': VALUE,
+  'hljs-template-variable': VALUE,
+  'hljs-type': VALUE,
+  'hljs-selector-class': VALUE,
+  'hljs-selector-attr': VALUE,
+  'hljs-selector-pseudo': VALUE,
+  'hljs-number': LITERAL,
+  'hljs-symbol': TITLE,
+  'hljs-bullet': TITLE,
+  'hljs-link': `${TITLE} underline`,
+  'hljs-meta': TITLE,
+  'hljs-selector-id': TITLE,
+  'hljs-title': TITLE,
+  'hljs-built_in': BUILT_IN,
+  'hljs-emphasis': 'italic',
+  'hljs-strong': 'font-bold',
 };
 
 type Hast = {
@@ -231,10 +280,15 @@ const hastToReact = (node: Hast, key: number): ReactNode => {
   if (node.type === 'text') return node.value;
   const children = node.children?.map(hastToReact);
   if (node.type !== 'element') return <Fragment key={key}>{children}</Fragment>;
-  const className = node.properties?.className
-    ?.map((name) => own(HLJS_CLASSES, name))
-    .filter(Boolean)
-    .join(' ');
+  const names = node.properties?.className;
+  // A class name (`hljs-title class_`) takes the built-in colour, as in Journal
+  const className =
+    names?.includes('hljs-title') && names.includes('class_')
+      ? BUILT_IN
+      : names
+          ?.map((name) => own(HLJS_CLASSES, name))
+          .filter(Boolean)
+          .join(' ');
   return (
     <span key={key} className={className || undefined}>
       {children}
@@ -242,8 +296,40 @@ const hastToReact = (node: Hast, key: number): ReactNode => {
   );
 };
 
-const PRE_CLASS =
-  'overflow-x-auto rounded-lg border border-foreground/15 bg-slate-100 p-4 text-sm leading-relaxed dark:bg-slate-800';
+// Right padding keeps the end of the longest line clear of the Copy button
+const PRE_CLASS = `overflow-x-auto rounded-lg border ${BORDER} ${MUTED_BG} p-4 pr-20 text-sm leading-relaxed`;
+
+/** Copies a code block's text, as Journal's share page does: "Copied" for a moment after. */
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const copy = () =>
+    navigator.clipboard?.writeText(text).then(
+      () => setCopied(true),
+      // The browser refused (no permission, or not a secure context): nothing was copied
+      () => undefined
+    );
+  return (
+    // A 44px target on a touch screen; the pill inside carries the look
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? t('Copied') : t('Copy code')}
+      className="group/copy absolute right-1 top-1 flex h-9 min-w-9 select-none items-center justify-center px-1 outline-none [@media(pointer:coarse)]:h-11 print:hidden"
+    >
+      <span
+        aria-live="polite"
+        className={`rounded-full border ${BORDER} bg-[var(--article-surface)] px-2.5 py-0.5 text-xs font-medium ${MUTED_TEXT} group-hover/copy:text-[color:var(--article-on-surface)] group-focus-visible/copy:ring-2 group-focus-visible/copy:ring-[color:var(--article-primary)]`}
+      >
+        {copied ? t('Copied') : t('Copy')}
+      </span>
+    </button>
+  );
+};
 
 /** Code, highlighted when its language is one lowlight knows. `language` is a bare word. */
 const Code = ({ code, language }: { code: string; language?: string }) => {
@@ -256,11 +342,14 @@ const Code = ({ code, language }: { code: string; language?: string }) => {
     }
   }
   return (
-    <pre className={PRE_CLASS}>
-      <code className="font-mono text-foreground" data-language={language}>
-        {highlighted}
-      </code>
-    </pre>
+    <div className="relative">
+      <pre className={PRE_CLASS}>
+        <code className="font-mono text-foreground" data-language={language}>
+          {highlighted}
+        </code>
+      </pre>
+      <CopyButton text={code} />
+    </div>
   );
 };
 
@@ -271,17 +360,73 @@ const LIVE_BLOCK_LABELS: Record<string, string> = {
   react: 'Interactive block — shown as code',
 };
 
+/** The live-block runtime, in a chunk of its own: only an article with a live block loads it. */
+const LiveBlock = lazy(() =>
+  import('@2002bishwajeet/live-blocks').then((module) => ({ default: module.LiveBlock }))
+);
+
+/** Falls back to `fallback` when a live block throws, loading its chunk or rendering. Tries again when `resetKey` changes. */
+class LiveBlockBoundary extends Component<
+  { resetKey: unknown; fallback: ReactNode; children: ReactNode },
+  { failed: boolean; resetKey: unknown }
+> {
+  state = { failed: false, resetKey: this.props.resetKey };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  static getDerivedStateFromProps(props: { resetKey: unknown }, state: { resetKey: unknown }) {
+    return props.resetKey !== state.resetKey ? { failed: false, resetKey: props.resetKey } : null;
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('[ArticleDocRenderer] A live block failed; showing its code instead', error);
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 /**
  * A code block. Its `language` is the fence's whole info string as Journal keeps it
- * (`html id=k3f9 wide`): only its first word is read, and only as a bare word. Journal's live
- * blocks can't run here (yet): an svg drawing shows as an image, which never runs its scripts,
- * and the rest show as their code under a label saying so.
+ * (`html id=k3f9 wide`): only its first word is read, and only as a bare word. A Journal live
+ * block runs in LiveBlock, as Journal's share page shows it. A block's saved state lives in the
+ * note's Yjs doc, not in the Tiptap document an article carries, so it starts from none; LiveBlock
+ * follows the `dark` class on <html> (what useDarkMode sets) for its colour scheme, and asks before
+ * opening a link. While its chunk loads, or when it throws, the block shows as below.
  */
 const CodeBlock = ({ node }: Props) => {
   const code = textOf(node);
-  const language = codeLanguage(node.attrs?.language) || undefined;
-  const live = language ? liveBlockKind(language) : null;
+  const info = str(node.attrs?.language) ?? null;
+  const language = codeLanguage(info) || undefined;
+  const live = liveBlockKind(language ?? null);
+  const shown = <StaticCodeBlock code={code} language={language} live={live} />;
+  if (!live || !code.trim()) return shown;
 
+  return (
+    <LiveBlockBoundary resetKey={code} fallback={shown}>
+      <Suspense fallback={shown}>
+        <LiveBlock kind={live} source={code} wide={parseCodeInfo(info).wide} />
+      </Suspense>
+    </LiveBlockBoundary>
+  );
+};
+
+/**
+ * A code block without its live block: an svg drawing as an image, which never runs its scripts,
+ * and the other live blocks as their code under a label saying so.
+ */
+const StaticCodeBlock = ({
+  code,
+  language,
+  live,
+}: {
+  code: string;
+  language?: string;
+  live: LiveBlockKind | null;
+}) => {
   if (live === 'svg' && code.trim())
     return (
       <figure data-live-block="svg" className="my-4">
@@ -290,9 +435,9 @@ const CodeBlock = ({ node }: Props) => {
           <img src={svgDataUri(code)} alt="" className="max-h-[32rem] max-w-full" />
         </div>
         <details className="mt-1">
-          <summary className="cursor-pointer text-xs text-foreground/60">View source</summary>
+          <summary className={`cursor-pointer text-xs ${MUTED_TEXT}`}>View source</summary>
           {/* Plain text: highlighting source nobody opens would cost as much as the drawing */}
-          <pre className="mt-2 overflow-x-auto rounded-lg bg-foreground/5 p-3 text-sm">
+          <pre className={`mt-2 overflow-x-auto rounded-lg ${MUTED_BG} p-3 text-sm`}>
             <code>{code}</code>
           </pre>
         </details>
@@ -301,7 +446,7 @@ const CodeBlock = ({ node }: Props) => {
 
   return (
     <div className="my-4" data-live-block={live ?? undefined}>
-      {live ? <p className="mb-1 text-xs text-foreground/60">{LIVE_BLOCK_LABELS[live]}</p> : null}
+      {live ? <p className={`mb-1 text-xs ${MUTED_TEXT}`}>{LIVE_BLOCK_LABELS[live]}</p> : null}
       <Code code={code} language={language} />
     </div>
   );
@@ -344,8 +489,12 @@ const ALIGN_CLASSES: Record<string, string> = {
 type ArticleDocContextValue = {
   headingIds: Map<Node, string>;
   footnotes: Map<string, number>;
+  /** Each image's place in the document, for the full-screen viewer: a masonry gallery's columns reorder them */
+  images?: Map<Node, number>;
   options?: ArticleDocOptions;
   odinId?: string;
+  /** Images are buttons that open the reader's full-screen viewer (ArticleReader) */
+  zoomImages?: boolean;
 };
 const ArticleDocContext = createContext<ArticleDocContextValue>({
   headingIds: new Map(),
@@ -409,27 +558,47 @@ const EditedImage = ({
   );
 };
 
-/** How an image sits in each gallery layout, as on Journal's share page. */
+/**
+ * How an image sits in each gallery layout: whole, at its own aspect ratio, never cropped, with
+ * Journal's rounded corners.
+ */
 const GALLERY_IMAGE_CLASSES: Record<GalleryLayout, string> = {
-  row: 'block w-full',
-  grid: 'block aspect-square w-full object-cover',
-  masonry: 'block w-full',
-  carousel: 'block max-h-72 max-w-full object-contain',
+  row: 'block w-full rounded-lg',
+  grid: 'block w-full rounded-lg',
+  masonry: 'block w-full rounded-lg',
+  carousel: 'mx-auto block max-h-72 max-w-full rounded-lg object-contain',
 };
 
 /** An edited image's frame per gallery layout: bounded as the plain image would be. */
 const EDITED_FRAME_CLASSES: Record<GalleryLayout, string> = {
-  row: 'w-full',
-  // centred in the square cell, cut off at its edges like object-cover
-  grid: 'w-full',
-  masonry: 'w-full',
-  carousel: 'mx-auto h-72 w-auto max-w-full',
+  row: 'w-full overflow-hidden rounded-lg',
+  grid: 'w-full overflow-hidden rounded-lg',
+  masonry: 'w-full overflow-hidden rounded-lg',
+  carousel: 'mx-auto h-72 w-auto max-w-full overflow-hidden rounded-lg',
+};
+
+/**
+ * An image's aspect ratio before it loads, with its crop and rotation: from its preview thumbnail's
+ * size, else the size the document gives it; undefined without either (an image by url), whose
+ * ratio is read once it loads (`--ar`, watchGalleryAspect).
+ */
+const imageAspect = (attrs: Record<string, unknown>, options?: ArticleDocOptions) => {
+  const fileKey = str(attrs.fileKey);
+  const preview = fileKey
+    ? options?.previewThumbnails?.find((payload) => payload.key === fileKey)?.previewThumbnail
+    : undefined;
+  const width = Number(preview?.pixelWidth ?? attrs.width);
+  const height = Number(preview?.pixelHeight ?? attrs.height);
+  if (!(width > 0 && height > 0)) return undefined;
+  const edited = editedSize({ width, height }, readEdits(attrs));
+  return edited.width / edited.height;
 };
 
 const ImageNode = ({ node, parent }: Props) => {
-  const { options, odinId } = useContext(ArticleDocContext);
+  const { options, odinId, zoomImages, images } = useContext(ArticleDocContext);
   const attrs = node.attrs ?? {};
   const alt = str(attrs.alt);
+  const src = typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src) ? attrs.src : undefined;
   // null shows the alt text, "" no caption, anything else replaces the alt text
   const caption = attrs.caption === null || attrs.caption === undefined ? alt : str(attrs.caption);
   const layout = parent?.type === 'gallery' ? toGalleryLayout(parent.attrs?.layout) : undefined;
@@ -461,14 +630,15 @@ const ImageNode = ({ node, parent }: Props) => {
         previewThumbnail={previewThumbnail}
         odinId={odinId}
         alt={alt}
-        fit={layout === 'grid' && !edited ? 'cover' : undefined}
         className={imgClass}
+        // Fetched once it comes within a screen of the viewport; the tiny preview shows at once
+        deferUntilNear
       />
     );
-  } else if (typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src)) {
+  } else if (src) {
     img = (
       <img
-        src={attrs.src}
+        src={src}
         alt={alt ?? ''}
         loading="lazy"
         referrerPolicy="no-referrer"
@@ -478,21 +648,27 @@ const ImageNode = ({ node, parent }: Props) => {
   } else {
     // A source this page can't load, such as a Journal attachment the publish didn't rewrite
     img = (
-      <span className="block rounded-lg border border-dashed border-foreground/25 px-3 py-6 text-center text-sm text-foreground/50">
+      <span
+        className={`block rounded-lg border border-dashed ${BORDER} px-3 py-6 text-center text-sm ${MUTED_TEXT}`}
+      >
         Image not available
       </span>
     );
   }
 
   const frameClass = layout ? EDITED_FRAME_CLASSES[layout] : 'w-full rounded-lg';
+  // An image by url without a size takes its own ratio once it loads (--ar, square until then)
+  const aspect = layout === 'grid' ? (imageAspect(attrs, options) ?? 'var(--ar, 1)') : undefined;
+  // A grid with set columns has rows of its own, which its images fill
+  const gridColumns = layout === 'grid' ? galleryColumns(parent?.attrs?.columns) : undefined;
   const shown =
     edited && fileKey ? (
       // Keyed by the source, so a reused instance never keeps another image's size
       <EditedImage key={fileKey} edits={edits} className={frameClass}>
         {img}
       </EditedImage>
-    ) : edited && typeof attrs.src === 'string' && SAFE_SRC.test(attrs.src) ? (
-      <EditedImage key={attrs.src} edits={edits} className={frameClass}>
+    ) : edited && src ? (
+      <EditedImage key={src} edits={edits} className={frameClass}>
         {img}
       </EditedImage>
     ) : (
@@ -507,17 +683,41 @@ const ImageNode = ({ node, parent }: Props) => {
               attrs.align === 'center' && !width ? 'min-[600px]:w-fit' : ''
             }`
       }
-      style={!layout && width ? ({ '--image-width': `${width}px` } as CSSProperties) : undefined}
+      style={
+        aspect && gridColumns
+          ? // A share of its row by its aspect ratio, so the row's images share one height
+            { flex: `${aspect} 1 0%` }
+          : aspect
+            ? // A justified row: as wide as the row height at its aspect ratio, growing by it to fill the row
+              { flex: `${aspect} 1 calc(${aspect} * var(--row-height))` }
+            : !layout && width
+              ? ({ '--image-width': `${width}px` } as CSSProperties)
+              : undefined
+      }
       // For the gallery's aspect ratios: the edited image's, read off these
       {...Object.fromEntries(editDataAttrs(edits))}
     >
-      {layout === 'grid' && edited ? (
-        <div className="flex aspect-square items-center overflow-hidden">{shown}</div>
+      {zoomImages && (fileKey || src) ? (
+        // Opens the reader's full-screen viewer, which finds the image by these attributes
+        <button
+          type="button"
+          data-zoom-image=""
+          data-file-key={fileKey}
+          data-file-id={fileKey ? fileId || options?.defaultFileId : undefined}
+          data-global-transit-id={fileKey && !fileId ? options?.defaultGlobalTransitId : undefined}
+          data-src={fileKey ? undefined : src}
+          data-alt={alt || undefined}
+          data-zoom-order={images?.get(node)}
+          aria-label={alt ? `${alt}: ${t('view full screen')}` : t('View image full screen')}
+          className="block w-full cursor-zoom-in rounded-lg text-left"
+        >
+          {shown}
+        </button>
       ) : (
         shown
       )}
       {caption ? (
-        <figcaption className="mt-1.5 block text-center text-sm text-foreground/60">
+        <figcaption className={`mt-1.5 block text-center text-sm ${MUTED_TEXT}`}>
           {caption}
         </figcaption>
       ) : null}
@@ -537,8 +737,8 @@ const Carousel = ({ slides }: { slides: ReactNode[] }) => {
   const show = (index: number) => {
     if (scroller.current) scrollToSlide(scroller.current, index, slides.length);
   };
-  const button =
-    'flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 leading-none disabled:opacity-40 hover:bg-foreground/5';
+  // 44px on a touch screen
+  const button = `flex h-7 w-7 items-center justify-center rounded-full border ${BORDER} leading-none disabled:opacity-40 hover:bg-foreground/5 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11`;
   return (
     <div
       className="my-6"
@@ -598,31 +798,89 @@ const Carousel = ({ slides }: { slides: ReactNode[] }) => {
   );
 };
 
-const GALLERY_CLASSES: Record<Exclude<GalleryLayout, 'carousel'>, string> = {
+const GALLERY_CLASSES: Record<'row' | 'grid', string> = {
   // Each image grows by its aspect ratio (--ar, set once it loads), so a row's images share one height
-  row: 'flex flex-wrap items-start gap-x-2 max-[480px]:gap-x-1 [&>figure]:[flex:var(--ar,1)_1_0%]',
-  grid: 'grid grid-cols-3 gap-2 max-[480px]:grid-cols-2 max-[480px]:gap-1',
-  masonry:
-    'columns-3 gap-2 max-[480px]:columns-2 max-[480px]:gap-1 [&>figure]:mb-2 [&>figure]:break-inside-avoid max-[480px]:[&>figure]:mb-1',
+  row: 'flex flex-wrap items-start gap-x-2 [&>figure]:[flex:var(--ar,1)_1_0%]',
+  // Justified rows (each image's flex is set by ImageNode), read left to right; on a phone, three
+  // portrait screenshots to a row
+  grid: 'flex flex-wrap items-start gap-2 [--row-height:220px] max-[480px]:[--row-height:190px]',
 };
+
+const NARROW = '(max-width: 480px)';
+const subscribeNarrow = (onChange: () => void) => {
+  if (typeof window.matchMedia !== 'function') return () => undefined;
+  const query = window.matchMedia(NARROW);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+};
+const isNarrow = () => typeof window.matchMedia === 'function' && window.matchMedia(NARROW).matches;
 
 /** An image gallery in one of Journal's layouts: row, grid, masonry or carousel. */
 const GalleryNode = ({ node, children }: Props) => {
+  const { options } = useContext(ArticleDocContext);
   const layout = toGalleryLayout(node.attrs?.layout);
+  // The author's images per row or columns (Journal's `columns`); a carousel has none
+  const columns = galleryColumns(node.attrs?.columns);
   const items = Children.toArray(children);
   const ref = useRef<HTMLDivElement>(null);
-  // Only a row reads the aspect ratios (--ar)
+  const narrow = useSyncExternalStore(subscribeNarrow, isNarrow, () => false);
+  // A row reads the aspect ratios (--ar), and so does a grid, for its images by url without a size
   useEffect(
-    () => (layout === 'row' && ref.current ? watchGalleryAspect(ref.current) : undefined),
+    () =>
+      (layout === 'row' || layout === 'grid') && ref.current
+        ? watchGalleryAspect(ref.current)
+        : undefined,
     [layout]
   );
 
   if (layout === 'carousel') return <Carousel slides={items} />;
 
+  if (layout === 'masonry') {
+    // Columns of whole images, dealt round-robin so the top row reads 1, 2, 3
+    const count = columnsAt(columns ?? 3, narrow);
+    return (
+      <div data-gallery="masonry" className="my-6 flex items-start gap-2">
+        {Array.from({ length: count }, (_, column) => (
+          <div key={column} className="flex min-w-0 flex-1 flex-col gap-2">
+            {items.filter((_, i) => i % count === column)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === 'grid' && columns) {
+    // Rows of exactly `perRow` images, each sharing its row by aspect ratio (set by ImageNode)
+    const perRow = columnsAt(columns, narrow);
+    const images = node.content ?? [];
+    const aspects = images.map((image) => imageAspect(image.attrs ?? {}, options) ?? 1);
+    const meanAspect = aspects.reduce((sum, a) => sum + a, 0) / (aspects.length || 1);
+    const rows = Array.from({ length: Math.ceil(items.length / perRow) }, (_, row) =>
+      items.slice(row * perRow, (row + 1) * perRow)
+    );
+    return (
+      <div ref={ref} data-gallery="grid" className="my-6 flex flex-col gap-2">
+        {rows.map((row, i) => (
+          <div key={i} className="flex items-start gap-2">
+            {row}
+            {/* A short last row keeps room for the images it lacks, so they stay the size of the rest */}
+            {row.length < perRow ? (
+              <span
+                aria-hidden="true"
+                className="h-0"
+                style={{ flex: `${(perRow - row.length) * meanAspect} 1 0%` }}
+              />
+            ) : null}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   let content: ReactNode[] = items;
   if (layout === 'row') {
     // Rows end at a break: the `wide` ones above 480px, the `narrow` ones (pairs) at or below it
-    const breaks = new Map(galleryRowBreaks(items.length).map((b) => [b.index, b.modes]));
+    const breaks = new Map(galleryRowBreaks(items.length, columns).map((b) => [b.index, b.modes]));
     content = items.flatMap((item, i) => {
       const modes = breaks.get(i);
       if (!modes) return [item];
@@ -631,7 +889,7 @@ const GalleryNode = ({ node, children }: Props) => {
         <span
           key={`break-${i}`}
           aria-hidden="true"
-          className={`hidden h-2 max-[480px]:h-1 [flex:0_0_100%] ${show}`}
+          className={`hidden h-2 [flex:0_0_100%] ${show}`}
         />,
         item,
       ];
@@ -640,6 +898,8 @@ const GalleryNode = ({ node, children }: Props) => {
   return (
     <div ref={ref} data-gallery={layout} className={`my-6 ${GALLERY_CLASSES[layout]}`}>
       {content}
+      {/* Takes the last row's spare room, so its images keep the row height */}
+      {layout === 'grid' ? <span aria-hidden="true" className="h-0 [flex:10000_1_0px]" /> : null}
     </div>
   );
 };
@@ -690,7 +950,7 @@ const FootnoteNode = ({ node, children }: Props) => {
           href={`#fnref-${id}`}
           role="doc-backlink"
           aria-label="Back to reference"
-          className="text-foreground/50 no-underline"
+          className={`${MUTED_TEXT} no-underline`}
         >
           {'↩︎'}
         </a>
@@ -716,7 +976,9 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   },
   heading: HeadingNode,
   blockquote: ({ children }) => (
-    <blockquote className="my-6 border-l-[3px] border-foreground/20 pl-4 text-foreground/80">
+    <blockquote
+      className={`my-6 border-l-[3px] border-[color:var(--article-on-surface)] pl-4 text-foreground/80`}
+    >
       {children}
     </blockquote>
   ),
@@ -749,7 +1011,9 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
       {/* Only the item's own text is struck through, not the items nested in it */}
       <div
         className={`min-w-0 flex-1 [&>p]:my-0 ${
-          node.attrs?.checked ? '[&>p]:text-foreground/60 [&>p]:line-through' : ''
+          node.attrs?.checked
+            ? '[&>p]:text-[color:var(--article-on-surface-variant)] [&>p]:line-through'
+            : ''
         }`}
       >
         {children}
@@ -768,7 +1032,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     <th
       colSpan={Number(node.attrs?.colspan) || undefined}
       rowSpan={Number(node.attrs?.rowspan) || undefined}
-      className="border border-foreground/20 bg-foreground/5 px-3 py-2 align-top font-semibold text-foreground/85 [&>p+p]:mt-3 [&>p]:my-0"
+      className={`border ${BORDER} ${MUTED_BG} px-3 py-2 align-top font-semibold text-foreground/85 [&>p+p]:mt-3 [&>p]:my-0`}
     >
       {children}
     </th>
@@ -777,7 +1041,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
     <td
       colSpan={Number(node.attrs?.colspan) || undefined}
       rowSpan={Number(node.attrs?.rowspan) || undefined}
-      className="border border-foreground/20 px-3 py-2 align-top [&>p+p]:mt-3 [&>p]:my-0"
+      className={`border ${BORDER} px-3 py-2 align-top [&>p+p]:mt-3 [&>p]:my-0`}
     >
       {children}
     </td>
@@ -789,7 +1053,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
         role="note"
         aria-label={CALLOUT_LABELS[variant]}
         data-variant={variant}
-        className={`my-4 flex gap-2 rounded-md border-l-4 px-3 ${CALLOUT_CLASSES[variant]}`}
+        className={`my-4 flex gap-2 rounded-md px-3 ${BODY_TEXT} ${CALLOUT_CLASSES[variant]}`}
       >
         <CalloutIcon variant={variant} />
         <div className="min-w-0 flex-1 py-3">{children}</div>
@@ -809,12 +1073,12 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
-            className="h-4 w-4 shrink-0 text-foreground/60 transition-transform group-open:rotate-90"
+            className={`h-4 w-4 shrink-0 ${MUTED_TEXT} transition-transform group-open:rotate-90`}
           >
             <path d="m9 18 6-6-6-6" />
           </svg>
           {/* Without a title, a muted one, as the editor's placeholder shows it */}
-          {summary || <span className="font-normal text-foreground/50">Details</span>}
+          {summary || <span className={`font-normal ${MUTED_TEXT}`}>Details</span>}
         </summary>
         <div className="mt-1 pl-5">{children}</div>
       </details>
@@ -839,7 +1103,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="my-4 flex flex-col overflow-hidden rounded-lg border border-foreground/15 no-underline hover:bg-foreground/5 min-[481px]:flex-row"
+        className={`my-4 flex flex-col overflow-hidden rounded-lg border ${BORDER} no-underline hover:bg-foreground/5 min-[481px]:flex-row`}
       >
         {image && SAFE_SRC.test(image) ? (
           <img
@@ -853,18 +1117,18 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
         <span className="block min-w-0 flex-1 p-3">
           <span className="block truncate font-medium text-foreground">{title || host}</span>
           {description ? (
-            <span className="mt-0.5 block text-sm text-foreground/60 line-clamp-2">
+            <span className={`mt-0.5 block text-sm ${MUTED_TEXT} line-clamp-2`}>
               {description}
             </span>
           ) : null}
           {title ? (
-            <span className="mt-1 block truncate text-xs text-foreground/60">{host}</span>
+            <span className={`mt-1 block truncate text-xs ${MUTED_TEXT}`}>{host}</span>
           ) : null}
         </span>
       </a>
     );
   },
-  horizontalRule: () => <hr className="my-8 border-foreground/20" />,
+  horizontalRule: () => <hr className={`my-8 ${BORDER}`} />,
   hardBreak: () => <br />,
   mention: ({ node }) =>
     typeof node.attrs?.id === 'string' && node.attrs.id ? <Mention odinId={node.attrs.id} /> : null,
@@ -874,7 +1138,7 @@ const nodeMapping: Record<string, (props: Props) => ReactNode> = {
   footnotes: ({ children }) => (
     <section
       role="doc-endnotes"
-      className="mt-10 border-t border-foreground/20 pt-2 text-[0.875em]"
+      className={`mt-10 border-t ${BORDER} pt-2 text-[0.875em]`}
     >
       <ol className="list-decimal pl-6">{children}</ol>
     </section>
@@ -891,12 +1155,14 @@ const markMapping: Record<
   underline: ({ children }) => <u>{children}</u>,
   strike: ({ children }) => <del>{children}</del>,
   code: ({ children }) => (
-    <code className="rounded-[0.3rem] bg-slate-100 px-[0.4rem] py-[0.2rem] font-mono text-[0.875rem] text-foreground dark:bg-slate-800">
+    <code
+      className={`rounded-[0.3rem] ${INLINE_CODE_BG} px-[0.4rem] py-[0.2rem] font-mono text-[0.875rem] text-[color:var(--article-inline-code)]`}
+    >
       {children}
     </code>
   ),
   kbd: ({ children }) => (
-    <kbd className="rounded-md border bg-slate-100 px-1 font-mono text-sm dark:bg-slate-800">
+    <kbd className={`rounded-md border ${BORDER} ${INLINE_CODE_BG} px-1 font-mono text-sm`}>
       {children}
     </kbd>
   ),
@@ -949,51 +1215,63 @@ export const ArticleDocRenderer = ({
   options,
   className,
   tableOfContents,
+  zoomImages,
 }: {
   doc: JSONContent;
   odinId?: string;
   options?: ArticleDocOptions;
   className?: string;
-  /** Show a table of contents above documents with 3 or more headings */
+  /** Show a table of contents above documents with MIN_TOC_HEADINGS or more headings */
   tableOfContents?: boolean;
+  /** Images are buttons, with what a full-screen viewer needs on them (`data-zoom-image`) */
+  zoomImages?: boolean;
 }) => {
   const clean = useMemo(() => sanitizeArticleDoc(doc), [doc]);
-  const { headings, headingIds, footnotes } = useMemo(() => indexDoc(clean), [clean]);
+  const { headings, headingIds, footnotes, images } = useMemo(() => indexDoc(clean), [clean]);
   // Only a new document renders new elements; new options reach the nodes through the context
   const body = useMemo(() => renderDoc(clean), [clean]);
   const context = useMemo(
-    () => ({ headingIds, footnotes, options, odinId }),
-    [headingIds, footnotes, options, odinId]
+    () => ({ headingIds, footnotes, images, options, odinId, zoomImages }),
+    [headingIds, footnotes, images, options, odinId, zoomImages]
   );
-
-  const toc = tableOfContents && headings.length >= 3 ? headings : undefined;
-  const topLevel = toc ? Math.min(...toc.map((heading) => heading.level)) : 1;
 
   return (
     <ArticleDocContext.Provider value={context}>
       <div className={`break-words ${className ?? ''}`}>
-        {toc ? (
-          <nav
-            aria-label="Table of contents"
-            className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm"
-          >
-            <p className="mb-2 font-semibold">Contents</p>
-            <ol>
-              {toc.map((heading) => (
-                <li
-                  key={heading.id}
-                  style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}
-                >
-                  <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
-                    {heading.text}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+        {tableOfContents && headings.length >= MIN_TOC_HEADINGS ? (
+          <TableOfContents headings={headings} />
         ) : null}
         {body}
       </div>
     </ArticleDocContext.Provider>
+  );
+};
+
+/** The headings to jump to, above the body: open from 640px, closed on a phone. */
+const TableOfContents = ({ headings }: { headings: ArticleHeading[] }) => {
+  // Only the first render reads the width: after that the box stays as the reader left it
+  const [open] = useState(
+    () => typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 640px)').matches
+  );
+  const topLevel = Math.min(...headings.map((heading) => heading.level));
+  return (
+    <nav
+      aria-label="Table of contents"
+      data-article-toc=""
+      className={`mb-6 rounded-lg border ${BORDER} px-4 py-3 text-sm`}
+    >
+      <details open={open}>
+        <summary className="cursor-pointer font-semibold">Contents</summary>
+        <ol className="mt-2">
+          {headings.map((heading) => (
+            <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
+              <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </nav>
   );
 };

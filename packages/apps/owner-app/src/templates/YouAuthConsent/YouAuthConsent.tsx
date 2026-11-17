@@ -241,7 +241,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
   return (
     <>
       <Helmet>
-        <title>{t('Login')} | Homebase</title>
+        <title>{`${t('Login')} | Homebase`}</title>
       </Helmet>
       <MinimalLayout noShadedBg={true}>
         <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">

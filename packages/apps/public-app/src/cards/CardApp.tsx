@@ -139,7 +139,7 @@ const CardApp = ({ host }: { host: CardHost }) => {
   const [exporting, setExporting] = useState(false);
   const main = useRef<HTMLElement>(null);
   const snapshot = useRef<HTMLDivElement>(null);
-  const failure = useRef<unknown>();
+  const failure = useRef<unknown>(undefined);
   const onCardError = (error: unknown) => {
     failure.current = error;
   };

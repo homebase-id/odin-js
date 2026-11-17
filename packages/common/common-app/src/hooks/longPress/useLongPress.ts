@@ -7,14 +7,14 @@ export const useLongPress = (
   onLongPress: (e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void,
   onClick?: (e?: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => void,
   options?: { shouldPreventDefault?: boolean; delay?: number },
-  scrollableRef?: React.RefObject<HTMLElement>
+  scrollableRef?: React.RefObject<HTMLElement | null>
 ) => {
   const { shouldPreventDefault = true, delay = 1000 } = options || {};
 
   const [longPressTriggered, setLongPressTriggered] = useState(false);
-  const timeout = useRef<NodeJS.Timeout>();
-  const target = useRef<EventTarget>();
-  const beforeScrollY = useRef<number>();
+  const timeout = useRef<NodeJS.Timeout>(undefined);
+  const target = useRef<EventTarget>(undefined);
+  const beforeScrollY = useRef<number>(undefined);
   const getScrollY = () =>
     scrollableRef && scrollableRef.current ? scrollableRef.current.scrollTop : window.scrollY;
 

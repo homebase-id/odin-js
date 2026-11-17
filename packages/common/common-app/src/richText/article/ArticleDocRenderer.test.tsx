@@ -18,6 +18,21 @@ vi.mock('../../media/Image', () => ({
 }));
 vi.mock('../../socialFeed', () => ({ AuthorName: ({ odinId }: { odinId: string }) => odinId }));
 vi.mock('../../ui/Buttons/ActionLink', () => ({ ActionLink: () => null }));
+const liveBlock = vi.hoisted(() => ({ throws: false }));
+vi.mock('@2002bishwajeet/live-blocks', () => ({
+  LiveBlock: (props: { kind: string; source: string; wide?: boolean; initialState?: string }) => {
+    if (liveBlock.throws) throw new Error('The live block failed');
+    return (
+      <div
+        data-test-live-block={props.kind}
+        data-wide={String(props.wide)}
+        data-initial-state={props.initialState ?? 'none'}
+      >
+        {props.source}
+      </div>
+    );
+  },
+}));
 vi.stubGlobal('window', { location: { origin: 'https://me.example' } });
 
 const options: ArticleDocOptions = {
@@ -60,7 +75,7 @@ test('renders every block of all-blocks.json', () => {
   expect(html).toContain('katex-display');
 
   // Code is highlighted
-  expect(html).toMatch(/<span class="text-purple-700[^"]*">const<\/span>/);
+  expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">const<\/span>/);
 
   // Tables, task lists, callouts, toggles
   expect(html).toContain('<table');
@@ -73,7 +88,7 @@ test('renders every block of all-blocks.json', () => {
   // Images go through Image with the post's file; captions in figcaption
   expect(html).toContain('<figure');
   expect(html).toContain(
-    '<figcaption class="mt-1.5 block text-center text-sm text-foreground/60">Its caption</figcaption>'
+    '<figcaption class="mt-1.5 block text-center text-sm text-[color:var(--article-on-surface-variant)]">Its caption</figcaption>'
   );
   expect(html).toContain('data-file-key="pst_rtei0" data-file-id="post-file" alt="A photo"');
   expect(html).toContain('style="--image-width:320px"');
@@ -145,12 +160,169 @@ test('a table of contents lists 3+ headings with unique ids', () => {
   ).not.toContain('Table of contents');
 });
 
+test('headings get unique ids from their text, also inside nodes the viewer drops', () => {
+  const text = (value: string, marks?: unknown[]) => ({ type: 'text', text: value, marks });
+  const heading = (content: unknown[], level = 2) => ({ type: 'heading', attrs: { level }, content });
+  // Types the viewer doesn't know: a block wrapping a heading, one after it, an inline in one, a mark
+  const unknownTypes = {
+    type: 'doc',
+    content: [
+      heading([text('Intro')]),
+      { type: 'someWidget', content: [heading([text('Intro', [{ type: 'glow' }])], 3)] },
+      { type: 'someWidget', attrs: { id: 'x' } },
+      {
+        type: 'constructor',
+        content: [heading([{ type: 'mystery', content: [text('Res')] }, text('ponses')])],
+      },
+      heading([text('Intro')]),
+    ],
+  };
+
+  const renderedIds = (doc: unknown) =>
+    [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
+  for (const doc of [allBlocks, journalNote]) expect(renderedIds(doc).length).toBeGreaterThan(0);
+  expect(renderedIds(unknownTypes)).toEqual(['intro', 'intro-2', 'responses', 'intro-3']);
+});
+
 test('images with a fileKey need the post options', () => {
   const doc = {
     type: 'doc',
     content: [{ type: 'paragraph', content: [{ type: 'image', attrs: { fileKey: 'k' } }] }],
   };
   expect(render(doc, { options: undefined })).not.toContain('<img');
+});
+
+test('with zoomImages, each image that loads is a button carrying what the viewer needs', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/a.png', alt: 'First' } },
+      {
+        type: 'gallery',
+        attrs: { layout: 'grid' },
+        content: [
+          { type: 'image', attrs: { src: 'https://x.example/b.png' } },
+          { type: 'image', attrs: { src: 'javascript:alert(1)' } },
+        ],
+      },
+    ],
+  };
+  expect(render(doc)).not.toContain('data-zoom-image');
+  const html = render(doc, { zoomImages: true });
+  expect(html.match(/<button type="button" data-zoom-image=""/g)).toHaveLength(2);
+  expect(html).toContain('data-src="https://x.example/a.png" data-alt="First"');
+  expect(html).toContain('aria-label="First: view full screen"');
+  expect(html).toContain('data-src="https://x.example/b.png"');
+  expect(html).not.toContain('javascript:');
+});
+
+test('grid and masonry galleries read left to right, and the viewer gets document order', () => {
+  const gallery = (layout: string) => ({
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/0.png' } },
+      {
+        type: 'gallery',
+        attrs: { layout },
+        content: [1, 2, 3, 4, 5].map((n) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${n}.png`, width: n * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  const orders = (html: string) =>
+    [...html.matchAll(/data-src="https:\/\/x\.example\/(\d)\.png" data-zoom-order="(\d)"/g)].map(
+      (m) => `${m[1]}:${m[2]}`
+    );
+
+  // Masonry: dealt into three columns, so the first of each column is 1, 2, 3
+  const masonry = render(gallery('masonry'), { zoomImages: true });
+  expect(srcs(masonry)).toEqual(['0', '1', '4', '2', '5', '3']);
+  expect(orders(masonry).sort()).toEqual(['0:0', '1:1', '2:2', '3:3', '4:4', '5:5']);
+
+  // Grid: one wrapping row in document order, each image flexing by its aspect ratio
+  const grid = render(gallery('grid'));
+  expect(srcs(grid)).toEqual(['0', '1', '2', '3', '4', '5']);
+  expect(grid).toContain('style="flex:3 1 calc(3 * var(--row-height))"');
+  expect(grid).toContain('[flex:10000_1_0px]');
+});
+
+describe('a gallery with columns', () => {
+  const gallery = (layout: string, columns: unknown, count = 5) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'gallery',
+        attrs: { layout, columns },
+        content: Array.from({ length: count }, (_, i) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${i + 1}.png`, width: (i + 1) * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  // Each row or column of a gallery, as the images it holds
+  const groups = (html: string, open: RegExp) =>
+    html
+      .split(open)
+      .slice(1)
+      .map((group) => srcs(group));
+
+  test('a grid has rows of exactly that many, each image sharing its row by aspect ratio', () => {
+    const html = render(gallery('grid', 2));
+    expect(html).not.toContain('--row-height');
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2'],
+      ['3', '4'],
+      ['5'],
+    ]);
+    expect(html).toContain('style="flex:1 1 0%"');
+    expect(html).toContain('style="flex:5 1 0%"');
+    // The short last row keeps room for its missing image: the gallery's mean aspect ratio, 3
+    expect(html).toContain('<span aria-hidden="true" class="h-0" style="flex:3 1 0%"></span>');
+  });
+
+  test('a full grid has no filler', () => {
+    const html = render(gallery('grid', 5));
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2', '3', '4', '5'],
+    ]);
+    expect(html).not.toContain('class="h-0"');
+  });
+
+  test('a masonry gallery has that many columns, dealt in turn', () => {
+    const html = render(gallery('masonry', 2));
+    expect(groups(html, /<div class="flex min-w-0 flex-1 flex-col gap-2">/)).toEqual([
+      ['1', '3', '5'],
+      ['2', '4'],
+    ]);
+  });
+
+  test('a row gallery holds at most that many per row', () => {
+    // Five in fours: balanced, 3 + 2; narrow rows stay pairs
+    const html = render(gallery('row', 4));
+    const breaks = [
+      ...html.matchAll(
+        /class="hidden h-2 \[flex:0_0_100%\] +([^"]*)"><\/span><figure[^>]*><img src="https:\/\/x\.example\/(\d)/g
+      ),
+    ].map((m) => `${m[2]}:${m[1].trim()}`);
+    expect(breaks).toEqual(['3:max-[480px]:block', '4:min-[481px]:block', '5:max-[480px]:block']);
+  });
+
+  test('a carousel ignores it', () => {
+    expect(render(gallery('carousel', 2))).toBe(render(gallery('carousel', undefined)));
+  });
+
+  test('anything but an integer from 1 to 6 is no setting', () => {
+    const automatic = render(gallery('grid', undefined));
+    expect(automatic).toContain('--row-height');
+    for (const columns of [0, 7, 2.5, 'two', null, -1])
+      expect(render(gallery('grid', columns))).toBe(automatic);
+    expect(render(gallery('grid', '3'))).toBe(render(gallery('grid', 3)));
+  });
 });
 
 const malformed = {
@@ -423,10 +595,10 @@ describe('a note published from Journal', () => {
     expect(html).not.toContain('k3f9');
     expect(html).not.toMatch(/="[^"]*id=x/);
     // react is highlighted as JavaScript
-    expect(html).toMatch(/<span class="text-purple-700[^"]*">export<\/span>/);
+    expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">export<\/span>/);
   });
 
-  test('shows live blocks as code under a label, and an svg drawing as an image', () => {
+  test('shows live blocks as code under a label, and an svg drawing as an image, until LiveBlock loads', () => {
     expect(html.match(/Interactive block — shown as code/g)).toHaveLength(2);
     expect(html.match(/Diagram — shown as code/g)).toHaveLength(1);
     expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg[^"]*" alt=""/);
@@ -465,6 +637,42 @@ test('a hostile info string only ever reaches data-language as a bare word', () 
   expect(html).toContain('more code');
   // An empty svg block is an empty code block, not an empty image
   expect(html).not.toContain('data:image/svg');
+});
+
+describe('a live block', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      {
+        type: 'codeBlock',
+        attrs: { language: 'html id=k3f9 wide' },
+        content: [{ type: 'text', text: '<p>Hello</p>' }],
+      },
+    ],
+  };
+
+  test('runs in LiveBlock once its chunk has loaded, wide as its fence says and with no saved state', async () => {
+    // Server rendering shows the Suspense fallback until the lazy chunk has loaded
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block="html"'));
+    const html = render(doc);
+    expect(html).toContain('data-wide="true"');
+    expect(html).toContain('data-initial-state="none"');
+    expect(html).toContain('&lt;p&gt;Hello&lt;/p&gt;');
+    expect(html).not.toContain('shown as code');
+  });
+
+  test('shows as code under its label when LiveBlock throws', async () => {
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block'));
+    liveBlock.throws = true;
+    try {
+      const html = render(doc);
+      expect(html).toContain('Interactive block — shown as code');
+      expect(html).toContain('data-language="html"');
+      expect(html).not.toContain('data-test-live-block');
+    } finally {
+      liveBlock.throws = false;
+    }
+  });
 });
 
 test('an unknown node keeps its text, and an unknown inline atom is dropped without breaking the paragraph', () => {

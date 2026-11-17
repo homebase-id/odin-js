@@ -156,7 +156,7 @@ export const VolatileInput = forwardRef(
     }, [defaultValue]);
 
     // We want values to be saved directly, while the link styling is better with a debounce
-    const onInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    const onInput: React.FormEventHandler<HTMLSpanElement> = (e) => {
       if (onChange) onChange((e.target as HTMLElement).innerText);
       if (!linksArePlain) debouncedLinkStyle();
     };

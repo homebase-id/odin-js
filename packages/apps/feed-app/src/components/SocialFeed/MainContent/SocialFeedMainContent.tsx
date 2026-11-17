@@ -1,6 +1,7 @@
 import {PostContent} from '@homebase-id/js-lib/public';
-import {useMemo, useEffect, useRef, useLayoutEffect} from 'react';
-import {useWindowVirtualizer} from '@tanstack/react-virtual';
+import {useMemo, useEffect, useRef, useLayoutEffect, useState} from 'react';
+import {useWindowVirtualizer, type VirtualItem} from '@tanstack/react-virtual';
+import {useLocation} from 'react-router-dom';
 
 import {
   flattenInfinteData,
@@ -13,6 +14,16 @@ import {
 import PostTeaserCard, {NewPostTeaserCard} from '../PostTeaserCard';
 import {HomebaseFile} from '@homebase-id/js-lib/core';
 import {useLiveFeedProcessor} from '../../../hooks/useLiveFeedProcessor';
+
+type SavedScroll = {y: number; measurements: VirtualItem[]};
+const readScroll = (key: string): SavedScroll | undefined => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(key) || 'null');
+    return typeof saved?.y === 'number' && Array.isArray(saved.measurements) ? saved : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
@@ -49,12 +60,43 @@ const SocialFeedMainContent = () => {
     parentOffsetRef.current = parentRef.current?.offsetTop ?? 0;
   }, []);
 
+  // Where the feed was left (opening an article leaves it), to come back to the same place
+  const scrollKey = `feed-scroll:${useLocation().pathname}`;
+  const [saved] = useState(() => readScroll(scrollKey));
+
   const virtualizer = useWindowVirtualizer({
     count: flattenedPosts?.length + 1, // Add 1 so we have an index for the 'loaderRow'
     estimateSize: () => 300, // Rough size of a postTeasercard
     scrollMargin: parentOffsetRef.current,
     overscan: 5, // Amount of items to load before and after (improved performance especially with images)
+    // The posts' sizes as they were measured, so the place comes back on the same post
+    initialOffset: saved?.y,
+    initialMeasurementsCache: saved?.measurements,
   });
+
+  // Saved as the feed goes, before the next page's layout effects scroll the window (the reader starts at its top)
+  useLayoutEffect(
+    () => () => {
+      try {
+        sessionStorage.setItem(
+          scrollKey,
+          JSON.stringify({y: window.scrollY, measurements: virtualizer.measurementsCache})
+        );
+      } catch {
+        // No storage (private mode, full): the feed starts at its top
+      }
+    },
+    [scrollKey, virtualizer]
+  );
+
+  // Back where it was once the posts are on the page, once
+  const restored = useRef(!saved);
+  const hasPosts = !!flattenedPosts?.length;
+  useLayoutEffect(() => {
+    if (restored.current || !hasPosts || !saved) return;
+    restored.current = true;
+    window.scrollTo(0, saved.y);
+  }, [hasPosts, saved]);
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();

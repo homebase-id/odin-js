@@ -13,7 +13,6 @@ import { ownerName, type CardData, type CardLink } from '../../useCardData';
 import { LOADED_POSTS, POSTS_HREF } from '../../parts/posts';
 import { CardBlock, displayUrl, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { CardSocials } from '../../parts/Socials';
 import { BreakAtDots, CardName } from '../../parts/Type';
 
 const linkHost = (target: string) => {
@@ -475,36 +474,60 @@ const LinksBlock = ({
 const handleOf = (social: CardData['socials'][number]) =>
   typeof social.children === 'string' && social.children ? `@${social.children}` : undefined;
 
-// Glyphs and bar become tonal buttons; handles keep each network's mark beside the name, so four
-// identical handles can still be told apart. Wordmark keeps the shared build
+const TONAL =
+  'bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)]';
+
+// Glyphs are separate round buttons, bar is one connected pill, handles keep each network's mark
+// beside the name, wordmark is one tile per network with its name
 const SocialButtons = ({ design, data, className }: LayoutProps & { className: string }) => {
   if (!data.socials.length) return null;
-  if (design.socials === 'wordmark')
-    return <CardSocials variant={design.socials} data={data} className={className} />;
-  const handles = design.socials === 'handles';
-  return (
-    <ul className={`flex flex-wrap ${handles ? 'gap-2' : 'gap-3'} ${className}`}>
+  const variant = design.socials;
+  const bar = variant === 'bar';
+  const list = (
+    <ul
+      className={`flex ${
+        bar
+          ? `${TONAL} flex-wrap items-center gap-1 rounded-[1.25rem] p-1`
+          : `flex-wrap ${variant === 'glyphs' ? 'gap-3' : 'gap-2'} ${className}`
+      }`}
+    >
       {data.socials.map((social) => {
         const Icon = social.icon;
-        const handle = handles ? handleOf(social) : undefined;
         const name = social.type || linkHost(social.link);
+        const handle = variant === 'handles' ? handleOf(social) : undefined;
         return (
           <li key={social.link}>
             <a
               href={social.link}
               {...external}
               aria-label={handle ? `${name} ${handle}` : name}
-              className={`flex items-center justify-center bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)] ${CARD_FOCUS} ${
-                handle
-                  ? 'h-8 gap-1.5 rounded-[var(--links-tile-radius)] pe-3 ps-2.5 text-[12.5px] font-medium'
-                  : 'h-10 w-10 rounded-[var(--links-well-radius)]'
+              className={`flex items-center justify-center ${CARD_FOCUS} ${
+                bar
+                  ? 'h-9 w-9 rounded-full text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)]'
+                  : variant === 'wordmark'
+                    ? `h-11 gap-2 rounded-[var(--links-tile-radius)] bg-[var(--card-surface)] pe-4 ps-3 text-[14px] font-semibold text-[color:var(--card-surface-ink)] ${TILE_SHADOW}`
+                    : `${TONAL} ${
+                        handle
+                          ? 'h-8 gap-1.5 rounded-[var(--links-tile-radius)] pe-3 ps-2.5 text-[12.5px] font-medium'
+                          : 'h-10 w-10 rounded-[var(--links-well-radius)]'
+                      }`
               }`}
             >
-              <Icon className={handle ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-[18px] w-[18px]'} />
+              <Icon
+                className={
+                  handle
+                    ? 'h-3.5 w-3.5 flex-shrink-0'
+                    : variant === 'wordmark'
+                      ? 'h-5 w-5 flex-shrink-0 text-[color:var(--card-accent)]'
+                      : 'h-[18px] w-[18px]'
+                }
+              />
               {handle ? (
                 <span dir="ltr" className="text-[color:var(--card-ink)]">
                   {handle}
                 </span>
+              ) : variant === 'wordmark' ? (
+                <span className="capitalize">{name}</span>
               ) : null}
             </a>
           </li>
@@ -512,6 +535,7 @@ const SocialButtons = ({ design, data, className }: LayoutProps & { className: s
       })}
     </ul>
   );
+  return bar ? <div className={`flex ${className}`}>{list}</div> : list;
 };
 
 const SIZES = {
@@ -543,7 +567,7 @@ export const LinksIdentity = ({
     : 'items-center text-center';
   return (
     <div className={`relative flex w-full flex-col ${align}`}>
-      {design.background ? null : <div aria-hidden className={WASH} />}
+      <div aria-hidden className={WASH} />
       {portrait && image ? (
         <CardPortrait
           portrait={portrait}

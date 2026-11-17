@@ -1,0 +1,178 @@
+/*
+  Tailwind v3 compatibility for apps built with Tailwind v4 (feed-app, public-app).
+
+  The class names in common-app, ui-lib and rich-text-editor are also compiled by the apps that are
+  still on Tailwind v3, so they keep their v3 spelling. This file makes those names render in v4 the
+  way they did in v3. Drop each part once the shared sources and every app have moved to v4.
+*/
+
+@import './tailwind-v3-palette.css';
+
+@theme {
+  /* v3's sans stack; v4 lists -apple-system, Segoe UI, Roboto... ahead of system-ui. */
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+
+  /* v3's font-size line heights were lengths, so inline children of another size (a <small> in an
+     h2) inherited the length; v4's are ratios, which grows the line box by a pixel or two. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  /* v4 shifted the scales down one step (v3 shadow-sm is v4 shadow-xs, and so on). Keep the
+     v3 values for the names the shared code uses; the bare shadow, rounded and blur match already. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --radius-sm: 0.125rem;
+  --blur-sm: 4px;
+
+  /* v3 ring: 3px, blue-500 at 50%. v4: 1px, currentColor. */
+  --default-ring-width: 3px;
+  --default-ring-color: rgb(59 130 246 / 0.5);
+}
+
+/* The official v4 compatibility base styles. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* v4's preflight makes form controls transparent; v3 left the browser's field background. */
+  input:where(
+      :not(
+          [type='button'],
+          [type='submit'],
+          [type='reset'],
+          [type='checkbox'],
+          [type='radio'],
+          [type='range'],
+          [type='color'],
+          [type='file'],
+          [type='image']
+        )
+    ),
+  textarea,
+  select {
+    background-color: Field;
+  }
+
+  /* v4's preflight sets `font: inherit` on form controls; v3 inherited the family, size and weight
+     but left the style, so a button in italic text stayed upright. */
+  button,
+  input,
+  select,
+  optgroup,
+  textarea,
+  ::file-selector-button {
+    font-style: normal;
+  }
+
+  /* Read by inline styles in common-app (LikeButton's emoji tint). */
+  :root {
+    --tw-text-opacity: 1;
+  }
+}
+
+/*
+  v4 removed text-opacity-*, bg-opacity-* and border-opacity-*. Each color utility below gains an
+  alpha variable that the matching *-opacity-* utility sets on the same element, as in v3. The
+  alpha variables don't inherit, so a child's own color stays opaque, like v3's per-class reset.
+  Color utilities with a modifier (bg-black/50) are left to v4.
+
+  v3's color utilities also reset the alpha, so a variant's color (dark:border-gray-700) over a base
+  border-opacity-80 was opaque. The second @utility of each color does that, in a rule of its own:
+  in the color rule, the extra declaration would sort it ahead of v4's own rule for the same class.
+  Its first --tw-sort (Tailwind's sort hint, dropped from the output) places it after the color
+  rules and before the *-opacity-* ones; the second only limits the match to colors.
+*/
+@property --tw-text-alpha {
+  syntax: '*';
+  inherits: false;
+}
+@property --tw-bg-alpha {
+  syntax: '*';
+  inherits: false;
+}
+@property --tw-border-alpha {
+  syntax: '*';
+  inherits: false;
+}
+
+@utility text-* {
+  color: color-mix(in oklab, --value(--color-*) var(--tw-text-alpha, 100%), transparent);
+}
+@utility text-* {
+  --tw-sort: text-transform;
+  --tw-sort: --value(--color-*);
+  --tw-text-alpha: 100%;
+}
+@utility text-opacity-* {
+  --tw-text-alpha: calc(--value(integer) * 1%);
+  --tw-text-opacity: calc(--value(integer) / 100);
+}
+
+@utility bg-* {
+  background-color: color-mix(in oklab, --value(--color-*) var(--tw-bg-alpha, 100%), transparent);
+}
+@utility bg-* {
+  --tw-sort: background-image;
+  --tw-sort: --value(--color-*);
+  --tw-bg-alpha: 100%;
+}
+@utility bg-opacity-* {
+  --tw-bg-alpha: calc(--value(integer) * 1%);
+}
+
+@utility border-* {
+  border-color: color-mix(in oklab, --value(--color-*) var(--tw-border-alpha, 100%), transparent);
+}
+@utility border-* {
+  --tw-sort: border-left-color;
+  --tw-sort: --value(--color-*);
+  --tw-border-alpha: 100%;
+}
+@utility border-t-* {
+  border-top-color: color-mix(
+    in oklab,
+    --value(--color-*) var(--tw-border-alpha, 100%),
+    transparent
+  );
+}
+@utility border-t-* {
+  --tw-sort: border-left-color;
+  --tw-sort: --value(--color-*);
+  --tw-border-alpha: 100%;
+}
+@utility border-opacity-* {
+  --tw-border-alpha: calc(--value(integer) * 1%);
+}
+
+/*
+  v4 reads stacked variants left to right, so before:empty:* now targets ::before:empty, which never
+  matches. v3 read it as :empty::before. VolatileInput uses it to show its placeholder.
+*/
+@layer utilities {
+  .before\:empty\:content-\[inherit\]:empty::before {
+    --tw-content: inherit;
+    content: var(--tw-content);
+  }
+}

@@ -14,13 +14,13 @@ export interface ActionLinkProps extends Omit<HybridLinkProps, 'children'> {
 export const ActionLink: FC<ActionLinkProps> = ({
   children,
   type,
-  icon,
+  icon: Icon,
   size,
   className,
   ...linkProps
 }) => {
   const hasChildren = !!children;
-  const hasIcon = !!icon;
+  const hasIcon = !!Icon;
 
   const classNames = (() => {
     const colorClasses =
@@ -70,7 +70,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
   return (
     <HybridLink className={classNames.join(' ')} {...linkProps}>
       {children}
-      {icon && icon({ className: `my-auto ${hasChildren ? 'ml-2' : ''} h-5 w-5` })}
+      {Icon && <Icon className={`my-auto ${hasChildren ? 'ml-2' : ''} h-5 w-5`} />}
     </HybridLink>
   );
 };

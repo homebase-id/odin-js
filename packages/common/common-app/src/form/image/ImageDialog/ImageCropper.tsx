@@ -19,7 +19,7 @@ export interface CropperRef extends HTMLImageElement {
 const OUTPUT_MIME_TYPE = 'image/webp';
 
 export const GetCroppedData = (
-  cropperRef: React.RefObject<CropperRef> | React.MutableRefObject<CropperRef | undefined>
+  cropperRef: React.RefObject<CropperRef | null> | React.MutableRefObject<CropperRef | undefined>
 ): Promise<Blob | undefined> => {
   return new Promise((resolve) => {
     const imageElement = cropperRef?.current;

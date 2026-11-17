@@ -5,11 +5,13 @@ import {
   CommentsReactionSummary,
   EmojiReactionSummary,
 } from '@homebase-id/js-lib/public';
-import { Suspense, useMemo, useState } from 'react';
+import { Fragment, Suspense, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   t,
   useCanReact,
   useCommentSummary,
+  useCommentCount,
   useComments,
   useEmojiSummary,
   HOME_ROOT_PATH,
@@ -35,8 +37,10 @@ export const PostInteracts = ({
   defaultExpanded,
   allowExpand = true,
   showSummary = false,
+  excludeComments,
   className,
   login,
+  commentsHref,
 }: {
   odinId: string;
   postFile: HomebaseFile<PostContent>;
@@ -46,8 +50,12 @@ export const PostInteracts = ({
   defaultExpanded?: boolean;
   allowExpand?: boolean;
   showSummary?: boolean;
+  /** Leave out the comments toggle, count and list: for a page that shows the comments itself */
+  excludeComments?: boolean;
   className?: string;
   login?: () => void;
+  /** Link the comment count here instead of showing the comments inline */
+  commentsHref?: string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
@@ -117,7 +125,14 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          {!postDisabledComment ? (
+          {excludeComments ? null : commentsHref ? (
+            <CommentsLink
+              href={commentsHref}
+              canComment={!postDisabledComment}
+              context={reactionContext}
+              reactionPreview={parsedReactionPreview.comments}
+            />
+          ) : !postDisabledComment ? (
             <button
               className={`inline-flex items-center hover:text-black dark:hover:text-white ${
                 !toggleable ? 'pointer-events-none' : ''
@@ -132,7 +147,7 @@ export const PostInteracts = ({
               <span className="sr-only">{t('Toggle comments')}</span>
             </button>
           ) : null}
-          {!showSummary ? (
+          {!showSummary && !commentsHref && !excludeComments ? (
             <CommentSummary
               context={reactionContext}
               reactionPreview={parsedReactionPreview.comments}
@@ -141,7 +156,7 @@ export const PostInteracts = ({
           ) : null}
         </div>
       </div>
-      {isExpanded ? (
+      {excludeComments || commentsHref ? null : isExpanded ? (
         <div
           className="grid cursor-default grid-flow-row gap-2  pb-4"
           onClick={(e) => e.stopPropagation()}
@@ -311,6 +326,34 @@ export const CommentSummary = ({
   ) : null;
 };
 
+/** The 💬 and its count, linking to the comments: while they are open, or when there are some, as in the reader. */
+const CommentsLink = ({
+  href,
+  canComment,
+  context,
+  reactionPreview,
+}: {
+  href: string;
+  canComment: boolean;
+  context: ReactionContext;
+  reactionPreview?: CommentsReactionSummary;
+}) => {
+  const count = useCommentCount(context, reactionPreview);
+  if (!canComment && !count) return null;
+
+  return (
+    <Link
+      to={href}
+      onAuxClick={(e) => e.stopPropagation()}
+      className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
+    >
+      <Bubble className="inline-block h-6 w-6" />
+      {count ? <span>{count}</span> : null}
+      <span className="sr-only">{t('comments')}</span>
+    </Link>
+  );
+};
+
 const CommentTeaserList = ({
   reactionPreview,
   onExpand,
@@ -353,38 +396,53 @@ const CommentTeaserList = ({
   );
 };
 
-const CommentList = ({
+export const CommentList = ({
   context,
   canReact,
   login,
+  composerFirst,
+  threadClassName,
 }: {
   context: ReactionContext;
   canReact?: CanReactInfo;
   login?: () => void;
+  /** The composer above the comments instead of below them */
+  composerFirst?: boolean;
+  /** Each comment and its replies in a box of their own, with this class */
+  threadClassName?: string;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
-  const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
+  const newestFirst = comments?.pages.flatMap((page) => page.comments);
+  // Under a composer at the top the newest come first, so a just-posted one shows right under it;
+  // above one at the bottom, the oldest
+  const flattenedComments = composerFirst ? newestFirst : newestFirst?.reverse();
+  const composer = <CommentComposer context={context} canReact={canReact} login={login} />;
+  const older = hasNextPage ? (
+    <a
+      className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
+      onClick={() => fetchNextPage()}
+    >
+      {t('View older')}
+    </a>
+  ) : null;
 
   return (
     <>
-      {hasNextPage ? (
-        <a
-          className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
-          onClick={() => fetchNextPage()}
-        >
-          {t('View older')}
-        </a>
-      ) : null}
-      {flattenedComments?.map((comment, index) => (
-        <Comment
-          context={context}
-          canReact={canReact}
-          commentData={comment}
-          key={comment.fileId ?? index}
-          isThread={false}
-        />
-      ))}
-      <CommentComposer context={context} canReact={canReact} login={login} />
+      {composerFirst ? composer : older}
+      {flattenedComments?.map((comment, index) => {
+        const key = comment.fileId ?? index;
+        const thread = (
+          <Comment context={context} canReact={canReact} commentData={comment} isThread={false} />
+        );
+        return threadClassName ? (
+          <div className={threadClassName} key={key}>
+            {thread}
+          </div>
+        ) : (
+          <Fragment key={key}>{thread}</Fragment>
+        );
+      })}
+      {composerFirst ? older : composer}
     </>
   );
 };

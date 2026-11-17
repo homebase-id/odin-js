@@ -6,6 +6,9 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { HomebaseCard } from './HomebaseCard';
 import { CardSocials } from './parts/Socials';
+import type { CardDesign } from './CardDesign';
+import { CardBackground } from './parts/Background';
+import schemePalettesRaw from './__fixtures__/scheme-palettes.json?raw';
 import { CardPage } from './CardPage';
 import { snapshotFilter } from './snapshotFilter';
 import { resolveRequestDesign } from './resolveDesign';
@@ -13,6 +16,8 @@ import { toCardData } from './toCardData';
 import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
 import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
 import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
+
+type Scheme = { ground: string; ink: string; muted: string; accents: string[] };
 
 const Icon = () => null;
 
@@ -28,6 +33,7 @@ vi.mock('@homebase-id/common-app', () => ({
   }),
   useDotYouClientContext: () => ({
     isOwner: () => false,
+    isAuthenticated: () => false,
     getLoggedInIdentity: () => 'visitor.dotyou.cloud',
   }),
 }));
@@ -93,16 +99,10 @@ describe('socials variants', () => {
     expect(html.match(/@frodo/g)).toHaveLength(5);
   });
 
-  it('wordmark names the first account and keeps the rest as glyphs', () => {
+  it('wordmark draws a compact named tile per network, first account first', () => {
     const html = renderToStaticMarkup(<CardSocials variant="wordmark" data={data} />);
     expect(html.indexOf('twitter.com')).toBeLessThan(html.indexOf('github.com'));
-    expect(html).toContain('aria-label="github"');
-  });
-
-  it('wordmark on one social renders only the box', () => {
-    const one = { ...data, socials: data.socials.slice(0, 1) };
-    const html = renderToStaticMarkup(<CardSocials variant="wordmark" data={one} />);
-    expect(html).not.toContain('<ul');
+    expect(html.match(/capitalize/g)).toHaveLength(5);
   });
 });
 
@@ -207,7 +207,8 @@ describe('links design', () => {
   it('holds with no links, with 12 links, and with a very long name', () => {
     expect(html(withLinks(0), true)).toContain('Frodo');
     const twelve = html(withLinks(12));
-    expect(twelve.match(/favicon\.ico/g)).toHaveLength(12);
+    // React 19 SSR adds a <link rel="preload"> per image, so count the img tags only
+    expect(twelve.match(/<img\b[^>]*favicon\.ico/g)).toHaveLength(12);
     const long = 'Bartholomew'.repeat(12);
     expect(html(withLinks(2, { firstName: long, surName: long }), true)).toContain(long);
   });
@@ -301,6 +302,372 @@ describe('portrait shape', () => {
   it('rounded keeps a corner radius proportional to the box, not the circle radius', () => {
     const html = draw('board', [{ shape: 'rounded' }]);
     expect(html).toContain('rounded-[22%]');
-    expect(html).not.toContain('rounded-full');
+    expect(html).not.toMatch(/overflow-hidden h-full w-full rounded-full/);
+  });
+});
+
+describe('portrait size', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const withPhoto = { ...data, photo, header: photo } as CardData;
+  const draw = (layout: keyof typeof CARD_PRESETS, size: unknown, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      portraits: [{ source: 'photo', shape: 'circle', size }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={withPhoto} />
+        ) : (
+          <HomebaseCard design={design} data={withPhoto} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const LAYOUTS = ['poster', 'board', 'collage', 'dossier', 'links'] as const;
+
+  it.each(LAYOUTS)('%s: medium is the same as no size, small and large differ', (layout) => {
+    for (const wide of [false, true]) {
+      const plain = draw(layout, undefined, wide);
+      expect(draw(layout, 'medium', wide)).toBe(plain);
+      const small = draw(layout, 'small', wide);
+      const large = draw(layout, 'large', wide);
+      expect(small).not.toBe(plain);
+      expect(large).not.toBe(plain);
+      expect(small).not.toBe(large);
+    }
+  });
+
+  // The property that actually sets the portrait size on each layout; zoom does not scale percent widths
+  const SIZE_PROPERTY = {
+    poster: {
+      card: { small: 'padding-top:36%', large: 'padding-top:56%' },
+      page: {
+        small: 'min-height:calc(clamp(480px,50vw,600px) * 0.8)',
+        large: 'min-height:calc(clamp(480px,50vw,600px) * 1.25)',
+      },
+    },
+    board: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    dossier: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    links: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    collage: {
+      card: { small: 'width:39.2%', large: 'width:61.25%' },
+      page: { small: 'width:64%', large: 'width:100%' },
+    },
+  } as const;
+
+  it.each(LAYOUTS)(
+    '%s: small and large set the layout size property, medium sets neither',
+    (layout) => {
+      for (const wide of [false, true]) {
+        const expected = SIZE_PROPERTY[layout][wide ? 'page' : 'card'];
+        expect(draw(layout, 'small', wide)).toContain(expected.small);
+        expect(draw(layout, 'large', wide)).toContain(expected.large);
+        const medium = draw(layout, 'medium', wide);
+        expect(medium).not.toContain(expected.small);
+        expect(medium).not.toContain(expected.large);
+      }
+    }
+  );
+
+  it('collage scales the cut-out width too, and keeps it beside the print', () => {
+    const two = (size: string, wide: boolean) => {
+      const design = applyOverrides(CARD_PRESETS.collage, {
+        portraits: [
+          { source: 'photo', shape: 'square', size },
+          { source: 'photo', shape: 'circle', size },
+        ],
+      });
+      return renderToStaticMarkup(
+        <MemoryRouter>
+          {wide ? (
+            <CardPage design={design} data={withPhoto} />
+          ) : (
+            <HomebaseCard design={design} data={withPhoto} />
+          )}
+        </MemoryRouter>
+      );
+    };
+    expect(two('small', false)).toContain('width:30.4%');
+    expect(two('large', false)).toContain('width:47.5%');
+    expect(two('large', true)).toContain('margin-left:23.75%');
+    expect(two('medium', true)).toContain('margin-left:39%');
+  });
+});
+
+describe('links socials', () => {
+  const links = (variant: string, socials = data.socials) =>
+    renderToStaticMarkup(
+      <MemoryRouter>
+        <HomebaseCard
+          design={applyOverrides(CARD_PRESETS.links, { socials: variant })}
+          data={{ ...data, socials } as CardData}
+        />
+      </MemoryRouter>
+    );
+
+  const lists = (html: string) =>
+    [...html.matchAll(/<ul([^>]*)>(.*?)<\/ul>/g)].map((m) => ({ attrs: m[1], inner: m[2] }));
+  const tokens = (attrs: string) => (attrs.match(/class="([^"]*)"/)?.[1] ?? '').split(' ');
+
+  it('bar is one tonal pill around every network, glyphs is one tonal button each', () => {
+    const bar = lists(links('bar'));
+    const glyphs = lists(links('glyphs'));
+    expect(bar).toHaveLength(1);
+    expect(tokens(bar[0].attrs)).toEqual(expect.arrayContaining(['rounded-[1.25rem]', 'p-1']));
+    expect(bar[0].attrs).toContain('color-mix');
+    for (const s of data.socials) expect(bar[0].inner).toContain(`href="${s.link}"`);
+    expect(bar[0].inner).not.toContain('h-10 w-10');
+
+    expect(tokens(bar[0].attrs)).toContain('flex-wrap');
+    const ten = Array.from({ length: 10 }, (_, i) => ({
+      ...data.socials[0],
+      link: `https://n${i}.com/x`,
+    }));
+    expect(tokens(lists(links('bar', ten as never))[0].attrs)).toContain('flex-wrap');
+
+    expect(glyphs).toHaveLength(1);
+    expect(tokens(glyphs[0].attrs)).not.toContain('p-1');
+    expect(glyphs[0].attrs).not.toContain('color-mix');
+    const buttons =
+      glyphs[0].inner.match(/<a [^>]*class="[^"]*color-mix[^"]*h-10 w-10[^"]*"/g) ?? [];
+    expect(buttons).toHaveLength(data.socials.length);
+  });
+
+  it.each([1, 2, 6])('wordmark draws one named tile per network (%i)', (count) => {
+    const socials = [...data.socials, ...data.socials].slice(0, count).map((s, i) => ({
+      ...s,
+      link: `${s.link}/${i}`,
+    }));
+    const html = links('wordmark', socials);
+    for (const s of socials) expect(html).toContain(`href="${s.link}"`);
+    expect(html.match(/capitalize/g)).toHaveLength(count);
+    expect(html).not.toContain('@frodo');
+  });
+
+  it('handles keep the @handle, wordmark leaves it out', () => {
+    expect(links('handles').match(/>@frodo</g)).toHaveLength(5);
+    expect(links('wordmark')).not.toContain('@frodo');
+  });
+});
+
+describe('background tint', () => {
+  type Rgb = [number, number, number];
+  const parse = (c: string): [number, number, number, number] => {
+    const hex = /^#([0-9a-f]{6})$/i.exec(c);
+    if (hex)
+      return [1, 3, 5].map((i) => parseInt(hex[1].slice(i - 1, i + 1), 16)).concat(1) as never;
+    const fn = /^rgba?\(([^)]+)\)$/.exec(c);
+    if (!fn) throw new Error(`unreadable colour ${c}`);
+    const [r, g, b, a = '1'] = fn[1].split(',').map((s) => s.trim());
+    return [+r, +g, +b, +a];
+  };
+  const over = (c: string, base: Rgb): Rgb => {
+    const [r, g, b, a] = parse(c);
+    return [r, g, b].map((v, i) => v * a + base[i] * (1 - a)) as Rgb;
+  };
+  const lum = (c: Rgb) => {
+    const [r, g, b] = c.map((v) => {
+      const s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: Rgb, b: Rgb) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const patternOpacity = (palette?: Partial<CardDesign['palette']>) => {
+    const base = applyOverrides(CARD_PRESETS.links, { background: 'dots' });
+    const svg = renderToStaticMarkup(
+      <CardBackground design={{ ...base, palette: { ...base.palette, ...palette } }} />
+    );
+    const found = /opacity:([0-9.]+)/.exec(svg);
+    if (!found) throw new Error('pattern opacity not in the rendered markup');
+    return Number(found[1]);
+  };
+
+  it('paints in the accent, not the ink', () => {
+    const html = render('links', { background: 'blobs' });
+    expect(html).toContain('text-[color:var(--card-accent)]');
+    expect(html).not.toContain('text-[color:var(--card-ink)] opacity');
+  });
+
+  it('keeps the pattern subtle', () => {
+    expect(patternOpacity()).toBeLessThanOrEqual(0.2);
+    expect(patternOpacity()).toBeGreaterThan(0);
+  });
+
+  const schemePalettes = JSON.parse(schemePalettesRaw);
+  const palettes = Object.entries(schemePalettes as Record<string, Record<string, Scheme>>).flatMap(
+    ([layout, schemes]) =>
+      Object.entries(schemes).flatMap(([id, s]) => [
+        ...s.accents.map((accent) => ({ name: `${layout}/${id}/${accent}`, ...s, accent })),
+      ])
+  );
+  const presets = Object.entries(CARD_PRESETS).map(([layout, d]) => ({
+    name: `${layout}/preset`,
+    ...d.palette,
+  }));
+
+  it.each([...presets, ...palettes])('$name: ink and muted stay AA over the pattern', (p) => {
+    const op = patternOpacity(p);
+    const ground = parse(p.ground).slice(0, 3) as Rgb;
+    const accent = over(p.accent, ground);
+    const blended = ground.map((g, i) => g * (1 - op) + accent[i] * op) as Rgb;
+    expect(contrast(over(p.ink, blended), blended), 'ink').toBeGreaterThanOrEqual(4.5);
+    if (contrast(over(p.muted, ground), ground) >= 4.5) {
+      expect(contrast(over(p.muted, blended), blended), 'muted').toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it('covers light and dark grounds', () => {
+    const lums = palettes.map((p) => lum(parse(p.ground).slice(0, 3) as Rgb));
+    expect(Math.min(...lums)).toBeLessThan(0.1);
+    expect(Math.max(...lums)).toBeGreaterThan(0.5);
+  });
+});
+
+describe('socials on the shared layouts and the collage page', () => {
+  const draw = (layout: keyof typeof CARD_PRESETS, socials: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], { socials });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const LAYOUTS = ['poster', 'board', 'collage', 'dossier'] as const;
+
+  it.each(LAYOUTS)('%s: bar is a connected pill and glyphs are not, on card and page', (layout) => {
+    for (const wide of [false, true]) {
+      const socialLists = (html: string) =>
+        [...html.matchAll(/<ul([^>]*data-socials[^>]*)>(.*?)<\/ul>/g)].map((m) => ({
+          attrs: m[1],
+          inner: m[2],
+          tokens: (m[1].match(/class="([^"]*)"/)?.[1] ?? '').split(' '),
+        }));
+      const bar = socialLists(draw(layout, 'bar', wide));
+      const glyphs = socialLists(draw(layout, 'glyphs', wide));
+      expect(bar.length).toBeGreaterThan(0);
+      expect(glyphs.length).toBe(bar.length);
+      for (const b of bar) {
+        expect(b.attrs).toContain('data-socials="bar"');
+        expect(b.tokens).toEqual(expect.arrayContaining(['rounded-[1.25rem]', 'p-1']));
+        // The layout's own padding, gap and border stay off the pill
+        expect(b.tokens.filter((t) => /^!?(p[tblrxy]?|gap|border|flex-1)(-|$)/.test(t))).toEqual([
+          'gap-1',
+          'p-1',
+        ]);
+        expect(b.attrs).toContain('color-mix');
+        expect(b.inner).toContain('h-9 w-9');
+      }
+      for (const g of glyphs) {
+        expect(g.attrs).toContain('data-socials="glyphs"');
+        expect(g.tokens).not.toContain('rounded-[1.25rem]');
+        expect(g.tokens).not.toContain('p-1');
+        expect(g.attrs).not.toContain('color-mix');
+        expect(g.inner).not.toContain('h-9 w-9');
+      }
+    }
+  });
+
+  it.each(LAYOUTS)('%s: a bar of 10 networks wraps instead of overflowing', (layout) => {
+    const many = Array.from({ length: 10 }, (_, i) => ({
+      type: `net${i}`,
+      link: `https://net${i}.com/frodo`,
+      children: 'frodo',
+      icon: Icon,
+    }));
+    const design = applyOverrides(CARD_PRESETS[layout], { socials: 'bar' });
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <HomebaseCard design={design} data={{ ...data, socials: many } as unknown as CardData} />
+      </MemoryRouter>
+    );
+    const list = /<ul([^>]*data-socials="bar"[^>]*)>/.exec(html);
+    expect(list?.[1]).toContain('flex-wrap');
+  });
+
+  it.each(LAYOUTS)(
+    '%s: wordmark on the compact card is a wrapping row with every network (3 and 6)',
+    (layout) => {
+      for (const count of [3, 6]) {
+        const socials = Array.from({ length: count }, (_, i) => ({
+          type: `net${i}`,
+          link: `https://net${i}.com/frodo`,
+          children: 'frodo',
+          icon: Icon,
+        }));
+        const design = applyOverrides(CARD_PRESETS[layout], { socials: 'wordmark' });
+        const html = renderToStaticMarkup(
+          <MemoryRouter>
+            <HomebaseCard design={design} data={{ ...data, socials } as unknown as CardData} />
+          </MemoryRouter>
+        );
+        const list = /<ul([^>]*data-socials="wordmark"[^>]*)>(.*?)<\/ul>/.exec(html);
+        expect(list).not.toBeNull();
+        const tokens = (list?.[1].match(/class="([^"]*)"/)?.[1] ?? '').split(' ');
+        expect(tokens).toContain('flex-wrap');
+        expect(tokens).not.toContain('flex-col');
+        for (const s of socials) expect(list?.[2]).toContain(`href="${s.link}"`);
+        expect(list?.[2].match(/capitalize/g)).toHaveLength(count);
+      }
+    }
+  );
+
+  it('the collage page follows the chosen style instead of hard-coding two', () => {
+    const outputs = (['glyphs', 'bar', 'wordmark', 'handles'] as const).map((s) =>
+      draw('collage', s, true)
+    );
+    expect(new Set(outputs).size).toBe(4);
+    expect(outputs[1]).toContain('data-socials="bar"');
+    expect(outputs[2]).toContain('capitalize');
+    expect(outputs[0]).not.toContain('capitalize');
+  });
+});
+
+describe('background keeps the design colour', () => {
+  const draw = (layout: keyof typeof CARD_PRESETS, overrides: object, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], overrides);
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+
+  it.each(['poster', 'board', 'collage', 'dossier', 'links'] as const)(
+    '%s: none renders the same as no override, card and page',
+    (layout) => {
+      for (const wide of [false, true]) {
+        const plain = draw(layout, {}, wide);
+        expect(draw(layout, { background: 'none' }, wide)).toBe(plain);
+        expect(draw(layout, { background: 'default' }, wide)).toBe(plain);
+      }
+    }
+  );
+
+  it('a pattern layers over the links wash and the ground art', () => {
+    const wash = 'radial-gradient(closest-side,color-mix(in_srgb,var(--card-accent)_17%';
+    expect(draw('links', { background: 'dots' }, false)).toContain(wash);
+    expect(draw('links', { background: 'dots' }, true)).toContain(wash);
+    expect(draw('board', { background: 'dots' }, false)).toContain('<circle cx="-20" cy="150"');
   });
 });

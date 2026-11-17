@@ -63,7 +63,7 @@ export const PostSource = ({
 
   if (!sourceData) return null;
 
-  const { icon, iconColors, text, rootUrl } = sourceData;
+  const { icon: Icon, iconColors, text, rootUrl } = sourceData;
 
   return (
     <a
@@ -74,7 +74,7 @@ export const PostSource = ({
       <div
         className={`px-2 py-2 bg-slate-300 dark:bg-gray-700 flex flex-row items-center gap-1 opacity-80 hover:opacity-100 ${className ?? ''}`}
       >
-        {icon({ className: `w-4 h-4 ${iconColors}` })}
+        <Icon className={`w-4 h-4 ${iconColors}`} />
         <span className="font-medium text-sm">{text}</span>
       </div>
     </a>

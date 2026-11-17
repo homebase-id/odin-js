@@ -1,6 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '../../../../common/common-app/src/tailwind-v4-compat.css';
+
+@source '../../../../libs/ui-lib/src';
+@source '../../../../common/common-app/src';
+/* LiveBlock's own markup; the rest of its dist is the blocks' frames, with a Tailwind of their own */
+@source '../../../../../node_modules/@2002bishwajeet/live-blocks/dist/index.js';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-destructive: #dc2626;
+
+  --animate-slowding: slowding 1.2s ease-in-out;
+  @keyframes slowding {
+    0%,
+    60% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+/* These colors read the RGB channels the Layout sets at runtime (`--color-button: 99 102 241`).
+   The theme keys share those names, so they are inlined and kept out of :root (`reference`). */
+@theme inline reference {
+  --color-page-background: rgb(var(--color-page-background));
+  --color-background: rgb(var(--color-background));
+  --color-foreground: rgb(var(--color-foreground));
+  --color-muted-foreground: rgb(var(--color-foreground) / 0.6);
+  --color-button: rgb(var(--color-button));
+  --color-button-text: rgb(var(--color-button-text));
+
+  --color-primary: rgb(var(--color-button));
+  --color-primary-contrast: rgb(var(--color-button-text));
+}
 
 .dark select option {
   background-color: black;
@@ -19,9 +54,9 @@
 }
 
 @layer base {
-  *,
-  ::before,
-  ::after {
-    @apply dark:border-gray-600;
+  .dark *,
+  .dark ::before,
+  .dark ::after {
+    border-color: color-mix(in oklab, var(--color-gray-600) var(--tw-border-alpha, 100%), transparent);
   }
 }

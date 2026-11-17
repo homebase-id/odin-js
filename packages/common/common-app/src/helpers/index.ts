@@ -10,4 +10,3 @@ export * from './bytesFormat';
 export * from './planStorage';
 export * from './ownerPaths';
 export * from './driveAdoption';
-export * from './richTextFileKey';
