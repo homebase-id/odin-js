@@ -131,7 +131,7 @@ const FaviconOption = ({
       className={`flex cursor-pointer flex-col rounded-md border-2 ${
         isActive
           ? 'border-primary bg-background'
-          : 'bg-surface-container-high'
+          : 'border-transparent bg-surface-container-high'
       }`}
       onClick={onClick}
     >
