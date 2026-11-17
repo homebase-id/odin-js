@@ -153,7 +153,6 @@
 .article-prose h2 {
   font-size: 28px;
   line-height: 1.5;
-  margin-top: 2.5em;
 }
 
 .article-prose h3 {
@@ -191,12 +190,13 @@
   color-scheme: dark;
 }
 
-/* Covers and top-level galleries take up to 880px of the 680px column */
+/* Covers, top-level galleries and wide live blocks take 880px of the 680px column */
 @media (min-width: 1024px) {
   .article-wide,
   .article-prose > div > [data-gallery],
-  .article-prose > div > [aria-roledescription='carousel'] {
-    margin-inline: calc((680px - min(880px, 100vw - 32px)) / 2);
+  .article-prose > div > [aria-roledescription='carousel'],
+  .article-prose > div > [data-live-block-wide] {
+    margin-inline: calc((680px - 880px) / 2);
   }
 }
 

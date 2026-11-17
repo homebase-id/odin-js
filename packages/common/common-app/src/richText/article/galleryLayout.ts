@@ -70,15 +70,16 @@ export function galleryRowBreaks(
 }
 
 /**
- * Gives the gallery item holding `img` its aspect ratio, so it grows by it. The ratio
- * is that of the edited image (Journal's #607): the viewer, like Journal, writes the crop, rotate
- * and flip as data attributes around the img.
+ * Gives the gallery item holding `img` (its figure, also in a grid's rows) its aspect ratio, so
+ * it grows by it. The ratio is that of the edited image (Journal's #607): the viewer, like
+ * Journal, writes the crop, rotate and flip as data attributes around the img.
  */
 function setItemAspect(img: HTMLImageElement): void {
   const gallery = img.closest('[data-gallery]');
   if (!gallery || !img.naturalWidth || !img.naturalHeight) return;
   let item: HTMLElement = img;
-  while (item.parentElement && item.parentElement !== gallery) item = item.parentElement;
+  while (item.tagName !== 'FIGURE' && item.parentElement && item.parentElement !== gallery)
+    item = item.parentElement;
   const edits = parseEditData((name) => img.closest(`[${name}]`)?.getAttribute(name));
   const { width, height } = editedSize(
     { width: img.naturalWidth, height: img.naturalHeight },

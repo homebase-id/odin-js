@@ -32,10 +32,11 @@ const ArticleReaderPage = () => {
   });
 
   const location = useLocation();
-  const state = location.state as Record<string, unknown> | undefined;
 
   const navigate = useNavigate();
-  const doClose = () => navigate(state?.referrer || -1, { preventScrollReset: true });
+  // Back to the entry the reader was opened from, where the feed restores its place; the feed
+  // when the reader was the first page (a shared link)
+  const doClose = () => (location.key !== 'default' ? navigate(-1) : navigate(FEED_ROOT_PATH));
 
   // The feed was scrolled; the article starts at its top, unless the link names a place in it,
   // which the reader scrolls to once that is on the page

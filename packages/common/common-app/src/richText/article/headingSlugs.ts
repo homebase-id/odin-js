@@ -46,10 +46,13 @@ export type ArticleHeading = { node: JSONContent; id: string; level: number; tex
 const textOf = (node: JSONContent): string =>
   node.type === 'text' ? (node.text ?? '') : (node.content ?? []).map(textOf).join('');
 
+/** A table of contents (the viewer's box, the reader's rail) shows from this many headings on. */
+export const MIN_TOC_HEADINGS = 3;
+
 /**
  * Every heading of a cleaned document (`cleanTiptapDoc`), depth first in document order, with the
  * id the article viewer gives it. The viewer calls it on its sanitized document; the reader's rail
- * takes the same list from `articleDocHeadings`, not from a document cleaned another way.
+ * reads the headings off the rendered page.
  */
 export const articleHeadings = (doc: JSONContent): ArticleHeading[] => {
   const found: Omit<ArticleHeading, 'id'>[] = [];

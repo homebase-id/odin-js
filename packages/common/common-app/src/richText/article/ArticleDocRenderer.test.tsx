@@ -4,7 +4,6 @@ import type { JSONContent } from '@tiptap/core';
 import allBlocks from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/all-blocks.json';
 import journalNote from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/journal-note.json';
 import {
-  articleDocHeadings,
   ArticleDocRenderer,
   sanitizeArticleDoc,
   type ArticleDocOptions,
@@ -161,7 +160,7 @@ test('a table of contents lists 3+ headings with unique ids', () => {
   ).not.toContain('Table of contents');
 });
 
-test("the reader's heading list has the ids the viewer renders", () => {
+test('headings get unique ids from their text, also inside nodes the viewer drops', () => {
   const text = (value: string, marks?: unknown[]) => ({ type: 'text', text: value, marks });
   const heading = (content: unknown[], level = 2) => ({ type: 'heading', attrs: { level }, content });
   // Types the viewer doesn't know: a block wrapping a heading, one after it, an inline in one, a mark
@@ -179,17 +178,10 @@ test("the reader's heading list has the ids the viewer renders", () => {
     ],
   };
 
-  for (const doc of [allBlocks, journalNote, unknownTypes]) {
-    const rendered = [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
-    expect(rendered.length).toBeGreaterThan(0);
-    expect(articleDocHeadings(doc).map((heading) => heading.id)).toEqual(rendered);
-  }
-  expect(articleDocHeadings(unknownTypes).map((heading) => heading.id)).toEqual([
-    'intro',
-    'intro-2',
-    'responses',
-    'intro-3',
-  ]);
+  const renderedIds = (doc: unknown) =>
+    [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
+  for (const doc of [allBlocks, journalNote]) expect(renderedIds(doc).length).toBeGreaterThan(0);
+  expect(renderedIds(unknownTypes)).toEqual(['intro', 'intro-2', 'responses', 'intro-3']);
 });
 
 test('images with a fileKey need the post options', () => {

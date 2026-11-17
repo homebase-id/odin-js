@@ -169,13 +169,17 @@ export const ReactionsBar = forwardRef(
     };
 
     useEffect(() => {
+      if (!isCustomOpen) return;
       const onKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') setIsCustomOpen(false);
+        if (e.key !== 'Escape') return;
+        // Escape is the picker's: a page that goes back on Escape (the article reader) stays
+        e.preventDefault();
+        setIsCustomOpen(false);
       };
 
       document.addEventListener('keydown', onKeyDown);
       return () => document.removeEventListener('keydown', onKeyDown);
-    }, []);
+    }, [isCustomOpen]);
 
     return (
       <>

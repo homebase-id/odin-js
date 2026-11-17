@@ -65,13 +65,12 @@ export const OdinImage = ({
     );
     observer.observe(wrapper);
     return () => observer.disconnect();
-  }, [isNear, weDontHaveSourceProps]);
+  }, [isNear, deferUntilNear, weDontHaveSourceProps]);
 
   const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
 
   const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(naturalSizeProp || previewThumbnail);
   const [tinyThumb, setTinyThumb] = useState<ThumbnailMeta | undefined>();
-
 
   const calculateSize = () => {
     if (loadSize !== undefined) return;

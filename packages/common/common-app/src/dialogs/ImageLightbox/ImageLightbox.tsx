@@ -2,7 +2,7 @@ import { createPortal } from 'react-dom';
 
 import { EmbeddedThumb, SystemFileType, TargetDrive } from '@homebase-id/js-lib/core';
 
-import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type TouchEvent } from 'react';
 import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 import { usePortal } from '../../hooks/portal/usePortal';
 import { Times } from '../../ui/Icons/Times';
@@ -72,6 +72,14 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const touch = useRef<{ x: number; y: number } | undefined>(undefined);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+  /** The side button that has focus, which keeps it when it goes disabled (at the first or last image) */
+  const focusedSide = useRef<'prev' | 'next'>(undefined);
+  useLayoutEffect(() => {
+    if (focusedSide.current === 'prev' && index === 0) nextRef.current?.focus();
+    else if (focusedSide.current === 'next' && index === count - 1) prevRef.current?.focus();
+  }, [index, count]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -116,6 +124,11 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
   }, []);
 
   const onTouchStart = (e: TouchEvent) => {
+    // A second finger (a pinch) is no swipe
+    if (e.touches.length !== 1) {
+      touch.current = undefined;
+      return;
+    }
     const { clientX: x, clientY: y } = e.touches[0];
     touch.current = { x, y };
   };
@@ -188,6 +201,9 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
                 {index + 1} / {count}
               </p>
               <button
+                ref={prevRef}
+                onFocus={() => (focusedSide.current = 'prev')}
+                onBlur={() => (focusedSide.current = undefined)}
                 aria-label={t('Previous')}
                 disabled={index === 0}
                 onClick={(e) => {
@@ -199,6 +215,9 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
+                ref={nextRef}
+                onFocus={() => (focusedSide.current = 'next')}
+                onBlur={() => (focusedSide.current = undefined)}
                 aria-label={t('Next')}
                 disabled={index === count - 1}
                 onClick={(e) => {

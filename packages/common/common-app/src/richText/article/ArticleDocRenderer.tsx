@@ -61,7 +61,8 @@ import {
   watchGalleryAspect,
   type GalleryLayout,
 } from './galleryLayout';
-import { articleHeadings, type ArticleHeading } from './headingSlugs';
+import { articleHeadings, MIN_TOC_HEADINGS, type ArticleHeading } from './headingSlugs';
+import { t } from '../../helpers/i18n/dictionary';
 import { Image } from '../../media/Image';
 import { Mention } from '../renderer/Mention';
 import type { RichTextRenderer } from '../renderer/RichTextRenderer';
@@ -295,7 +296,40 @@ const hastToReact = (node: Hast, key: number): ReactNode => {
   );
 };
 
-const PRE_CLASS = `overflow-x-auto rounded-lg ${MUTED_BG} p-4 text-sm leading-relaxed`;
+// Right padding keeps the end of the longest line clear of the Copy button
+const PRE_CLASS = `overflow-x-auto rounded-lg border ${BORDER} ${MUTED_BG} p-4 pr-20 text-sm leading-relaxed`;
+
+/** Copies a code block's text, as Journal's share page does: "Copied" for a moment after. */
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const copy = () =>
+    navigator.clipboard?.writeText(text).then(
+      () => setCopied(true),
+      // The browser refused (no permission, or not a secure context): nothing was copied
+      () => undefined
+    );
+  return (
+    // A 44px target on a touch screen; the pill inside carries the look
+    <button
+      type="button"
+      onClick={copy}
+      aria-label={copied ? t('Copied') : t('Copy code')}
+      className="group/copy absolute right-1 top-1 flex h-9 min-w-9 select-none items-center justify-center px-1 outline-none [@media(pointer:coarse)]:h-11 print:hidden"
+    >
+      <span
+        aria-live="polite"
+        className={`rounded-full border ${BORDER} bg-[var(--article-surface)] px-2.5 py-0.5 text-xs font-medium ${MUTED_TEXT} group-hover/copy:text-[color:var(--article-on-surface)] group-focus-visible/copy:ring-2 group-focus-visible/copy:ring-[color:var(--article-primary)]`}
+      >
+        {copied ? t('Copied') : t('Copy')}
+      </span>
+    </button>
+  );
+};
 
 /** Code, highlighted when its language is one lowlight knows. `language` is a bare word. */
 const Code = ({ code, language }: { code: string; language?: string }) => {
@@ -308,11 +342,14 @@ const Code = ({ code, language }: { code: string; language?: string }) => {
     }
   }
   return (
-    <pre className={PRE_CLASS}>
-      <code className="font-mono text-foreground" data-language={language}>
-        {highlighted}
-      </code>
-    </pre>
+    <div className="relative">
+      <pre className={PRE_CLASS}>
+        <code className="font-mono text-foreground" data-language={language}>
+          {highlighted}
+        </code>
+      </pre>
+      <CopyButton text={code} />
+    </div>
   );
 };
 
@@ -542,7 +579,8 @@ const EDITED_FRAME_CLASSES: Record<GalleryLayout, string> = {
 
 /**
  * An image's aspect ratio before it loads, with its crop and rotation: from its preview thumbnail's
- * size, else the size the document gives it, else square.
+ * size, else the size the document gives it; undefined without either (an image by url), whose
+ * ratio is read once it loads (`--ar`, watchGalleryAspect).
  */
 const imageAspect = (attrs: Record<string, unknown>, options?: ArticleDocOptions) => {
   const fileKey = str(attrs.fileKey);
@@ -551,7 +589,7 @@ const imageAspect = (attrs: Record<string, unknown>, options?: ArticleDocOptions
     : undefined;
   const width = Number(preview?.pixelWidth ?? attrs.width);
   const height = Number(preview?.pixelHeight ?? attrs.height);
-  if (!(width > 0 && height > 0)) return 1;
+  if (!(width > 0 && height > 0)) return undefined;
   const edited = editedSize({ width, height }, readEdits(attrs));
   return edited.width / edited.height;
 };
@@ -619,7 +657,8 @@ const ImageNode = ({ node, parent }: Props) => {
   }
 
   const frameClass = layout ? EDITED_FRAME_CLASSES[layout] : 'w-full rounded-lg';
-  const aspect = layout === 'grid' ? imageAspect(attrs, options) : undefined;
+  // An image by url without a size takes its own ratio once it loads (--ar, square until then)
+  const aspect = layout === 'grid' ? (imageAspect(attrs, options) ?? 'var(--ar, 1)') : undefined;
   // A grid with set columns has rows of its own, which its images fill
   const gridColumns = layout === 'grid' ? galleryColumns(parent?.attrs?.columns) : undefined;
   const shown =
@@ -669,7 +708,7 @@ const ImageNode = ({ node, parent }: Props) => {
           data-src={fileKey ? undefined : src}
           data-alt={alt || undefined}
           data-zoom-order={images?.get(node)}
-          aria-label={alt ? `${alt}: view full screen` : 'View image full screen'}
+          aria-label={alt ? `${alt}: ${t('view full screen')}` : t('View image full screen')}
           className="block w-full cursor-zoom-in rounded-lg text-left"
         >
           {shown}
@@ -698,7 +737,8 @@ const Carousel = ({ slides }: { slides: ReactNode[] }) => {
   const show = (index: number) => {
     if (scroller.current) scrollToSlide(scroller.current, index, slides.length);
   };
-  const button = `flex h-7 w-7 items-center justify-center rounded-full border ${BORDER} leading-none disabled:opacity-40 hover:bg-foreground/5`;
+  // 44px on a touch screen
+  const button = `flex h-7 w-7 items-center justify-center rounded-full border ${BORDER} leading-none disabled:opacity-40 hover:bg-foreground/5 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:w-11`;
   return (
     <div
       className="my-6"
@@ -784,9 +824,12 @@ const GalleryNode = ({ node, children }: Props) => {
   const items = Children.toArray(children);
   const ref = useRef<HTMLDivElement>(null);
   const narrow = useSyncExternalStore(subscribeNarrow, isNarrow, () => false);
-  // Only a row reads the aspect ratios (--ar)
+  // A row reads the aspect ratios (--ar), and so does a grid, for its images by url without a size
   useEffect(
-    () => (layout === 'row' && ref.current ? watchGalleryAspect(ref.current) : undefined),
+    () =>
+      (layout === 'row' || layout === 'grid') && ref.current
+        ? watchGalleryAspect(ref.current)
+        : undefined,
     [layout]
   );
 
@@ -810,13 +853,13 @@ const GalleryNode = ({ node, children }: Props) => {
     // Rows of exactly `perRow` images, each sharing its row by aspect ratio (set by ImageNode)
     const perRow = columnsAt(columns, narrow);
     const images = node.content ?? [];
-    const aspects = images.map((image) => imageAspect(image.attrs ?? {}, options));
+    const aspects = images.map((image) => imageAspect(image.attrs ?? {}, options) ?? 1);
     const meanAspect = aspects.reduce((sum, a) => sum + a, 0) / (aspects.length || 1);
     const rows = Array.from({ length: Math.ceil(items.length / perRow) }, (_, row) =>
       items.slice(row * perRow, (row + 1) * perRow)
     );
     return (
-      <div data-gallery="grid" className="my-6 flex flex-col gap-2">
+      <div ref={ref} data-gallery="grid" className="my-6 flex flex-col gap-2">
         {rows.map((row, i) => (
           <div key={i} className="flex items-start gap-2">
             {row}
@@ -1156,10 +1199,6 @@ export const sanitizeArticleDoc = (doc: unknown): JSONContent =>
     isKnownMark: (type) => Object.hasOwn(markMapping, type),
   });
 
-/** The headings this viewer renders with ids, for a document as stored: the reader's rail lists them. */
-// eslint-disable-next-line react-refresh/only-export-components
-export const articleDocHeadings = (doc: unknown) => indexDoc(sanitizeArticleDoc(doc)).headings;
-
 /** React elements for a sanitized document. A new renderer each time, so element keys start at 0. */
 const renderDoc = (doc: JSONContent) =>
   renderJSONContentToReactElement<{ type: string; attrs?: Record<string, unknown> }, Node>({
@@ -1182,7 +1221,7 @@ export const ArticleDocRenderer = ({
   odinId?: string;
   options?: ArticleDocOptions;
   className?: string;
-  /** Show a table of contents above documents with 3 or more headings */
+  /** Show a table of contents above documents with MIN_TOC_HEADINGS or more headings */
   tableOfContents?: boolean;
   /** Images are buttons, with what a full-screen viewer needs on them (`data-zoom-image`) */
   zoomImages?: boolean;
@@ -1199,7 +1238,9 @@ export const ArticleDocRenderer = ({
   return (
     <ArticleDocContext.Provider value={context}>
       <div className={`break-words ${className ?? ''}`}>
-        {tableOfContents && headings.length >= 3 ? <TableOfContents headings={headings} /> : null}
+        {tableOfContents && headings.length >= MIN_TOC_HEADINGS ? (
+          <TableOfContents headings={headings} />
+        ) : null}
         {body}
       </div>
     </ArticleDocContext.Provider>

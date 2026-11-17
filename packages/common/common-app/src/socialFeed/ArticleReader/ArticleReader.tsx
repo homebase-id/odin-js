@@ -10,7 +10,6 @@ import {
 } from 'react';
 import {
   Article,
-  articleDocOf,
   ChannelDefinition,
   getChannelDrive,
   parseReactionPreview,
@@ -22,7 +21,7 @@ import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
 // with the first article, as KaTeX's do in ArticleDoc
 import '@fontsource-variable/inter';
 import '../../richText/article/articleProse.css';
-import type { ArticleHeading } from '../../richText/article/headingSlugs';
+import { MIN_TOC_HEADINGS } from '../../richText/article/headingSlugs';
 import { ImageLightbox, type LightboxImage } from '../../dialogs/ImageLightbox/ImageLightbox';
 import { abstractSubtitle } from './abstractSubtitle';
 import {
@@ -42,9 +41,6 @@ import {
   useEmojiSummary,
 } from '../../..';
 import { ArrowLeft, Bubble, Heart } from '../../ui/Icons';
-
-/** Rail and inline box both list the headings from this many on, as ArticleDocRenderer does. */
-const MIN_TOC_HEADINGS = 3;
 
 /**
  * `#responses`, in the address or on the 💬 link, is the responses. A heading can have that id too
@@ -119,9 +115,9 @@ export const ArticleReader = ({
     [article.channelId, postFile.fileId, globalTransitId, updated, payloads]
   );
 
-  const headings = useArticleHeadings(article);
-  const rail = headings.length >= MIN_TOC_HEADINGS ? headings : undefined;
   const proseRef = useRef<HTMLDivElement>(null);
+  const headings = useRenderedHeadings(proseRef);
+  const rail = headings.length >= MIN_TOC_HEADINGS ? headings : undefined;
   const articleRef = useRef<HTMLElement>(null);
   const [zoom, setZoom] = useState<{ images: LightboxImage[]; index: number }>();
 
@@ -451,7 +447,6 @@ const ArticleCounts = ({
       {canComment || comments ? (
         <a
           href={`#${RESPONSES_HASH}`}
-          data-responses=""
           className="inline-flex items-center gap-1.5 rounded-md hover:text-foreground"
         >
           <span aria-hidden="true">
@@ -465,25 +460,37 @@ const ArticleCounts = ({
   );
 };
 
-/** The sticky "On this page" rail, with the heading being read in the foreground. */
-const OnThisPage = ({ headings }: { headings: ArticleHeading[] }) => {
+/** A heading of the rendered body, as the rail lists it. */
+type RailHeading = { id: string; level: number; text: string };
+
+/** The sticky "On this page" rail, with the heading being read in the foreground and a bar beside it. */
+const OnThisPage = ({ headings }: { headings: RailHeading[] }) => {
   const active = useActiveHeading(headings);
   const topLevel = Math.min(...headings.map((heading) => heading.level));
 
   return (
     <nav
       aria-label={t('On this page')}
-      className={`sticky top-24 ml-[8.25rem] max-h-[calc(100vh-8rem)] max-w-[15rem] overflow-y-auto border-l ${HAIRLINE} py-1 pl-4 text-sm`}
+      className="sticky top-20 ml-[8.25rem] max-h-[calc(100vh-7rem)] max-w-[15rem] overflow-y-auto py-1 text-sm"
     >
-      <p className={`mb-3 font-medium ${MUTED}`}>{t('On this page')}</p>
-      <ol className="flex flex-col gap-2">
+      <p className={`mb-3 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
+        {t('On this page')}
+      </p>
+      <ol className={`border-l ${HAIRLINE}`}>
         {headings.map((heading) => (
-          <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 0.75}rem` }}>
+          <li key={heading.id}>
             <a
               href={`#${heading.id}`}
               aria-current={heading.id === active ? 'location' : undefined}
-              className={`block leading-snug transition-colors ${
-                heading.id === active ? 'text-foreground' : `${MUTED} hover:text-foreground`
+              // The page follows the link in place (jumpInPlace); the address names the heading, to share
+              onClick={() =>
+                window.history.replaceState(window.history.state, '', `#${heading.id}`)
+              }
+              style={{ paddingLeft: `${1 + (heading.level - topLevel) * 0.75}rem` }}
+              className={`-ml-px block border-l-2 py-1 leading-snug transition-colors ${
+                heading.id === active
+                  ? 'border-foreground text-foreground'
+                  : `border-transparent ${MUTED} hover:text-foreground`
               }`}
             >
               {heading.text}
@@ -496,31 +503,38 @@ const OnThisPage = ({ headings }: { headings: ArticleHeading[] }) => {
 };
 
 /**
- * The headings ArticleDocRenderer gives ids, from the document it shows, sanitized as it does: from
- * its own chunk, which ArticleBody loads for the same article. None for an article without a
- * `bodyDoc`: its Slate body renders headings without ids.
+ * The h2 to h4 headings with an id in the rendered body, as they are on the page: the viewer gives
+ * a Journal body's headings ids, and a body it can't show (the Slate one it falls back to) has
+ * none, so the rail never links to a heading that isn't there. Read again as the body renders.
  */
-const useArticleHeadings = (article: Pick<Article, 'body' | 'bodyDoc'>) => {
-  const [headings, setHeadings] = useState<ArticleHeading[]>([]);
+const useRenderedHeadings = (body: RefObject<HTMLElement | null>) => {
+  const [headings, setHeadings] = useState<RailHeading[]>([]);
   useEffect(() => {
-    if (!article.bodyDoc) {
-      setHeadings([]);
-      return;
-    }
-    let current = true;
-    Promise.all([articleDocOf(article), import('../../richText/article/ArticleDocRenderer')]).then(
-      ([doc, { articleDocHeadings }]) => current && setHeadings(articleDocHeadings(doc)),
-      () => current && setHeadings([])
-    );
-    return () => {
-      current = false;
+    const element = body.current;
+    if (!element) return;
+    const read = () => {
+      const found = Array.from(
+        element.querySelectorAll<HTMLElement>('h2[id], h3[id], h4[id]'),
+        (heading): RailHeading => ({
+          id: heading.id,
+          level: Number(heading.tagName[1]),
+          text: heading.textContent?.trim() ?? '',
+        })
+      );
+      setHeadings((previous) =>
+        JSON.stringify(previous) === JSON.stringify(found) ? previous : found
+      );
     };
-  }, [article.body, article.bodyDoc]);
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [body]);
   return headings;
 };
 
 /** The heading being read: the last one scrolled above a line just below the bar. */
-const useActiveHeading = (headings: ArticleHeading[]) => {
+const useActiveHeading = (headings: RailHeading[]) => {
   const [active, setActive] = useState<string>();
 
   useEffect(() => {
@@ -581,17 +595,21 @@ const useArrivalHash = (body: RefObject<HTMLElement | null>) => {
   }, [body]);
 };
 
-/** Escape goes back, unless it is a field's (typing a response) or a dialog's. */
+/**
+ * Escape goes back, unless it is a field's (typing a response), a dialog's or the emoji picker's,
+ * or a menu took it (preventDefault).
+ */
 const useEscape = (onBack: (() => void) | undefined) => {
   useEffect(() => {
     if (!onBack) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
-      const target = e.target as HTMLElement | null;
+      // The element itself, also inside a shadow root (the emoji picker's search field)
+      const target = e.composedPath()[0] as HTMLElement | undefined;
       if (
         target?.isContentEditable ||
         target?.closest?.('input, textarea, select') ||
-        document.querySelector('[aria-modal="true"]')
+        document.querySelector('[aria-modal="true"], emoji-picker')
       )
         return;
       onBack();
@@ -609,8 +627,8 @@ const jumpInPlace = (e: MouseEvent<HTMLElement>) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
     return;
   const link = (e.target as Element).closest?.('a[href^="#"]');
-  const href = link?.getAttribute('href');
-  const id = link?.hasAttribute('data-responses') ? RESPONSES_ID : href?.slice(1);
+  const hash = link?.getAttribute('href')?.slice(1);
+  const id = hash === RESPONSES_HASH ? RESPONSES_ID : hash;
   const target = id ? document.getElementById(id) : null;
   if (!target) return;
   e.preventDefault();
