@@ -199,7 +199,7 @@ const ShamirAccountRecovery = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Recover access to your account')} | Homebase</title>
+        <title>{`${t('Recover access to your account')} | Homebase`}</title>
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <UrlNotifier/>

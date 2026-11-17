@@ -40,9 +40,7 @@ const PostDetail = () => {
   return (
     <>
       <Helmet>
-        <title>
-          {post?.caption || channel?.fileMetadata.appData.content.name || ''} | Homebase
-        </title>
+        <title>{`${post?.caption || channel?.fileMetadata.appData.content.name || ''} | Homebase`}</title>
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"

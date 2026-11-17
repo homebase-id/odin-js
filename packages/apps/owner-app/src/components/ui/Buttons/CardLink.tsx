@@ -9,7 +9,7 @@ const CardLink = ({
   title,
   description,
   children,
-  icon,
+  icon: Icon,
 }: {
   className?: string;
   isDisabled?: boolean;
@@ -32,7 +32,7 @@ const CardLink = ({
         } items-center bg-slate-100 p-4 dark:bg-slate-900 dark:text-slate-200`}
       >
         <h2 className="flex flex-grow text-xl">{title}</h2>
-        {icon && icon({ className: 'w-4 h-4 ml-auto' })}
+        {Icon && <Icon className="ml-auto h-4 w-4" />}
       </div>
       {description || children ? (
         <div className="flex flex-grow flex-col p-4">

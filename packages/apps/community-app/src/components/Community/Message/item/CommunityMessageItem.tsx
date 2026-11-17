@@ -54,7 +54,7 @@ export const CommunityMessageItem = memo(
     originId?: string;
     showChannelName?: boolean;
     className?: string;
-    scrollRef?: React.RefObject<HTMLDivElement>;
+    scrollRef?: React.RefObject<HTMLDivElement | null>;
   }) => {
     const {
       msg,
@@ -255,7 +255,7 @@ const CommunityTextMessageBody = ({
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }) => {
   const [loadMore, setLoadMore] = useState(false);
 
@@ -426,7 +426,7 @@ const CommunityMediaMessageBody = ({
   msg: HomebaseFile<CommunityMessage>;
   community?: HomebaseFile<CommunityDefinition>;
   originId?: string;
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }) => {
   const content = msg.fileMetadata.appData.content;
   const hasACaption = !!content.message;
