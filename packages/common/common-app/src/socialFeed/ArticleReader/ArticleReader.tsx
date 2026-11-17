@@ -66,6 +66,7 @@ export const ArticleReader = ({
   isAuthenticated,
   onBack,
   login,
+  barEnd,
 }: {
   odinId?: string;
   channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
@@ -75,6 +76,8 @@ export const ArticleReader = ({
   /** Back to where the reader came from, from the ← button and Escape; no button without it */
   onBack?: () => void;
   login?: () => void;
+  /** A host's own controls in the bar, before the post's menu: the public site's login */
+  barEnd?: ReactNode;
 }) => {
   const article = postFile.fileMetadata.appData.content as Article;
   const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
@@ -171,8 +174,8 @@ export const ArticleReader = ({
 
   return (
     // The page in the article's palette (articleProse.css), edge to edge
-    <div className="article-page min-h-screen" onClick={jumpInPlace}>
-      <ReaderBar onBack={onBack}>
+    <div className="article-page @container min-h-screen" onClick={jumpInPlace}>
+      <ReaderBar onBack={onBack} end={barEnd}>
         <PostContextMenu
           odinId={odinId}
           authorOdinId={authorOdinId}
@@ -181,14 +184,18 @@ export const ArticleReader = ({
         />
       </ReaderBar>
 
+      {/* The rail from 1280px, when the reader itself has the 73.25rem its grid takes (6.25rem + 680px +
+          22rem and the padding): a host's sidebar can narrow it. articleProse.css hides the inline box then */}
       <div
         className={`px-5 pb-24 pt-6 sm:pt-10 ${
-          rail ? 'xl:grid xl:grid-cols-[minmax(6.25rem,1fr)_680px_minmax(22rem,1fr)]' : ''
+          rail
+            ? 'xl:@min-[73.25rem]:grid xl:@min-[73.25rem]:grid-cols-[minmax(6.25rem,1fr)_680px_minmax(22rem,1fr)]'
+            : ''
         }`}
       >
         <article
           ref={articleRef}
-          className="mx-auto w-full max-w-[680px] xl:col-start-2"
+          className="mx-auto w-full max-w-[680px] xl:@min-[73.25rem]:col-start-2"
           onClick={openImage}
         >
           {cover && postFile.fileId ? (
@@ -322,7 +329,7 @@ export const ArticleReader = ({
         </article>
 
         {rail ? (
-          <aside className="hidden xl:col-start-3 xl:row-start-1 xl:block">
+          <aside className="hidden xl:@min-[73.25rem]:col-start-3 xl:@min-[73.25rem]:row-start-1 xl:@min-[73.25rem]:block">
             <OnThisPage headings={rail} />
           </aside>
         ) : null}
@@ -370,8 +377,19 @@ const CoverZoom = ({
     <>{children}</>
   );
 
-/** The sticky bar: back on the left, the post's menu on the right; a hairline once scrolled. */
-const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactNode }) => {
+/**
+ * The sticky bar: back on the left, a host's controls and the post's menu on the right; a hairline
+ * once scrolled.
+ */
+const ReaderBar = ({
+  onBack,
+  end,
+  children,
+}: {
+  onBack?: () => void;
+  end?: ReactNode;
+  children: ReactNode;
+}) => {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 0);
@@ -399,7 +417,10 @@ const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactN
         ) : (
           <span />
         )}
-        {children}
+        <div className="flex items-center gap-2">
+          {end}
+          {children}
+        </div>
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useMatch } from 'react-router-dom';
 import ProfileNav from '../../../Auth/ProfileNav/ProfileNav';
 
 import {
@@ -7,12 +7,17 @@ import {
   OwnerImage,
   OwnerName,
   useDotYouClientContext,
+  usePost,
   useSiteData,
 } from '@homebase-id/common-app';
 
 const Header = () => {
-  const isOwner = useDotYouClientContext().isOwner();
   const { owner } = useSiteData().data ?? {};
+  const postMatch = useMatch(`${HOME_ROOT_PATH}posts/:channelKey/:postKey`);
+  const { data: post } = usePost(postMatch?.params);
+
+  // An article's reader has a bar of its own, with the site's login in it
+  if (post?.fileMetadata.appData.content.type === 'Article') return null;
 
   return (
     <header className="body-font bg-background">
@@ -27,15 +32,19 @@ const Header = () => {
             <OwnerName />
           </span>
         </Link>
-        {isOwner ? null : (
-          <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
-            <DarkModeToggle className="mr-2" />
-            <ProfileNav />
-          </nav>
-        )}
+        <SiteNav />
       </div>
     </header>
   );
 };
+
+/** Dark mode and login, for visitors; the owner has the sidenav */
+export const SiteNav = () =>
+  useDotYouClientContext().isOwner() ? null : (
+    <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
+      <DarkModeToggle className="mr-2" />
+      <ProfileNav />
+    </nav>
+  );
 
 export default Header;

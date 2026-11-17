@@ -14,6 +14,7 @@ import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { Article } from '@homebase-id/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
+import { SiteNav } from '../../../components/ui/Layout/Header/Header';
 
 const PostDetail = () => {
   const navigate = useNavigate();
@@ -60,9 +61,12 @@ const PostDetail = () => {
           onBack={() => {
             const referrer = state?.referrer as string | undefined;
             if (referrer) navigate(referrer);
-            else navigate(-1);
+            // The first page of the visit has no page of the site to go back to
+            else if (location.key !== 'default') navigate(-1);
+            else navigate(HOME_ROOT_PATH);
           }}
           login={() => setIsLogin(true)}
+          barEnd={<SiteNav />}
         />
         <div className="container mx-auto sm:px-5">
           <RelatedArticles blog={postData} channel={channel || undefined} />
