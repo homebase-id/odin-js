@@ -52,6 +52,8 @@ import {
   type Size,
 } from './imageEdits';
 import {
+  columnsAt,
+  galleryColumns,
   galleryRowBreaks,
   scrollToSlide,
   slideIndex,
@@ -617,6 +619,8 @@ const ImageNode = ({ node, parent }: Props) => {
 
   const frameClass = layout ? EDITED_FRAME_CLASSES[layout] : 'w-full rounded-lg';
   const aspect = layout === 'grid' ? imageAspect(attrs, options) : undefined;
+  // A grid with set columns has rows of its own, which its images fill
+  const gridColumns = layout === 'grid' ? galleryColumns(parent?.attrs?.columns) : undefined;
   const shown =
     edited && fileKey ? (
       // Keyed by the source, so a reused instance never keeps another image's size
@@ -640,12 +644,15 @@ const ImageNode = ({ node, parent }: Props) => {
             }`
       }
       style={
-        aspect
-          ? // A justified row: as wide as the row height at its aspect ratio, growing by it to fill the row
-            { flex: `${aspect} 1 calc(${aspect} * var(--row-height))` }
-          : !layout && width
-            ? ({ '--image-width': `${width}px` } as CSSProperties)
-            : undefined
+        aspect && gridColumns
+          ? // A share of its row by its aspect ratio, so the row's images share one height
+            { flex: `${aspect} 1 0%` }
+          : aspect
+            ? // A justified row: as wide as the row height at its aspect ratio, growing by it to fill the row
+              { flex: `${aspect} 1 calc(${aspect} * var(--row-height))` }
+            : !layout && width
+              ? ({ '--image-width': `${width}px` } as CSSProperties)
+              : undefined
       }
       // For the gallery's aspect ratios: the edited image's, read off these
       {...Object.fromEntries(editDataAttrs(edits))}
@@ -753,8 +760,9 @@ const Carousel = ({ slides }: { slides: ReactNode[] }) => {
 const GALLERY_CLASSES: Record<'row' | 'grid', string> = {
   // Each image grows by its aspect ratio (--ar, set once it loads), so a row's images share one height
   row: 'flex flex-wrap items-start gap-x-2 [&>figure]:[flex:var(--ar,1)_1_0%]',
-  // Justified rows (each image's flex is set by ImageNode), read left to right
-  grid: 'flex flex-wrap items-start gap-2 [--row-height:220px] max-[480px]:[--row-height:140px]',
+  // Justified rows (each image's flex is set by ImageNode), read left to right; on a phone, three
+  // portrait screenshots to a row
+  grid: 'flex flex-wrap items-start gap-2 [--row-height:220px] max-[480px]:[--row-height:190px]',
 };
 
 const NARROW = '(max-width: 480px)';
@@ -768,7 +776,10 @@ const isNarrow = () => typeof window.matchMedia === 'function' && window.matchMe
 
 /** An image gallery in one of Journal's layouts: row, grid, masonry or carousel. */
 const GalleryNode = ({ node, children }: Props) => {
+  const { options } = useContext(ArticleDocContext);
   const layout = toGalleryLayout(node.attrs?.layout);
+  // The author's images per row or columns (Journal's `columns`); a carousel has none
+  const columns = galleryColumns(node.attrs?.columns);
   const items = Children.toArray(children);
   const ref = useRef<HTMLDivElement>(null);
   const narrow = useSyncExternalStore(subscribeNarrow, isNarrow, () => false);
@@ -782,12 +793,40 @@ const GalleryNode = ({ node, children }: Props) => {
 
   if (layout === 'masonry') {
     // Columns of whole images, dealt round-robin so the top row reads 1, 2, 3
-    const columns = narrow ? 2 : 3;
+    const count = columnsAt(columns ?? 3, narrow);
     return (
       <div data-gallery="masonry" className="my-6 flex items-start gap-2">
-        {Array.from({ length: columns }, (_, column) => (
+        {Array.from({ length: count }, (_, column) => (
           <div key={column} className="flex min-w-0 flex-1 flex-col gap-2">
-            {items.filter((_, i) => i % columns === column)}
+            {items.filter((_, i) => i % count === column)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (layout === 'grid' && columns) {
+    // Rows of exactly `perRow` images, each sharing its row by aspect ratio (set by ImageNode)
+    const perRow = columnsAt(columns, narrow);
+    const images = node.content ?? [];
+    const aspects = images.map((image) => imageAspect(image.attrs ?? {}, options));
+    const meanAspect = aspects.reduce((sum, a) => sum + a, 0) / (aspects.length || 1);
+    const rows = Array.from({ length: Math.ceil(items.length / perRow) }, (_, row) =>
+      items.slice(row * perRow, (row + 1) * perRow)
+    );
+    return (
+      <div data-gallery="grid" className="my-6 flex flex-col gap-2">
+        {rows.map((row, i) => (
+          <div key={i} className="flex items-start gap-2">
+            {row}
+            {/* A short last row keeps room for the images it lacks, so they stay the size of the rest */}
+            {row.length < perRow ? (
+              <span
+                aria-hidden="true"
+                className="h-0"
+                style={{ flex: `${(perRow - row.length) * meanAspect} 1 0%` }}
+              />
+            ) : null}
           </div>
         ))}
       </div>
@@ -797,7 +836,7 @@ const GalleryNode = ({ node, children }: Props) => {
   let content: ReactNode[] = items;
   if (layout === 'row') {
     // Rows end at a break: the `wide` ones above 480px, the `narrow` ones (pairs) at or below it
-    const breaks = new Map(galleryRowBreaks(items.length).map((b) => [b.index, b.modes]));
+    const breaks = new Map(galleryRowBreaks(items.length, columns).map((b) => [b.index, b.modes]));
     content = items.flatMap((item, i) => {
       const modes = breaks.get(i);
       if (!modes) return [item];

@@ -22,16 +22,37 @@ export function toGalleryLayout(value: unknown): GalleryLayout {
 const WIDE_PER_ROW = 3;
 const NARROW_PER_ROW = 2;
 
+/**
+ * The gallery's `columns` attribute (Journal): how many images per row (grid, row) or how many
+ * columns (masonry), an integer from 1 to 6. Anything else is no setting.
+ */
+export function galleryColumns(value: unknown): number | undefined {
+  const columns = typeof value === 'string' && value.trim() ? Number(value) : value;
+  return typeof columns === 'number' && Number.isInteger(columns) && columns >= 1 && columns <= 6
+    ? columns
+    : undefined;
+}
+
+/** The columns to use at a width: at or below 480px, at most two. */
+export const columnsAt = (columns: number, narrow: boolean) =>
+  narrow ? Math.min(columns, NARROW_PER_ROW) : columns;
+
 export type RowBreakMode = 'wide' | 'narrow';
 
 /**
  * Where rows break in a gallery of `count` images: the index of the image a new row
- * starts at, and the widths it applies to. Wide rows are balanced (4 is 2 + 2, 7 is
- * 3 + 2 + 2), so no row holds a lone image; narrow rows are pairs.
+ * starts at, and the widths it applies to. Wide rows hold at most `columns` (three without it)
+ * and are balanced (in threes, 4 is 2 + 2 and 7 is 3 + 2 + 2), so their sizes differ by one at
+ * most; narrow rows hold at most two, in order.
  */
-export function galleryRowBreaks(count: number): Array<{ index: number; modes: RowBreakMode[] }> {
+export function galleryRowBreaks(
+  count: number,
+  columns?: number
+): Array<{ index: number; modes: RowBreakMode[] }> {
+  const widePerRow = columns ?? WIDE_PER_ROW;
+  const narrowPerRow = columnsAt(widePerRow, true);
   const wide = new Set<number>();
-  const rows = Math.ceil(count / WIDE_PER_ROW);
+  const rows = Math.ceil(count / widePerRow);
   const base = Math.floor(count / rows);
   let start = 0;
   for (let row = 0; row < rows - 1; row++) {
@@ -42,7 +63,7 @@ export function galleryRowBreaks(count: number): Array<{ index: number; modes: R
   for (let index = 1; index < count; index++) {
     const modes: RowBreakMode[] = [];
     if (wide.has(index)) modes.push('wide');
-    if (index % NARROW_PER_ROW === 0) modes.push('narrow');
+    if (index % narrowPerRow === 0) modes.push('narrow');
     if (modes.length) breaks.push({ index, modes });
   }
   return breaks;

@@ -257,6 +257,82 @@ test('grid and masonry galleries read left to right, and the viewer gets documen
   expect(grid).toContain('[flex:10000_1_0px]');
 });
 
+describe('a gallery with columns', () => {
+  const gallery = (layout: string, columns: unknown, count = 5) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'gallery',
+        attrs: { layout, columns },
+        content: Array.from({ length: count }, (_, i) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${i + 1}.png`, width: (i + 1) * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  // Each row or column of a gallery, as the images it holds
+  const groups = (html: string, open: RegExp) =>
+    html
+      .split(open)
+      .slice(1)
+      .map((group) => srcs(group));
+
+  test('a grid has rows of exactly that many, each image sharing its row by aspect ratio', () => {
+    const html = render(gallery('grid', 2));
+    expect(html).not.toContain('--row-height');
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2'],
+      ['3', '4'],
+      ['5'],
+    ]);
+    expect(html).toContain('style="flex:1 1 0%"');
+    expect(html).toContain('style="flex:5 1 0%"');
+    // The short last row keeps room for its missing image: the gallery's mean aspect ratio, 3
+    expect(html).toContain('<span aria-hidden="true" class="h-0" style="flex:3 1 0%"></span>');
+  });
+
+  test('a full grid has no filler', () => {
+    const html = render(gallery('grid', 5));
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2', '3', '4', '5'],
+    ]);
+    expect(html).not.toContain('class="h-0"');
+  });
+
+  test('a masonry gallery has that many columns, dealt in turn', () => {
+    const html = render(gallery('masonry', 2));
+    expect(groups(html, /<div class="flex min-w-0 flex-1 flex-col gap-2">/)).toEqual([
+      ['1', '3', '5'],
+      ['2', '4'],
+    ]);
+  });
+
+  test('a row gallery holds at most that many per row', () => {
+    // Five in fours: balanced, 3 + 2; narrow rows stay pairs
+    const html = render(gallery('row', 4));
+    const breaks = [
+      ...html.matchAll(
+        /class="hidden h-2 \[flex:0_0_100%\] +([^"]*)"><\/span><figure[^>]*><img src="https:\/\/x\.example\/(\d)/g
+      ),
+    ].map((m) => `${m[2]}:${m[1].trim()}`);
+    expect(breaks).toEqual(['3:max-[480px]:block', '4:min-[481px]:block', '5:max-[480px]:block']);
+  });
+
+  test('a carousel ignores it', () => {
+    expect(render(gallery('carousel', 2))).toBe(render(gallery('carousel', undefined)));
+  });
+
+  test('anything but an integer from 1 to 6 is no setting', () => {
+    const automatic = render(gallery('grid', undefined));
+    expect(automatic).toContain('--row-height');
+    for (const columns of [0, 7, 2.5, 'two', null, -1])
+      expect(render(gallery('grid', columns))).toBe(automatic);
+    expect(render(gallery('grid', '3'))).toBe(render(gallery('grid', 3)));
+  });
+});
+
 const malformed = {
   type: 'doc',
   content: [
