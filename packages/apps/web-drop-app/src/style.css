@@ -27,7 +27,7 @@ body {
   height: 100%;
 }
 
-/* Each theme's ground is on the body, so the page needs it too, past the fold */
+/* Let the body's ground reach the canvas; the shared theme paints html. */
 html {
   background-color: transparent;
 }
