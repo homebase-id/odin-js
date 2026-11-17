@@ -51,6 +51,9 @@ const MIN_TOC_HEADINGS = 3;
  * ("Responses"), so the section's own is one no heading slug can be: slugs have no '_'.
  */
 const RESPONSES_HASH = 'responses';
+/** The article's palette (articleProse.css) for the reader's own muted text and hairlines */
+const MUTED = 'text-[color:var(--article-on-surface-variant)]';
+const HAIRLINE = 'border-[color:var(--article-outline-variant)]';
 const RESPONSES_ID = 'reader_responses';
 
 /**
@@ -170,10 +173,8 @@ export const ArticleReader = ({
   };
 
   return (
-    <div
-      className="min-h-screen bg-[var(--article-surface)] text-[color:var(--article-on-surface)]"
-      onClick={jumpInPlace}
-    >
+    // The page in the article's palette (articleProse.css), edge to edge
+    <div className="article-page min-h-screen" onClick={jumpInPlace}>
       <ReaderBar onBack={onBack}>
         <PostContextMenu
           odinId={odinId}
@@ -221,9 +222,7 @@ export const ArticleReader = ({
             {article.caption}
           </h1>
           {subtitle ? (
-            <p className="article-font mt-4 text-[20px] leading-[1.5] text-foreground/65">
-              {subtitle}
-            </p>
+            <p className={`article-font mt-4 text-[20px] leading-[1.5] ${MUTED}`}>{subtitle}</p>
           ) : null}
 
           <div className="mt-8 flex items-center gap-3">
@@ -237,10 +236,12 @@ export const ArticleReader = ({
                   channel={channel}
                   odinId={odinId}
                   authorOdinId={postFile.fileMetadata.originalAuthor}
-                  className="ml-1 font-normal text-foreground/60"
+                  className={`ml-1 font-normal ${MUTED}`}
                 />
               </p>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/60">
+              <div
+                className={`mt-0.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm ${MUTED}`}
+              >
                 <div className="flex flex-wrap items-center">
                   <PostMeta
                     postFile={postFile}
@@ -272,13 +273,9 @@ export const ArticleReader = ({
             </div>
           </div>
 
-          <hr className="my-8 border-foreground/10" />
+          <hr className={`my-8 ${HAIRLINE}`} />
 
-          <div
-            ref={proseRef}
-            className="article-prose"
-            data-toc-rail={rail ? '' : undefined}
-          >
+          <div ref={proseRef} className="article-prose" data-toc-rail={rail ? '' : undefined}>
             <ArticleBody
               odinId={odinId}
               article={article}
@@ -288,7 +285,7 @@ export const ArticleReader = ({
             />
           </div>
 
-          <hr className="mb-4 mt-12 border-foreground/10" />
+          <hr className={`mb-4 mt-12 ${HAIRLINE}`} />
           <PostInteracts
             odinId={reactionOdinId}
             postFile={postFile}
@@ -309,7 +306,7 @@ export const ArticleReader = ({
               {channelLink && channel ? (
                 <a
                   href={channelLink}
-                  className="text-sm text-foreground/60 hover:text-foreground hover:underline"
+                  className={`text-sm ${MUTED} hover:text-foreground hover:underline`}
                 >
                   {t('More from')} {channel.fileMetadata.appData.content.name}
                 </a>
@@ -392,7 +389,7 @@ const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactN
   return (
     <header
       className={`sticky top-0 z-20 border-b bg-[color-mix(in_srgb,var(--article-surface)_90%,transparent)] backdrop-blur-md motion-safe:transition-colors motion-safe:duration-200 ${
-        scrolled ? 'border-foreground/10' : 'border-transparent'
+        scrolled ? HAIRLINE : 'border-transparent'
       }`}
     >
       <div className="flex h-14 items-center justify-between gap-2 px-3">
@@ -476,9 +473,9 @@ const OnThisPage = ({ headings }: { headings: ArticleHeading[] }) => {
   return (
     <nav
       aria-label={t('On this page')}
-      className="sticky top-24 ml-[8.25rem] max-h-[calc(100vh-8rem)] max-w-[15rem] overflow-y-auto border-l border-foreground/10 py-1 pl-4 text-sm"
+      className={`sticky top-24 ml-[8.25rem] max-h-[calc(100vh-8rem)] max-w-[15rem] overflow-y-auto border-l ${HAIRLINE} py-1 pl-4 text-sm`}
     >
-      <p className="mb-3 font-medium text-foreground/50">{t('On this page')}</p>
+      <p className={`mb-3 font-medium ${MUTED}`}>{t('On this page')}</p>
       <ol className="flex flex-col gap-2">
         {headings.map((heading) => (
           <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 0.75}rem` }}>
@@ -486,9 +483,7 @@ const OnThisPage = ({ headings }: { headings: ArticleHeading[] }) => {
               href={`#${heading.id}`}
               aria-current={heading.id === active ? 'location' : undefined}
               className={`block leading-snug transition-colors ${
-                heading.id === active
-                  ? 'text-foreground'
-                  : 'text-foreground/50 hover:text-foreground/80'
+                heading.id === active ? 'text-foreground' : `${MUTED} hover:text-foreground`
               }`}
             >
               {heading.text}

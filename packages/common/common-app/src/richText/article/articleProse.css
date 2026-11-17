@@ -28,6 +28,9 @@
   --article-error-container: #fdebec;
   --article-warning: #cb912f;
   --article-warning-container: #fbf3db;
+  /* The page and body text as the apps' RGB channels (--color-background: 22 22 22) */
+  --article-surface-rgb: 255 255 255;
+  --article-on-surface-rgb: 55 53 47;
 }
 
 :root.dark {
@@ -48,6 +51,26 @@
   --article-error-container: #33201f;
   --article-warning: #ca9849;
   --article-warning-container: #2e2a1c;
+  --article-surface-rgb: 25 25 25;
+  --article-on-surface-rgb: 212 212 212;
+}
+
+/*
+ * The reader's page: the article's paper and ink, edge to edge. The apps' colour channels are
+ * redefined inside it only, so what it holds (the bar, responses, menus) draws in them too.
+ */
+.article-page {
+  --color-background: var(--article-surface-rgb);
+  --color-page-background: var(--article-surface-rgb);
+  --color-foreground: var(--article-on-surface-rgb);
+  background-color: var(--article-surface);
+  color: var(--article-on-surface);
+}
+
+/* Around it while it is open: the canvas past the page's edges, as when overscrolled */
+:root[data-article-reader],
+:root[data-article-reader] body {
+  background-color: var(--article-surface);
 }
 
 /*
