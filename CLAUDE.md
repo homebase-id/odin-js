@@ -11,10 +11,7 @@
 
 ## Repo
 
-npm workspaces: `libs/js-lib` (Homebase client), `libs/ui-lib`, `common/common-app` (shared app code, used as source), `common/rich-text-editor`, `apps/*` (Vite + React).
-
-- Journal articles carry a Tiptap `bodyDoc` next to the Slate `body`; common-app's `ArticleBody` renders it with `richText/article/ArticleDocRenderer`.
-- Each app compiles common-app and ui-lib classes with its own Tailwind config, so shared classes must work in every app's Tailwind version.
+- Shared classes in common-app and ui-lib are compiled by each app's own Tailwind: check they work in every consuming app.
 
 ```bash
 npm run build:libs                                     # apps see js-lib changes only after this
