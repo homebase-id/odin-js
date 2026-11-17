@@ -96,8 +96,8 @@ export const PostBody = ({
   const hasMoreToShowNonArticle = useMemo(() => {
     return (
       !!hasFullTextPayload ||
-      !!effectivePost.captionAsRichText ||
-      (effectivePost.caption?.length ?? 0) > MAX_CHAR_FOR_SUMMARY
+      (effectivePost.caption?.length ?? 0) > MAX_CHAR_FOR_SUMMARY ||
+      (!!effectivePost.captionAsRichText && effectivePost.caption.split('\n').length > 7)
     );
   }, [effectivePost, hasFullTextPayload]);
   return (
@@ -114,9 +114,17 @@ export const PostBody = ({
           )
         ) : (
           <>
-            <span className="whitespace-pre-wrap">
-              {ellipsisAtMaxChar(filteredCaption, MAX_CHAR_FOR_SUMMARY)}{' '}
-            </span>
+            {effectivePost.captionAsRichText ? (
+              <RichTextRenderer
+                body={effectivePost.captionAsRichText}
+                odinId={odinId}
+                className="line-clamp-[7]"
+              />
+            ) : (
+              <span className="whitespace-pre-wrap">
+                {ellipsisAtMaxChar(filteredCaption, MAX_CHAR_FOR_SUMMARY)}{' '}
+              </span>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();

@@ -176,6 +176,10 @@ export const RichTextRenderer = ({
             {children}
           </h2>
         );
+      case 'h3':
+        return <h3 className="text-lg">{children}</h3>;
+      case 'hr':
+        return <hr className="my-2 border-foreground/20" />;
       case 'ol':
         return (
           <ol className="list-decimal pl-5">

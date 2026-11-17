@@ -353,6 +353,26 @@ describe('getPostContentForUpload', () => {
 
         expect(() => getPostContentForUpload(file)).toThrow();
     });
+
+    it('moves a large captionAsRichText into the text payload when the header is full', async () => {
+        const captionAsRichText = Array.from({ length: 200 }, (_, i) => ({
+            type: 'p',
+            children: [{ text: `line ${i}`, bold: true }],
+        }));
+        const content = {
+            id: 'id8', channelId: 'chan', caption: 'short', slug: 'slug8', type: 'Tweet', captionAsRichText,
+        } as unknown as PostContent;
+        const file = { fileMetadata: { appData: { content } } } as unknown as NewHomebaseFile<PostContent>;
+
+        const { headerContent, additionalPayloads } = getPostContentForUpload(file);
+        const header = JSON.parse(headerContent);
+        expect(header.caption).toBe('short');
+        expect(header.captionAsRichText).toBeUndefined();
+        const text = JSON.parse(await (additionalPayloads[0].payload as Blob).text());
+        expect(additionalPayloads[0].key).toBe(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(text.captionAsRichText).toEqual(captionAsRichText);
+    });
+
     describe('Article bodyDoc', () => {
         const articleFile = (body: Article['body'], bodyDoc: Article['bodyDoc'], abstract = 'abstract') =>
             ({

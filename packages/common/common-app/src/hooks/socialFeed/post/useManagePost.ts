@@ -8,7 +8,7 @@ import {
 } from '@homebase-id/js-lib/public';
 import { NewMediaFile, MediaFile, UpdateResult } from '@homebase-id/js-lib/core';
 import { HomebaseFile, NewHomebaseFile, UploadResult } from '@homebase-id/js-lib/core';
-import { getRichTextFromString } from '../../../helpers/richTextHelper';
+import { markdownToRichText } from '../../../helpers/markdownToRichText';
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { invalidatePosts } from './usePostsInfinite';
@@ -74,7 +74,7 @@ export const useManagePost = () => {
             });
           };
 
-      postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
+      postFile.fileMetadata.appData.content.captionAsRichText = markdownToRichText(
         postFile.fileMetadata.appData.content.caption.trim()
       );
 
