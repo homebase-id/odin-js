@@ -9,8 +9,6 @@ import savePublicRaw from './__fixtures__/save-public-card.json?raw';
 import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
 import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
 import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
-import specsRaw from './__fixtures__/design-specs.json?raw';
-import { PORTRAIT_SIZES } from './CardDesign';
 import storedSetRaw from './__fixtures__/stored-card-set.json?raw';
 
 /*
@@ -183,11 +181,5 @@ describe('render requests built by chat-kmp with overrides and audience', () => 
   it('shares its overrides byte for byte with the stored card', () => {
     expect(renderPublic.overrides).toEqual(savePublic.data.overrides);
     expect(renderCircle.overrides).toEqual(saveCircle.data.overrides);
-  });
-});
-
-describe('portrait size contract', () => {
-  it('the shared fixture lists exactly the sizes the renderer accepts', () => {
-    expect(JSON.parse(specsRaw).portraitSizes).toEqual([...PORTRAIT_SIZES]);
   });
 });

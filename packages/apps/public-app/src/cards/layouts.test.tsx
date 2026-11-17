@@ -356,8 +356,16 @@ describe('links socials', () => {
     );
 
   it('glyphs and bar draw different cards', () => {
-    expect(links('glyphs')).not.toBe(links('bar'));
-    expect(links('bar')).toContain('rounded-full');
+    const bar = links('bar');
+    const glyphs = links('glyphs');
+    const pills = (html: string) => html.match(/<ul class="[^"]*p-1[^"]*rounded-full[^"]*"/g) ?? [];
+    const tonalButtons = (html: string) =>
+      html.match(/<a [^>]*class="[^"]*color-mix[^"]*h-10 w-10[^"]*"/g) ?? [];
+    expect(bar.match(/<ul/g)).toHaveLength(1);
+    expect(pills(bar)).toHaveLength(1);
+    expect(tonalButtons(bar)).toHaveLength(0);
+    expect(pills(glyphs)).toHaveLength(0);
+    expect(tonalButtons(glyphs)).toHaveLength(data.socials.length);
   });
 
   it.each([1, 2, 6])('wordmark draws one named tile per network (%i)', (count) => {
