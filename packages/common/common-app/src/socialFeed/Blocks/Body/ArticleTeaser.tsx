@@ -14,11 +14,9 @@ const SERIF_STYLE = {
 export const ArticleTeaser = ({
   postFile,
   odinId,
-  className,
 }: {
   postFile: HomebaseFile<PostContent>;
   odinId?: string;
-  className?: string;
 }) => {
   const article = postFile.fileMetadata.appData.content as Article;
   const minutes = article.readingTimeStats?.minutes;
@@ -28,10 +26,9 @@ export const ArticleTeaser = ({
         (payload) => payload.key === article.primaryMediaFile?.fileKey
       )
     : undefined;
-  const hasCover = !!postFile.fileId && !!coverPayload?.contentType?.startsWith('image');
 
   return (
-    <div className={`flex flex-row gap-4 ${className ?? ''}`}>
+    <div className="flex flex-row gap-4">
       <div className="min-w-0 flex-1">
         <h1 className="line-clamp-2 text-[20px] font-semibold leading-[1.3] text-foreground">
           {article.caption}
@@ -50,7 +47,7 @@ export const ArticleTeaser = ({
           </p>
         ) : null}
       </div>
-      {hasCover && coverPayload ? (
+      {postFile.fileId && coverPayload?.contentType?.startsWith('image') ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(article.channelId)}
