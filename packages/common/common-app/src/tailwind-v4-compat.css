@@ -97,6 +97,12 @@
   alpha variable that the matching *-opacity-* utility sets on the same element, as in v3. The
   alpha variables don't inherit, so a child's own color stays opaque, like v3's per-class reset.
   Color utilities with a modifier (bg-black/50) are left to v4.
+
+  v3's color utilities also reset the alpha, so a variant's color (dark:border-gray-700) over a base
+  border-opacity-80 was opaque. The second @utility of each color does that, in a rule of its own:
+  in the color rule, the extra declaration would sort it ahead of v4's own rule for the same class.
+  Its first --tw-sort (Tailwind's sort hint, dropped from the output) places it after the color
+  rules and before the *-opacity-* ones; the second only limits the match to colors.
 */
 @property --tw-text-alpha {
   syntax: '*';
@@ -114,6 +120,11 @@
 @utility text-* {
   color: color-mix(in oklab, --value(--color-*) var(--tw-text-alpha, 100%), transparent);
 }
+@utility text-* {
+  --tw-sort: text-transform;
+  --tw-sort: --value(--color-*);
+  --tw-text-alpha: 100%;
+}
 @utility text-opacity-* {
   --tw-text-alpha: calc(--value(integer) * 1%);
   --tw-text-opacity: calc(--value(integer) / 100);
@@ -122,6 +133,11 @@
 @utility bg-* {
   background-color: color-mix(in oklab, --value(--color-*) var(--tw-bg-alpha, 100%), transparent);
 }
+@utility bg-* {
+  --tw-sort: background-image;
+  --tw-sort: --value(--color-*);
+  --tw-bg-alpha: 100%;
+}
 @utility bg-opacity-* {
   --tw-bg-alpha: calc(--value(integer) * 1%);
 }
@@ -129,12 +145,22 @@
 @utility border-* {
   border-color: color-mix(in oklab, --value(--color-*) var(--tw-border-alpha, 100%), transparent);
 }
+@utility border-* {
+  --tw-sort: border-left-color;
+  --tw-sort: --value(--color-*);
+  --tw-border-alpha: 100%;
+}
 @utility border-t-* {
   border-top-color: color-mix(
     in oklab,
     --value(--color-*) var(--tw-border-alpha, 100%),
     transparent
   );
+}
+@utility border-t-* {
+  --tw-sort: border-left-color;
+  --tw-sort: --value(--color-*);
+  --tw-border-alpha: 100%;
 }
 @utility border-opacity-* {
   --tw-border-alpha: calc(--value(integer) * 1%);
