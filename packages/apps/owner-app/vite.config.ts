@@ -36,7 +36,7 @@ export default defineConfig({
       cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
-      // The repo root: hoisted node_modules hold the reader's fonts (Source Serif, KaTeX)
+      // The repo root: hoisted node_modules hold the reader's fonts (Inter, KaTeX)
       allow: ['../../..'],
     },
   },
