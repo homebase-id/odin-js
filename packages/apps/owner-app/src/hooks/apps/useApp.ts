@@ -223,7 +223,7 @@ export const useApp = ({ appId }: { appId?: string }) => {
   const dotYouClient = useDotYouClientContext();
   // The owner's password, when creating a private drive needs it (ZkPasswordNeededError). Read by the mutations rather
   // than passed to them, so react-query's mutation cache never holds it.
-  const zkPassword = useRef<string>();
+  const zkPassword = useRef<string>(undefined);
 
   const fetch = async ({ appId }: { appId: string }) => {
     return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;

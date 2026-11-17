@@ -31,7 +31,7 @@ export const useWebsocketSubscriber = (
   const isPeer = useMemo(() => !!odinId && odinId !== dotYouClient.getHostIdentity(), [odinId]);
   const [isConnected, setIsConected] = useState(false);
   const connectedHandler =
-    useRef<(dotYouClient: DotYouClient, data: TypedConnectionNotification) => void | null>();
+    useRef<(dotYouClient: DotYouClient, data: TypedConnectionNotification) => void | null>(undefined);
 
   const wrappedHandler = useCallback(
     (dotYouClient: DotYouClient, notification: TypedConnectionNotification) => {

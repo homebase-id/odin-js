@@ -28,7 +28,7 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>{owner?.firstName ?? 'Home'} | Homebase</title>
+        <title>{`${owner?.firstName ?? 'Home'} | Homebase`}</title>
       </Helmet>
       {body}
     </>

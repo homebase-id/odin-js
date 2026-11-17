@@ -30,7 +30,7 @@ export const ImageDialog = ({
   const target = usePortal('modal-container');
   const [isGettingData, setIsGettingData] = useState(false);
   const [uncroppedData, setUncroppedData] = useState<Blob>();
-  const cropperRef = useRef<CropperRef>();
+  const cropperRef = useRef<CropperRef>(undefined);
   if (!isOpen) return null;
 
   const doUploadImage = async () => {

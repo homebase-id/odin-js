@@ -11,6 +11,7 @@ import {
   useFloatingLinkInsertState,
 } from '@udecode/plate-link/react';
 import { ExternalLink, Link, Text, Unlink } from 'lucide-react';
+import type { HTMLAttributes } from 'react';
 
 import { buttonVariants } from './button-variants';
 import { inputVariants } from './input/input-variants';
@@ -134,11 +135,19 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
   return (
     <>
-      <div ref={insertRef} className={cn(popoverVariants(), 'w-auto p-1')} {...insertProps}>
+      <div
+        ref={insertRef}
+        className={cn(popoverVariants(), 'w-auto p-1')}
+        {...(insertProps as HTMLAttributes<HTMLDivElement>)}
+      >
         {input}
       </div>
 
-      <div ref={editRef} className={cn(popoverVariants(), 'w-auto p-1')} {...editProps}>
+      <div
+        ref={editRef}
+        className={cn(popoverVariants(), 'w-auto p-1')}
+        {...(editProps as HTMLAttributes<HTMLDivElement>)}
+      >
         {editContent}
       </div>
     </>

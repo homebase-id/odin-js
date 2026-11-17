@@ -8,7 +8,7 @@ import hls from 'hls.js';
 interface OdinHlsProps extends OdinVideoProps {
   videoFileHeader: HomebaseFile;
   videoMetaData: SegmentedVideoMetadata;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onFatalError?: () => void;
 }
 

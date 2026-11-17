@@ -5,7 +5,7 @@ import { OdinVideoProps } from './OdinVideo';
 
 interface OdinDirectProps extends OdinVideoProps {
   videoMetaData: BaseVideoMetadata | undefined;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onFatalError?: () => void;
 }
 

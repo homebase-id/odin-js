@@ -54,7 +54,7 @@ export const SocialFeed = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Feed')} | Homebase</title>
+        <title>{`${t('Feed')} | Homebase`}</title>
       </Helmet>
       <ExtendPermissionDialog
         appName={t('Homebase Feed')}

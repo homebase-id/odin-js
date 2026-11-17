@@ -162,7 +162,7 @@ const DataUpgrade = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Data Upgrade')} | Homebase</title>
+        <title>{`${t('Data Upgrade')} | Homebase`}</title>
       </Helmet>
 
       <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">
