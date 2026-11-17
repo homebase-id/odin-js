@@ -24,7 +24,12 @@ import {
   LinkOverview,
   AllContactMentionDropdown,
 } from '../../form';
-import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
+import {
+  t,
+  getImagesFromPasteEvent,
+  getVideosFromPasteEvent,
+  markdownToRichText,
+} from '../../helpers';
 import {
   usePostComposer,
   useChannels,
@@ -39,6 +44,7 @@ import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
 import { Globe, Arrow, Lock } from '../../ui/Icons';
+import { RichTextRenderer } from '../../richText';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
@@ -65,6 +71,7 @@ export const PostComposer = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [caption, setCaption] = useState<string>('');
+  const [isPreview, setIsPreview] = useState(false);
 
   const { data: publicChannel } = useChannel({ channelKey: BlogConfig.PublicChannelId }).fetch;
   const [targetChannel, setTargetChannel] = useState<{
@@ -111,6 +118,7 @@ export const PostComposer = ({
 
   const resetUi = () => {
     setCaption('');
+    setIsPreview(false);
     // setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     fileInputRef.current?.value && (fileInputRef.current.value = '');
@@ -157,31 +165,35 @@ export const PostComposer = ({
           return false;
         }}
       >
-        <VolatileInput
-          defaultValue={caption}
-          onChange={(newCaption) => setCaption(newCaption)}
-          placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
-          onPaste={(e) => {
-            const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
-              (file) => ({ file })
-            );
+        {isPreview ? (
+          <CaptionPreview caption={caption} />
+        ) : (
+          <VolatileInput
+            defaultValue={caption}
+            onChange={(newCaption) => setCaption(newCaption)}
+            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+                (file) => ({ file })
+              );
 
-            if (mediaFiles.length && !embeddedPost) {
-              setFiles([...(files ?? []), ...mediaFiles]);
-              e.preventDefault();
+              if (mediaFiles.length && !embeddedPost) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : () => {
+                    doPost();
+                    return false;
+                  }
             }
-          }}
-          onSubmit={
-            isTouchDevice()
-              ? undefined
-              : () => {
-                  doPost();
-                  return false;
-                }
-          }
-          key={stateIndex}
-          autoCompleters={[AllContactMentionDropdown]}
-        />
+            key={stateIndex}
+            autoCompleters={[AllContactMentionDropdown]}
+          />
+        )}
 
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {files?.length ? null : (
@@ -244,6 +256,7 @@ export const PostComposer = ({
               />
             </>
           ) : null}
+          <WritePreviewToggle isPreview={isPreview} onChange={setIsPreview} />
           <div className="ml-auto"></div>
           {!forcedChannel ? (
             <ChannelOrAclSelector
@@ -505,6 +518,42 @@ export const ChannelOrAclSelector = React.forwardRef(
     );
   }
 );
+
+export const WritePreviewToggle = ({
+  isPreview,
+  onChange,
+}: {
+  isPreview: boolean;
+  onChange: (isPreview: boolean) => void;
+}) => (
+  <div className="flex flex-row rounded-md bg-foreground/5 p-0.5 text-sm">
+    {[false, true].map((preview) => (
+      <button
+        type="button"
+        key={String(preview)}
+        aria-pressed={isPreview === preview}
+        onClick={() => onChange(preview)}
+        className={`rounded px-2 py-1 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ${
+          isPreview === preview
+            ? 'bg-background text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        {preview ? t('Preview') : t('Write')}
+      </button>
+    ))}
+  </div>
+);
+
+export const CaptionPreview = ({ caption }: { caption: string }) =>
+  caption.trim() ? (
+    <RichTextRenderer
+      body={markdownToRichText(caption.trim()) ?? [{ text: caption.trim() }]}
+      className="min-h-12 py-2"
+    />
+  ) : (
+    <p className="min-h-12 py-2 text-muted-foreground">{t('Nothing to preview')}</p>
+  );
 
 const ProgressIndicator = ({
   postState,
