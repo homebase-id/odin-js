@@ -22,7 +22,7 @@ const GlyphList = ({
     data-socials={variant}
     className={`flex items-center ${
       variant === 'bar'
-        ? 'w-fit gap-1 rounded-full bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
+        ? 'w-fit flex-wrap gap-1 rounded-[1.25rem] bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
         : 'flex-wrap gap-3'
     } ${className ?? ''}`}
   >

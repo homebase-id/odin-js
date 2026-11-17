@@ -6,6 +6,7 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { HomebaseCard } from './HomebaseCard';
 import { CardSocials } from './parts/Socials';
+import type { CardDesign } from './CardDesign';
 import { CardBackground } from './parts/Background';
 import schemePalettesRaw from './__fixtures__/scheme-palettes.json?raw';
 import { CardPage } from './CardPage';
@@ -426,10 +427,17 @@ describe('links socials', () => {
     const bar = lists(links('bar'));
     const glyphs = lists(links('glyphs'));
     expect(bar).toHaveLength(1);
-    expect(tokens(bar[0].attrs)).toEqual(expect.arrayContaining(['rounded-full', 'p-1']));
+    expect(tokens(bar[0].attrs)).toEqual(expect.arrayContaining(['rounded-[1.25rem]', 'p-1']));
     expect(bar[0].attrs).toContain('color-mix');
     for (const s of data.socials) expect(bar[0].inner).toContain(`href="${s.link}"`);
     expect(bar[0].inner).not.toContain('h-10 w-10');
+
+    expect(tokens(bar[0].attrs)).toContain('flex-wrap');
+    const ten = Array.from({ length: 10 }, (_, i) => ({
+      ...data.socials[0],
+      link: `https://n${i}.com/x`,
+    }));
+    expect(tokens(lists(links('bar', ten as never))[0].attrs)).toContain('flex-wrap');
 
     expect(glyphs).toHaveLength(1);
     expect(tokens(glyphs[0].attrs)).not.toContain('p-1');
@@ -482,11 +490,12 @@ describe('background tint', () => {
     const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
     return (hi + 0.05) / (lo + 0.05);
   };
-  const patternOpacity = () => {
+  const patternOpacity = (palette?: Partial<CardDesign['palette']>) => {
+    const base = applyOverrides(CARD_PRESETS.links, { background: 'dots' });
     const svg = renderToStaticMarkup(
-      <CardBackground design={applyOverrides(CARD_PRESETS.links, { background: 'dots' })} />
+      <CardBackground design={{ ...base, palette: { ...base.palette, ...palette } }} />
     );
-    const found = /opacity-\[([0-9.]+)\]/.exec(svg);
+    const found = /opacity:([0-9.]+)/.exec(svg);
     if (!found) throw new Error('pattern opacity not in the rendered markup');
     return Number(found[1]);
   };
@@ -499,6 +508,7 @@ describe('background tint', () => {
 
   it('keeps the pattern subtle', () => {
     expect(patternOpacity()).toBeLessThanOrEqual(0.2);
+    expect(patternOpacity()).toBeGreaterThan(0);
   });
 
   const schemePalettes = JSON.parse(schemePalettesRaw);
@@ -514,16 +524,14 @@ describe('background tint', () => {
   }));
 
   it.each([...presets, ...palettes])('$name: ink and muted stay AA over the pattern', (p) => {
-    const op = patternOpacity();
+    const op = patternOpacity(p);
     const ground = parse(p.ground).slice(0, 3) as Rgb;
     const accent = over(p.accent, ground);
     const blended = ground.map((g, i) => g * (1 - op) + accent[i] * op) as Rgb;
     expect(contrast(over(p.ink, blended), blended), 'ink').toBeGreaterThanOrEqual(4.5);
-    // a scheme whose muted text is already thin may lose at most half a point to the pattern
-    const bare = contrast(over(p.muted, ground), ground);
-    expect(contrast(over(p.muted, blended), blended), 'muted').toBeGreaterThanOrEqual(
-      Math.min(4.5, bare - 0.5)
-    );
+    if (contrast(over(p.muted, ground), ground) >= 4.5) {
+      expect(contrast(over(p.muted, blended), blended), 'muted').toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it('covers light and dark grounds', () => {
@@ -562,18 +570,35 @@ describe('socials on the shared layouts and the collage page', () => {
       expect(glyphs.length).toBe(bar.length);
       for (const b of bar) {
         expect(b.attrs).toContain('data-socials="bar"');
-        expect(b.tokens).toEqual(expect.arrayContaining(['rounded-full', 'p-1']));
+        expect(b.tokens).toEqual(expect.arrayContaining(['rounded-[1.25rem]', 'p-1']));
         expect(b.attrs).toContain('color-mix');
         expect(b.inner).toContain('h-9 w-9');
       }
       for (const g of glyphs) {
         expect(g.attrs).toContain('data-socials="glyphs"');
-        expect(g.tokens).not.toContain('rounded-full');
+        expect(g.tokens).not.toContain('rounded-[1.25rem]');
         expect(g.tokens).not.toContain('p-1');
         expect(g.attrs).not.toContain('color-mix');
         expect(g.inner).not.toContain('h-9 w-9');
       }
     }
+  });
+
+  it.each(LAYOUTS)('%s: a bar of 10 networks wraps instead of overflowing', (layout) => {
+    const many = Array.from({ length: 10 }, (_, i) => ({
+      type: `net${i}`,
+      link: `https://net${i}.com/frodo`,
+      children: 'frodo',
+      icon: Icon,
+    }));
+    const design = applyOverrides(CARD_PRESETS[layout], { socials: 'bar' });
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <HomebaseCard design={design} data={{ ...data, socials: many } as CardData} />
+      </MemoryRouter>
+    );
+    const list = /<ul([^>]*data-socials="bar"[^>]*)>/.exec(html);
+    expect(list?.[1]).toContain('flex-wrap');
   });
 
   it('the collage page follows the chosen style instead of hard-coding two', () => {

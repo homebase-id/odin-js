@@ -487,7 +487,7 @@ const SocialButtons = ({ design, data, className }: LayoutProps & { className: s
     <ul
       className={`flex ${
         bar
-          ? `${TONAL} items-center gap-1 rounded-full p-1`
+          ? `${TONAL} flex-wrap items-center gap-1 rounded-[1.25rem] p-1`
           : `flex-wrap ${variant === 'glyphs' ? 'gap-3' : 'gap-2'} ${className}`
       }`}
     >
