@@ -38,6 +38,7 @@ import {
   useCanReact,
   useChannelLink,
   useCommentCount,
+  useCommentSummary,
   useEmojiSummary,
 } from '../../..';
 import { ArrowLeft, Bubble, Heart } from '../../ui/Icons';
@@ -313,12 +314,26 @@ export const ArticleReader = ({
           {reactionContext ? (
             <section
               id={RESPONSES_ID}
-              aria-label={t('Responses')}
-              className="mt-12 grid scroll-mt-20 grid-flow-row gap-2"
+              aria-labelledby={`${RESPONSES_ID}_title`}
+              className="mt-12 scroll-mt-20"
             >
-              <Suspense fallback={null}>
-                <CommentList context={reactionContext} canReact={canReact} login={login} />
-              </Suspense>
+              <ResponsesTitle
+                id={`${RESPONSES_ID}_title`}
+                context={reactionContext}
+                postFile={postFile}
+              />
+              {/* The composer, then the threads, 24px apart; a thread's replies keep their 8px */}
+              <div className="mt-5 flex flex-col gap-6">
+                <Suspense fallback={null}>
+                  <CommentList
+                    context={reactionContext}
+                    canReact={canReact}
+                    login={login}
+                    composerFirst={true}
+                    threadClassName="grid grid-flow-row gap-2"
+                  />
+                </Suspense>
+              </div>
             </section>
           ) : null}
         </article>
@@ -455,6 +470,35 @@ const ArticleCounts = ({
   );
 };
 
+/** "Responses (n)", with the count the 💬 by the byline shows. */
+const ResponsesTitle = ({
+  id,
+  context,
+  postFile,
+}: {
+  id: string;
+  context: ReactionContext;
+  postFile: HomebaseFile<PostContent>;
+}) => {
+  const preview = useMemo(
+    () => parseReactionPreview(postFile.fileMetadata.reactionPreview),
+    [postFile.fileMetadata.reactionPreview]
+  );
+  const { data: count } = useCommentSummary({
+    authorOdinId: context.odinId,
+    channelId: context.channelId,
+    postGlobalTransitId: context.target.globalTransitId,
+    reactionPreview: preview.comments,
+  }).fetch;
+
+  return (
+    <h2 id={id} className="text-[22px] font-[650] leading-[1.35]">
+      {t('Responses')}
+      {count ? <span className="font-normal text-foreground/60"> ({count})</span> : null}
+    </h2>
+  );
+};
+
 /** A heading of the rendered body, as the rail lists it. */
 type RailHeading = { id: string; level: number; text: string };
 
@@ -577,6 +621,8 @@ const useArrivalHash = (body: RefObject<HTMLElement | null>) => {
 
     // Fires once when observing starts, then each time the body changes height
     const resize = new ResizeObserver(() => document.getElementById(id)?.scrollIntoView());
+    // The responses come in after the body; only once they do may there be room to reach them
+    const responses = id === RESPONSES_ID ? document.getElementById(id) : null;
     const events = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
     const stop = () => {
       resize.disconnect();
@@ -586,6 +632,7 @@ const useArrivalHash = (body: RefObject<HTMLElement | null>) => {
     const timer = setTimeout(stop, 10_000);
     events.forEach((type) => window.addEventListener(type, stop, { passive: true }));
     resize.observe(element);
+    if (responses) resize.observe(responses);
     return stop;
   }, [body]);
 };

@@ -400,16 +400,24 @@ export const CommentList = ({
   context,
   canReact,
   login,
+  composerFirst,
+  threadClassName,
 }: {
   context: ReactionContext;
   canReact?: CanReactInfo;
   login?: () => void;
+  /** The composer above the comments instead of below them */
+  composerFirst?: boolean;
+  /** Each comment and its replies in a box of their own, with this class */
+  threadClassName?: string;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
+  const composer = <CommentComposer context={context} canReact={canReact} login={login} />;
 
   return (
     <>
+      {composerFirst ? composer : null}
       {hasNextPage ? (
         <a
           className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
@@ -418,16 +426,25 @@ export const CommentList = ({
           {t('View older')}
         </a>
       ) : null}
-      {flattenedComments?.map((comment, index) => (
-        <Comment
-          context={context}
-          canReact={canReact}
-          commentData={comment}
-          key={comment.fileId ?? index}
-          isThread={false}
-        />
-      ))}
-      <CommentComposer context={context} canReact={canReact} login={login} />
+      {flattenedComments?.map((comment, index) => {
+        const thread = (
+          <Comment
+            context={context}
+            canReact={canReact}
+            commentData={comment}
+            key={comment.fileId ?? index}
+            isThread={false}
+          />
+        );
+        return threadClassName ? (
+          <div className={threadClassName} key={comment.fileId ?? index}>
+            {thread}
+          </div>
+        ) : (
+          thread
+        );
+      })}
+      {composerFirst ? null : composer}
     </>
   );
 };
