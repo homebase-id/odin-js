@@ -1,5 +1,5 @@
 /*
-  The Sidenav's colours, the same in every app: the chat app's soft Homebase blue rail
+  The Sidenav's colours, the same in every app: the chat app's grey Material 3 NavigationRail
   (chat-kmp homebase-common/.../ui/theme/Color.kt), as RGB channels; tokens.css (Tailwind 4) and
   tailwind-legacy-colors.cjs (Tailwind 3) turn them into colour utilities. Import after the app's
   theme file.
@@ -7,23 +7,23 @@
 
 /* The var() references resolve on <html>, so they rely on .dark being set there */
 :root {
-  --color-nav: 210 223 251; /* primaryContainer */
-  --color-nav-contrast: 5 24 69; /* onPrimaryContainer */
-  --color-nav-active: 251 252 255; /* surfaceContainerLowest (Surface) */
-  --color-nav-active-contrast: var(--color-nav-contrast);
+  --color-nav: 232 236 244; /* surfaceContainerHigh */
+  --color-nav-contrast: 84 88 99; /* onSurfaceVariant */
+  --color-nav-active: 210 223 251; /* primaryContainer */
+  --color-nav-active-contrast: 5 24 69; /* onPrimaryContainer */
   --color-nav-hover: var(--color-nav-contrast) / 0.08; /* M3 hover state layer */
-  --color-nav-more: 251 252 255; /* surfaceContainerLowest (Surface) */
+  --color-nav-more: 251 252 255; /* surfaceContainerLowest */
   --color-nav-outline: 207 212 222; /* outlineVariant */
   --color-nav-shadow: 0 0 0 / 0.1;
   --color-nav-ring: var(--color-nav);
 }
 
 .dark {
-  --color-nav: 70 75 92; /* primaryContainer */
-  --color-nav-contrast: 219 225 252; /* onPrimaryContainer */
-  --color-nav-active: 116 142 189; /* HomebaseBrand.BlueOnDark */
-  --color-nav-active-contrast: 30 36 56; /* onPrimary */
-  --color-nav-more: 44 47 55; /* surfaceContainerHigh (Surface3) */
+  --color-nav: 44 47 55; /* surfaceContainerHigh */
+  --color-nav-contrast: 190 191 197; /* onSurfaceVariant */
+  --color-nav-active: 70 75 92; /* primaryContainer */
+  --color-nav-active-contrast: 219 225 252; /* onPrimaryContainer */
+  --color-nav-more: 39 42 49; /* surfaceContainer, M3's menu container */
   --color-nav-outline: 62 65 74; /* outlineVariant */
   --color-nav-shadow: 0 0 0 / 0.3;
 }
