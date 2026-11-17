@@ -276,7 +276,7 @@ export const ArticleReader = ({
 
         {rail ? (
           <aside className="hidden xl:col-start-3 xl:row-start-1 xl:block">
-            <OnThisPage headings={rail} proseRef={proseRef} />
+            <OnThisPage headings={rail} />
           </aside>
         ) : null}
       </div>
@@ -374,14 +374,8 @@ const ArticleCounts = ({
 };
 
 /** The sticky "On this page" rail, with the heading being read in the foreground. */
-const OnThisPage = ({
-  headings,
-  proseRef,
-}: {
-  headings: ArticleHeading[];
-  proseRef: RefObject<HTMLElement | null>;
-}) => {
-  const active = useActiveHeading(headings, proseRef);
+const OnThisPage = ({ headings }: { headings: ArticleHeading[] }) => {
+  const active = useActiveHeading(headings);
   const topLevel = Math.min(...headings.map((heading) => heading.level));
 
   return (
@@ -392,10 +386,7 @@ const OnThisPage = ({
       <p className="mb-3 font-medium text-foreground/50">{t('On this page')}</p>
       <ol className="flex flex-col gap-2">
         {headings.map((heading) => (
-          <li
-            key={heading.id}
-            style={{ paddingLeft: `${(heading.level - topLevel) * 0.75}rem` }}
-          >
+          <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 0.75}rem` }}>
             <a
               href={`#${heading.id}`}
               aria-current={heading.id === active ? 'location' : undefined}
@@ -438,51 +429,32 @@ const useArticleHeadings = (article: Pick<Article, 'body' | 'bodyDoc'>) => {
   return headings;
 };
 
-/** The heading being read: the topmost one in a band below the bar, else the one scrolled past. */
-const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLElement | null>) => {
+/** The heading being read: the last one scrolled above a line just below the bar. */
+const useActiveHeading = (headings: ArticleHeading[]) => {
   const [active, setActive] = useState<string>();
 
   useEffect(() => {
-    const root = container.current;
-    if (!root) return;
-    const ids = headings.map((heading) => heading.id);
-    const inBand = new Set<string>();
-
-    const intersection = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const id = entry.target.id;
-          if (entry.isIntersecting) {
-            inBand.add(id);
-          } else {
-            inBand.delete(id);
-            // Scrolled back above this heading: the section before it is the one being read
-            if (entry.boundingClientRect.top > (entry.rootBounds?.bottom ?? 0))
-              setActive((current) => (current === id ? ids[ids.indexOf(id) - 1] : current));
-          }
-        }
-        const topmost = ids.find((id) => inBand.has(id));
-        if (topmost) setActive(topmost);
-      },
-      // Below the 56px bar, down to 40% of the window
-      { rootMargin: '-56px 0px -60% 0px' }
-    );
-
-    // The body renders once the viewer's chunk is in, all of it at once: observe the headings it
-    // has as soon as there are any
-    const observe = () => {
-      const elements = ids.flatMap((id) => document.getElementById(id) ?? []);
-      elements.forEach((element) => intersection.observe(element));
-      return elements.length > 0;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      let current: string | undefined;
+      for (const { id } of headings) {
+        const top = document.getElementById(id)?.getBoundingClientRect().top;
+        // ponytail: one layout read per heading per frame; fine for articles' tens of headings
+        if (top !== undefined && top <= 96) current = id;
+      }
+      setActive(current);
     };
-    const mutations = new MutationObserver(() => observe() && mutations.disconnect());
-    if (!observe()) mutations.observe(root, { childList: true, subtree: true });
-
+    const onScroll = () => (frame ||= requestAnimationFrame(update));
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      intersection.disconnect();
-      mutations.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
-  }, [headings, container]);
+  }, [headings]);
 
   return active;
 };
