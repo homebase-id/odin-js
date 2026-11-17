@@ -197,7 +197,7 @@ export const CardBackground = ({ design }: { design: CardDesign }) => {
       aria-hidden
       viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="xMidYMid slice"
-      className="pointer-events-none absolute inset-0 -z-10 h-full w-full text-[color:var(--card-accent)] opacity-[0.14]"
+      className="pointer-events-none absolute inset-0 -z-10 h-full w-full text-[color:var(--card-accent)] opacity-[0.06]"
     >
       {shapes}
     </svg>

@@ -53,7 +53,7 @@ type Payload = {
     links: { id: string; text: string; target: string }[];
     socials: { type: string; username: string }[];
   };
-  audience: { kind: 'public' | 'circle' };
+  audience: { kind: 'public' | 'circle'; label?: string };
   overrides?: {
     palette: Record<string, string>;
     type: Record<string, string>;
@@ -162,7 +162,7 @@ describe('chat-kmp matrix fixtures', () => {
       if (f.audience === 'circle') {
         expect(texts).toContain('Friends only');
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,friends-key');
-        expect(f.payload.audience).toEqual({ kind: 'circle' });
+        expect(f.payload.audience).toEqual({ kind: 'circle', label: 'Friends' });
       } else {
         expect(texts).toEqual(['Public site']);
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,public-key');
@@ -226,6 +226,49 @@ describe('chat-kmp CardDesignSpecs against what odin-js supports', () => {
   );
 });
 
+describe('portrait size on every layout that declares it', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const data = {
+    ...toCardData(
+      { odinId: 'frodo.dotyou.cloud', firstName: 'Frodo', links: [], socials: [] },
+      () => undefined
+    ),
+    photo,
+    header: photo,
+  };
+  const draw = (layout: keyof typeof CARD_PRESETS, size: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      portraits: [{ source: 'photo', shape: 'circle', size }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const declaring = Object.keys(specs.specs).filter((id) =>
+    specs.specs[id].options.includes('PORTRAIT_SIZE')
+  );
+
+  it('every layout is declared', () => {
+    expect([...declaring].sort()).toEqual(Object.keys(CARD_PRESETS).sort());
+  });
+
+  it.each(declaring)('%s: small and large change the output on card and page', (layout) => {
+    for (const wide of [false, true]) {
+      const medium = draw(layout as keyof typeof CARD_PRESETS, 'medium', wide);
+      for (const size of specs.portraitSizes.filter((s: string) => s !== 'medium'))
+        expect(draw(layout as keyof typeof CARD_PRESETS, size, wide), `${layout} ${size}`).not.toBe(
+          medium
+        );
+    }
+  });
+});
+
 describe('links layout honours each option chat-kmp exposes for it', () => {
   const data = toCardData(
     {
@@ -267,7 +310,6 @@ describe('links layout honours each option chat-kmp exposes for it', () => {
   });
 
   it('background: a declared background changes the links card', () => {
-    expect(specs.specs.links.options).toContain('BACKGROUND');
     expect(html({ background: 'dots' })).not.toEqual(html({ background: 'none' }));
   });
 

@@ -125,23 +125,19 @@ describe('stored set chat-kmp writes, read by the card picker', () => {
     expect(storedSet[0].data.label).toBeUndefined();
   });
 
-  it('writes no circle name into a circle card (chat-kmp shows none to members)', () => {
-    for (const entry of storedSet) expect(entry.data.label).toBeUndefined();
-  });
-
-  it('picks the lowest-priority circle card with design and overrides', () => {
+  it('picks the lowest-priority circle card with design, overrides and label', () => {
     const picked = pickCard(storedSet.map(attribute));
     expect(picked).toEqual({
       kind: 'circle',
       design: 'dossier',
-      label: undefined,
+      label: 'Friends',
       overrides: undefined,
       priority: 2,
     });
   });
 
   it('does not depend on the order the server returns', () => {
-    expect(pickCard([...storedSet].reverse().map(attribute))?.design).toBe('dossier');
+    expect(pickCard([...storedSet].reverse().map(attribute))?.label).toBe('Friends');
   });
 
   it('falls back to the public card, with its overrides, when the viewer sees no circle card', () => {
@@ -151,11 +147,11 @@ describe('stored set chat-kmp writes, read by the card picker', () => {
     expect(picked?.overrides).toEqual(storedSet[0].data.overrides);
   });
 
-  it('still picks the circle card by priority when its ACL is hidden, though it is no longer told apart by a label', () => {
+  it('reads the label even when the circle ACL is hidden from the viewer', () => {
     const hidden = { ...attribute(storedSet[2]), serverMetadata: undefined };
     expect(pickCard([attribute(storedSet[0]), hidden])).toMatchObject({
-      design: 'dossier',
-      priority: 2,
+      kind: 'circle',
+      label: 'Friends',
     });
   });
 });
@@ -177,9 +173,9 @@ describe('render requests built by chat-kmp with overrides and audience', () => 
     expect(design.portraits[0]).toEqual(o.portraits[0]);
   });
 
-  it('carries an audience the page keeps (kind only, no circle name)', () => {
+  it('carries an audience the page keeps (kind and label only)', () => {
     expect(renderPublic.audience).toEqual({ kind: 'public' });
-    expect(renderCircle.audience).toEqual({ kind: 'circle' });
+    expect(renderCircle.audience).toEqual({ kind: 'circle', label: 'Friends' });
   });
 
   it('shares its overrides byte for byte with the stored card', () => {

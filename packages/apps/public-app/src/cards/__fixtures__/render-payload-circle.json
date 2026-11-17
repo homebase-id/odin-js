@@ -11,7 +11,8 @@
         "posts": []
     },
     "audience": {
-        "kind": "circle"
+        "kind": "circle",
+        "label": "Friends"
     },
     "overrides": {
         "palette": {

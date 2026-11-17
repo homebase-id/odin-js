@@ -6,6 +6,8 @@ import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { HomebaseCard } from './HomebaseCard';
 import { CardSocials } from './parts/Socials';
+import { CardBackground } from './parts/Background';
+import schemePalettesRaw from './__fixtures__/scheme-palettes.json?raw';
 import { CardPage } from './CardPage';
 import { snapshotFilter } from './snapshotFilter';
 import { resolveRequestDesign } from './resolveDesign';
@@ -13,6 +15,8 @@ import { toCardData } from './toCardData';
 import renderPayloadRaw from './__fixtures__/render-payload.json?raw';
 import renderPublicRaw from './__fixtures__/render-payload-public.json?raw';
 import renderCircleRaw from './__fixtures__/render-payload-circle.json?raw';
+
+type Scheme = { ground: string; ink: string; muted: string; accents: string[] };
 
 const Icon = () => null;
 
@@ -323,8 +327,7 @@ describe('portrait size', () => {
       </MemoryRouter>
     );
   };
-  // poster has no portrait slot, so the app never sends it a size
-  const LAYOUTS = ['board', 'collage', 'dossier', 'links'] as const;
+  const LAYOUTS = ['poster', 'board', 'collage', 'dossier', 'links'] as const;
 
   it.each(LAYOUTS)('%s: medium is the same as no size, small and large differ', (layout) => {
     for (const wide of [false, true]) {
@@ -340,6 +343,13 @@ describe('portrait size', () => {
 
   // The property that actually sets the portrait size on each layout; zoom does not scale percent widths
   const SIZE_PROPERTY = {
+    poster: {
+      card: { small: 'padding-top:36%', large: 'padding-top:56%' },
+      page: {
+        small: 'min-height:calc(clamp(480px,50vw,600px) * 0.8)',
+        large: 'min-height:calc(clamp(480px,50vw,600px) * 1.25)',
+      },
+    },
     board: {
       card: { small: 'zoom:0.8', large: 'zoom:1.25' },
       page: { small: 'zoom:0.8', large: 'zoom:1.25' },
@@ -447,17 +457,38 @@ describe('links socials', () => {
 });
 
 describe('background tint', () => {
-  const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-  const lum = (c: number[]) => {
+  type Rgb = [number, number, number];
+  const parse = (c: string): [number, number, number, number] => {
+    const hex = /^#([0-9a-f]{6})$/i.exec(c);
+    if (hex)
+      return [1, 3, 5].map((i) => parseInt(hex[1].slice(i - 1, i + 1), 16)).concat(1) as never;
+    const fn = /^rgba?\(([^)]+)\)$/.exec(c);
+    if (!fn) throw new Error(`unreadable colour ${c}`);
+    const [r, g, b, a = '1'] = fn[1].split(',').map((s) => s.trim());
+    return [+r, +g, +b, +a];
+  };
+  const over = (c: string, base: Rgb): Rgb => {
+    const [r, g, b, a] = parse(c);
+    return [r, g, b].map((v, i) => v * a + base[i] * (1 - a)) as Rgb;
+  };
+  const lum = (c: Rgb) => {
     const [r, g, b] = c.map((v) => {
       const s = v / 255;
       return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
     });
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
-  const contrast = (a: number[], b: number[]) => {
+  const contrast = (a: Rgb, b: Rgb) => {
     const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
     return (hi + 0.05) / (lo + 0.05);
+  };
+  const patternOpacity = () => {
+    const svg = renderToStaticMarkup(
+      <CardBackground design={applyOverrides(CARD_PRESETS.links, { background: 'dots' })} />
+    );
+    const found = /opacity-\[([0-9.]+)\]/.exec(svg);
+    if (!found) throw new Error('pattern opacity not in the rendered markup');
+    return Number(found[1]);
   };
 
   it('paints in the accent, not the ink', () => {
@@ -466,11 +497,39 @@ describe('background tint', () => {
     expect(html).not.toContain('text-[color:var(--card-ink)] opacity');
   });
 
-  it.each(Object.keys(CARD_PRESETS))('%s ink stays AA over a full-strength pattern', (layout) => {
-    const { ground, ink, accent } = CARD_PRESETS[layout as keyof typeof CARD_PRESETS].palette;
-    if (![ground, ink, accent].every((c) => /^#[0-9a-f]{6}$/i.test(c))) return;
-    const blended = rgb(ground).map((g, i) => g * 0.86 + rgb(accent)[i] * 0.14);
-    expect(contrast(rgb(ink), blended)).toBeGreaterThanOrEqual(4.5);
+  it('keeps the pattern subtle', () => {
+    expect(patternOpacity()).toBeLessThanOrEqual(0.2);
+  });
+
+  const schemePalettes = JSON.parse(schemePalettesRaw);
+  const palettes = Object.entries(schemePalettes as Record<string, Record<string, Scheme>>).flatMap(
+    ([layout, schemes]) =>
+      Object.entries(schemes).flatMap(([id, s]) => [
+        ...s.accents.map((accent) => ({ name: `${layout}/${id}/${accent}`, ...s, accent })),
+      ])
+  );
+  const presets = Object.entries(CARD_PRESETS).map(([layout, d]) => ({
+    name: `${layout}/preset`,
+    ...d.palette,
+  }));
+
+  it.each([...presets, ...palettes])('$name: ink and muted stay AA over the pattern', (p) => {
+    const op = patternOpacity();
+    const ground = parse(p.ground).slice(0, 3) as Rgb;
+    const accent = over(p.accent, ground);
+    const blended = ground.map((g, i) => g * (1 - op) + accent[i] * op) as Rgb;
+    expect(contrast(over(p.ink, blended), blended), 'ink').toBeGreaterThanOrEqual(4.5);
+    // a scheme whose muted text is already thin may lose at most half a point to the pattern
+    const bare = contrast(over(p.muted, ground), ground);
+    expect(contrast(over(p.muted, blended), blended), 'muted').toBeGreaterThanOrEqual(
+      Math.min(4.5, bare - 0.5)
+    );
+  });
+
+  it('covers light and dark grounds', () => {
+    const lums = palettes.map((p) => lum(parse(p.ground).slice(0, 3) as Rgb));
+    expect(Math.min(...lums)).toBeLessThan(0.1);
+    expect(Math.max(...lums)).toBeGreaterThan(0.5);
   });
 });
 

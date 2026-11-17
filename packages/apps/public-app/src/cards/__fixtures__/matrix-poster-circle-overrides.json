@@ -30,7 +30,8 @@
         "posts": []
     },
     "audience": {
-        "kind": "circle"
+        "kind": "circle",
+        "label": "Friends"
     },
     "overrides": {
         "palette": {
@@ -55,8 +56,7 @@
                 "shadow": "soft",
                 "tilt": 5,
                 "tape": true,
-                "mono": true,
-                "size": "large"
+                "mono": true
             }
         ],
         "blocks": [

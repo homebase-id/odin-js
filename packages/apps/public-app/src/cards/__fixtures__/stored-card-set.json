@@ -53,7 +53,8 @@
         ],
         "priority": 5,
         "data": {
-            "design": "collage"
+            "design": "collage",
+            "label": "Family"
         }
     },
     {
@@ -63,7 +64,8 @@
         ],
         "priority": 2,
         "data": {
-            "design": "dossier"
+            "design": "dossier",
+            "label": "Friends"
         }
     }
 ]
