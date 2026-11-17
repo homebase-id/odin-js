@@ -11,6 +11,13 @@ module.exports = {
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
         button: 'rgb(99 101 241 / <alpha-value>)',
         'button-text': 'rgb(255 255 255 / <alpha-value>)',
+        // ActionButton's colours (common-app ColorConfig)
+        secondary: 'rgb(var(--color-background) / <alpha-value>)',
+        'secondary-contrast': 'rgb(var(--color-foreground) / <alpha-value>)',
+        destructive: '#ef4444',
+        'destructive-contrast': '#fff',
+        'error-container': 'var(--error-container)',
+        'on-error-container': 'var(--on-error-container)',
       },
       keyframes: {
         slowding: {

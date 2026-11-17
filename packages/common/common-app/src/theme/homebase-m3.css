@@ -1,0 +1,96 @@
+/*
+  Homebase's Material 3 colour scheme, as the chat app sets it
+  (chat-kmp homebase-common/.../ui/theme/Color.kt and Theme.kt).
+
+  Each colour is a set of RGB channels (`--color-primary: 44 88 195`), so a Tailwind opacity modifier
+  (bg-primary/20) still works. Import this after `@import 'tailwindcss'` in a Tailwind 4 app; the
+  `@theme inline reference` block turns the channels into colour utilities (bg-surface-variant,
+  text-on-primary-container, border-outline-variant...) without writing them to :root again.
+*/
+
+:root {
+  --color-page-background: 242 245 249; /* surfaceContainerLow */
+  --color-background: 251 252 255; /* surface */
+  --color-foreground: 27 27 29; /* onSurface */
+  --color-muted-foreground: 84 88 99; /* onSurfaceVariant */
+
+  --color-primary: 44 88 195;
+  --color-primary-contrast: 255 255 255; /* onPrimary */
+  --color-primary-container: 210 223 251;
+  --color-on-primary-container: 5 24 69;
+  --color-secondary: 220 229 249; /* secondaryContainer */
+  --color-secondary-contrast: 21 29 44; /* onSecondaryContainer */
+  --color-destructive: 186 27 27; /* error */
+  --color-destructive-contrast: 255 255 255; /* onError */
+  --color-error-container: 255 218 212;
+  --color-on-error-container: 65 0 2;
+
+  --color-surface-variant: 231 235 243;
+  --color-surface-container-lowest: 251 252 255;
+  --color-surface-container-low: 242 245 249;
+  --color-surface-container: 237 240 246;
+  --color-surface-container-high: 232 236 244;
+  --color-surface-container-highest: 230 234 243;
+  --color-outline: 128 131 137;
+  --color-outline-variant: 207 212 222;
+
+  --color-button: var(--color-primary);
+  --color-button-text: var(--color-primary-contrast);
+}
+
+.dark {
+  --color-page-background: 27 28 31; /* surface */
+  --color-background: 35 36 42; /* surfaceContainerLow */
+  --color-foreground: 226 225 229;
+  --color-muted-foreground: 190 191 197;
+
+  --color-primary: 182 197 250;
+  --color-primary-contrast: 30 36 56;
+  --color-primary-container: 70 75 92;
+  --color-on-primary-container: 219 225 252;
+  --color-secondary: 65 70 89;
+  --color-secondary-contrast: 220 225 249;
+  --color-destructive: 255 180 169;
+  --color-destructive-contrast: 105 0 5;
+  --color-error-container: 147 0 6;
+  --color-on-error-container: 255 218 214;
+
+  --color-surface-variant: 48 49 51;
+  --color-surface-container-lowest: 27 28 31;
+  --color-surface-container-low: 35 36 42;
+  --color-surface-container: 39 42 49;
+  --color-surface-container-high: 44 47 55;
+  --color-surface-container-highest: 46 48 57;
+  --color-outline: 113 116 124;
+  --color-outline-variant: 62 65 74;
+}
+
+@theme inline reference {
+  --color-page-background: rgb(var(--color-page-background));
+  --color-background: rgb(var(--color-background));
+  --color-foreground: rgb(var(--color-foreground));
+  --color-muted-foreground: rgb(var(--color-muted-foreground));
+
+  --color-primary: rgb(var(--color-primary));
+  --color-primary-contrast: rgb(var(--color-primary-contrast));
+  --color-primary-container: rgb(var(--color-primary-container));
+  --color-on-primary-container: rgb(var(--color-on-primary-container));
+  --color-secondary: rgb(var(--color-secondary));
+  --color-secondary-contrast: rgb(var(--color-secondary-contrast));
+  --color-destructive: rgb(var(--color-destructive));
+  --color-destructive-contrast: rgb(var(--color-destructive-contrast));
+  --color-error-container: rgb(var(--color-error-container));
+  --color-on-error-container: rgb(var(--color-on-error-container));
+
+  --color-surface-variant: rgb(var(--color-surface-variant));
+  --color-surface-container-lowest: rgb(var(--color-surface-container-lowest));
+  --color-surface-container-low: rgb(var(--color-surface-container-low));
+  --color-surface-container: rgb(var(--color-surface-container));
+  --color-surface-container-high: rgb(var(--color-surface-container-high));
+  --color-surface-container-highest: rgb(var(--color-surface-container-highest));
+  --color-outline: rgb(var(--color-outline));
+  --color-outline-variant: rgb(var(--color-outline-variant));
+
+  --color-button: rgb(var(--color-button));
+  --color-button-text: rgb(var(--color-button-text));
+}

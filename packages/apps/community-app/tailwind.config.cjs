@@ -12,8 +12,13 @@ module.exports = {
       colors: {
         primary: '#6366f1',
         'primary-contrast': '#fff',
-        secondary: '#f1f5f9',
-        'secondary-contrast': '#000',
+        // ActionButton's colours (common-app ColorConfig)
+        secondary: 'rgb(var(--color-background) / <alpha-value>)',
+        'secondary-contrast': 'rgb(var(--color-foreground) / <alpha-value>)',
+        destructive: '#ef4444',
+        'destructive-contrast': '#fff',
+        'error-container': 'var(--error-container)',
+        'on-error-container': 'var(--on-error-container)',
 
         'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
         background: 'rgb(var(--color-background) / <alpha-value>)',

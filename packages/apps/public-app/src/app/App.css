@@ -10,6 +10,7 @@
 
 @theme {
   --color-destructive: #dc2626;
+  --color-destructive-contrast: #fff;
 
   --animate-slowding: slowding 1.2s ease-in-out;
   @keyframes slowding {
@@ -35,6 +36,22 @@
 
   --color-primary: rgb(var(--color-button));
   --color-primary-contrast: rgb(var(--color-button-text));
+
+  /* ActionButton's secondary and remove colours */
+  --color-secondary: rgb(var(--color-background));
+  --color-secondary-contrast: rgb(var(--color-foreground));
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+}
+
+/* ActionButton's remove colours (common-app ColorConfig), as they were before it moved to tokens */
+:root {
+  --error-container: #fecaca;
+  --on-error-container: currentColor;
+}
+.dark {
+  --error-container: #b91c1c;
+  --on-error-container: #fff;
 }
 
 .dark select option {

@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import '../../../../common/common-app/src/tailwind-v4-compat.css';
+@import '../../../../common/common-app/src/theme/homebase-m3.css';
 
 @source '../../../../libs/ui-lib/src';
 @source '../../../../common/common-app/src';
@@ -12,9 +13,6 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary: #6366f1;
-  --color-primary-contrast: #fff;
-
   --animate-slowding: slowding 1.2s ease-in-out;
   @keyframes slowding {
     0%,
@@ -25,16 +23,6 @@
       opacity: 1;
     }
   }
-}
-
-/* These colors read the RGB channels the Layout sets at runtime (`--color-button: 99 101 241`).
-   The theme keys share those names, so they are inlined and kept out of :root (`reference`). */
-@theme inline reference {
-  --color-page-background: rgb(var(--color-page-background));
-  --color-background: rgb(var(--color-background));
-  --color-foreground: rgb(var(--color-foreground));
-  --color-button: rgb(var(--color-button));
-  --color-button-text: rgb(var(--color-button-text));
 }
 
 .dark select option {
@@ -53,10 +41,21 @@
   color-scheme: auto;
 }
 
+html.dark {
+  background-color: rgb(var(--color-page-background));
+}
+
+/* Borders default to the scheme's outline-variant, in light and dark */
 @layer base {
-  .dark *,
-  .dark ::before,
-  .dark ::after {
-    border-color: color-mix(in oklab, var(--color-gray-600) var(--tw-border-alpha, 100%), transparent);
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: color-mix(
+      in oklab,
+      rgb(var(--color-outline-variant)) var(--tw-border-alpha, 100%),
+      transparent
+    );
   }
 }

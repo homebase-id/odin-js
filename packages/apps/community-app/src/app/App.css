@@ -14,6 +14,16 @@
   color-scheme: dark;
 }
 
+/* ActionButton's remove colours (common-app ColorConfig), as they were before it moved to tokens */
+:root {
+  --error-container: #fecaca;
+  --on-error-container: currentColor;
+}
+.dark {
+  --error-container: #b91c1c;
+  --on-error-container: #fff;
+}
+
 .dark iframe {
   color-scheme: auto;
 }
