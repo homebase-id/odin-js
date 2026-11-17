@@ -19,7 +19,12 @@ const GlyphList = ({
   className?: string;
 }) => (
   <ul
-    className={`flex flex-wrap items-center ${variant === 'bar' ? 'justify-center gap-5' : 'gap-3'} ${className ?? ''}`}
+    data-socials={variant}
+    className={`flex items-center ${
+      variant === 'bar'
+        ? 'w-fit gap-1 rounded-full bg-[color:color-mix(in_srgb,var(--card-accent)_14%,transparent)] p-1 text-[color:var(--card-accent)]'
+        : 'flex-wrap gap-3'
+    } ${className ?? ''}`}
   >
     {socials.map((s) => {
       const Icon = s.icon;
@@ -30,9 +35,13 @@ const GlyphList = ({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={s.type || hostName(s.link) || s.link}
-            className={`-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`}
+            className={
+              variant === 'bar'
+                ? `flex h-9 w-9 items-center justify-center rounded-full hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)] ${CARD_FOCUS}`
+                : `-m-1.5 block p-1.5 opacity-80 hover:opacity-100 ${CARD_FOCUS}`
+            }
           >
-            <Icon className={variant === 'bar' ? 'h-6 w-6' : 'h-4 w-4'} />
+            <Icon className={variant === 'bar' ? 'h-5 w-5' : 'h-4 w-4'} />
           </a>
         </li>
       );

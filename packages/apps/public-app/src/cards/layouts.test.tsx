@@ -302,7 +302,7 @@ describe('portrait shape', () => {
   it('rounded keeps a corner radius proportional to the box, not the circle radius', () => {
     const html = draw('board', [{ shape: 'rounded' }]);
     expect(html).toContain('rounded-[22%]');
-    expect(html).not.toContain('rounded-full');
+    expect(html).not.toMatch(/overflow-hidden h-full w-full rounded-full/);
   });
 });
 
@@ -337,10 +337,69 @@ describe('portrait size', () => {
     }
   });
 
-  it('scales the portrait box with zoom, so the name is pushed down rather than overlapped', () => {
-    expect(draw('links', 'small', false)).toContain('zoom:0.8');
-    expect(draw('links', 'large', false)).toContain('zoom:1.25');
-    expect(draw('links', 'medium', false)).not.toContain('zoom');
+  // The property that actually sets the portrait size on each layout; zoom does not scale percent widths
+  const SIZE_PROPERTY = {
+    poster: {
+      card: { small: 'padding-top:36%', large: 'padding-top:56%' },
+      page: {
+        small: 'min-height:calc(clamp(480px,50vw,600px) * 0.8)',
+        large: 'min-height:calc(clamp(480px,50vw,600px) * 1.25)',
+      },
+    },
+    board: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    dossier: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    links: {
+      card: { small: 'zoom:0.8', large: 'zoom:1.25' },
+      page: { small: 'zoom:0.8', large: 'zoom:1.25' },
+    },
+    collage: {
+      card: { small: 'width:39.2%', large: 'width:61.25%' },
+      page: { small: 'width:64%', large: 'width:100%' },
+    },
+  } as const;
+
+  it.each(LAYOUTS)(
+    '%s: small and large set the layout size property, medium sets neither',
+    (layout) => {
+      for (const wide of [false, true]) {
+        const expected = SIZE_PROPERTY[layout][wide ? 'page' : 'card'];
+        expect(draw(layout, 'small', wide)).toContain(expected.small);
+        expect(draw(layout, 'large', wide)).toContain(expected.large);
+        const medium = draw(layout, 'medium', wide);
+        expect(medium).not.toContain(expected.small);
+        expect(medium).not.toContain(expected.large);
+      }
+    }
+  );
+
+  it('collage scales the cut-out width too, and keeps it beside the print', () => {
+    const two = (size: string, wide: boolean) => {
+      const design = applyOverrides(CARD_PRESETS.collage, {
+        portraits: [
+          { source: 'photo', shape: 'square', size },
+          { source: 'photo', shape: 'circle', size },
+        ],
+      });
+      return renderToStaticMarkup(
+        <MemoryRouter>
+          {wide ? (
+            <CardPage design={design} data={withPhoto} />
+          ) : (
+            <HomebaseCard design={design} data={withPhoto} />
+          )}
+        </MemoryRouter>
+      );
+    };
+    expect(two('small', false)).toContain('width:30.4%');
+    expect(two('large', false)).toContain('width:47.5%');
+    expect(two('large', true)).toContain('margin-left:23.75%');
+    expect(two('medium', true)).toContain('margin-left:39%');
   });
 });
 
@@ -355,17 +414,25 @@ describe('links socials', () => {
       </MemoryRouter>
     );
 
-  it('glyphs and bar draw different cards', () => {
-    const bar = links('bar');
-    const glyphs = links('glyphs');
-    const pills = (html: string) => html.match(/<ul class="[^"]*p-1[^"]*rounded-full[^"]*"/g) ?? [];
-    const tonalButtons = (html: string) =>
-      html.match(/<a [^>]*class="[^"]*color-mix[^"]*h-10 w-10[^"]*"/g) ?? [];
-    expect(bar.match(/<ul/g)).toHaveLength(1);
-    expect(pills(bar)).toHaveLength(1);
-    expect(tonalButtons(bar)).toHaveLength(0);
-    expect(pills(glyphs)).toHaveLength(0);
-    expect(tonalButtons(glyphs)).toHaveLength(data.socials.length);
+  const lists = (html: string) =>
+    [...html.matchAll(/<ul([^>]*)>(.*?)<\/ul>/g)].map((m) => ({ attrs: m[1], inner: m[2] }));
+  const tokens = (attrs: string) => (attrs.match(/class="([^"]*)"/)?.[1] ?? '').split(' ');
+
+  it('bar is one tonal pill around every network, glyphs is one tonal button each', () => {
+    const bar = lists(links('bar'));
+    const glyphs = lists(links('glyphs'));
+    expect(bar).toHaveLength(1);
+    expect(tokens(bar[0].attrs)).toEqual(expect.arrayContaining(['rounded-full', 'p-1']));
+    expect(bar[0].attrs).toContain('color-mix');
+    for (const s of data.socials) expect(bar[0].inner).toContain(`href="${s.link}"`);
+    expect(bar[0].inner).not.toContain('h-10 w-10');
+
+    expect(glyphs).toHaveLength(1);
+    expect(tokens(glyphs[0].attrs)).not.toContain('p-1');
+    expect(glyphs[0].attrs).not.toContain('color-mix');
+    const buttons =
+      glyphs[0].inner.match(/<a [^>]*class="[^"]*color-mix[^"]*h-10 w-10[^"]*"/g) ?? [];
+    expect(buttons).toHaveLength(data.socials.length);
   });
 
   it.each([1, 2, 6])('wordmark draws one named tile per network (%i)', (count) => {
@@ -410,5 +477,74 @@ describe('background tint', () => {
     if (![ground, ink, accent].every((c) => /^#[0-9a-f]{6}$/i.test(c))) return;
     const blended = rgb(ground).map((g, i) => g * 0.86 + rgb(accent)[i] * 0.14);
     expect(contrast(rgb(ink), blended)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('socials on the shared layouts and the collage page', () => {
+  const draw = (layout: keyof typeof CARD_PRESETS, socials: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], { socials });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const LAYOUTS = ['poster', 'board', 'collage', 'dossier'] as const;
+
+  it.each(LAYOUTS)('%s: bar is a connected pill and glyphs are not, on card and page', (layout) => {
+    for (const wide of [false, true]) {
+      const bar = draw(layout, 'bar', wide);
+      const glyphs = draw(layout, 'glyphs', wide);
+      expect(bar).toContain('data-socials="bar"');
+      expect(glyphs).toContain('data-socials="glyphs"');
+      expect(glyphs).not.toContain('data-socials="bar"');
+    }
+  });
+
+  it('the collage page follows the chosen style instead of hard-coding two', () => {
+    const outputs = (['glyphs', 'bar', 'wordmark', 'handles'] as const).map((s) =>
+      draw('collage', s, true)
+    );
+    expect(new Set(outputs).size).toBe(4);
+    expect(outputs[1]).toContain('data-socials="bar"');
+    expect(outputs[2]).toContain('capitalize');
+    expect(outputs[0]).not.toContain('capitalize');
+  });
+});
+
+describe('background keeps the design colour', () => {
+  const draw = (layout: keyof typeof CARD_PRESETS, overrides: object, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], overrides);
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+
+  it.each(['poster', 'board', 'collage', 'dossier', 'links'] as const)(
+    '%s: none renders the same as no override, card and page',
+    (layout) => {
+      for (const wide of [false, true]) {
+        const plain = draw(layout, {}, wide);
+        expect(draw(layout, { background: 'none' }, wide)).toBe(plain);
+        expect(draw(layout, { background: 'default' }, wide)).toBe(plain);
+      }
+    }
+  );
+
+  it('a pattern layers over the links wash and the ground art', () => {
+    const wash = 'radial-gradient(closest-side,color-mix(in_srgb,var(--card-accent)_17%';
+    expect(draw('links', { background: 'dots' }, false)).toContain(wash);
+    expect(draw('links', { background: 'dots' }, true)).toContain(wash);
+    expect(draw('board', { background: 'dots' }, false)).toContain('<circle cx="-20" cy="150"');
   });
 });

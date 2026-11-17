@@ -567,7 +567,7 @@ export const LinksIdentity = ({
     : 'items-center text-center';
   return (
     <div className={`relative flex w-full flex-col ${align}`}>
-      {design.background ? null : <div aria-hidden className={WASH} />}
+      <div aria-hidden className={WASH} />
       {portrait && image ? (
         <CardPortrait
           portrait={portrait}
