@@ -5,7 +5,7 @@ import {
   getChannelDrive,
 } from '@homebase-id/js-lib/public';
 import { ReactNode, useMemo, useState } from 'react';
-import { ellipsisAtMaxChar, markdownToRichText, t } from '../../../helpers';
+import { ellipsisAtMaxChar, spilledCaptionRichText, t } from '../../../helpers';
 import { ArticleBody, RichTextRenderer, captionBlocksClassName } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
 import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
@@ -102,8 +102,9 @@ export const PostBody = ({
   }, [effectivePost, hasFullTextPayload]);
   const captionAsRichText = useMemo(
     () =>
-      effectivePost.captionAsRichText ??
-      (hasFullTextPayload ? markdownToRichText(effectivePost.caption) : undefined),
+      hasFullTextPayload
+        ? spilledCaptionRichText(effectivePost.caption, effectivePost.captionAsRichText)
+        : effectivePost.captionAsRichText,
     [effectivePost, hasFullTextPayload]
   );
   return (
