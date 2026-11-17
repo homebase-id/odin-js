@@ -39,13 +39,13 @@ import {ApiType} from "@homebase-id/js-lib/core";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
-const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-nav-active/50`;
-const navItemActiveClassname = `bg-nav-active text-nav-active-foreground`;
+const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-nav-hover`;
+const navItemActiveClassname = `bg-nav-active text-nav-active-contrast`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
-const sidebarBg = 'bg-nav text-nav-foreground';
-const moreBg = 'bg-nav-more text-nav-foreground';
+const sidebarBg = 'bg-nav text-nav-contrast';
+const moreBg = 'bg-nav-more text-nav-contrast';
 
 export const Sidenav = ({
                           disablePinning,
@@ -226,7 +226,7 @@ const MoreItems = ({
       </a>
 
       <div
-        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md ${moreBg} ${
+        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md shadow-nav-shadow ${moreBg} ${
           isOpen ? '' : 'hidden'
         }`}
         onClick={() => setIsOpen(false)}
@@ -288,7 +288,7 @@ const NavItem = ({
       end={end}
     >
       {Icon ? <Icon className={iconClassName}/> : null}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-destructive"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </NavLink>
   );
@@ -310,7 +310,7 @@ const ExternalNavItem = ({
   return (
     <a className={`${navItemClassName} relative`} href={href}>
       {Icon ? <Icon className={iconClassName}/> : null}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-destructive"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </a>
   );
@@ -429,7 +429,7 @@ const SecurityMenuItem = () => {
     <div className="relative">
       <NavItem icon={Shield} label={'Security'} to={`${OWNER_ROOT}/security`}/>
       {needsAttention && (
-        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"/>
+        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-nav-ring"/>
       )}
     </div>
   );

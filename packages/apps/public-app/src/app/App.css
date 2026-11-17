@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import '../../../../common/common-app/src/tailwind-v4-compat.css';
+@import '../../../../common/common-app/src/theme/tokens.css';
+@import '../../../../common/common-app/src/theme/legacy-indigo.css';
 
 @source '../../../../libs/ui-lib/src';
 @source '../../../../common/common-app/src';
@@ -9,9 +11,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-destructive: #dc2626;
-  --color-destructive-contrast: #fff;
-
   --animate-slowding: slowding 1.2s ease-in-out;
   @keyframes slowding {
     0%,
@@ -24,58 +23,16 @@
   }
 }
 
-/* These colors read the RGB channels the Layout sets at runtime (`--color-button: 99 102 241`).
-   The theme keys share those names, so they are inlined and kept out of :root (`reference`). */
+/* From the Layout's channels (the site's theme colours), resolved where they are used, as the
+   article page redefines background and foreground */
 @theme inline reference {
-  --color-page-background: rgb(var(--color-page-background));
-  --color-background: rgb(var(--color-background));
-  --color-foreground: rgb(var(--color-foreground));
   --color-muted-foreground: rgb(var(--color-foreground) / 0.6);
-  --color-button: rgb(var(--color-button));
-  --color-button-text: rgb(var(--color-button-text));
-
-  --color-primary: rgb(var(--color-button));
-  --color-primary-contrast: rgb(var(--color-button-text));
-
-  /* ActionButton's secondary and remove colours */
   --color-secondary: rgb(var(--color-background));
   --color-secondary-contrast: rgb(var(--color-foreground));
-  --color-error-container: var(--error-container);
-  --color-on-error-container: var(--on-error-container);
-
-  /* Sidenav's colours */
-  --color-nav: rgb(var(--color-nav));
-  --color-nav-foreground: rgb(var(--color-nav-foreground));
-  --color-nav-active: rgb(var(--color-nav-active));
-  --color-nav-active-foreground: rgb(var(--color-nav-active-foreground));
-  --color-nav-more: rgb(var(--color-nav-more));
-  --color-nav-outline: rgb(var(--color-nav-outline));
-}
-
-/* ActionButton's remove colours (common-app ColorConfig), as they were before it moved to tokens */
-:root {
-  --error-container: #fecaca;
-  --on-error-container: currentColor;
-
-  /* Sidenav's colours, as they were before it moved to tokens: indigo-100, -200, #d4ddff, gray-200 */
-  --color-nav: 224 231 255;
-  --color-nav-foreground: 0 0 0;
-  --color-nav-active: 199 210 254;
-  --color-nav-active-foreground: 0 0 0;
-  --color-nav-more: 212 221 255;
-  --color-nav-outline: 229 231 235;
-}
-.dark {
-  --error-container: #b91c1c;
-  --on-error-container: #fff;
-
-  /* indigo-900, -700, #3730a3, slate-500 */
-  --color-nav: 49 46 129;
-  --color-nav-foreground: 255 255 255;
-  --color-nav-active: 67 56 202;
-  --color-nav-active-foreground: 255 255 255;
-  --color-nav-more: 55 48 163;
-  --color-nav-outline: 100 116 139;
+  --color-button: rgb(var(--color-button));
+  --color-button-text: rgb(var(--color-button-text));
+  --color-primary: rgb(var(--color-button));
+  --color-primary-contrast: rgb(var(--color-button-text));
 }
 
 .dark select option {

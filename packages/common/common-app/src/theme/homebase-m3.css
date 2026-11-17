@@ -1,112 +1,78 @@
 /*
   Homebase's Material 3 colour scheme, as the chat app sets it
-  (chat-kmp homebase-common/.../ui/theme/Color.kt and Theme.kt).
+  (chat-kmp homebase-common/.../ui/theme/Color.kt and Theme.kt), for the owner console.
 
-  Each colour is a set of RGB channels (`--color-primary: 44 88 195`), so a Tailwind opacity modifier
-  (bg-primary/20) still works. Import this after `@import 'tailwindcss'` in a Tailwind 4 app; the
-  `@theme inline reference` block turns the channels into colour utilities (bg-surface-variant,
-  text-on-primary-container, border-outline-variant...) without writing them to :root again.
+  Values only, as RGB channels (`--color-primary: 44 88 195`); tokens.css turns them into the colour
+  utilities (bg-primary, text-nav-contrast, bg-surface-container-high...). Import both after
+  `@import 'tailwindcss'`.
 */
 
+/* The var() references resolve on <html>, so they rely on .dark being set there */
 :root {
-  --color-page-background: 242 245 249; /* surfaceContainerLow */
-  --color-background: 251 252 255; /* surface */
-  --color-foreground: 27 27 29; /* onSurface */
-  --color-muted-foreground: 84 88 99; /* onSurfaceVariant */
-
-  --color-primary: 44 88 195;
-  --color-primary-contrast: 255 255 255; /* onPrimary */
-  --color-primary-container: 210 223 251;
-  --color-on-primary-container: 5 24 69;
-  --color-secondary: 220 229 249; /* secondaryContainer */
-  --color-secondary-contrast: 21 29 44; /* onSecondaryContainer */
-  --color-destructive: 186 27 27; /* error */
-  --color-destructive-contrast: 255 255 255; /* onError */
-  --color-error-container: 255 218 212;
-  --color-on-error-container: 65 0 2;
-
-  --color-surface-variant: 231 235 243;
   --color-surface-container-lowest: 251 252 255;
   --color-surface-container-low: 242 245 249;
   --color-surface-container: 237 240 246;
   --color-surface-container-high: 232 236 244;
-  --color-surface-container-highest: 230 234 243;
-  --color-outline: 128 131 137;
   --color-outline-variant: 207 212 222;
 
-  --color-button: var(--color-primary);
-  --color-button-text: var(--color-primary-contrast);
+  --color-page-background: var(--color-surface-container-low);
+  --color-background: var(--color-surface-container-lowest);
+  --color-foreground: 27 27 29; /* onSurface */
+  --color-muted-foreground: 84 88 99; /* onSurfaceVariant */
+  --color-subtle-foreground: var(--color-muted-foreground);
+
+  --color-primary: 44 88 195;
+  --color-primary-contrast: 255 255 255; /* onPrimary */
+  --color-primary-contrast-subtle: var(--color-primary-contrast) / 0.8;
+  --color-primary-container: 210 223 251;
+  --color-primary-container-contrast: 5 24 69; /* onPrimaryContainer */
+  --color-secondary: 220 229 249; /* secondaryContainer */
+  --color-secondary-contrast: 21 29 44; /* onSecondaryContainer */
+
+  /* error, onError and their containers; hover is M3's state layer, 8% of the contrast on top */
+  --color-destructive: 186 27 27;
+  --color-destructive-hover: 192 45 45;
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 255 218 212;
+  --color-error-container-hover: 240 201 195;
+  --color-error-container-contrast: 65 0 2;
 
   /* Sidenav, as chat-kmp's NavigationRail: surfaceContainerHigh, onSurfaceVariant icons, a
      primaryContainer indicator; the More menu on surfaceContainer, its divider outlineVariant */
   --color-nav: var(--color-surface-container-high);
-  --color-nav-foreground: var(--color-muted-foreground);
+  --color-nav-contrast: var(--color-muted-foreground);
   --color-nav-active: var(--color-primary-container);
-  --color-nav-active-foreground: var(--color-on-primary-container);
+  --color-nav-active-contrast: var(--color-primary-container-contrast);
+  --color-nav-hover: var(--color-primary-container) / 0.5;
   --color-nav-more: var(--color-surface-container);
   --color-nav-outline: var(--color-outline-variant);
+  --color-nav-shadow: 0 0 0 / 0.1;
+  --color-nav-ring: var(--color-nav);
 }
 
 .dark {
-  --color-page-background: 27 28 31; /* surface */
-  --color-background: 35 36 42; /* surfaceContainerLow */
+  --color-surface-container-lowest: 27 28 31;
+  --color-surface-container-low: 35 36 42;
+  --color-surface-container: 39 42 49;
+  --color-surface-container-high: 44 47 55;
+  --color-outline-variant: 62 65 74;
+
+  --color-page-background: var(--color-surface-container-lowest);
+  --color-background: var(--color-surface-container-low);
   --color-foreground: 226 225 229;
   --color-muted-foreground: 190 191 197;
 
   --color-primary: 182 197 250;
   --color-primary-contrast: 30 36 56;
   --color-primary-container: 70 75 92;
-  --color-on-primary-container: 219 225 252;
+  --color-primary-container-contrast: 219 225 252;
   --color-secondary: 65 70 89;
   --color-secondary-contrast: 220 225 249;
+
   --color-destructive: 255 180 169;
+  --color-destructive-hover: 243 166 156;
   --color-destructive-contrast: 105 0 5;
   --color-error-container: 147 0 6;
-  --color-on-error-container: 255 218 214;
-
-  --color-surface-variant: 48 49 51;
-  --color-surface-container-lowest: 27 28 31;
-  --color-surface-container-low: 35 36 42;
-  --color-surface-container: 39 42 49;
-  --color-surface-container-high: 44 47 55;
-  --color-surface-container-highest: 46 48 57;
-  --color-outline: 113 116 124;
-  --color-outline-variant: 62 65 74;
-}
-
-@theme inline reference {
-  --color-page-background: rgb(var(--color-page-background));
-  --color-background: rgb(var(--color-background));
-  --color-foreground: rgb(var(--color-foreground));
-  --color-muted-foreground: rgb(var(--color-muted-foreground));
-
-  --color-primary: rgb(var(--color-primary));
-  --color-primary-contrast: rgb(var(--color-primary-contrast));
-  --color-primary-container: rgb(var(--color-primary-container));
-  --color-on-primary-container: rgb(var(--color-on-primary-container));
-  --color-secondary: rgb(var(--color-secondary));
-  --color-secondary-contrast: rgb(var(--color-secondary-contrast));
-  --color-destructive: rgb(var(--color-destructive));
-  --color-destructive-contrast: rgb(var(--color-destructive-contrast));
-  --color-error-container: rgb(var(--color-error-container));
-  --color-on-error-container: rgb(var(--color-on-error-container));
-
-  --color-surface-variant: rgb(var(--color-surface-variant));
-  --color-surface-container-lowest: rgb(var(--color-surface-container-lowest));
-  --color-surface-container-low: rgb(var(--color-surface-container-low));
-  --color-surface-container: rgb(var(--color-surface-container));
-  --color-surface-container-high: rgb(var(--color-surface-container-high));
-  --color-surface-container-highest: rgb(var(--color-surface-container-highest));
-  --color-outline: rgb(var(--color-outline));
-  --color-outline-variant: rgb(var(--color-outline-variant));
-
-  --color-button: rgb(var(--color-button));
-  --color-button-text: rgb(var(--color-button-text));
-
-  --color-nav: rgb(var(--color-nav));
-  --color-nav-foreground: rgb(var(--color-nav-foreground));
-  --color-nav-active: rgb(var(--color-nav-active));
-  --color-nav-active-foreground: rgb(var(--color-nav-active-foreground));
-  --color-nav-more: rgb(var(--color-nav-more));
-  --color-nav-outline: rgb(var(--color-nav-outline));
+  --color-error-container-hover: 156 17 23;
+  --color-error-container-contrast: 255 218 214;
 }

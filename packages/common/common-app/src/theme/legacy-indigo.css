@@ -1,0 +1,51 @@
+/*
+  The indigo look of the apps not on Homebase's Material 3 colours (feed, public, community,
+  provisioning): the values of common-app's colour tokens, as the Tailwind classes they replaced,
+  in RGB channels. tokens.css (Tailwind 4) and tailwind-legacy-colors.cjs (Tailwind 3) turn them
+  into colour utilities. page-background, background and foreground come from each app's Layout.
+*/
+
+/* The var() references resolve on <html>, so they rely on .dark being set there */
+:root {
+  --color-primary: 99 102 241; /* indigo-500 */
+  --color-primary-contrast: 255 255 255;
+  --color-primary-contrast-subtle: 203 213 225; /* slate-300 */
+  --color-subtle-foreground: 100 116 139; /* slate-500 */
+  --color-secondary: var(--color-background);
+  --color-secondary-contrast: var(--color-foreground);
+  --color-surface-container-high: 241 245 249; /* slate-100 */
+
+  --color-destructive: 239 68 68; /* red-500 */
+  --color-destructive-hover: 220 38 38; /* red-600 */
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 254 202 202; /* red-200 */
+  --color-error-container-hover: 248 113 113; /* red-400 */
+  --color-error-container-contrast: var(--color-foreground);
+
+  /* Sidenav */
+  --color-nav: 224 231 255; /* indigo-100 */
+  --color-nav-contrast: 0 0 0;
+  --color-nav-active: 199 210 254; /* indigo-200 */
+  --color-nav-active-contrast: var(--color-nav-contrast);
+  --color-nav-hover: var(--color-nav-active) / 0.4;
+  --color-nav-more: 212 221 255;
+  --color-nav-outline: 229 231 235; /* gray-200 */
+  --color-nav-shadow: 0 0 0 / 0.1; /* shadow-md's own */
+  --color-nav-ring: 255 255 255;
+}
+
+.dark {
+  --color-surface-container-high: 30 41 59; /* slate-800 */
+
+  --color-error-container: 185 28 28; /* red-700 */
+  --color-error-container-hover: 153 27 27; /* red-800 */
+  --color-error-container-contrast: 255 255 255;
+
+  --color-nav: 49 46 129; /* indigo-900 */
+  --color-nav-contrast: 255 255 255;
+  --color-nav-active: 67 56 202; /* indigo-700 */
+  --color-nav-hover: var(--color-nav-active) / 0.5;
+  --color-nav-more: 55 48 163; /* indigo-800 */
+  --color-nav-outline: 100 116 139; /* slate-500 */
+  --color-nav-shadow: 51 65 85; /* slate-700 */
+}

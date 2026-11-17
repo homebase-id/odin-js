@@ -71,7 +71,7 @@ const ClickToReveal = ({textToShow}: { textToShow?: string | null | undefined })
   };
 
   const buttonStyle =
-    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12 text-foreground hover:text-primary dark:hover:text-primary-dark';
+    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12 text-foreground hover:text-primary';
 
   return (
     <>

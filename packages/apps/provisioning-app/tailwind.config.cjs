@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-undef, @typescript-eslint/no-require-imports
+const legacyColors = require('../../common/common-app/tailwind-legacy-colors.cjs');
+
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
 module.exports = {
@@ -5,19 +8,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        ...legacyColors,
         // Driven by CSS variables so the shell can follow the device theme;
         // the values live in Layout's SharedStyleTag
         background: 'rgb(var(--color-background) / <alpha-value>)',
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
         button: 'rgb(99 101 241 / <alpha-value>)',
         'button-text': 'rgb(255 255 255 / <alpha-value>)',
-        // ActionButton's colours (common-app ColorConfig)
-        secondary: 'rgb(var(--color-background) / <alpha-value>)',
-        'secondary-contrast': 'rgb(var(--color-foreground) / <alpha-value>)',
-        destructive: '#ef4444',
-        'destructive-contrast': '#fff',
-        'error-container': 'var(--error-container)',
-        'on-error-container': 'var(--on-error-container)',
       },
       keyframes: {
         slowding: {
