@@ -594,7 +594,7 @@ describe('socials on the shared layouts and the collage page', () => {
     const design = applyOverrides(CARD_PRESETS[layout], { socials: 'bar' });
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <HomebaseCard design={design} data={{ ...data, socials: many } as CardData} />
+        <HomebaseCard design={design} data={{ ...data, socials: many } as unknown as CardData} />
       </MemoryRouter>
     );
     const list = /<ul([^>]*data-socials="bar"[^>]*)>/.exec(html);
