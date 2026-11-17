@@ -2,8 +2,6 @@
 @import '../../../common/common-app/src/theme/tokens.css';
 @import '../../../common/common-app/src/theme/homebase-m3.css';
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 form.loading {
   pointer-events: none;
 }
