@@ -55,7 +55,7 @@ export const PostMedia = ({
           onClick={onClick ? (e) => onClick(e, 0) : undefined}
           className={`${
             className || ''
-          } relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600`}
+          } relative aspect-square overflow-hidden bg-media-placeholder text-media-placeholder-contrast`}
         >
           <p className="absolute inset-0 p-2 text-9xl">{post.caption}</p>
         </div>

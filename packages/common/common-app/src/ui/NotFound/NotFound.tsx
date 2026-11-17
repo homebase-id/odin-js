@@ -2,7 +2,7 @@ import { ActionButton } from '../Buttons/ActionButton';
 
 export const NotFound = () => {
   return (
-    <section className="flex h-full grow flex-col bg-red-50 py-5 text-black">
+    <section className="flex h-full grow flex-col bg-error-page py-5 text-error-page-contrast">
       <h1 className="my-auto text-center text-3xl font-medium">
         404&apos;d! Nothing to see here.
         <small className="block font-light">Take your control</small>

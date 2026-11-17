@@ -55,7 +55,7 @@ export const ReactionDetailsDialog = ({
       isSidePanel={false}
       isPaddingLess={true}
     >
-      <ul className="flex flex-row bg-slate-100 px-4 dark:bg-slate-700 sm:px-8">
+      <ul className="flex flex-row bg-surface-container-highest px-4 sm:px-8">
         {filteredEmojis?.map((reaction, index) => {
           return (
             <li className="" key={reaction.emoji}>

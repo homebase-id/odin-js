@@ -16,7 +16,7 @@ const CharacterHighlighter = ({ children }: { children: string }) => {
 
         return (
           <React.Fragment key={index}>
-            <span className="text-orange-400 underline">{char}</span>
+            <span className="text-warning underline">{char}</span>
           </React.Fragment>
         );
       })}
@@ -32,7 +32,7 @@ export const DomainHighlighter = ({ children: domain }: { children: string }) =>
     return (
       <>
         <CharacterHighlighter>{parts[0]}</CharacterHighlighter>
-        <span className="text-orange-400 underline">{parts[1]}</span>
+        <span className="text-warning underline">{parts[1]}</span>
       </>
     );
   }

@@ -43,7 +43,7 @@ export const LinkOverview = ({
           };
           return (
             <div
-              className="relative w-full max-w-lg hover:bg-slate-200 cursor-pointer"
+              className="relative w-full max-w-lg hover:bg-link-hover cursor-pointer"
               key={link}
               onClick={() => {
                 removeLink();

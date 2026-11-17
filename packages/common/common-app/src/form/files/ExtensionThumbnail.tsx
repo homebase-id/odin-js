@@ -63,7 +63,7 @@ export const ExtensionThumbnail = ({
 
   return (
     <div
-      className={`${className || ''} aspect-square flex flex-col items-center justify-center bg-indigo-200 text-[0.7rem] uppercase dark:bg-indigo-800 break-all overflow-hidden`}
+      className={`${className || ''} aspect-square flex flex-col items-center justify-center bg-primary-container text-[0.7rem] uppercase break-all overflow-hidden`}
     >
       {contentTypeExtension}
     </div>

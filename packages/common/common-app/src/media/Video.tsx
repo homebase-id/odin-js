@@ -76,7 +76,7 @@ export const VideoClickToLoad = ({
       {/* We only load the thumbnail if the video isn't already set to preload */}
       {!loadVideo && !preload ? (
         imageHasError ? (
-          <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full h-full"></div>
+          <div className="bg-placeholder aspect-video w-full h-full"></div>
         ) : (
           <OdinThumbnailImage
             dotYouClient={dotYouClient}

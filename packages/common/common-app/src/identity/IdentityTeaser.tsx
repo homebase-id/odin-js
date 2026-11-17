@@ -45,7 +45,7 @@ export const IdentityTeaser = ({
       className={`group flex h-full w-full items-center rounded-lg ${
         isBorderLess
           ? '-mx-1 p-1'
-          : 'border border-gray-200 p-4 dark:border-gray-700 hover:shadow-md hover:z-10 hover:dark:shadow-slate-600'
+          : 'border border-outline-variant p-4 hover:shadow-md hover:z-10 hover:shadow-card-shadow'
       } bg-background relative  ${className ?? ''}`}
       ref={wrapperRef}
     >
@@ -53,7 +53,7 @@ export const IdentityTeaser = ({
         <ContactImage
           odinId={isInView ? odinId : undefined}
           canSave={!!isConnected}
-          className={`${imageSizeClass} flex-shrink-0 rounded-full overflow-hidden bg-gray-100 object-cover object-center`}
+          className={`${imageSizeClass} flex-shrink-0 rounded-full overflow-hidden bg-avatar-placeholder object-cover object-center`}
         />
 
         <div className="flex-grow ">

@@ -11,7 +11,7 @@ export const highlightQuery = (text: string | undefined, query: string | undefin
     return (
       <React.Fragment key={index}>
         {str}
-        <span className="bg-amber-200 dark:bg-yellow-600">{query}</span>
+        <span className="bg-highlight">{query}</span>
       </React.Fragment>
     );
   });

@@ -19,7 +19,7 @@ export const ChannelTemplateSelector = ({
   }) => void;
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
+    <div className="grid grid-cols-2 gap-2 py-5 text-center text-caption-foreground md:grid-cols-3 md:gap-5">
       <Template
         name={name}
         icon={TemplateList}
@@ -76,7 +76,7 @@ const Template = ({
       />
       <label
         htmlFor={value + ''}
-        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-primary dark:border-slate-900 dark:bg-slate-900"
+        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-template-card bg-template-card p-2 peer-checked:border-primary"
       >
         <div className="flex flex-grow flex-col justify-center">
           <Icon

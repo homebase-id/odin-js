@@ -56,7 +56,7 @@ export const DialogWrapper = ({
       role="dialog"
       aria-modal="true"
     >
-      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+      <div className="fixed inset-0 bg-scrim transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div
           className={`min-h-full ${
@@ -82,13 +82,13 @@ export const DialogWrapper = ({
             <div className="flex h-full flex-col max-h-screen">
               {title || onClose ? (
                 <div
-                  className={`flex flex-row bg-slate-100 px-4 py-4 dark:bg-slate-700 sm:px-8 ${
+                  className={`flex flex-row bg-surface-container-highest px-4 py-4 sm:px-8 ${
                     isSidePanel ? 'sm:rounded-none' : ''
                   } rounded-t-lg overflow-hidden`}
                 >
                   {title ? (
                     <h3
-                      className="z-40 w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
+                      className="z-40 w-20 flex-grow my-3 text-2xl font-medium leading-6 text-surface-contrast"
                       id="modal-title"
                     >
                       {title}
@@ -102,7 +102,7 @@ export const DialogWrapper = ({
                 </div>
               ) : null}
               <div
-                className={`flex-grow bg-white dark:bg-black dark:text-slate-50 ${isPaddingLess ? '' : 'px-4 py-8 sm:px-8'}
+                className={`flex-grow bg-surface text-dialog-contrast ${isPaddingLess ? '' : 'px-4 py-8 sm:px-8'}
                 ${
                   isOverflowLess ? '' : 'overflow-auto overflow-y-auto'
                 } sm:max-h-[calc(100vh-5rem)] `}
@@ -110,7 +110,7 @@ export const DialogWrapper = ({
                 {children}
               </div>
               <div
-                className={`bg-white dark:bg-black pb-2 rounded-b-lg ${
+                className={`bg-surface pb-2 rounded-b-lg ${
                   isSidePanel ? 'sm:rounded-none' : ''
                 }`}
               >

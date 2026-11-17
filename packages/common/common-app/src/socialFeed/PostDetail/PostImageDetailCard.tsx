@@ -114,15 +114,15 @@ export const PostImageDetailCard = ({
           />
         ) : null}
       </Helmet>
-      <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
-        <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
+      <div className="relative z-40 bg-media-backdrop lg:bg-transparent" role="dialog" aria-modal="true">
+        <div className="inset-0 bg-media-backdrop transition-opacity lg:fixed"></div>
         <div className="inset-0 z-10 lg:fixed">
           <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
             <div
               className={`relative flex h-[60vh] lg:h-full lg:flex-grow max-h-screen flex-grow-0 overflow-hidden`}
             >
               {!post ? (
-                <Loader className="m-auto h-10 w-10 text-white" />
+                <Loader className="m-auto h-10 w-10 text-media-backdrop-contrast" />
               ) : currentMediaFile?.contentType.startsWith('image') ? (
                 <Image
                   odinId={odinId}

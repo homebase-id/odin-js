@@ -47,7 +47,7 @@ export const SaveStatus = ({
   }
 
   return (
-    <p className={`${className} text-sm text-slate-400`}>
+    <p className={`${className} text-sm text-faint-foreground`}>
       {t('Last saved')} {formatToTimeAgo(lastSave)}
     </p>
   );

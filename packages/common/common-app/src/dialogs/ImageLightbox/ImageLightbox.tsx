@@ -147,14 +147,14 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
   const dialog = (
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-40 bg-black lg:bg-transparent"
+      className="fixed inset-0 z-40 bg-media-backdrop lg:bg-transparent"
       role="dialog"
       aria-modal="true"
       aria-label={count > 1 ? `${t('Image')} ${index + 1} / ${count}` : t('Image')}
       onTouchStart={count > 1 ? onTouchStart : undefined}
       onTouchEnd={count > 1 ? onTouchEnd : undefined}
     >
-      <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
+      <div className="inset-0 bg-media-backdrop transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="relative flex h-full min-h-screen flex-col lg:flex-row" onClick={onClose}>
           <button
@@ -196,7 +196,7 @@ export const ImageLightbox = (props: (OneImage | ManyImages) & { onClose: () => 
             <>
               <p
                 aria-hidden="true"
-                className="absolute right-4 top-6 rounded-full bg-black/60 px-3 py-1 text-sm text-white"
+                className="absolute right-4 top-6 rounded-full bg-media-backdrop/60 px-3 py-1 text-sm text-media-backdrop-contrast"
               >
                 {index + 1} / {count}
               </p>

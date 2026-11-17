@@ -52,7 +52,7 @@ export const DictionaryEditor = ({
             <div className="w-2/5 flex-grow">{defaultValue[key]}</div>
             <div>
               <ActionButton
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700"
+                className="p-2 hover:bg-menu-hover"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
