@@ -36,4 +36,3 @@ export * from './PostDetail/PostImageDetailCard';
 export * from './ArticleReader/ArticleReader';
 
 export * from './PostListItem/PostTeaser';
-export * from './PostListItem/PostTextListItem';

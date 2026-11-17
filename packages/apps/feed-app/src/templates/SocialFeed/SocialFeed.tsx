@@ -8,7 +8,7 @@ import {
   t,
   useRemoveNotifications,
 } from '@homebase-id/common-app';
-import { Feed, Article, Ellipsis, Quote } from '@homebase-id/common-app/icons';
+import { Feed, Ellipsis, Quote } from '@homebase-id/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -73,11 +73,6 @@ export const SocialFeed = () => {
             <ActionGroup
               type="secondary"
               options={[
-                {
-                  label: t('Articles'),
-                  href: `${FEED_ROOT_PATH}/articles`,
-                  icon: Article,
-                },
                 {
                   label: t('Channels'),
                   href: `${FEED_ROOT_PATH}/channels`,

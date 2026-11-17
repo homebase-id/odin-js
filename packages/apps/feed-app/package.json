@@ -24,7 +24,6 @@
     "@homebase-id/common-app": "*",
     "@homebase-id/ffmpeg": "*",
     "@homebase-id/js-lib": "*",
-    "@homebase-id/rich-text-editor": "*",
     "@homebase-id/ui-lib": "*",
     "axios": "1.20.0",
     "emoji-picker-element": "^1.24.0",
