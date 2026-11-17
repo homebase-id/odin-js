@@ -53,7 +53,7 @@ type Payload = {
     links: { id: string; text: string; target: string }[];
     socials: { type: string; username: string }[];
   };
-  audience: { kind: 'public' | 'circle'; label?: string };
+  audience: { kind: 'public' | 'circle' };
   overrides?: {
     palette: Record<string, string>;
     type: Record<string, string>;
@@ -162,7 +162,7 @@ describe('chat-kmp matrix fixtures', () => {
       if (f.audience === 'circle') {
         expect(texts).toContain('Friends only');
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,friends-key');
-        expect(f.payload.audience).toEqual({ kind: 'circle', label: 'Friends' });
+        expect(f.payload.audience).toEqual({ kind: 'circle' });
       } else {
         expect(texts).toEqual(['Public site']);
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,public-key');
@@ -254,6 +254,21 @@ describe('links layout honours each option chat-kmp exposes for it', () => {
     expect(html({ portraits: [{ shape: 'square' }] })).toContain('--links-tile-radius:6px');
     expect(html({ portraits: [{ shape: 'ellipse' }] })).toContain('--links-tile-radius:18px');
     expect(html({ socials: 'handles' })).toContain('@frodo');
+  });
+
+  it('portrait size: every size chat-kmp declares is applied', () => {
+    expect(specs.specs.links.options).toContain('PORTRAIT_SIZE');
+    expect(html({ portraits: [{ size: 'medium' }] })).not.toContain('zoom');
+    for (const size of specs.portraitSizes.filter((s: string) => s !== 'medium'))
+      expect(html({ portraits: [{ size }] }), size).toContain('zoom');
+    expect(html({ portraits: [{ size: 'small' }] })).not.toEqual(
+      html({ portraits: [{ size: 'large' }] })
+    );
+  });
+
+  it('background: a declared background changes the links card', () => {
+    expect(specs.specs.links.options).toContain('BACKGROUND');
+    expect(html({ background: 'dots' })).not.toEqual(html({ background: 'none' }));
   });
 
   it('block order', () => {
