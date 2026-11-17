@@ -125,7 +125,7 @@ const AspectOption = ({
     <button
       onClick={() => onChange(currentVal === val ? undefined : val)}
       className={`rounded-md px-3 py-2 ${
-        isActive ? 'bg-segment-selected text-accent-contrast' : 'opacity-50'
+        isActive ? 'bg-primary text-primary-contrast' : 'opacity-50'
       }`}
     >
       {label}

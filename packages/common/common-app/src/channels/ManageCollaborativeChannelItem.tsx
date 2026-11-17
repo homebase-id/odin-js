@@ -32,7 +32,7 @@ export const ManageCollaborativeChannelItem = ({
           type="mute"
         />
       ) : (
-        <p className="rounded-lg bg-chip px-2 py-1 text-sm">
+        <p className="rounded-lg bg-secondary px-2 py-1 text-sm">
           {t('Auto discovered')}
         </p>
       )}

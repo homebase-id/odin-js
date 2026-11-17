@@ -90,7 +90,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             <AuthorImage odinId={authorOdinId} size="xs" />
           </div>
           <div
-            className={`ml-2 rounded-lg bg-comment-bubble px-2 py-1 w-20 flex-grow ${
+            className={`ml-2 rounded-lg bg-surface-container-high px-2 py-1 w-20 flex-grow ${
               isEdit ? 'flex-grow' : ''
             }`}
           >
@@ -164,7 +164,7 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
                 <AuthorName odinId={authorOdinId} />
               </span>{' '}
               {commentData.isEncrypted && body === '' ? (
-                <span className="ml-2 h-3 w-20 rounded bg-skeleton text-skeleton">
+                <span className="ml-2 h-3 w-20 rounded bg-surface-container-highest text-surface-container-highest">
                   {t('Encrypted')}
                 </span>
               ) : (

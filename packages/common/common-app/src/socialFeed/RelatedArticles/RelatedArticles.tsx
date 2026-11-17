@@ -22,7 +22,7 @@ const RelatedArticleCard = ({
   return (
     <FakeAnchor
       href={`${HOME_ROOT_PATH}posts/${channelSlug ?? post.channelId}/${post.slug ?? post.id}`}
-      className="block rounded-lg border border-card-outline bg-background p-4 transition-colors hover:shadow-md hover:shadow-card-shadow"
+      className="block rounded-lg border border-outline-variant bg-background p-4 transition-colors hover:shadow-md dark:shadow-black/30"
     >
       <ArticleTeaser postFile={postFile} />
     </FakeAnchor>
@@ -61,7 +61,7 @@ export const RelatedArticles = ({
       className={`mt-10 pb-10 pt-16 ${
         onPaper
           ? 'border-t border-[color:var(--article-outline-variant)]'
-          : 'bg-related-articles'
+          : 'bg-surface-container-low'
       }`}
     >
       <div className="container mx-auto px-2 sm:px-5">

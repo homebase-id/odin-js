@@ -97,8 +97,8 @@ export const LikeButton = ({
           />
         </div>
         <button
-          className={`hover:text-strong-foreground ${
-            isReact ? 'text-strong-foreground' : ''
+          className={`hover:text-foreground ${
+            isReact ? 'text-foreground' : ''
           } ${hasReacted ? 'cursor-pointer hover:opacity-10' : ''}`}
           onClick={() => {
             if (hasReacted) {

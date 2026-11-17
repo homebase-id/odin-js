@@ -73,7 +73,7 @@ export const ChannelItem = ({
     <div
       className={`${isEdit ? '' : 'cursor-pointer'} ${
         className ?? ''
-      } rounded-md border border-list-outline px-4 py-4`}
+      } rounded-md border border-outline-variant px-4 py-4`}
       onClick={() => setIsEdit(true)}
     >
       {isEdit || !chnl ? (

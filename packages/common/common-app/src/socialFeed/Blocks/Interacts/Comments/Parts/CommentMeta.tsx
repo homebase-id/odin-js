@@ -21,7 +21,7 @@ export const CommentMeta = ({
   const isEdited = updated && updated !== 0 && updated !== created;
 
   return (
-    <div className="text-interaction-foreground relative ml-[2.25rem] flex flex-row items-center px-2 pt-[2px] text-sm">
+    <div className="text-muted-foreground relative ml-[2.25rem] flex flex-row items-center px-2 pt-[2px] text-sm">
       {canReact?.canReact === true || canReact?.canReact === 'emoji' ? (
         <>
           <CommentLikeButton threadContext={threadContext} />
@@ -30,7 +30,7 @@ export const CommentMeta = ({
       ) : null}
       <EmojiSummary
         context={threadContext}
-        className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 after:border-comment-meta-divider"
+        className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 after:border-outline-variant"
       />
       {(canReact?.canReact === true || canReact?.canReact === 'comment') && onReply ? (
         <button

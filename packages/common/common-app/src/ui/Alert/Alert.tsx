@@ -9,8 +9,8 @@ interface AlertProps {
 }
 
 const ICONS = {
-  critical: { Icon: Exclamation, color: 'text-error' },
-  warning: { Icon: Exclamation, color: 'text-warning' },
+  critical: { Icon: Exclamation, color: 'text-destructive' },
+  warning: { Icon: Exclamation, color: 'text-warning-container-contrast' },
   success: { Icon: Check, color: 'text-success' },
   info: { Icon: Question, color: 'text-info' },
 } as const;
@@ -19,17 +19,12 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
   const icon = ICONS[type];
   const bgClass =
     type === 'critical'
-      ? 'bg-error-surface text-error-surface-contrast'
+      ? 'bg-error-surface text-error-container-contrast'
       : type === 'warning'
-        ? 'bg-warning-surface text-warning-surface-contrast'
-        : 'bg-surface-container-highest text-heading-foreground';
+        ? 'bg-warning-container text-warning-container-contrast'
+        : 'bg-surface-container-highest text-foreground';
 
-  const borderClass =
-    type === 'critical'
-      ? 'border-error-surface-outline'
-      : type === 'warning'
-        ? 'border-warning-surface-outline'
-        : 'border-outline-variant';
+  const borderClass = 'border-outline-variant';
 
   return (
     <section
@@ -60,7 +55,7 @@ export const SubtleMessage = (
     <div className="flex flex-row">
       <p
         {...props}
-        className={`mr-auto rounded-lg py-3 italic text-hint-foreground ${props.className || ''}`}
+        className={`mr-auto rounded-lg py-3 italic text-muted-foreground ${props.className || ''}`}
       />
     </div>
   );

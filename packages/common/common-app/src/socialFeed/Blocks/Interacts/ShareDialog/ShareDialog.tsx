@@ -26,7 +26,7 @@ export const ShareDialog = ({
         <span className="">
           {t('Share')}{' '}
           {title ? (
-            <small className="block text-sm text-faint-foreground break-words">&quot;{title}&quot;</small>
+            <small className="block text-sm text-muted-foreground break-words">&quot;{title}&quot;</small>
           ) : null}
         </span>
       }
@@ -108,7 +108,7 @@ const ClickToCopy = ({ text }: { text: string }) => {
       </div>
       {showCopied && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="rounded-lg bg-tooltip px-2 py-1 text-sm text-tooltip-contrast">
+          <span className="rounded-lg bg-foreground px-2 py-1 text-sm text-background">
             {t('Copied to clipboard')}
           </span>
         </div>

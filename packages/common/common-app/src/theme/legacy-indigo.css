@@ -2,263 +2,76 @@
 
 /* The var() references resolve on <html>, so they rely on .dark being set there */
 :root {
+  --color-muted-foreground: 100 116 139; /* slate-500 */
   --color-primary: 99 102 241; /* indigo-500 */
   --color-primary-contrast: 255 255 255;
-  --color-muted-foreground: 100 116 139; /* slate-500 */
+  --color-primary-container: 199 210 254; /* indigo-200 / indigo-800 */
   --color-secondary: var(--color-background);
   --color-secondary-contrast: var(--color-foreground);
-  --color-surface-container-high: 241 245 249; /* slate-100 */
+
+  --color-outline: 209 213 219; /* gray-300 / gray-700 */
+  --color-outline-variant: 229 231 235; /* gray-200 / gray-700 */
+
+  --color-surface-container-lowest: 255 255 255; /* white / slate-900 */
+  --color-surface-container-low: 249 250 251; /* gray-50 / slate-900 */
+  --color-surface-container-high: 241 245 249; /* slate-100 / slate-800 */
+  --color-surface-container-highest: 241 245 249; /* slate-100 / slate-700 */
 
   --color-destructive: 239 68 68; /* red-500 */
   --color-destructive-hover: 220 38 38; /* red-600 */
   --color-destructive-contrast: 255 255 255;
-  --color-error-container: 254 202 202; /* red-200 */
-  --color-error-container-hover: 248 113 113; /* red-400 */
+  --color-error-container: 254 202 202; /* red-200 / red-700 */
+  --color-error-container-hover: 248 113 113; /* red-400 / red-800 */
   --color-error-container-contrast: var(--color-foreground);
-}
+  --color-error-surface: 254 242 242; /* red-50 / red-900 */
 
-.dark {
-  --color-surface-container-high: 30 41 59; /* slate-800 */
-
-  --color-error-container: 185 28 28; /* red-700 */
-  --color-error-container-hover: 153 27 27; /* red-800 */
-  --color-error-container-contrast: 255 255 255;
-}
-
-/* Shared components, as the classes they replaced */
-:root {
-  --color-scrim: 107 114 128 / 0.75; /* gray-500 at 75% */
-  --color-surface: 255 255 255; /* white / black */
-  --color-surface-contrast: 17 24 39; /* gray-900 / slate-50 */
-  --color-surface-container-low: 249 250 251; /* gray-50 / slate-900 */
-  --color-surface-container-highest: 241 245 249; /* slate-100 / slate-700 */
-  --color-outline-variant: 229 231 235; /* gray-200 / gray-700 */
-  --color-outline: 209 213 219; /* gray-300 / gray-700 */
-  --color-strong-foreground: 0 0 0; /* black / white */
-  --color-heading-foreground: var(--color-foreground); /* inherited / white */
-  --color-faint-foreground: 148 163 184; /* slate-400 */
-  --color-caption-foreground: 107 114 128; /* gray-500 */
-  --color-hint-foreground: 156 163 175; /* gray-400 */
-  --color-accent: 99 102 241; /* indigo-500 */
-  --color-accent-strong: 79 70 229; /* indigo-600 */
-  --color-accent-contrast: 255 255 255; /* white */
-  --color-focus-ring: 165 180 252; /* indigo-300 */
-  --color-focus-ring-soft: 199 210 254; /* indigo-200 */
-  --color-destructive-strong: 220 38 38; /* red-600 */
   --color-success: 34 197 94; /* green-500 */
   --color-warning: 251 146 60; /* orange-400 */
   --color-info: 96 165 250; /* blue-400 */
-  --color-error: 248 113 113; /* red-400 / red-300 */
-  --color-dialog-contrast: 0 0 0; /* inherited (body) / slate-50 */
-  --color-dialog-info: 129 140 248; /* indigo-400 */
-  --color-dialog-error: 248 113 113; /* red-400 */
-  --color-dialog-cancel: 255 255 255; /* white / slate-700 */
-  --color-dialog-cancel-hover: 249 250 251; /* gray-50 / slate-700, the button unchanged on hover in dark */
-  --color-dialog-cancel-contrast: 55 65 81; /* gray-700 / white */
-  --color-dialog-cancel-outline: 209 213 219; /* gray-300 / gray-800 */
-  --color-menu: 255 255 255; /* white / slate-900 */
-  --color-menu-hover: 226 232 240; /* slate-200 / slate-700 */
-  --color-menu-outline: 229 231 235 / 0.8; /* gray-200 at 80% / gray-700 */
-  --color-menu-label: 148 163 184; /* slate-400 / slate-500 */
-  --color-light-menu: 255 255 255; /* white in both themes */
-  --color-light-menu-contrast: 0 0 0; /* black in both themes */
-  --color-toast-contrast: var(--color-foreground); /* inherited / slate-300 */
-  --color-error-surface: 254 242 242; /* red-50 / red-900 */
-  --color-error-surface-contrast: var(--color-foreground); /* inherited / white */
-  --color-error-surface-outline: 254 226 226; /* red-100 / red-800 */
-  --color-warning-surface: 255 247 237; /* orange-50 */
-  --color-warning-surface-contrast: var(--color-foreground); /* inherited / black */
-  --color-warning-surface-outline: 254 215 170; /* orange-200 / orange-900 */
-  --color-code-surface: 255 255 255; /* white / zinc-900 */
-  --color-code-surface-hover: 244 244 245; /* zinc-100 / zinc-800 */
-  --color-code-outline: 212 212 216; /* zinc-300 / zinc-800 */
-  --color-code-outline-strong: 212 212 216; /* zinc-300 / zinc-700 */
-  --color-code-divider: 228 228 231; /* zinc-200 / zinc-800 at 80% */
-  --color-code-label: 113 113 122; /* zinc-500 / zinc-400 */
-  --color-code-contrast: 63 63 70; /* zinc-700 / zinc-200 */
-  --color-code-focus-ring: 129 140 248 / 0.7; /* indigo-400 at 70% / indigo-500 at 60% */
+  --color-warning-container: 255 247 237; /* orange-50 */
+  --color-warning-container-contrast: var(--color-foreground);
+  --color-highlight: 253 230 138; /* amber-200 / yellow-600 */
+
   --color-syntax-key: 29 78 216; /* blue-700 / blue-300 */
   --color-syntax-string: 21 128 61; /* green-700 / green-300 */
   --color-syntax-number: 194 65 12; /* orange-700 / orange-300 */
   --color-syntax-boolean: 126 34 206; /* purple-700 / purple-300 */
   --color-syntax-null: 190 18 60; /* rose-700 / rose-300 */
-  --color-syntax-punctuation: 161 161 170; /* zinc-400 */
-  --color-field: 255 255 255; /* white / gray-900 */
-  --color-field-raised: 255 255 255; /* white / gray-800 */
-  --color-field-contrast: 55 65 81; /* gray-700 / gray-100 */
-  --color-helper-foreground: 75 85 99; /* gray-600 / gray-500 */
-  --color-tonal-button: 226 232 240; /* slate-200 */
-  --color-tonal-button-contrast: 0 0 0; /* black */
-  --color-check: 243 244 246; /* gray-100 / gray-700 */
-  --color-check-outline: 209 213 219; /* gray-300 / gray-600 */
-  --color-check-accent: 37 99 235; /* blue-600 */
-  --color-check-ring: 59 130 246; /* blue-500 / blue-600 */
-  --color-check-ring-offset: 255 255 255; /* white / gray-800 */
-  --color-fancy-check: var(--color-page-background); /* page background / gray-700 */
-  --color-check-selected: 79 70 229; /* indigo-600 / indigo-500 */
-  --color-check-selected-hover: 79 70 229 / 0.5; /* indigo-600 at 50% */
-  --color-toggle-track: 229 231 235; /* gray-200 / gray-700 */
-  --color-toggle-thumb: 255 255 255; /* white */
-  --color-toggle-thumb-outline: 209 213 219; /* gray-300 */
-  --color-toggle-focus-ring: 165 180 252; /* indigo-300 / indigo-800 */
-  --color-primary-container: 199 210 254; /* indigo-200 / indigo-800 */
-  --color-segment-selected: 129 140 248; /* indigo-400 / indigo-800 */
-  --color-remove-control: 254 202 202; /* red-200 / red-800 */
-  --color-remove-control-contrast: var(--color-foreground); /* inherited */
-  --color-link-hover: 226 232 240; /* slate-200 */
-  --color-comment-field: 107 114 128 / 0.1; /* gray-500 at 10% / gray-300 at 10% */
-  --color-comment-bubble: 107 114 128 / 0.1; /* gray-500 at 10% / gray-300 at 20% */
-  --color-skeleton: 226 232 240; /* slate-200 / slate-700 */
-  --color-comment-meta-divider: 229 231 235; /* gray-200 (default) / slate-600 */
-  --color-tooltip: 30 41 59; /* slate-800 / slate-600 */
-  --color-tooltip-contrast: 255 255 255; /* white */
-  --color-popover: var(--color-background); /* page background / slate-900 */
-  --color-reaction-selected: 203 213 225; /* slate-300 / slate-700 */
-  --color-emoji-picker-outline: 243 244 246; /* gray-100 / slate-800 */
-  --color-embed-outline: 229 231 235; /* gray-200 (default) / slate-700 */
-  --color-source-chip: 203 213 225; /* slate-300 / gray-700 */
-  --color-media-backdrop: 0 0 0; /* black */
-  --color-media-backdrop-contrast: 255 255 255; /* white */
-  --color-byline-divider: 229 231 235; /* gray-200 (default) / slate-500 */
-  --color-media-placeholder: 248 250 252; /* slate-50 / slate-700 */
-  --color-media-placeholder-contrast: 226 232 240; /* slate-200 / slate-600 */
-  --color-media-placeholder-strong: 100 116 139; /* slate-500 / slate-400 */
-  --color-card-outline: 229 231 235 / 0.6; /* gray-200 at 60% / gray-800 */
-  --color-card-shadow: 0 0 0 / 0.1; /* shadow-md's own / slate-600 */
-  --color-related-articles: 248 250 252; /* slate-50 / slate-800 at 50% */
-  --color-error-page: 254 242 242; /* red-50 */
-  --color-error-page-contrast: 0 0 0; /* black */
-  --color-placeholder: 226 232 240; /* slate-200 / slate-800 */
-  --color-page-header-outline: 243 244 246; /* gray-100 / gray-800 */
-  --color-pager: 71 85 105; /* slate-600 / slate-200 */
-  --color-pager-disabled: 203 213 225; /* slate-300 / slate-700 */
-  --color-avatar-placeholder: 243 244 246; /* gray-100 */
-  --color-circle-link-hover: 51 65 85; /* slate-700 / slate-400 */
-  --color-circle-selected-outline: 99 102 241; /* indigo-500 / indigo-800 */
-  --color-list-outline: 241 245 249; /* slate-100 / slate-800 */
-  --color-inline-code: 239 68 68; /* red-500 / orange-400 */
-  --color-highlight: 253 230 138; /* amber-200 / yellow-600 */
-  --color-list-item: 248 250 252; /* slate-50 / slate-900 */
-  --color-template-card: 241 245 249; /* slate-100 / slate-900 */
-  --color-chip: 226 232 240; /* slate-200 / slate-600 */
-  --color-document-surface: 249 250 251; /* gray-50 */
-  --color-document-contrast: 55 65 81; /* gray-700 */
-  --color-document-button: 37 99 235; /* blue-600 */
-  --color-document-button-hover: 29 78 216; /* blue-700 */
-  --color-circle-outline: 229 231 235; /* gray-200 (default) / slate-800 */
-  --color-circle-selected: 248 250 252; /* slate-50 / slate-700 */
-  --color-divider: 229 231 235; /* gray-200 (default) / gray-300 at 20% */
-  --color-interaction-foreground: var(--color-foreground) / 0.2; /* foreground at 20% / 30% */
 }
 
 .dark {
-  --color-surface: 0 0 0;
-  --color-surface-contrast: 248 250 252;
-  --color-surface-container-low: 15 23 42;
-  --color-surface-container-highest: 51 65 85;
-  --color-outline-variant: 55 65 81;
+  --color-primary-container: 55 48 163;
+
   --color-outline: 55 65 81;
-  --color-strong-foreground: 255 255 255;
-  --color-heading-foreground: 255 255 255;
-  --color-error: 252 165 165;
-  --color-dialog-contrast: 248 250 252;
-  --color-dialog-cancel: 51 65 85;
-  --color-dialog-cancel-hover: 51 65 85;
-  --color-dialog-cancel-contrast: 255 255 255;
-  --color-dialog-cancel-outline: 31 41 55;
-  --color-menu: 15 23 42;
-  --color-menu-hover: 51 65 85;
-  --color-menu-outline: 55 65 81;
-  --color-menu-label: 100 116 139;
-  --color-toast-contrast: 203 213 225;
+  --color-outline-variant: 55 65 81;
+
+  --color-surface-container-lowest: 15 23 42;
+  --color-surface-container-low: 15 23 42;
+  --color-surface-container-high: 30 41 59;
+  --color-surface-container-highest: 51 65 85;
+
+  --color-error-container: 185 28 28;
+  --color-error-container-hover: 153 27 27;
+  --color-error-container-contrast: 255 255 255;
   --color-error-surface: 127 29 29;
-  --color-error-surface-contrast: 255 255 255;
-  --color-error-surface-outline: 153 27 27;
-  --color-warning-surface-contrast: 0 0 0;
-  --color-warning-surface-outline: 124 45 18;
-  --color-code-surface: 24 24 27;
-  --color-code-surface-hover: 39 39 42;
-  --color-code-outline: 39 39 42;
-  --color-code-outline-strong: 63 63 70;
-  --color-code-divider: 39 39 42 / 0.8;
-  --color-code-label: 161 161 170;
-  --color-code-contrast: 228 228 231;
-  --color-code-focus-ring: 99 102 241 / 0.6;
+
+  --color-warning-container-contrast: 0 0 0;
+  --color-highlight: 202 138 4;
+
   --color-syntax-key: 147 197 253;
   --color-syntax-string: 134 239 172;
   --color-syntax-number: 253 186 116;
   --color-syntax-boolean: 216 180 254;
   --color-syntax-null: 253 164 175;
-  --color-field: 17 24 39;
-  --color-field-raised: 31 41 55;
-  --color-field-contrast: 243 244 246;
-  --color-helper-foreground: 107 114 128;
-  --color-check: 55 65 81;
-  --color-check-outline: 75 85 99;
-  --color-check-ring: 37 99 235;
-  --color-check-ring-offset: 31 41 55;
-  --color-fancy-check: 55 65 81;
-  --color-check-selected: 99 102 241;
-  --color-toggle-track: 55 65 81;
-  --color-toggle-focus-ring: 55 48 163;
-  --color-primary-container: 55 48 163;
-  --color-segment-selected: 55 48 163;
-  --color-remove-control: 153 27 27;
-  --color-comment-field: 209 213 219 / 0.1;
-  --color-comment-bubble: 209 213 219 / 0.2;
-  --color-skeleton: 51 65 85;
-  --color-comment-meta-divider: 71 85 105;
-  --color-tooltip: 71 85 105;
-  --color-popover: 15 23 42;
-  --color-reaction-selected: 51 65 85;
-  --color-emoji-picker-outline: 30 41 59;
-  --color-embed-outline: 51 65 85;
-  --color-source-chip: 55 65 81;
-  --color-byline-divider: 100 116 139;
-  --color-media-placeholder: 51 65 85;
-  --color-media-placeholder-contrast: 71 85 105;
-  --color-media-placeholder-strong: 148 163 184;
-  --color-card-outline: 31 41 55;
-  --color-card-shadow: 71 85 105;
-  --color-related-articles: 30 41 59 / 0.5;
-  --color-placeholder: 30 41 59;
-  --color-page-header-outline: 31 41 55;
-  --color-pager: 226 232 240;
-  --color-pager-disabled: 51 65 85;
-  --color-circle-link-hover: 148 163 184;
-  --color-circle-selected-outline: 55 48 163;
-  --color-list-outline: 30 41 59;
-  --color-inline-code: 251 146 60;
-  --color-highlight: 202 138 4;
-  --color-list-item: 15 23 42;
-  --color-template-card: 15 23 42;
-  --color-chip: 71 85 105;
-  --color-circle-outline: 30 41 59;
-  --color-circle-selected: 51 65 85;
-  --color-divider: 209 213 219 / 0.2;
-  --color-interaction-foreground: var(--color-foreground) / 0.3;
 }
 
-/* The ones read from the page's own colours also resolve inside the article reader, which redefines
-   them for what it holds */
+/* The article reader redefines foreground, so the ones read from it resolve again inside it */
 .article-page {
-  --color-heading-foreground: var(--color-foreground);
-  --color-toast-contrast: var(--color-foreground);
-  --color-error-surface-contrast: var(--color-foreground);
-  --color-warning-surface-contrast: var(--color-foreground);
-  --color-fancy-check: var(--color-page-background);
-  --color-remove-control-contrast: var(--color-foreground);
-  --color-popover: var(--color-background);
-  --color-interaction-foreground: var(--color-foreground) / 0.2;
+  --color-error-container-contrast: var(--color-foreground);
+  --color-warning-container-contrast: var(--color-foreground);
 }
 
 .dark .article-page {
-  --color-heading-foreground: 255 255 255;
-  --color-toast-contrast: 203 213 225;
-  --color-error-surface-contrast: 255 255 255;
-  --color-warning-surface-contrast: 0 0 0;
-  --color-fancy-check: 55 65 81;
-  --color-remove-control-contrast: var(--color-foreground);
-  --color-popover: 15 23 42;
-  --color-interaction-foreground: var(--color-foreground) / 0.3;
+  --color-error-container-contrast: 255 255 255;
+  --color-warning-container-contrast: 0 0 0;
 }

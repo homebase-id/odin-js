@@ -110,7 +110,7 @@ export const ImageSelector = ({
           }}
         >
           <Exclamation className="m-auto h-8 w-8" />
-          <p className="text-center text-faint-foreground">{label ?? t('No image selected')}</p>
+          <p className="text-center text-muted-foreground">{label ?? t('No image selected')}</p>
         </div>
       )}
 

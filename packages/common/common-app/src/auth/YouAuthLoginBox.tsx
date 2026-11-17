@@ -112,12 +112,12 @@ export const YouAuthLoginBox = ({
         <div className="flex flex-col">
           <label
             htmlFor="youauth-identity"
-            className="text-sm leading-7 text-helper-foreground"
+            className="text-sm leading-7 text-muted-foreground"
           >
             Homebase Id
           </label>
           <input
-            className="w-full rounded border border-outline bg-field-raised px-3 py-1 text-base leading-8 text-field-contrast outline-none transition-colors duration-200 ease-in-out focus:border-accent focus:ring-2 focus:ring-focus-ring"
+            className="w-full rounded border border-outline bg-background px-3 py-1 text-base leading-8 text-foreground outline-none transition-colors duration-200 ease-in-out focus:border-primary focus:ring-2 focus:ring-primary"
             type="text"
             name="homebase-id"
             id="youauth-identity"
@@ -134,13 +134,13 @@ export const YouAuthLoginBox = ({
           {error ? <span className="text-sm text-destructive">{error}</span> : null}
         </div>
 
-        <button className="my-3 block cursor-pointer rounded-md bg-accent px-4 py-2 text-center text-accent-contrast hover:brightness-90">
+        <button className="my-3 block cursor-pointer rounded-md bg-primary px-4 py-2 text-center text-primary-contrast hover:brightness-90">
           Login
         </button>
       </form>
       <p className="text-center">or</p>
       <a
-        className="my-3 block rounded-md bg-tonal-button px-4 py-2 text-center text-tonal-button-contrast hover:brightness-90"
+        className="my-3 block rounded-md bg-secondary px-4 py-2 text-center text-secondary-contrast hover:brightness-90"
         href="https://homebase.id/sign-up"
         target="_blank"
         rel="noopener noreferrer"

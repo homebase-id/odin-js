@@ -81,7 +81,7 @@ export const PostMeta = ({
       <span>{date.toLocaleDateString(undefined, format)}</span>
       {channel ? (
         <a
-          className="text-primary ml-1 flex flex-row items-center gap-1 border-l border-byline-divider pl-1 hover:underline"
+          className="text-primary ml-1 flex flex-row items-center gap-1 border-l border-outline-variant pl-1 hover:underline"
           href={channelLink}
           onClick={(e) => e.stopPropagation()}
         >
@@ -196,7 +196,7 @@ export const ToGroupBlock = ({
     <span className={className}>
       {t('to')}{' '}
       <a
-        className="text-accent hover:underline inline-flex items-center flex-row gap-1"
+        className="text-primary hover:underline inline-flex items-center flex-row gap-1"
         href={channelLink}
         onClick={(e) => e.stopPropagation()}
       >

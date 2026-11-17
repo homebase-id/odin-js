@@ -29,6 +29,21 @@
   --color-error-container: 255 218 212;
   --color-error-container-hover: 240 201 195;
   --color-error-container-contrast: 65 0 2;
+  --color-error-surface: var(--color-error-container);
+
+  /* ExtendedColors, and the RequestBanner for warnings */
+  --color-success: 76 175 80;
+  --color-warning: 255 152 0;
+  --color-info: 33 150 243;
+  --color-warning-container: 255 217 163;
+  --color-warning-container-contrast: 61 44 26;
+  --color-highlight: var(--color-primary-container);
+
+  --color-syntax-key: 29 78 216;
+  --color-syntax-string: 21 128 61;
+  --color-syntax-number: 194 65 12;
+  --color-syntax-boolean: 126 34 206;
+  --color-syntax-null: 190 18 60;
 }
 
 .dark {
@@ -58,6 +73,12 @@
   --color-error-container: 147 0 6;
   --color-error-container-hover: 156 17 23;
   --color-error-container-contrast: 255 218 214;
+
+  --color-syntax-key: 147 197 253;
+  --color-syntax-string: 134 239 172;
+  --color-syntax-number: 253 186 116;
+  --color-syntax-boolean: 216 180 254;
+  --color-syntax-null: 253 164 175;
 }
 
 /* The Sidenav, the chat app's grey NavigationRail */
@@ -72,135 +93,4 @@
 
 .dark {
   --color-nav-more: var(--color-surface-container);
-}
-
-/* Shared components, from the roles above */
-:root {
-  --color-scrim: 0 0 0 / 0.4; /* TransparentInverse3 */
-  --color-surface: var(--color-background);
-  --color-surface-contrast: var(--color-foreground);
-  --color-strong-foreground: var(--color-foreground);
-  --color-heading-foreground: var(--color-foreground);
-  --color-faint-foreground: var(--color-muted-foreground);
-  --color-caption-foreground: var(--color-muted-foreground);
-  --color-hint-foreground: var(--color-muted-foreground);
-  --color-accent: var(--color-primary);
-  --color-accent-strong: var(--color-primary);
-  --color-accent-contrast: var(--color-primary-contrast);
-  --color-focus-ring: var(--color-primary);
-  --color-focus-ring-soft: var(--color-primary);
-  --color-destructive-strong: var(--color-destructive);
-  --color-success: 76 175 80; /* ExtendedColors.Success */
-  --color-warning: 255 152 0; /* ExtendedColors.Warning */
-  --color-info: 33 150 243; /* ExtendedColors.Info */
-  --color-error: var(--color-destructive);
-  --color-dialog-contrast: var(--color-foreground);
-  --color-dialog-info: var(--color-primary);
-  --color-dialog-error: var(--color-destructive);
-  --color-dialog-cancel: var(--color-surface-container-high);
-  --color-dialog-cancel-hover: var(--color-surface-container-highest);
-  --color-dialog-cancel-contrast: var(--color-foreground);
-  --color-dialog-cancel-outline: var(--color-outline-variant);
-  --color-menu: var(--color-surface-container);
-  --color-menu-hover: var(--color-foreground) / 0.08; /* M3 hover state layer */
-  --color-menu-outline: var(--color-outline-variant);
-  --color-menu-label: var(--color-muted-foreground);
-  --color-light-menu: var(--color-surface-container);
-  --color-light-menu-contrast: var(--color-foreground);
-  --color-toast-contrast: var(--color-foreground);
-  --color-error-surface: var(--color-error-container);
-  --color-error-surface-contrast: var(--color-error-container-contrast);
-  --color-error-surface-outline: var(--color-error-container);
-  --color-warning-surface: 255 217 163; /* RequestBanner */
-  --color-warning-surface-contrast: 61 44 26; /* OnRequestBanner */
-  --color-warning-surface-outline: 255 217 163; /* RequestBanner */
-  --color-code-surface: var(--color-surface-container-lowest);
-  --color-code-surface-hover: var(--color-surface-container-high);
-  --color-code-outline: var(--color-outline-variant);
-  --color-code-outline-strong: var(--color-outline);
-  --color-code-divider: var(--color-outline-variant);
-  --color-code-label: var(--color-muted-foreground);
-  --color-code-contrast: var(--color-foreground);
-  --color-code-focus-ring: var(--color-primary);
-  --color-syntax-key: 29 78 216; /* the same */
-  --color-syntax-string: 21 128 61; /* the same */
-  --color-syntax-number: 194 65 12; /* the same */
-  --color-syntax-boolean: 126 34 206; /* the same */
-  --color-syntax-null: 190 18 60; /* the same */
-  --color-syntax-punctuation: var(--color-muted-foreground);
-  --color-field: var(--color-surface-container-lowest);
-  --color-field-raised: var(--color-surface-container-lowest);
-  --color-field-contrast: var(--color-foreground);
-  --color-helper-foreground: var(--color-muted-foreground);
-  --color-tonal-button: var(--color-secondary);
-  --color-tonal-button-contrast: var(--color-secondary-contrast);
-  --color-check: var(--color-surface-container-lowest);
-  --color-check-outline: var(--color-outline);
-  --color-check-accent: var(--color-primary);
-  --color-check-ring: var(--color-primary);
-  --color-check-ring-offset: var(--color-background);
-  --color-fancy-check: var(--color-page-background);
-  --color-check-selected: var(--color-primary);
-  --color-check-selected-hover: var(--color-primary) / 0.5;
-  --color-toggle-track: var(--color-surface-container-highest);
-  --color-toggle-thumb: 255 255 255;
-  --color-toggle-thumb-outline: var(--color-outline);
-  --color-toggle-focus-ring: var(--color-primary);
-  --color-segment-selected: var(--color-primary);
-  --color-remove-control: var(--color-error-container);
-  --color-remove-control-contrast: var(--color-error-container-contrast);
-  --color-link-hover: var(--color-surface-container-highest);
-  --color-comment-field: var(--color-surface-container-high);
-  --color-comment-bubble: var(--color-surface-container-high);
-  --color-skeleton: var(--color-surface-container-highest);
-  --color-comment-meta-divider: var(--color-outline-variant);
-  --color-tooltip: var(--color-foreground); /* inverse of the page */
-  --color-tooltip-contrast: var(--color-background);
-  --color-popover: var(--color-surface-container);
-  --color-reaction-selected: var(--color-secondary);
-  --color-emoji-picker-outline: var(--color-outline-variant);
-  --color-embed-outline: var(--color-outline-variant);
-  --color-source-chip: var(--color-surface-container-highest);
-  --color-media-backdrop: 0 0 0; /* black in both themes, behind photos */
-  --color-media-backdrop-contrast: 255 255 255; /* white in both themes */
-  --color-byline-divider: var(--color-outline-variant);
-  --color-media-placeholder: var(--color-surface-container-high);
-  --color-media-placeholder-contrast: var(--color-outline-variant);
-  --color-media-placeholder-strong: var(--color-muted-foreground);
-  --color-card-outline: var(--color-outline-variant);
-  --color-card-shadow: 0 0 0 / 0.1;
-  --color-related-articles: var(--color-surface-container-low);
-  --color-error-page: var(--color-error-container);
-  --color-error-page-contrast: var(--color-error-container-contrast);
-  --color-placeholder: var(--color-surface-container-high);
-  --color-page-header-outline: var(--color-outline-variant);
-  --color-pager: var(--color-foreground);
-  --color-pager-disabled: var(--color-foreground) / 0.38; /* M3 disabled content */
-  --color-avatar-placeholder: var(--color-surface-container-high);
-  --color-circle-link-hover: var(--color-primary);
-  --color-circle-selected-outline: var(--color-primary);
-  --color-list-outline: var(--color-outline-variant);
-  --color-inline-code: var(--color-primary);
-  --color-highlight: var(--color-primary-container);
-  --color-list-item: var(--color-surface-container-low);
-  --color-template-card: var(--color-surface-container-high);
-  --color-chip: var(--color-secondary);
-  --color-document-surface: var(--color-surface-container-low);
-  --color-document-contrast: var(--color-foreground);
-  --color-document-button: var(--color-primary);
-  --color-document-button-hover: var(--color-primary) / 0.9;
-  --color-circle-outline: var(--color-outline-variant);
-  --color-circle-selected: var(--color-secondary);
-  --color-divider: var(--color-outline-variant);
-  --color-interaction-foreground: var(--color-muted-foreground);
-}
-
-.dark {
-  --color-syntax-key: 147 197 253;
-  --color-syntax-string: 134 239 172;
-  --color-syntax-number: 253 186 116;
-  --color-syntax-boolean: 216 180 254;
-  --color-syntax-null: 253 164 175;
-  --color-fancy-check: var(--color-surface-container-highest);
-  --color-card-shadow: 0 0 0 / 0.3;
 }

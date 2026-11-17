@@ -41,7 +41,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     <div
       className={[
         'group rounded-xl border shadow-sm',
-        'border-code-outline bg-code-surface',
+        'border-outline-variant bg-surface-container-lowest',
         'prose prose-zinc dark:prose-invert',
         className ?? '',
       ].join(' ')}
@@ -49,8 +49,8 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
       role="region"
     >
       {showHeader && (
-        <div className="flex items-center justify-between border-b border-code-divider px-4 py-2">
-          <div className="text-xs font-semibold uppercase tracking-widest text-code-label">
+        <div className="flex items-center justify-between border-b border-outline-variant px-4 py-2">
+          <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {title}
           </div>
           <CopyButton getText={getCopyText} />
@@ -79,10 +79,10 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
                         : t.cls === 'null'
                           ? 'text-syntax-null italic'
                           : t.cls === 'punct'
-                            ? 'text-syntax-punctuation'
+                            ? 'text-muted-foreground'
                             : t.cls === 'ws'
                               ? ''
-                              : 'text-code-contrast';
+                              : 'text-foreground';
 
               return (
                 <span key={i} className={cls}>

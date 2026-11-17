@@ -121,7 +121,7 @@ export const CommentEditor = ({
   const hasContent = body?.length || attachment;
 
   return (
-    <div className="ml-2 flex-grow rounded-lg bg-comment-field px-2 py-1 relative">
+    <div className="ml-2 flex-grow rounded-lg bg-surface-container-high px-2 py-1 relative">
       <div className={`flex ${hasContent ? 'flex-col' : 'flex-row'}`}>
         <VolatileInput
           defaultValue={body}

@@ -20,7 +20,7 @@ export const PageMeta = ({
   icon?: FC<IconProps>;
 }) => {
   return (
-    <section className="-mx-2 -mt-4 mb-4 border-b border-page-header-outline bg-surface px-2 py-1 sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4">
+    <section className="-mx-2 -mt-4 mb-4 border-b border-outline-variant bg-background px-2 py-1 sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4">
       <div className="flex-col">
         {breadCrumbs && (
           <ul className="mb-2 hidden flex-row xl:flex">
@@ -43,7 +43,7 @@ export const PageMeta = ({
         <div className="flex w-full flex-row flex-wrap items-end gap-5">
           {title && (
             <>
-              <h1 className="my-auto flex flex-row text-2xl text-heading-foreground xl:text-3xl">
+              <h1 className="my-auto flex flex-row text-2xl text-foreground xl:text-3xl">
                 {Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7 my-auto mr-2 flex-shrink-0" />}{' '}
                 {title}
               </h1>

@@ -49,7 +49,7 @@ export const CirclePermissionView = ({
     ) : (
       <Link
         to={`${new DotYouClient({ hostIdentity: loggedInIdentity, api: ApiType.App }).getRoot()}${getOwnerCirclePath(circleDef.appId, circleDef.id || '')}`}
-        className={`hover:text-circle-link-hover hover:underline ${
+        className={`hover:text-primary hover:underline ${
           className ?? ''
         }`}
       >
@@ -58,9 +58,9 @@ export const CirclePermissionView = ({
     );
 
   const checkedClasses = isChecked
-    ? 'border-circle-selected-outline'
+    ? 'border-primary'
     : isChecked === false
-      ? 'border-list-outline'
+      ? 'border-outline-variant'
       : '';
 
   return (
@@ -74,7 +74,7 @@ export const CirclePermissionView = ({
         <p className={`my-auto leading-none`}>
           {circleDef.disabled && t('Disabled:')} {circleDef?.name}
           {permissionDetails && `: ${permissionDetails}`}
-          <span className="text-sm block text-faint-foreground">
+          <span className="text-sm block text-muted-foreground">
             {isSystemCircle ? t('This is a built-in circle.') : circleDef.description || ' '}
           </span>
         </p>

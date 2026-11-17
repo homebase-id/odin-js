@@ -81,7 +81,7 @@ const ImageUploadAndCrop = ({
         accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif"
         className={`${
           uploadedImageUrl ? 'sr-only' : 'w-full'
-        } rounded border border-outline bg-field-raised px-3 py-1 text-base leading-8 text-field-contrast outline-none transition-colors duration-200 ease-in-out focus:border-accent focus:ring-2 focus:ring-focus-ring-soft`}
+        } rounded border border-outline bg-background px-3 py-1 text-base leading-8 text-foreground outline-none transition-colors duration-200 ease-in-out focus:border-primary focus:ring-2 focus:ring-primary`}
       />
       {uploadedImageUrl ? (
         isCropping ? (
@@ -94,7 +94,7 @@ const ImageUploadAndCrop = ({
             />
             {disableClear ? null : (
               <button
-                className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-remove-control p-2 text-remove-control-contrast"
+                className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-error-container p-2 text-error-container-contrast"
                 onClick={() => reset()}
               >
                 <Trash className="h-5 w-5" />
@@ -120,7 +120,7 @@ const ImageUploadAndCrop = ({
             />
             {disableClear ? null : (
               <button
-                className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-remove-control p-2 text-remove-control-contrast"
+                className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-error-container p-2 text-error-container-contrast"
                 onClick={() => reset()}
               >
                 <Trash className="h-5 w-5" />

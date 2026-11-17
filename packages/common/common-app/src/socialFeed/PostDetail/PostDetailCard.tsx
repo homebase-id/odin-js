@@ -54,14 +54,14 @@ export const PostDetailCard = ({
 
   return (
     <div
-      className={`bg-background rounded-lg border-card-outline lg:border ${
+      className={`bg-background rounded-lg border-outline-variant lg:border ${
         className ?? ''
       }`}
     >
       <PostSource postFile={postFile} className="rounded-t-lg" />
       <div className="p-4">
         <div className="mb-5 flex w-full flex-col">
-          <div className="flex flex-row flex-wrap items-center pb-2 text-caption-foreground">
+          <div className="flex flex-row flex-wrap items-center pb-2 text-muted-foreground">
             {!post ? (
               <LoadingBlock className="mb-2 h-8 w-full max-w-xs" />
             ) : (

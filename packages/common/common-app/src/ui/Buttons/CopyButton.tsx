@@ -50,13 +50,13 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
         [
           'inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors',
           // Border
-          'border-code-outline-strong',
+          'border-outline',
           // Background
-          'bg-code-surface hover:bg-code-surface-hover',
+          'bg-surface-container-lowest hover:bg-surface-container-high',
           // Text
-          'text-code-contrast',
+          'text-foreground',
           // Focus ring
-          'focus:outline-none focus:ring-2 focus:ring-code-focus-ring',
+          'focus:outline-none focus:ring-2 focus:ring-primary',
         ].join(' ')
       }
     >

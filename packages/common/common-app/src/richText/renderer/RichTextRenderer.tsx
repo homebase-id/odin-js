@@ -101,7 +101,7 @@ export const RichTextRenderer = ({
 
     if (leaf.code) {
       children = (
-        <code className="bg-surface-container-high p-[2px_3px_1px] rounded-md text-inline-code font-mono text-sm border">
+        <code className="bg-surface-container-high p-[2px_3px_1px] rounded-md text-primary font-mono text-sm border">
           {children}
         </code>
       );

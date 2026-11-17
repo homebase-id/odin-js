@@ -97,14 +97,14 @@ export const PDFHandler: React.FC<PDFHandlerProps> = ({
           ref={iframeRef}
           src={displayUrl}
           title={fileName || 'PDF Viewer'}
-          className="w-full h-full min-h-[100dvh] border-none bg-document-surface"
+          className="w-full h-full min-h-[100dvh] border-none bg-surface-container-low"
           onLoad={() => setLoaded(true)}
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-          <p className="mb-4 text-document-contrast">Unable to render PDF inside this view.</p>
+          <p className="mb-4 text-foreground">Unable to render PDF inside this view.</p>
           <button
-            className="px-4 py-2 bg-document-button text-accent-contrast rounded-md hover:bg-document-button-hover focus:outline-none"
+            className="px-4 py-2 bg-primary text-primary-contrast rounded-md hover:bg-primary/90 focus:outline-none"
             onClick={() => openExternally(displayUrl)}
           >
             Open PDF Externally

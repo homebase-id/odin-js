@@ -9,10 +9,10 @@ export const CheckboxFancy = (
     >
       <input type="checkbox" className="peer sr-only" {...inputProps} />
       <div
-        className={`peer h-6 w-6 rounded-full bg-fancy-check
+        className={`peer h-6 w-6 rounded-full bg-page-background
             after:content-[''] after:absolute after:inset-0 after:rounded-full
             after:border-2 after:border-page-background after:bg-page-background
-            peer-checked:after:bg-check-selected group-hover:after:bg-check-selected-hover`}
+            peer-checked:after:bg-primary group-hover:after:bg-primary/50`}
       ></div>
     </label>
   );
