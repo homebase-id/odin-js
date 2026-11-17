@@ -59,8 +59,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
     const postPath = `${post.type === 'Article' ? 'read' : 'preview'}/${isExternal ? odinId : identity}/${
         channel?.fileMetadata.appData.uniqueId
     }/${post.id}`;
+    // Post is only clickable if it's an article; While media posts are clickable only on the media itself
     const isArticle = post.type === 'Article';
-    const clickable = isArticle; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
     const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
@@ -74,12 +74,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
         >
             <ErrorBoundary>
                 <FakeAnchor
-                    href={clickable ? postPath : undefined}
+                    href={isArticle ? postPath : undefined}
                     target="__blank"
                     rel="nofollow noreferrer"
                     preventScrollReset={true}
                     className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors ${
-                        clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
+                        isArticle ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
                     } dark:border-gray-800 lg:border`}
                 >
                     <PostSource postFile={postFile} className="rounded-t-lg"/>

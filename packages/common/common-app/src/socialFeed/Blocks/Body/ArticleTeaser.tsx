@@ -31,7 +31,7 @@ export const ArticleTeaser = ({
     : undefined;
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 break-words">
       {postFile.fileId && coverPayload?.contentType?.startsWith('image') ? (
         <Image
           odinId={odinId}

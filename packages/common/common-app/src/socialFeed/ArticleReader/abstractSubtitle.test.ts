@@ -39,6 +39,26 @@ describe('openingExcerpt', () => {
     expect(openingExcerpt(long, 80)).toBe(`${'a'.repeat(50)} ${'b'.repeat(29)}`);
   });
 
+  test('leaves out a code block or a quote it starts with', () => {
+    const code = {
+      type: 'code_block',
+      children: [{ type: 'code_line', children: [{ text: 'npm install' }] }],
+    };
+    const quote = { type: 'blockquote', children: [{ text: 'Someone said this.' }] };
+    expect(openingExcerpt([code, quote, p('The article starts here.')])).toBe(
+      'The article starts here.'
+    );
+  });
+
+  test('keeps the items of a list it starts with apart', () => {
+    const li = (text: string) => ({
+      type: 'li',
+      children: [{ type: 'lic', children: [{ text }] }],
+    });
+    const list = { type: 'ul', children: [li('Apples'), li('Pears'), li('Plums')] };
+    expect(openingExcerpt([list, p('Then the rest.')])).toBe('Apples Pears Plums Then the rest.');
+  });
+
   test('is a plain body as it is, and empty without one', () => {
     expect(openingExcerpt('Just  text')).toBe('Just text');
     expect(openingExcerpt(undefined)).toBe('');

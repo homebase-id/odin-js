@@ -11,6 +11,7 @@ import {
   t,
   useCanReact,
   useCommentSummary,
+  useCommentCount,
   useComments,
   useEmojiSummary,
   HOME_ROOT_PATH,
@@ -124,19 +125,13 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          {excludeComments ? null : !postDisabledComment && commentsHref ? (
-            <Link
-              to={commentsHref}
-              onAuxClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
-            >
-              <Bubble className="inline-block h-6 w-6" />
-              <CommentCount
-                context={reactionContext}
-                reactionPreview={parsedReactionPreview.comments}
-              />
-              <span className="sr-only">{t('comments')}</span>
-            </Link>
+          {excludeComments ? null : commentsHref ? (
+            <CommentsLink
+              href={commentsHref}
+              canComment={!postDisabledComment}
+              context={reactionContext}
+              reactionPreview={parsedReactionPreview.comments}
+            />
           ) : !postDisabledComment ? (
             <button
               className={`inline-flex items-center hover:text-black dark:hover:text-white ${
@@ -331,21 +326,32 @@ export const CommentSummary = ({
   ) : null;
 };
 
-const CommentCount = ({
+/** The 💬 and its count, linking to the comments: while they are open, or when there are some, as in the reader. */
+const CommentsLink = ({
+  href,
+  canComment,
   context,
   reactionPreview,
 }: {
+  href: string;
+  canComment: boolean;
   context: ReactionContext;
   reactionPreview?: CommentsReactionSummary;
 }) => {
-  const { data: totalCount } = useCommentSummary({
-    authorOdinId: context.odinId,
-    channelId: context.channelId,
-    postGlobalTransitId: context.target.globalTransitId,
-    reactionPreview: reactionPreview,
-  }).fetch;
+  const count = useCommentCount(context, reactionPreview);
+  if (!canComment && !count) return null;
 
-  return totalCount ? <span>{totalCount}</span> : null;
+  return (
+    <Link
+      to={href}
+      onAuxClick={(e) => e.stopPropagation()}
+      className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
+    >
+      <Bubble className="inline-block h-6 w-6" />
+      {count ? <span>{count}</span> : null}
+      <span className="sr-only">{t('comments')}</span>
+    </Link>
+  );
 };
 
 const CommentTeaserList = ({
