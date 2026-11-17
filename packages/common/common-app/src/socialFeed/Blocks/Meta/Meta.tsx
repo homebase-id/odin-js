@@ -249,35 +249,6 @@ const ExternalActions = ({
     },
   ];
 
-  // Only supported for posts that are marked as collaborative
-  if (postFile.fileMetadata.appData.content.isCollaborative) {
-    // disabling since editing in feed is broken
-    // options.push({
-    //   icon: Pencil,
-    //   label: t(
-    //     postFile.fileMetadata.appData.content.type === 'Article' ? 'Edit Article' : 'Edit post'
-    //   ),
-    //   onClick: (e) => {
-    //     e.stopPropagation();
-    //     if (postFile.fileMetadata.appData.content.type === 'Article') {
-    //       const targetUrl = `/apps/feed/edit/${odinId || window.location.host}/${
-    //         channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
-    //       }/${postFile.fileMetadata.appData.content.id}`;
-    //
-    //       if (window.location.host === odinId) {
-    //         // Navigate to own identity
-    //         window.location.href = `${host}${targetUrl}`;
-    //       } else {
-    //         if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
-    //         else window.location.href = targetUrl;
-    //       }
-    //     } else {
-    //       setIsEditOpen(true);
-    //     }
-    //   },
-    // });
-  }
-
   return (
     <>
       <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
@@ -349,35 +320,8 @@ const GroupChannelActions = ({
       },
     });
 
-    if (isAuthor && host) {
-      // Disabling for now since these are broken
-      // if(postFile.fileMetadata.appData.content.type === 'Article') {
-      //   options.push({
-      //     icon: Pencil,
-      //     label: t(
-      //         postFile.fileMetadata.appData.content.type === 'Article' ? 'Edit Article' : 'Edit post'
-      //     ),
-      //     onClick: (e) => {
-      //       e.stopPropagation();
-      //       if (postFile.fileMetadata.appData.content.type === 'Article') {
-      //         const targetUrl = `/apps/feed/edit/${odinId || window.location.host}/${
-      //             channel?.fileMetadata.appData.content.slug || channel?.fileMetadata.appData.uniqueId
-      //         }/${postFile.fileMetadata.appData.content.id}`;
-      //
-      //         if (window.location.host === odinId) {
-      //           // Navigate to own identity
-      //           window.location.href = `${host}${targetUrl}`;
-      //         } else {
-      //           if (window.location.pathname.startsWith(FEED_ROOT_PATH)) navigate(targetUrl);
-      //           else window.location.href = targetUrl;
-      //         }
-      //       } else {
-      //         setIsEditOpen(true);
-      //       }
-      //     },
-      //   });
-      // }
-    } else {
+    // Authors don't report their own post
+    if (!isAuthor || !host) {
       options.push({
         icon: Flag,
         label: `${t('Report')}`,

@@ -14,8 +14,6 @@ export const OwnerActions = ({
   postFile,
   channel,
 }: {
-  odinId?: string;
-  authorOdinId?: string;
   postFile: HomebaseFile<PostContent>;
   channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition> | undefined;
 }) => {
