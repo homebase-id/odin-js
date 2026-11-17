@@ -78,7 +78,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                     target="__blank"
                     rel="nofollow noreferrer"
                     preventScrollReset={true}
-                    className={`relative flex h-full flex-col rounded-lg border-outline-variant transition-colors ${
+                    className={`relative flex h-full flex-col rounded-lg transition-colors ${
                         isArticle ? 'hover:shadow-md hover:dark:shadow-outline-variant' : ''
                     } lg:border`}
                 >
@@ -95,7 +95,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                         </div>
                         <div className="flex w-20 flex-grow flex-col">
                             <div
-                                className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+                                className="mb-1 flex flex-col text-muted-foreground md:flex-row md:flex-wrap md:items-center">
                                 <h2>
                                     <AuthorName odinId={authorOdinId}/>
                                     <ToGroupBlock

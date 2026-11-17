@@ -38,7 +38,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
               fileKey={data?.owner.profileImageFileKey}
               lastModified={data?.owner.profileImageLastModified}
               previewThumbnail={data?.owner.profileImagePreviewThumbnail}
-              className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-outline-variant"
+              className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2"
               fit="cover"
               odinId={odinId}
             />

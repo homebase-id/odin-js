@@ -23,7 +23,7 @@ export const UnreachableIdentity = ({ className, postFile, odinId }: Unreachable
 
   return (
     <div
-      className={`w-full break-words rounded-lg ${className ?? ''} relative flex h-full flex-col rounded-lg border-outline-variant px-3 py-3 sm:px-4 lg:border`}
+      className={`w-full break-words rounded-lg ${className ?? ''} relative flex h-full flex-col rounded-lg px-3 py-3 sm:px-4 lg:border`}
     >
       <div className="flex flex-row justify-between">
         <div>

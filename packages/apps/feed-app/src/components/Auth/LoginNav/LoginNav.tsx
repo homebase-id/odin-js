@@ -26,14 +26,14 @@ const LoginNav = () => {
       {isOpen ? (
         <button
           key={'close'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-contrast`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-500`}
         >
           <Times className="h-5 w-5" />
         </button>
       ) : (
         <button
           key={'open'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-surface-container-highest`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isAuthenticated && identity ? (
@@ -48,7 +48,7 @@ const LoginNav = () => {
           className="fixed left-0 right-0 top-[4rem] z-40 sm:absolute sm:left-auto sm:top-[3.5rem]"
           ref={wrapperRef}
         >
-          <div className="min-w-[20rem] bg-surface-container-high p-8 pt-6 shadow-md">
+          <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">
             {isAuthenticated ? (
               <>
                 <p className="mb-4">
@@ -68,7 +68,7 @@ const LoginNav = () => {
                 </p>
                 <button
                   onClick={() => logoutOwnerAndAllApps()}
-                  className="mt-2 block w-full rounded border-0 bg-primary px-4 py-2 text-primary-contrast hover:brightness-90 focus:outline-none"
+                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
                 >
                   {t('logout')}
                 </button>

@@ -69,7 +69,7 @@ export const ChannelsPage = () => {
               <div key={'new'}>
                 <div
                   onClick={() => setIsAddNew(true)}
-                  className="flex cursor-pointer flex-row items-center rounded-md border border-outline-variant bg-background px-4 py-4"
+                  className="flex cursor-pointer flex-row items-center rounded-md border bg-background px-4 py-4"
                 >
                   <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
                 </div>
@@ -114,7 +114,7 @@ export const ChannelsPage = () => {
                 setDiscoverCollaborativeChannels(true);
                 setTimeout(() => refetchCollaborativeChannels(), 100);
               }}
-              className="flex cursor-pointer flex-row items-center rounded-md border border-outline-variant bg-background px-4 py-4"
+              className="flex cursor-pointer flex-row items-center rounded-md border bg-background px-4 py-4"
             >
               {isRefetchingCollaborativeChannels && discoverCollaborativeChannels ? (
                 <Loader className="mr-2 h-5 w-5" />

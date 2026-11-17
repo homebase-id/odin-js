@@ -529,7 +529,7 @@ const ProgressIndicator = ({
       {postState === 'error' ? (
         t('Error')
       ) : (
-        <span className="animate-pulse text-sm text-foreground text-opacity-40">
+        <span className="animate-pulse text-sm text-muted-foreground">
           {progressText}
         </span>
       )}

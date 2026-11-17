@@ -106,9 +106,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <IdentityLink className="overflow-hidden rounded-md border border-outline-variant bg-background shadow-sm hover:shadow-md hover:dark:shadow-outline-variant" />
-                    <FollowHomebase className="rounded-md border border-outline-variant bg-background shadow-sm" />
-                    <ChannelsOverview className="rounded-md border border-outline-variant bg-background shadow-sm" />
+                    <IdentityLink className="overflow-hidden rounded-md border bg-background shadow-sm hover:shadow-md hover:dark:shadow-outline-variant" />
+                    <FollowHomebase className="rounded-md border bg-background shadow-sm" />
+                    <ChannelsOverview className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}
@@ -117,9 +117,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <ConnectionsView className="rounded-md border border-outline-variant bg-background shadow-sm" />
-                    <FollowingView className="rounded-md border border-outline-variant bg-background shadow-sm" />
-                    <FollowersView className="rounded-md border border-outline-variant bg-background shadow-sm" />
+                    <ConnectionsView className="rounded-md border bg-background shadow-sm" />
+                    <FollowingView className="rounded-md border bg-background shadow-sm" />
+                    <FollowersView className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}

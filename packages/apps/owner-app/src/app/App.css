@@ -26,7 +26,7 @@
 }
 
 .dark select option {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark select optgroup {
@@ -39,23 +39,4 @@
 
 .dark iframe {
   color-scheme: auto;
-}
-
-html.dark {
-  background-color: rgb(var(--color-page-background));
-}
-
-/* Borders default to the scheme's outline-variant, in light and dark */
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: color-mix(
-      in oklab,
-      rgb(var(--color-outline-variant)) var(--tw-border-alpha, 100%),
-      transparent
-    );
-  }
 }

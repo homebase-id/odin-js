@@ -94,3 +94,29 @@
 .dark {
   --color-nav-more: var(--color-surface-container);
 }
+
+/* The article reader's paper and ink (articleProse.css) in the reader's own muted text and tonal fills */
+.article-page {
+  --color-muted-foreground: var(--article-muted-rgb);
+  --color-secondary: var(--article-surface-rgb);
+  --color-secondary-contrast: var(--article-on-surface-rgb);
+}
+
+html {
+  background-color: rgb(var(--color-page-background));
+}
+
+/* Borders default to the scheme's outline-variant, in light and dark */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: color-mix(
+      in oklab,
+      rgb(var(--color-outline-variant)) var(--tw-border-alpha, 100%),
+      transparent
+    );
+  }
+}
