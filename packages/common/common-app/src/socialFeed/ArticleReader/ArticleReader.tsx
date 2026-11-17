@@ -18,12 +18,13 @@ import {
   ReactionContext,
 } from '@homebase-id/js-lib/public';
 import { HomebaseFile, NewHomebaseFile } from '@homebase-id/js-lib/core';
-// Self-hosted, so reading an article sends nothing to a font service; the files load with the first
-// article, as KaTeX's do in ArticleDoc
-import '@fontsource-variable/source-serif-4/opsz.css';
-import '@fontsource-variable/source-serif-4/opsz-italic.css';
+// Journal's Inter, self-hosted, so reading an article sends nothing to a font service; the files load
+// with the first article, as KaTeX's do in ArticleDoc
+import '@fontsource-variable/inter';
 import '../../richText/article/articleProse.css';
 import type { ArticleHeading } from '../../richText/article/headingSlugs';
+import { ImageLightbox, type LightboxImage } from '../../dialogs/ImageLightbox/ImageLightbox';
+import { abstractSubtitle } from './abstractSubtitle';
 import {
   t,
   ArticleBody,
@@ -54,8 +55,8 @@ const RESPONSES_ID = 'reader_responses';
 
 /**
  * An article as a page of its own, for long reading: the cover, title, abstract and byline, the body
- * in the serif reading scale (articleProse.css), an "On this page" rail from 1280px, then the
- * reactions and the responses.
+ * in Journal's type scale (articleProse.css), an "On this page" rail from 1280px, then the reactions
+ * and the responses. The cover and every image in the body open full screen.
  */
 export const ArticleReader = ({
   odinId,
@@ -118,6 +119,8 @@ export const ArticleReader = ({
   const headings = useArticleHeadings(article);
   const rail = headings.length >= MIN_TOC_HEADINGS ? headings : undefined;
   const proseRef = useRef<HTMLDivElement>(null);
+  const articleRef = useRef<HTMLElement>(null);
+  const [zoom, setZoom] = useState<{ images: LightboxImage[]; index: number }>();
 
   useEscape(onBack);
   useArrivalHash(proseRef);
@@ -127,6 +130,36 @@ export const ArticleReader = ({
     : undefined;
   const minutes = Math.ceil(article.readingTimeStats?.minutes ?? 0);
   const channelLink = useChannelLink(odinId, channel);
+  const subtitle = abstractSubtitle(article.abstract, article.body);
+
+  /** Opens the clicked image full screen, among all of the article's in document order. */
+  const openImage = (e: MouseEvent<HTMLElement>) => {
+    const trigger = (e.target as Element).closest?.('[data-zoom-image]');
+    if (!(trigger instanceof HTMLElement) || !articleRef.current) return;
+    const triggers = Array.from(
+      articleRef.current.querySelectorAll<HTMLElement>('[data-zoom-image]')
+    );
+    const targetDrive = getChannelDrive(article.channelId);
+    const images = triggers.map(({ dataset }): LightboxImage => {
+      const { fileKey, fileId, globalTransitId, src, alt } = dataset;
+      return fileKey && fileId
+        ? {
+            targetDrive,
+            fileKey,
+            fileId,
+            globalTransitId,
+            odinId,
+            lastModified: updated,
+            previewThumbnail: payloads?.find((payload) => payload.key === fileKey)
+              ?.previewThumbnail,
+            alt,
+          }
+        : { src: src ?? '', alt };
+    });
+    // Where focus goes back to when the viewer closes (a click doesn't focus a button in Safari)
+    trigger.focus({ preventScroll: true });
+    setZoom({ images, index: triggers.indexOf(trigger) });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground" onClick={jumpInPlace}>
@@ -144,30 +177,41 @@ export const ArticleReader = ({
           rail ? 'xl:grid xl:grid-cols-[minmax(6.25rem,1fr)_680px_minmax(22rem,1fr)]' : ''
         }`}
       >
-        <article className="mx-auto w-full max-w-[680px] xl:col-start-2">
+        <article
+          ref={articleRef}
+          className="mx-auto w-full max-w-[680px] xl:col-start-2"
+          onClick={openImage}
+        >
           {cover && postFile.fileId ? (
             <div className="article-wide mb-8 sm:mb-10">
-              <PrimaryMedia
-                odinId={odinId}
-                file={cover}
+              <CoverZoom
+                image={cover.contentType?.startsWith('image/')}
+                fileKey={cover.key}
                 fileId={article.primaryMediaFile?.fileId || postFile.fileId}
                 globalTransitId={globalTransitId}
-                lastModified={updated}
-                channelId={article.channelId}
-                previewThumbnail={cover.previewThumbnail}
-                probablyEncrypted={isEncrypted}
-                fit="cover"
-                className="aspect-[2/1] w-full rounded-xl"
-              />
+              >
+                <PrimaryMedia
+                  odinId={odinId}
+                  file={cover}
+                  fileId={article.primaryMediaFile?.fileId || postFile.fileId}
+                  globalTransitId={globalTransitId}
+                  lastModified={updated}
+                  channelId={article.channelId}
+                  previewThumbnail={cover.previewThumbnail}
+                  probablyEncrypted={isEncrypted}
+                  fit="cover"
+                  className="aspect-[2/1] w-full rounded-xl"
+                />
+              </CoverZoom>
             </div>
           ) : null}
 
-          <h1 className="text-balance text-[30px] font-bold leading-[1.2] tracking-[-0.02em] sm:text-[44px] sm:leading-[1.12]">
+          <h1 className="article-font text-balance text-[30px] font-bold leading-[1.2] tracking-[-0.02em] sm:text-[44px] sm:leading-[1.12]">
             {article.caption}
           </h1>
-          {article.abstract ? (
-            <p className="article-serif mt-4 text-[19px] leading-[1.45] text-foreground/65 sm:text-[22px]">
-              {article.abstract}
+          {subtitle ? (
+            <p className="article-font mt-4 text-[20px] leading-[1.5] text-foreground/65">
+              {subtitle}
             </p>
           ) : null}
 
@@ -229,6 +273,7 @@ export const ArticleReader = ({
               article={article}
               tableOfContents={true}
               options={bodyOptions}
+              zoomImages={true}
             />
           </div>
 
@@ -280,9 +325,48 @@ export const ArticleReader = ({
           </aside>
         ) : null}
       </div>
+
+      {zoom ? (
+        <ImageLightbox
+          images={zoom.images}
+          startIndex={zoom.index}
+          onClose={() => setZoom(undefined)}
+        />
+      ) : null}
     </div>
   );
 };
+
+/** The cover as a button that opens it full screen, as the body's images are (`data-zoom-image`). */
+const CoverZoom = ({
+  image,
+  fileKey,
+  fileId,
+  globalTransitId,
+  children,
+}: {
+  /** Only an image opens: a video cover plays where it is */
+  image?: boolean;
+  fileKey: string;
+  fileId: string;
+  globalTransitId?: string;
+  children: ReactNode;
+}) =>
+  image ? (
+    <button
+      type="button"
+      data-zoom-image=""
+      data-file-key={fileKey}
+      data-file-id={fileId}
+      data-global-transit-id={globalTransitId}
+      aria-label={t('View cover image full screen')}
+      className="block w-full cursor-zoom-in rounded-xl"
+    >
+      {children}
+    </button>
+  ) : (
+    <>{children}</>
+  );
 
 /** The sticky bar: back on the left, the post's menu on the right; a hairline once scrolled. */
 const ReaderBar = ({ onBack, children }: { onBack?: () => void; children: ReactNode }) => {

@@ -12,6 +12,8 @@ export type ArticleDocProps = {
   options?: ArticleDocOptions;
   className?: string;
   tableOfContents?: boolean;
+  /** Images open a full-screen viewer: see ArticleDocRenderer */
+  zoomImages?: boolean;
 };
 
 type Resolved = { doc: JSONContent } | { failed: true } | undefined;

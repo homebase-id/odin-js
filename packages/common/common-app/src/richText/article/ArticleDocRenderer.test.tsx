@@ -76,7 +76,7 @@ test('renders every block of all-blocks.json', () => {
   expect(html).toContain('katex-display');
 
   // Code is highlighted
-  expect(html).toMatch(/<span class="text-purple-700[^"]*">const<\/span>/);
+  expect(html).toMatch(/<span class="text-\[#a626a4\][^"]*">const<\/span>/);
 
   // Tables, task lists, callouts, toggles
   expect(html).toContain('<table');
@@ -198,6 +198,30 @@ test('images with a fileKey need the post options', () => {
     content: [{ type: 'paragraph', content: [{ type: 'image', attrs: { fileKey: 'k' } }] }],
   };
   expect(render(doc, { options: undefined })).not.toContain('<img');
+});
+
+test('with zoomImages, each image that loads is a button carrying what the viewer needs', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/a.png', alt: 'First' } },
+      {
+        type: 'gallery',
+        attrs: { layout: 'grid' },
+        content: [
+          { type: 'image', attrs: { src: 'https://x.example/b.png' } },
+          { type: 'image', attrs: { src: 'javascript:alert(1)' } },
+        ],
+      },
+    ],
+  };
+  expect(render(doc)).not.toContain('data-zoom-image');
+  const html = render(doc, { zoomImages: true });
+  expect(html.match(/<button type="button" data-zoom-image=""/g)).toHaveLength(2);
+  expect(html).toContain('data-src="https://x.example/a.png" data-alt="First"');
+  expect(html).toContain('aria-label="First: view full screen"');
+  expect(html).toContain('data-src="https://x.example/b.png"');
+  expect(html).not.toContain('javascript:');
 });
 
 const malformed = {
@@ -470,7 +494,7 @@ describe('a note published from Journal', () => {
     expect(html).not.toContain('k3f9');
     expect(html).not.toMatch(/="[^"]*id=x/);
     // react is highlighted as JavaScript
-    expect(html).toMatch(/<span class="text-purple-700[^"]*">export<\/span>/);
+    expect(html).toMatch(/<span class="text-\[#a626a4\][^"]*">export<\/span>/);
   });
 
   test('shows live blocks as code under a label, and an svg drawing as an image, until LiveBlock loads', () => {
