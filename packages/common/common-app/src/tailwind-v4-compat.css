@@ -14,6 +14,17 @@
     ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
 
+  /* v3's font-size line heights were lengths, so inline children of another size (a <small> in an
+     h2) inherited the length; v4's are ratios, which grows the line box by a pixel or two. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
   /* v4 shifted the scales down one step (v3 shadow-sm is v4 shadow-xs, and so on). Keep the
      v3 values for the names the shared code uses; the bare shadow, rounded and blur match already. */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -62,6 +73,17 @@
   textarea,
   select {
     background-color: Field;
+  }
+
+  /* v4's preflight sets `font: inherit` on form controls; v3 inherited the family, size and weight
+     but left the style, so a button in italic text stayed upright. */
+  button,
+  input,
+  select,
+  optgroup,
+  textarea,
+  ::file-selector-button {
+    font-style: normal;
   }
 
   /* Read by inline styles in common-app (LikeButton's emoji tint). */
