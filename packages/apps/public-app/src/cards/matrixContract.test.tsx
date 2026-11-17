@@ -162,7 +162,7 @@ describe('chat-kmp matrix fixtures', () => {
       if (f.audience === 'circle') {
         expect(texts).toContain('Friends only');
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,friends-key');
-        expect(f.payload.audience).toEqual({ kind: 'circle', label: 'Friends' });
+        expect(f.payload.audience).toEqual({ kind: 'circle' });
       } else {
         expect(texts).toEqual(['Public site']);
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,public-key');
@@ -254,8 +254,9 @@ describe('portrait size on every layout that declares it', () => {
     specs.specs[id].options.includes('PORTRAIT_SIZE')
   );
 
-  it('every layout is declared', () => {
-    expect([...declaring].sort()).toEqual(Object.keys(CARD_PRESETS).sort());
+  it('every layout that draws a portrait declares it', () => {
+    const drawing = Object.keys(specs.specs).filter((id) => specs.specs[id].portraitSlots > 0);
+    expect([...declaring].sort()).toEqual(drawing.sort());
   });
 
   it.each(declaring)('%s: small and large change the output on card and page', (layout) => {

@@ -1,0 +1,23 @@
+{
+    "type": "9832dc5dd4ba12dd60acb853e7588f49",
+    "visibility": "connected",
+    "data": {
+        "design": "dossier",
+        "overrides": {
+            "socials": "bar",
+            "fields": {
+                "order": [
+                    "bbbbbbbb-0000-4000-8000-000000000004",
+                    "bbbbbbbb-0000-4000-8000-000000000003",
+                    "bbbbbbbb-0000-4000-8000-000000000006",
+                    "bbbbbbbb-0000-4000-8000-000000000005"
+                ],
+                "hidden": [
+                    "bbbbbbbb-0000-4000-8000-000000000001",
+                    "bbbbbbbb-0000-4000-8000-000000000002"
+                ]
+            }
+        }
+    },
+    "priority": 0
+}
