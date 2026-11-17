@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { codeLanguage } from '@homebase-id/js-lib/public';
-import { liveBlockKind, svgDataUri } from './codeInfo';
+import { liveBlockKind, svgDataUri } from '@2002bishwajeet/live-blocks/core';
 
 describe('code info strings', () => {
   it('name live blocks by their language only', () => {

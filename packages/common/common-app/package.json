@@ -29,6 +29,7 @@
     "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
+    "@2002bishwajeet/live-blocks": "0.1.0",
     "@homebase-id/js-lib": "*",
     "@tiptap/core": "3.32.2",
     "@tiptap/pm": "3.32.2",
