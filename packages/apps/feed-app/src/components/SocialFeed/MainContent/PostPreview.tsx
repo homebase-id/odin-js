@@ -64,6 +64,16 @@ const PostPreview = ({
     };
   }, []);
 
+  // An article opens in the reader, full page; old preview links to one keep working
+  const isArticle = post?.fileMetadata.appData.content.type === 'Article' && !attachmentKey;
+  useEffect(() => {
+    if (!isArticle) return;
+    navigate(
+      `${location.pathname.replace('/preview/', '/read/')}${location.search}${location.hash}`,
+      { replace: true, state: location.state }
+    );
+  }, [isArticle]);
+
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => doClose());
 
@@ -72,6 +82,7 @@ const PostPreview = ({
   const rootUrl = paths.join('/');
 
   if (fetchedPost && !post) return <NotFound />;
+  if (isArticle) return null;
 
   return (
     <div

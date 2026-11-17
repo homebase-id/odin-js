@@ -8,7 +8,8 @@ import {
   sanitizeArticleDoc,
   type ArticleDocOptions,
 } from './ArticleDocRenderer';
-import { slugify, uniqueHeadingIds } from './headingSlugs';
+import { articleHeadings, slugify, uniqueHeadingIds } from './headingSlugs';
+import { cleanTiptapDoc } from '@homebase-id/js-lib/public';
 
 // Browser-only code (window at import time); stand-ins show what they were given
 vi.mock('../../media/Image', () => ({
@@ -158,6 +159,14 @@ test('a table of contents lists 3+ headings with unique ids', () => {
   expect(
     render({ type: 'doc', content: [heading('One'), heading('Two')] }, { tableOfContents: true })
   ).not.toContain('Table of contents');
+});
+
+test("the reader's heading list has the ids the viewer renders", () => {
+  for (const doc of [allBlocks, journalNote]) {
+    const rendered = [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
+    expect(rendered.length).toBeGreaterThan(0);
+    expect(articleHeadings(cleanTiptapDoc(doc)).map((heading) => heading.id)).toEqual(rendered);
+  }
 });
 
 test('images with a fileKey need the post options', () => {

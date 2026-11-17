@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Layout, MinimalLayout } from '../components/ui/Layout/Layout';
+import { Layout, MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -22,6 +22,7 @@ const NavigateToReferencedPost = lazy(() =>
   }))
 );
 
+const ArticleReaderPage = lazy(() => import('../templates/SocialFeed/ArticleReaderPage'));
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
 const ArticleDuplicatePage = lazy(() => import('../templates/SocialFeed/ArticleDuplicatePage'));
 const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
@@ -93,6 +94,16 @@ function App() {
               element={<IncomingCollaborativeChannelPage />}
             />
           </Route>
+
+          {/* An article, full page: */}
+          <Route
+            path="read/:identityKey/:channelKey/:postKey"
+            element={
+              <NoLayout noShadedBg={true}>
+                <ArticleReaderPage />
+              </NoLayout>
+            }
+          />
 
           <Route
             path="*"

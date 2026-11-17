@@ -35,6 +35,7 @@ export const PostInteracts = ({
   defaultExpanded,
   allowExpand = true,
   showSummary = false,
+  excludeComments,
   className,
   login,
 }: {
@@ -46,6 +47,8 @@ export const PostInteracts = ({
   defaultExpanded?: boolean;
   allowExpand?: boolean;
   showSummary?: boolean;
+  /** Leave out the comments toggle, count and list: for a page that shows the comments itself */
+  excludeComments?: boolean;
   className?: string;
   login?: () => void;
 }) => {
@@ -117,7 +120,7 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          {!postDisabledComment ? (
+          {!postDisabledComment && !excludeComments ? (
             <button
               className={`inline-flex items-center hover:text-black dark:hover:text-white ${
                 !toggleable ? 'pointer-events-none' : ''
@@ -132,7 +135,7 @@ export const PostInteracts = ({
               <span className="sr-only">{t('Toggle comments')}</span>
             </button>
           ) : null}
-          {!showSummary ? (
+          {!showSummary && !excludeComments ? (
             <CommentSummary
               context={reactionContext}
               reactionPreview={parsedReactionPreview.comments}
@@ -141,7 +144,7 @@ export const PostInteracts = ({
           ) : null}
         </div>
       </div>
-      {isExpanded ? (
+      {excludeComments ? null : isExpanded ? (
         <div
           className="grid cursor-default grid-flow-row gap-2  pb-4"
           onClick={(e) => e.stopPropagation()}
@@ -353,7 +356,7 @@ const CommentTeaserList = ({
   );
 };
 
-const CommentList = ({
+export const CommentList = ({
   context,
   canReact,
   login,

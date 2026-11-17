@@ -32,6 +32,7 @@ export * from './RelatedArticles/RelatedArticles';
 
 export * from './PostDetail/PostDetailCard';
 export * from './PostDetail/PostImageDetailCard';
+export * from './ArticleReader/ArticleReader';
 
 export * from './PostListItem/PostTeaser';
 export * from './PostListItem/PostTextListItem';

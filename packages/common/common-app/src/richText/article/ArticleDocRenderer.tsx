@@ -57,7 +57,7 @@ import {
   watchGalleryAspect,
   type GalleryLayout,
 } from './galleryLayout';
-import { slugify, uniqueHeadingIds } from './headingSlugs';
+import { articleHeadings, type ArticleHeading } from './headingSlugs';
 import { Image } from '../../media/Image';
 import { Mention } from '../renderer/Mention';
 import type { RichTextRenderer } from '../renderer/RichTextRenderer';
@@ -90,20 +90,13 @@ const textOf = (node: Node): string =>
 
 const idSafe = (id: unknown) => String(id ?? '').replace(/[^\w-]/g, '');
 
-type Heading = { node: Node; id: string; level: number; text: string };
-
 /**
  * Heading ids (unique slugs) and footnote numbers (in reference order) of a document, walked depth
  * first in document order. Takes a sanitized document.
  */
 const indexDoc = (doc: Node) => {
-  const found: Omit<Heading, 'id'>[] = [];
   const footnotes = new Map<string, number>();
   const walk = (node: Node) => {
-    if (node.type === 'heading') {
-      const text = textOf(node).trim();
-      found.push({ node, text, level: Math.min(6, Math.max(1, Number(node.attrs?.level) || 1)) });
-    }
     if (node.type === 'footnoteReference') {
       const id = idSafe(node.attrs?.id);
       if (!footnotes.has(id)) footnotes.set(id, footnotes.size + 1);
@@ -111,8 +104,7 @@ const indexDoc = (doc: Node) => {
     node.content?.forEach(walk);
   };
   walk(doc);
-  const ids = uniqueHeadingIds(found.map((heading) => slugify(heading.text)));
-  const headings: Heading[] = found.map((heading, i) => ({ ...heading, id: ids[i] }));
+  const headings = articleHeadings(doc);
   return {
     headings,
     headingIds: new Map(headings.map((heading) => [heading.node, heading.id])),
@@ -1032,34 +1024,41 @@ export const ArticleDocRenderer = ({
     [headingIds, footnotes, options, odinId]
   );
 
-  const toc = tableOfContents && headings.length >= 3 ? headings : undefined;
-  const topLevel = toc ? Math.min(...toc.map((heading) => heading.level)) : 1;
-
   return (
     <ArticleDocContext.Provider value={context}>
       <div className={`break-words ${className ?? ''}`}>
-        {toc ? (
-          <nav
-            aria-label="Table of contents"
-            className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm"
-          >
-            <p className="mb-2 font-semibold">Contents</p>
-            <ol>
-              {toc.map((heading) => (
-                <li
-                  key={heading.id}
-                  style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}
-                >
-                  <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
-                    {heading.text}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-        ) : null}
+        {tableOfContents && headings.length >= 3 ? <TableOfContents headings={headings} /> : null}
         {body}
       </div>
     </ArticleDocContext.Provider>
+  );
+};
+
+/** The headings to jump to, above the body: open from 640px, closed on a phone. */
+const TableOfContents = ({ headings }: { headings: ArticleHeading[] }) => {
+  // Only the first render reads the width: after that the box stays as the reader left it
+  const [open] = useState(
+    () => typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 640px)').matches
+  );
+  const topLevel = Math.min(...headings.map((heading) => heading.level));
+  return (
+    <nav
+      aria-label="Table of contents"
+      data-article-toc=""
+      className="mb-6 rounded-lg border border-foreground/10 px-4 py-3 text-sm"
+    >
+      <details open={open}>
+        <summary className="cursor-pointer font-semibold">Contents</summary>
+        <ol className="mt-2">
+          {headings.map((heading) => (
+            <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
+              <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    </nav>
   );
 };
