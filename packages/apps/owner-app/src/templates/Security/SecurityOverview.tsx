@@ -105,7 +105,7 @@ export const SecurityOverview = () => {
                 {/* Password Status */}
                 <SettingsRow label={t('Password last verified:')}>
                   {(info?.status?.passwordLastVerified ?? 0) > 0 && (
-                    <div className="flex">
+                    <div className="flex text-success">
                       <Check className="mr-2 h-4 w-4 text-success" />
                       {t('Verified')}
                       <TimeAgoUtc
@@ -118,7 +118,7 @@ export const SecurityOverview = () => {
                   <Link
                     to=""
                     onClick={() => setOpenDialog('verify-password')}
-                    className="text-primary underline"
+                    className="text-primary underline hover:no-underline"
                   >
                     {t('Verify now')}
                   </Link>
@@ -132,7 +132,7 @@ export const SecurityOverview = () => {
                       {t('Not Verified')}
                       <Link
                         to="/owner/security/password-recovery?gs=1"
-                        className="ml-2 text-primary underline"
+                        className="ml-2 text-primary underline hover:no-underline"
                       >
                         {t('Setup now')}
                       </Link>
@@ -147,7 +147,7 @@ export const SecurityOverview = () => {
                 <SettingsRow label={t('Email monthly security health report:')}>
                   {monthlyStatusReportEnabled ? (
                     <>
-                      <div className="flex items-center">
+                      <div className="flex items-center text-success">
                         <Check className="mr-2 h-4 w-4 text-success" />
                         {t('Enabled')}
                       </div>
@@ -155,7 +155,7 @@ export const SecurityOverview = () => {
                       <Link
                         to=""
                         onClick={disableMonthlyReport}
-                        className="text-primary underline"
+                        className="text-primary underline hover:no-underline"
                       >
                         {t('Disable now')}
                       </Link>
@@ -167,7 +167,7 @@ export const SecurityOverview = () => {
                       <Link
                         to=""
                         onClick={enableMonthlyReport}
-                        className="text-primary underline"
+                        className="text-primary underline hover:no-underline"
                       >
                         {t('Enable now')}
                       </Link>
@@ -180,7 +180,7 @@ export const SecurityOverview = () => {
                   <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
                     <SettingsRow label={t('Recovery phrase last verified:')}>
                       {(info?.status?.recoveryKeyLastVerified ?? 0) > 0 ? (
-                        <div className="flex items-center">
+                        <div className="flex items-center text-success">
                           <Check className="mr-2 h-4 w-4 text-success" />
                           {t('Verified')}
                           <TimeAgoUtc
@@ -195,7 +195,7 @@ export const SecurityOverview = () => {
                       <Link
                         to=""
                         onClick={() => setOpenDialog('verify-recovery-phrase')}
-                        className="text-primary underline"
+                        className="text-primary underline hover:no-underline"
                       >
                         {t('Verify now')}
                       </Link>
@@ -213,7 +213,7 @@ export const SecurityOverview = () => {
                     </p>
                     <Link
                       to="/owner/security/password-recovery?rp=1"
-                      className="mt-2 inline-block text-primary underline"
+                      className="mt-2 inline-block text-primary underline hover:no-underline"
                     >
                       {t('Go store your recovery phrase now')}
                     </Link>
@@ -229,7 +229,7 @@ export const SecurityOverview = () => {
         {/*  title={*/}
         {/*    <div className="flex flex-col">*/}
         {/*      {t('Login history')}*/}
-        {/*      <small className="text-sm text-muted-foreground">*/}
+        {/*      <small className="text-sm text-gray-400">*/}
         {/*        {t('Logins across apps')}*/}
         {/*      </small>*/}
         {/*    </div>*/}
@@ -279,7 +279,7 @@ export const SecurityOverview = () => {
           {info?.email && <span className="break-all text-foreground">{info.email}</span>}
 
           {isVerified ? (
-            <span className="flex items-center text-sm">
+            <span className="flex items-center text-sm text-success">
               <Check className="mr-1 h-4 w-4 text-success" aria-hidden="true" />
               {t('Verified')}
               <TimeAgoUtc
@@ -295,7 +295,7 @@ export const SecurityOverview = () => {
                 <button
                   type="button"
                   onClick={() => setOpenDialog('verify-email')}
-                  className="ml-2 text-primary underline"
+                  className="ml-2 text-primary underline hover:no-underline"
                 >
                   {t('Verify now')}
                 </button>
@@ -307,7 +307,7 @@ export const SecurityOverview = () => {
         <button
           type="button"
           onClick={() => setOpenDialog('change-email')}
-          className="self-start whitespace-nowrap text-primary underline sm:self-auto sm:text-base"
+          className="self-start whitespace-nowrap text-primary underline hover:no-underline sm:self-auto sm:text-base"
         >
           {t('Change')}
         </button>

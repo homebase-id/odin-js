@@ -1,6 +1,6 @@
 import {
   useRemoveNotifications,
-  OWNER_APP_ID, useDotYouClient, formatDateExludingYearIfCurrent,
+  OWNER_APP_ID, useDotYouClient, formatDateExludingYearIfCurrent, ActionButton,
 } from '@homebase-id/common-app';
 import {useEffect, useState} from 'react';
 import {
@@ -69,18 +69,22 @@ const ApproveAndReleaseShardsTabs = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
+                <ActionButton
+                  type="primary"
+                  size="none"
                   onClick={() => handleApprove(r)}
-                  className="px-3 py-1 rounded bg-primary text-primary-contrast hover:brightness-90"
+                  className="px-3 py-1 w-auto"
                 >
                   Approve
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
+                  type="remove"
+                  size="none"
                   onClick={() => handleReject(r)}
-                  className="px-3 py-1 rounded bg-error-container text-error-container-contrast hover:bg-error-container-hover"
+                  className="px-3 py-1 w-auto"
                 >
                   Reject
-                </button>
+                </ActionButton>
               </div>
             </li>
           ))}

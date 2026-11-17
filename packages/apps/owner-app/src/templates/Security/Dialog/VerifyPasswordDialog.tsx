@@ -93,7 +93,7 @@ export const VerifyPasswordDialog = ({
                     {/*<SubtleMessage>*/}
                     {/*    <div>*/}
                     {/*        Forgot your password? {' '}*/}
-                    {/*        <Link to={'/owner/security/password-recovery'} className="text-primary underline">*/}
+                    {/*        <Link to={'/owner/security/password-recovery'} className="text-blue-600 underline">*/}
                     {/*            Click here*/}
                     {/*        </Link>*/}
                     {/*        {' '} to request to view it.*/}

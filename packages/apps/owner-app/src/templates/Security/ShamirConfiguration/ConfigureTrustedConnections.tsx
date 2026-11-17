@@ -218,7 +218,7 @@ const SelectedConnectionItem = ({
                 )}
 
                 {!canApprove && verificationStatus !== "loading" && (
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-warning">
                         {t("Can't approve until they log in to Homebase again")}
                     </span>
                 )}
@@ -245,7 +245,7 @@ const SelectedConnectionItem = ({
                 {allowRemove && (
                     <button
                         onClick={onRemove}
-                        className="text-destructive text-sm sm:text-xs sm:bg-destructive sm:px-2 sm:py-1 sm:rounded sm:text-destructive-contrast sm:hover:bg-destructive-hover"
+                        className="text-destructive text-sm hover:underline sm:hover:no-underline sm:text-xs sm:bg-destructive sm:px-2 sm:py-1 sm:rounded sm:text-destructive-contrast sm:hover:bg-destructive-hover"
                     >
                         {t("Remove")}
                     </button>

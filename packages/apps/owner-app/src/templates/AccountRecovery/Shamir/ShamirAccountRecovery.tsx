@@ -309,7 +309,7 @@ const ShamirAccountRecovery = () => {
                       <Arrow className="ml-auto h-5 w-5"/>
                     </ActionButton>
                   </div>
-                  {/*<hr className="mb-5 mt-7"/>*/}
+                  {/*<hr className="mb-5 mt-7 dark:border-slate-700"/>*/}
 
                 </form>
               )}

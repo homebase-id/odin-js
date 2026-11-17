@@ -60,7 +60,7 @@ export function DealerRecoveryRiskHeadlineText({report}: {
     }
 
     return (
-        <span className="flex items-center gap-1">
+        <span className={`flex items-center gap-1 ${report.riskLevel === RecoveryRiskLevel.High || report.riskLevel === RecoveryRiskLevel.Critical ? "text-destructive" : ""}`}>
             <Icon className={`h-4 w-4 ${iconColor}`}/>
             {text}
         </span>

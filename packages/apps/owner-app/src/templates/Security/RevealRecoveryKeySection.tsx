@@ -304,7 +304,7 @@ const GenerateNewRecoveryKeySection = () => {
       {/* Post-generation alert */}
       {status === "success" && (
         <div className="mb-4 rounded-md border-l-4 border-success bg-surface-container-high p-4">
-          <p className="font-semibold">{t("Important Security Notice")}</p>
+          <p className="font-semibold text-success">{t("Important Security Notice")}</p>
           <p className="text-sm">
             {t("Store your recovery phrase in a secure location, such as a password manager or offline storage.")}
           </p>
