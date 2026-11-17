@@ -36,6 +36,15 @@
 
   --color-button: var(--color-primary);
   --color-button-text: var(--color-primary-contrast);
+
+  /* Sidenav, as chat-kmp's NavigationRail: surfaceContainerHigh, onSurfaceVariant icons, a
+     primaryContainer indicator; the More menu on surfaceContainer, its divider outlineVariant */
+  --color-nav: var(--color-surface-container-high);
+  --color-nav-foreground: var(--color-muted-foreground);
+  --color-nav-active: var(--color-primary-container);
+  --color-nav-active-foreground: var(--color-on-primary-container);
+  --color-nav-more: var(--color-surface-container);
+  --color-nav-outline: var(--color-outline-variant);
 }
 
 .dark {
@@ -93,4 +102,11 @@
 
   --color-button: rgb(var(--color-button));
   --color-button-text: rgb(var(--color-button-text));
+
+  --color-nav: rgb(var(--color-nav));
+  --color-nav-foreground: rgb(var(--color-nav-foreground));
+  --color-nav-active: rgb(var(--color-nav-active));
+  --color-nav-active-foreground: rgb(var(--color-nav-active-foreground));
+  --color-nav-more: rgb(var(--color-nav-more));
+  --color-nav-outline: rgb(var(--color-nav-outline));
 }

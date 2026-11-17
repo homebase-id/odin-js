@@ -18,10 +18,26 @@
 :root {
   --error-container: #fecaca;
   --on-error-container: currentColor;
+
+  /* Sidenav's colours, as they were before it moved to tokens: indigo-100, -200, #d4ddff, gray-200 */
+  --color-nav: 224 231 255;
+  --color-nav-foreground: 0 0 0;
+  --color-nav-active: 199 210 254;
+  --color-nav-active-foreground: 0 0 0;
+  --color-nav-more: 212 221 255;
+  --color-nav-outline: 229 231 235;
 }
 .dark {
   --error-container: #b91c1c;
   --on-error-container: #fff;
+
+  /* indigo-900, -700, #3730a3, slate-500 */
+  --color-nav: 49 46 129;
+  --color-nav-foreground: 255 255 255;
+  --color-nav-active: 67 56 202;
+  --color-nav-active-foreground: 255 255 255;
+  --color-nav-more: 55 48 163;
+  --color-nav-outline: 100 116 139;
 }
 
 .dark iframe {

@@ -39,13 +39,13 @@ import {ApiType} from "@homebase-id/js-lib/core";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
-const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-indigo-200/40 dark:hover:bg-indigo-700/50`;
-const navItemActiveClassname = `bg-indigo-200 dark:bg-indigo-700`;
+const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-nav-active/50`;
+const navItemActiveClassname = `bg-nav-active text-nav-active-foreground`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
-const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
-const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
+const sidebarBg = 'bg-nav text-nav-foreground';
+const moreBg = 'bg-nav-more text-nav-foreground';
 
 export const Sidenav = ({
                           disablePinning,
@@ -103,7 +103,7 @@ export const Sidenav = ({
               {canPin ? (
                 <button
                   className={`${navItemClassName} ${
-                    isPinned ? 'md:bg-indigo-200 md:dark:bg-indigo-700 rounded-md' : ''
+                    isPinned ? 'md:bg-nav-active rounded-md' : ''
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
@@ -113,7 +113,7 @@ export const Sidenav = ({
               ) : isOpen || isPeeking ? (
                 <button
                   className={`${navItemClassName} ${
-                    isOpen ? 'md:bg-indigo-200 md:dark:bg-indigo-700 xl:hidden' : ''
+                    isOpen ? 'md:bg-nav-active xl:hidden' : ''
                   }`}
                   onClick={() => {
                     setIsPeeking(false);
@@ -226,7 +226,7 @@ const MoreItems = ({
       </a>
 
       <div
-        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-500 dark:shadow-slate-700 ${moreBg} ${
+        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md ${moreBg} ${
           isOpen ? '' : 'hidden'
         }`}
         onClick={() => setIsOpen(false)}
@@ -243,7 +243,7 @@ const MoreItems = ({
 
         {logout ? (
           <>
-            <hr className="border-b dark:border-slate-500"/>
+            <hr className="border-b border-nav-outline"/>
             <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
               <Person className={`${iconClassName}`}/>
               <span className={`my-auto ml-3`}>Log out</span>

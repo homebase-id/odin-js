@@ -19,6 +19,13 @@ module.exports = {
         'destructive-contrast': '#fff',
         'error-container': 'var(--error-container)',
         'on-error-container': 'var(--on-error-container)',
+        // Sidenav's colours (common-app Sidenav)
+        nav: 'rgb(var(--color-nav) / <alpha-value>)',
+        'nav-foreground': 'rgb(var(--color-nav-foreground) / <alpha-value>)',
+        'nav-active': 'rgb(var(--color-nav-active) / <alpha-value>)',
+        'nav-active-foreground': 'rgb(var(--color-nav-active-foreground) / <alpha-value>)',
+        'nav-more': 'rgb(var(--color-nav-more) / <alpha-value>)',
+        'nav-outline': 'rgb(var(--color-nav-outline) / <alpha-value>)',
 
         'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
         background: 'rgb(var(--color-background) / <alpha-value>)',
