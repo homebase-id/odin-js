@@ -28,6 +28,7 @@ vi.mock('@homebase-id/common-app', () => ({
   }),
   useDotYouClientContext: () => ({
     isOwner: () => false,
+    isAuthenticated: () => false,
     getLoggedInIdentity: () => 'visitor.dotyou.cloud',
   }),
 }));
@@ -302,5 +303,104 @@ describe('portrait shape', () => {
     const html = draw('board', [{ shape: 'rounded' }]);
     expect(html).toContain('rounded-[22%]');
     expect(html).not.toContain('rounded-full');
+  });
+});
+
+describe('portrait size', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const withPhoto = { ...data, photo, header: photo } as CardData;
+  const draw = (layout: keyof typeof CARD_PRESETS, size: unknown, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      portraits: [{ source: 'photo', shape: 'circle', size }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={withPhoto} />
+        ) : (
+          <HomebaseCard design={design} data={withPhoto} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const LAYOUTS = ['poster', 'board', 'collage', 'dossier', 'links'] as const;
+
+  it.each(LAYOUTS)('%s: medium is the same as no size, small and large differ', (layout) => {
+    for (const wide of [false, true]) {
+      const plain = draw(layout, undefined, wide);
+      expect(draw(layout, 'medium', wide)).toBe(plain);
+      const small = draw(layout, 'small', wide);
+      const large = draw(layout, 'large', wide);
+      expect(small).not.toBe(plain);
+      expect(large).not.toBe(plain);
+      expect(small).not.toBe(large);
+    }
+  });
+
+  it('scales the portrait box with zoom, so the name is pushed down rather than overlapped', () => {
+    expect(draw('links', 'small', false)).toContain('zoom:0.8');
+    expect(draw('links', 'large', false)).toContain('zoom:1.25');
+    expect(draw('links', 'medium', false)).not.toContain('zoom');
+  });
+});
+
+describe('links socials', () => {
+  const links = (variant: string, socials = data.socials) =>
+    renderToStaticMarkup(
+      <MemoryRouter>
+        <HomebaseCard
+          design={applyOverrides(CARD_PRESETS.links, { socials: variant })}
+          data={{ ...data, socials } as CardData}
+        />
+      </MemoryRouter>
+    );
+
+  it('glyphs and bar draw different cards', () => {
+    expect(links('glyphs')).not.toBe(links('bar'));
+    expect(links('bar')).toContain('rounded-full');
+  });
+
+  it.each([1, 2, 6])('wordmark draws one named tile per network (%i)', (count) => {
+    const socials = [...data.socials, ...data.socials].slice(0, count).map((s, i) => ({
+      ...s,
+      link: `${s.link}/${i}`,
+    }));
+    const html = links('wordmark', socials);
+    for (const s of socials) expect(html).toContain(`href="${s.link}"`);
+    expect(html.match(/capitalize/g)).toHaveLength(count);
+    expect(html).not.toContain('@frodo');
+  });
+
+  it('handles keep the @handle, wordmark leaves it out', () => {
+    expect(links('handles').match(/>@frodo</g)).toHaveLength(5);
+    expect(links('wordmark')).not.toContain('@frodo');
+  });
+});
+
+describe('background tint', () => {
+  const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const lum = (c: number[]) => {
+    const [r, g, b] = c.map((v) => {
+      const s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: number[], b: number[]) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  it('paints in the accent, not the ink', () => {
+    const html = render('links', { background: 'blobs' });
+    expect(html).toContain('text-[color:var(--card-accent)]');
+    expect(html).not.toContain('text-[color:var(--card-ink)] opacity');
+  });
+
+  it.each(Object.keys(CARD_PRESETS))('%s ink stays AA over a full-strength pattern', (layout) => {
+    const { ground, ink, accent } = CARD_PRESETS[layout as keyof typeof CARD_PRESETS].palette;
+    if (![ground, ink, accent].every((c) => /^#[0-9a-f]{6}$/i.test(c))) return;
+    const blended = rgb(ground).map((g, i) => g * 0.86 + rgb(accent)[i] * 0.14);
+    expect(contrast(rgb(ink), blended)).toBeGreaterThanOrEqual(4.5);
   });
 });

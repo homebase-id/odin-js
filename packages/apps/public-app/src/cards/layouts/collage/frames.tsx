@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { LayoutProps, Portrait } from '../../CardDesign';
+import { portraitZoom, type LayoutProps, type Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
 
@@ -43,8 +43,12 @@ export const Tape = ({ className }: { className: string }) => (
   />
 );
 
-const tilt = (deg?: number): CSSProperties | undefined =>
-  deg ? { transform: `rotate(${deg}deg)` } : undefined;
+const frameStyle = (portrait: Portrait): CSSProperties | undefined => {
+  const style: CSSProperties = {};
+  if (portrait.tilt) style.transform = `rotate(${portrait.tilt}deg)`;
+  if (portrait.size && portrait.size !== 'medium') style.zoom = portraitZoom(portrait.size);
+  return Object.keys(style).length ? style : undefined;
+};
 
 // A polaroid: the frame carries the tilt, tape and shadow; the picture sits square inside it
 export const Print = ({
@@ -58,7 +62,7 @@ export const Print = ({
   return (
     <div
       className={`relative bg-[var(--card-surface)] ${portrait.shadow ? FRAME_SHADOWS[portrait.shadow] : ''} ${className}`}
-      style={tilt(portrait.tilt)}
+      style={frameStyle(portrait)}
     >
       {portrait.tape ? <Tape className={tapeClassName} /> : null}
       <CardPortrait

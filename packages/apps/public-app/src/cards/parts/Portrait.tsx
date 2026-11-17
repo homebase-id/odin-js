@@ -1,6 +1,6 @@
 import { CardImg } from './CardImg';
 import type { CardData, CardPhoto } from '../useCardData';
-import type { Portrait } from '../CardDesign';
+import { portraitZoom, type Portrait } from '../CardDesign';
 
 const SHAPES: Record<Portrait['shape'], string> = {
   circle: 'rounded-full',
@@ -34,7 +34,12 @@ export const CardPortrait = ({
   return (
     <div
       className={`relative ${className ?? ''}`}
-      style={portrait.tilt ? { transform: `rotate(${portrait.tilt}deg)` } : undefined}
+      style={{
+        ...(portrait.tilt ? { transform: `rotate(${portrait.tilt}deg)` } : null),
+        ...(portrait.size && portrait.size !== 'medium'
+          ? { zoom: portraitZoom(portrait.size) }
+          : null),
+      }}
     >
       {portrait.tape ? (
         <span

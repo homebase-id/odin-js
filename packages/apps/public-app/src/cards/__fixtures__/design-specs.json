@@ -231,5 +231,10 @@
             "#14213D",
             "#F8F2C8"
         ]
-    }
+    },
+    "portraitSizes": [
+        "small",
+        "medium",
+        "large"
+    ]
 }
