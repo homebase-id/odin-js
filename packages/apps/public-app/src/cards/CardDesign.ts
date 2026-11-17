@@ -48,7 +48,13 @@ export type BlockKind = (typeof BLOCK_KINDS)[number];
 export type Presentation = (typeof PRESENTATIONS)[number];
 export type SocialsVariant = (typeof SOCIALS)[number];
 
+export const PORTRAIT_SIZES = ['small', 'medium', 'large'] as const;
+export type PortraitSize = (typeof PORTRAIT_SIZES)[number];
+const ZOOM: Record<PortraitSize, number> = { small: 0.8, medium: 1, large: 1.25 };
+export const portraitZoom = (size?: PortraitSize) => ZOOM[size ?? 'medium'];
+
 export type Portrait = {
+  size?: PortraitSize;
   source: 'photo' | 'header';
   shape: (typeof SHAPES)[number];
   ring?: number;

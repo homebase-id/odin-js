@@ -189,15 +189,68 @@ const SHAPES: Partial<Record<BackgroundId, ReactNode>> = {
   ),
 };
 
+type Rgb = [number, number, number];
+
+const parseColour = (c: string): [number, number, number, number] => {
+  const hex = /^#([0-9a-f]{6})$/i.exec(c);
+  if (hex) {
+    const n = parseInt(hex[1], 16);
+    return [n >> 16, (n >> 8) & 255, n & 255, 1];
+  }
+  const fn = /^rgba?\(([^)]+)\)$/.exec(c);
+  if (!fn) return [0, 0, 0, 1];
+  const [r, g, b, a = '1'] = fn[1].split(',').map((v) => v.trim());
+  return [+r, +g, +b, +a];
+};
+
+const flatten = (c: string, base: Rgb): Rgb => {
+  const [r, g, b, a] = parseColour(c);
+  return [r, g, b].map((v, i) => v * a + base[i] * (1 - a)) as Rgb;
+};
+
+const luminance = (c: Rgb) => {
+  const [r, g, b] = c.map((v) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+const contrast = (a: Rgb, b: Rgb) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+const MAX_OPACITY = 0.06;
+const AA = 4.5;
+
+// Strongest pattern opacity under which ink and muted text keep AA over it (when they pass AA bare).
+const patternOpacity = ({ palette }: CardDesign) => {
+  const ground = parseColour(palette.ground).slice(0, 3) as Rgb;
+  const accent = flatten(palette.accent, ground);
+  const text = [palette.ink, palette.muted].filter(
+    (t) => contrast(flatten(t, ground), ground) >= AA
+  );
+  const passes = (op: number) => {
+    const under = ground.map((g, i) => g * (1 - op) + accent[i] * op) as Rgb;
+    return text.every((t) => contrast(flatten(t, under), under) >= AA);
+  };
+  let op = MAX_OPACITY;
+  while (op > 0 && !passes(op)) op = Math.round((op - 0.0005) * 10000) / 10000;
+  return Math.max(op, 0);
+};
+
 export const CardBackground = ({ design }: { design: CardDesign }) => {
   const shapes = design.background ? SHAPES[design.background] : undefined;
   if (!shapes) return null;
+  const opacity = patternOpacity(design);
   return (
     <svg
       aria-hidden
       viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="xMidYMid slice"
-      className="pointer-events-none absolute inset-0 -z-10 h-full w-full text-[color:var(--card-ink)] opacity-[0.22]"
+      className="pointer-events-none absolute inset-0 -z-10 h-full w-full text-[color:var(--card-accent)]"
+      style={{ opacity }}
     >
       {shapes}
     </svg>

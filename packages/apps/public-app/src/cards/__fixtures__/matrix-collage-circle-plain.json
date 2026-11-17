@@ -30,7 +30,6 @@
         "posts": []
     },
     "audience": {
-        "kind": "circle",
-        "label": "Friends"
+        "kind": "circle"
     }
 }
