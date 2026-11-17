@@ -379,7 +379,7 @@ const OnThisPage = ({
   proseRef,
 }: {
   headings: ArticleHeading[];
-  proseRef: RefObject<HTMLElement>;
+  proseRef: RefObject<HTMLElement | null>;
 }) => {
   const active = useActiveHeading(headings, proseRef);
   const topLevel = Math.min(...headings.map((heading) => heading.level));
@@ -439,7 +439,7 @@ const useArticleHeadings = (article: Pick<Article, 'body' | 'bodyDoc'>) => {
 };
 
 /** The heading being read: the topmost one in a band below the bar, else the one scrolled past. */
-const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLElement>) => {
+const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLElement | null>) => {
   const [active, setActive] = useState<string>();
 
   useEffect(() => {
@@ -492,7 +492,7 @@ const useActiveHeading = (headings: ArticleHeading[], container: RefObject<HTMLE
  * and kept there while the body above it renders (the viewer's chunk, then its images), until the
  * reader scrolls, clicks or types, or 10 seconds pass.
  */
-const useArrivalHash = (body: RefObject<HTMLElement>) => {
+const useArrivalHash = (body: RefObject<HTMLElement | null>) => {
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     const element = body.current;
