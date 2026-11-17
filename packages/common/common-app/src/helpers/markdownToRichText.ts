@@ -6,7 +6,17 @@ type Node = Record<string, unknown>;
 type Marks = { bold?: true; italic?: true; strikethrough?: true };
 
 // Bare URLs and mentions are found by the caption regexes; link definitions stay literal text
-const md = new Marked({ gfm: true, tokenizer: { url: () => undefined, def: () => undefined } });
+const md = new Marked({
+  gfm: true,
+  tokenizer: {
+    url: (src) => {
+      const url = src.match(/^https?:\/\/[^\s<]+/)?.[0];
+      return url ? ({ type: 'text', raw: url, text: url } as unknown as Tokens.Link) : undefined;
+    },
+    del: (src) => (src.startsWith('~~') ? false : undefined),
+    def: () => undefined,
+  },
+});
 
 const isSafeUrl = (url: string) => /^(https?:|mailto:)/i.test(url.trim());
 
@@ -43,20 +53,20 @@ const isPlain = (token: Token) =>
   (token.type === 'paragraph' &&
     !!token.tokens?.every((inline) => ['text', 'br', 'image', 'html'].includes(inline.type)));
 
-const leaves = (text: string, marks: Marks): Node[] =>
-  ((getRichTextFromString(text) as Node[] | undefined) ?? [{ text }]).map((part) =>
+const leaves = (text: string, marks: Marks, inLink: boolean): Node[] =>
+  ((!inLink && (getRichTextFromString(text) as Node[] | undefined)) || [{ text }]).map((part) =>
     part.type ? part : { ...part, ...marks }
   );
 
-const inline = (tokens: Token[] = [], marks: Marks = {}): Node[] =>
+const inline = (tokens: Token[] = [], marks: Marks = {}, inLink = false): Node[] =>
   tokens.flatMap((token): Node[] => {
     switch (token.type) {
       case 'strong':
-        return inline(token.tokens, { ...marks, bold: true });
+        return inline(token.tokens, { ...marks, bold: true }, inLink);
       case 'em':
-        return inline(token.tokens, { ...marks, italic: true });
+        return inline(token.tokens, { ...marks, italic: true }, inLink);
       case 'del':
-        return inline(token.tokens, { ...marks, strikethrough: true });
+        return inline(token.tokens, { ...marks, strikethrough: true }, inLink);
       case 'codespan':
         return [{ text: token.text, code: true, ...marks }];
       case 'br':
@@ -64,18 +74,20 @@ const inline = (tokens: Token[] = [], marks: Marks = {}): Node[] =>
       case 'escape':
         return [{ text: token.text, ...marks }];
       case 'text':
-        return token.tokens ? inline(token.tokens, marks) : leaves(token.text, marks);
+        return token.tokens
+          ? inline(token.tokens, marks, inLink)
+          : leaves(token.text, marks, inLink);
       case 'link':
         return isSafeUrl(token.href)
-          ? [{ type: 'a', url: token.href, children: inline(token.tokens, marks) }]
-          : leaves(token.raw, marks);
+          ? [{ type: 'a', url: token.href, children: inline(token.tokens, marks, true) }]
+          : leaves(token.raw, marks, inLink);
       default:
-        return leaves(token.raw, marks);
+        return leaves(token.raw, marks, inLink);
     }
   });
 
 const blocks = (tokens: Token[]): Node[] =>
-  tokens.map(toSupported).flatMap((token): Node[] => {
+  tokens.flatMap((token): Node[] => {
     switch (token.type) {
       case 'space':
         return [];
@@ -89,14 +101,20 @@ const blocks = (tokens: Token[]): Node[] =>
         return [
           {
             type: token.ordered ? 'ol' : 'ul',
-            children: token.items.map((item: Tokens.ListItem) => ({
-              type: 'li',
-              children: blocks(item.tokens),
-            })),
+            children: token.items.map((item: Tokens.ListItem) => {
+              const box = item.task && item.raw.match(/\[[ xX]\] +/)?.[0];
+              if (box)
+                (item.tokens[0] as Tokens.Text)?.tokens?.unshift({
+                  type: 'text',
+                  raw: box,
+                  text: box,
+                });
+              return { type: 'li', children: blocks(item.tokens.map(toSupported)) };
+            }),
           },
         ];
       case 'blockquote':
-        return [{ type: 'blockquote', children: blocks(token.tokens ?? []) }];
+        return [{ type: 'blockquote', children: blocks((token.tokens ?? []).map(toSupported)) }];
       case 'code':
         return [
           {

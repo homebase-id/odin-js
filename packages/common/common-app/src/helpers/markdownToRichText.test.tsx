@@ -21,6 +21,9 @@ describe('plain captions keep the tree they get today', () => {
     'snake_case and file_name_here',
     '#tag #another',
     '2024. What a year',
+    'about ~5 km~ away',
+    'https://github.com/x/Lib/__init__.py',
+    'https://example.com/a*b*c',
     'Big news\n---',
     'Big news\n===',
     'First line\nsecond line\nthird line',
@@ -39,7 +42,10 @@ describe('plain captions keep the tree they get today', () => {
 describe('markdown', () => {
   test.each<[string, unknown]>([
     ['**bold** text', [p({ text: 'bold', bold: true }, { text: ' text' })]],
-    ['*it* and _it_', [p({ text: 'it', italic: true }, { text: ' and ' }, { text: 'it', italic: true })]],
+    [
+      '*it* and _it_',
+      [p({ text: 'it', italic: true }, { text: ' and ' }, { text: 'it', italic: true })],
+    ],
     ['~~gone~~', [p({ text: 'gone', strikethrough: true })]],
     ['***both***', [p({ text: 'both', italic: true, bold: true })]],
     ['use `npm ci`', [p({ text: 'use ' }, { text: 'npm ci', code: true })]],
@@ -55,10 +61,20 @@ describe('markdown', () => {
         },
       ],
     ],
-    ['# One', [{ type: 'h1', children: [{ text: 'One' }] }]],
-    ['## Two', [{ type: 'h2', children: [{ text: 'Two' }] }]],
-    ['### Three', [{ type: 'h3', children: [{ text: 'Three' }] }]],
-    ['###### Six', [{ type: 'h3', children: [{ text: 'Six' }] }]],
+    [
+      '# One\n## Two',
+      [
+        { type: 'h1', children: [{ text: 'One' }] },
+        { type: 'h2', children: [{ text: 'Two' }] },
+      ],
+    ],
+    [
+      '### Three\n###### Six',
+      [
+        { type: 'h3', children: [{ text: 'Three' }] },
+        { type: 'h3', children: [{ text: 'Six' }] },
+      ],
+    ],
     [
       '- a\n- **b**',
       [
@@ -112,10 +128,42 @@ describe('markdown', () => {
     ],
     ['**a**\nb', [p({ text: 'a', bold: true }, { text: '\nb' })]],
     [
-      'Big news\n---\n\n**more**',
-      [p({ text: 'Big news\n---' }), p({ text: 'more', bold: true })],
+      '**x**\n\n2024. What a year',
+      [p({ text: 'x', bold: true }), p({ text: '2024. What a year' })],
     ],
-    ['**x**\n\n2024. What a year', [p({ text: 'x', bold: true }), p({ text: '2024. What a year' })]],
+    [
+      '**b** https://example.com/a*b*c',
+      [
+        p(
+          { text: 'b', bold: true },
+          { text: ' ' },
+          { type: 'a', url: 'https://example.com/a*b*c', text: 'https://example.com/a*b*c' }
+        ),
+      ],
+    ],
+    [
+      '[see @frodo.dotyou.cloud at https://a.com](https://example.com)',
+      [
+        p({
+          type: 'a',
+          url: 'https://example.com',
+          children: [{ text: 'see @frodo.dotyou.cloud at https://a.com' }],
+        }),
+      ],
+    ],
+    ['~~gone~~ ~kept~', [p({ text: 'gone', strikethrough: true }, { text: ' ~kept~' })]],
+    [
+      '- [ ] task\n- **b**',
+      [
+        {
+          type: 'ul',
+          children: [
+            { type: 'li', children: [{ text: '[ ] ' }, { text: 'task' }] },
+            { type: 'li', children: [{ text: 'b', bold: true }] },
+          ],
+        },
+      ],
+    ],
     ['\\*not italic\\*', [p({ text: '*' }, { text: 'not italic' }, { text: '*' })]],
   ])('%j', (caption, expected) => {
     expect(markdownToRichText(caption)).toEqual(expected);
