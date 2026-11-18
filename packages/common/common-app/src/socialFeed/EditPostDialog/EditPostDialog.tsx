@@ -18,6 +18,7 @@ import {
 import { VolatileInput, FileOverview, AllContactMentionDropdown } from '../../form';
 import { t } from '../../helpers';
 import { useChannel, usePortal } from '../../hooks';
+import { usePostBody } from '../../hooks/socialFeed/post/usePostBody';
 import { ErrorNotification, DialogWrapper, ActionButton } from '../../ui';
 import { Save } from '../../ui/Icons';
 
@@ -43,6 +44,20 @@ export const EditPostDialog = ({
     channelKey: incomingPostFile.fileMetadata.appData.content.channelId,
   }).fetch;
 
+  const hasFullTextPayload = incomingPostFile.fileMetadata.payloads?.some(
+    (p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY
+  );
+  const { data: fullPost, error: fullPostError } = usePostBody({
+    targetDrive: getChannelDrive(incomingPostFile.fileMetadata.appData.content.channelId),
+    fileId: incomingPostFile.fileId,
+    odinId,
+    globalTransitId: incomingPostFile.fileMetadata.globalTransitId,
+    headerPostContent: incomingPostFile.fileMetadata.appData.content,
+    payloadKey: POST_FULL_TEXT_PAYLOAD_KEY,
+    enabled: isOpen && hasFullTextPayload,
+  });
+  const isFullTextLoaded = !hasFullTextPayload || !!fullPost;
+
   const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter(
@@ -55,7 +70,17 @@ export const EditPostDialog = ({
 
   useEffect(() => {
     if (incomingPostFile) {
-      setPostFile({ ...incomingPostFile });
+      setPostFile(
+        fullPost
+          ? {
+              ...incomingPostFile,
+              fileMetadata: {
+                ...incomingPostFile.fileMetadata,
+                appData: { ...incomingPostFile.fileMetadata.appData, content: fullPost },
+              },
+            }
+          : { ...incomingPostFile }
+      );
       const newMediaFiles = incomingPostFile.fileMetadata.payloads?.filter(
         (p) =>
           p.key !== DEFAULT_PAYLOAD_KEY &&
@@ -64,7 +89,7 @@ export const EditPostDialog = ({
       );
       if (newMediaFiles) setNewMediaFiles(newMediaFiles);
     }
-  }, [incomingPostFile]);
+  }, [incomingPostFile, fullPost]);
 
   useEffect(() => {
     if (updatePostStatus === 'success') onConfirm();
@@ -97,7 +122,7 @@ export const EditPostDialog = ({
 
   const dialog = (
     <>
-      <ErrorNotification error={updatePostError} />
+      <ErrorNotification error={updatePostError || fullPostError} />
       <DialogWrapper
         title={<div className="flex flex-row items-center">{t('Edit Post')}</div>}
         onClose={onCancel}
@@ -117,6 +142,7 @@ export const EditPostDialog = ({
             onChange={(newCaption) => {
               const dirtyPostFile = { ...postFile };
               dirtyPostFile.fileMetadata.appData.content.caption = newCaption;
+              dirtyPostFile.fileMetadata.appData.content.captionAsRichText = undefined;
               setPostFile(dirtyPostFile);
             }}
             placeholder={t("What's up?")}
@@ -136,7 +162,8 @@ export const EditPostDialog = ({
           <div className="gap-2 mt-3 flex flex-col sm:flex-row-reverse ">
             <ActionButton
               className={`${
-                postFile.fileMetadata.appData.content.caption?.length || newMediaFiles.length
+                isFullTextLoaded &&
+                (postFile.fileMetadata.appData.content.caption?.length || newMediaFiles.length)
                   ? ''
                   : 'pointer-events-none opacity-20 grayscale'
               }`}

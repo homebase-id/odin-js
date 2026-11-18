@@ -137,3 +137,9 @@ export const markdownToRichText = (caption: string): RichText | undefined => {
 
   return blocks(tokens) as RichText;
 };
+
+// Before Markdown, captions with a link or mention got the flat tree of getRichTextFromString
+export const spilledCaptionRichText = (caption: string, tree?: RichText): RichText | undefined =>
+  tree?.some((node) => node.type && node.type !== 'a' && node.type !== 'mention')
+    ? tree
+    : markdownToRichText(caption);

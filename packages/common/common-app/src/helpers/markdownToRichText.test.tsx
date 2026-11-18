@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { markdownToRichText } from './markdownToRichText';
+import { markdownToRichText, spilledCaptionRichText } from './markdownToRichText';
 import { getRichTextFromString } from './richTextHelper';
 import { RichTextRenderer } from '../richText/renderer/RichTextRenderer';
 
@@ -193,5 +193,20 @@ describe('unsafe input stays inert', () => {
     expect(html).not.toMatch(/<(script|img)/i);
     expect(html).not.toMatch(/href="(javascript|data):/i);
     expect(html).toContain('<strong');
+  });
+});
+
+describe('spilled captions', () => {
+  const caption = '# Title\n\n__[pica](https://example.com/pica)__ resizes images';
+
+  test('a flat tree from before Markdown is parsed again', () => {
+    expect(spilledCaptionRichText(caption, getRichTextFromString(caption))).toEqual(
+      markdownToRichText(caption)
+    );
+  });
+
+  test('a Markdown tree is kept', () => {
+    const tree = [p({ text: 'kept' })];
+    expect(spilledCaptionRichText(caption, tree)).toBe(tree);
   });
 });
