@@ -39,6 +39,7 @@ import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
 import { Globe, Arrow, Lock } from '../../ui/Icons';
+import { CaptionPreview, WritePreviewToggle } from './WritePreview';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
@@ -65,6 +66,7 @@ export const PostComposer = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [caption, setCaption] = useState<string>('');
+  const [isPreview, setIsPreview] = useState<boolean>();
 
   const { data: publicChannel } = useChannel({ channelKey: BlogConfig.PublicChannelId }).fetch;
   const [targetChannel, setTargetChannel] = useState<{
@@ -111,6 +113,7 @@ export const PostComposer = ({
 
   const resetUi = () => {
     setCaption('');
+    setIsPreview(undefined);
     // setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     fileInputRef.current?.value && (fileInputRef.current.value = '');
@@ -157,31 +160,36 @@ export const PostComposer = ({
           return false;
         }}
       >
-        <VolatileInput
-          defaultValue={caption}
-          onChange={(newCaption) => setCaption(newCaption)}
-          placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
-          onPaste={(e) => {
-            const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
-              (file) => ({ file })
-            );
+        {isPreview ? (
+          <CaptionPreview caption={caption} />
+        ) : (
+          <VolatileInput
+            defaultValue={caption}
+            onChange={(newCaption) => setCaption(newCaption)}
+            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+                (file) => ({ file })
+              );
 
-            if (mediaFiles.length && !embeddedPost) {
-              setFiles([...(files ?? []), ...mediaFiles]);
-              e.preventDefault();
+              if (mediaFiles.length && !embeddedPost) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : () => {
+                    doPost();
+                    return false;
+                  }
             }
-          }}
-          onSubmit={
-            isTouchDevice()
-              ? undefined
-              : () => {
-                  doPost();
-                  return false;
-                }
-          }
-          key={stateIndex}
-          autoCompleters={[AllContactMentionDropdown]}
-        />
+            key={stateIndex}
+            autoFocus={isPreview === false}
+            autoCompleters={[AllContactMentionDropdown]}
+          />
+        )}
 
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {files?.length ? null : (
@@ -244,6 +252,7 @@ export const PostComposer = ({
               />
             </>
           ) : null}
+          <WritePreviewToggle isPreview={!!isPreview} onChange={setIsPreview} />
           <div className="ml-auto"></div>
           {!forcedChannel ? (
             <ChannelOrAclSelector
