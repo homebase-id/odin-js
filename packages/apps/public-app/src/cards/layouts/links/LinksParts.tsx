@@ -470,7 +470,8 @@ const LinksBlock = ({
         internal
       />
     );
-  return <CardBlock block={block} data={data} />;
+  const links = data.links.filter(isLinkable).map((link) => ({ ...link, text: describe(link).title }));
+  return <CardBlock block={block} data={{ ...data, links }} />;
 };
 
 const handleOf = (social: CardData['socials'][number]) =>

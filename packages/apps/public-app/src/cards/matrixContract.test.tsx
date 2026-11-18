@@ -349,6 +349,24 @@ describe('link presentation on every design', () => {
     );
   };
 
+  it('simple: an unlabelled link shows under every presentation', () => {
+    const bare = {
+      ...data,
+      links: [{ id: '3', text: '', target: 'https://shire.example/w' }],
+    };
+    for (const presentation of ['bare', 'boxed', 'row', 'button']) {
+      const design = applyOverrides(CARD_PRESETS.links, {
+        blocks: [{ kind: 'links', presentation }],
+      });
+      const out = renderToStaticMarkup(
+        <MemoryRouter>
+          <HomebaseCard design={design} data={bare} />
+        </MemoryRouter>
+      );
+      expect(out, presentation).toContain('>Shire<');
+    }
+  });
+
   it.each(DESIGNS)('%s: each presentation draws the links differently', (layout) => {
     for (const wide of layout === 'dossier' ? [false] : [false, true]) {
       const outputs = ['bare', 'boxed', 'row', 'button'].map((p) =>
