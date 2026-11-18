@@ -1,0 +1,26 @@
+/* The indigo look of the apps not on Material 3 yet; each app's Layout sets the page colours */
+
+/* The var() references resolve on <html>, so they rely on .dark being set there */
+:root {
+  --color-primary: 99 102 241; /* indigo-500 */
+  --color-primary-contrast: 255 255 255;
+  --color-muted-foreground: 100 116 139; /* slate-500 */
+  --color-secondary: var(--color-background);
+  --color-secondary-contrast: var(--color-foreground);
+  --color-surface-container-high: 241 245 249; /* slate-100 */
+
+  --color-destructive: 239 68 68; /* red-500 */
+  --color-destructive-hover: 220 38 38; /* red-600 */
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 254 202 202; /* red-200 */
+  --color-error-container-hover: 248 113 113; /* red-400 */
+  --color-error-container-contrast: var(--color-foreground);
+}
+
+.dark {
+  --color-surface-container-high: 30 41 59; /* slate-800 */
+
+  --color-error-container: 185 28 28; /* red-700 */
+  --color-error-container-hover: 153 27 27; /* red-800 */
+  --color-error-container-contrast: 255 255 255;
+}

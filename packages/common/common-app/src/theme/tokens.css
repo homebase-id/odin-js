@@ -1,0 +1,28 @@
+/* common-app's colour tokens as Tailwind 4 utilities, from the RGB channels the theme file sets */
+@theme inline reference {
+  --color-page-background: rgb(var(--color-page-background));
+  --color-background: rgb(var(--color-background));
+  --color-foreground: rgb(var(--color-foreground));
+  --color-muted-foreground: rgb(var(--color-muted-foreground));
+
+  --color-primary: rgb(var(--color-primary));
+  --color-primary-contrast: rgb(var(--color-primary-contrast));
+  --color-secondary: rgb(var(--color-secondary));
+  --color-secondary-contrast: rgb(var(--color-secondary-contrast));
+  --color-surface-container-lowest: rgb(var(--color-surface-container-lowest));
+  --color-surface-container-high: rgb(var(--color-surface-container-high));
+
+  --color-destructive: rgb(var(--color-destructive));
+  --color-destructive-hover: rgb(var(--color-destructive-hover));
+  --color-destructive-contrast: rgb(var(--color-destructive-contrast));
+  --color-error-container: rgb(var(--color-error-container));
+  --color-error-container-hover: rgb(var(--color-error-container-hover));
+  --color-error-container-contrast: rgb(var(--color-error-container-contrast));
+
+  --color-nav: rgb(var(--color-nav));
+  --color-nav-contrast: rgb(var(--color-nav-contrast));
+  --color-nav-active: rgb(var(--color-nav-active));
+  --color-nav-active-contrast: rgb(var(--color-nav-active-contrast));
+  --color-nav-more: rgb(var(--color-nav-more));
+  --color-nav-outline: rgb(var(--color-nav-outline));
+}

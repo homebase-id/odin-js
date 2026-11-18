@@ -1,3 +1,5 @@
+@import '../../../../common/common-app/src/theme/legacy-indigo.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

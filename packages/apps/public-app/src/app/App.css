@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import '../../../../common/common-app/src/tailwind-v4-compat.css';
+@import '../../../../common/common-app/src/theme/tokens.css';
+@import '../../../../common/common-app/src/theme/legacy-indigo.css';
+@import '../../../../common/common-app/src/theme/nav.css';
 
 @source '../../../../libs/ui-lib/src';
 @source '../../../../common/common-app/src';
@@ -9,8 +12,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-destructive: #dc2626;
-
   --animate-slowding: slowding 1.2s ease-in-out;
   @keyframes slowding {
     0%,
@@ -23,16 +24,14 @@
   }
 }
 
-/* These colors read the RGB channels the Layout sets at runtime (`--color-button: 99 102 241`).
-   The theme keys share those names, so they are inlined and kept out of :root (`reference`). */
+/* From the Layout's channels (the site's theme colours), resolved where they are used, as the
+   article page redefines background and foreground */
 @theme inline reference {
-  --color-page-background: rgb(var(--color-page-background));
-  --color-background: rgb(var(--color-background));
-  --color-foreground: rgb(var(--color-foreground));
   --color-muted-foreground: rgb(var(--color-foreground) / 0.6);
+  --color-secondary: rgb(var(--color-background));
+  --color-secondary-contrast: rgb(var(--color-foreground));
   --color-button: rgb(var(--color-button));
   --color-button-text: rgb(var(--color-button-text));
-
   --color-primary: rgb(var(--color-button));
   --color-primary-contrast: rgb(var(--color-button-text));
 }

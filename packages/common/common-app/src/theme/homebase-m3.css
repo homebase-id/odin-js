@@ -1,0 +1,71 @@
+/* Homebase's Material 3 colours from the chat app (chat-kmp Color.kt), for the owner console */
+
+/* The var() references resolve on <html>, so they rely on .dark being set there */
+:root {
+  --color-surface-container-lowest: 251 252 255;
+  --color-surface-container-low: 242 245 249;
+  --color-surface-container: 237 240 246;
+  --color-surface-container-high: 232 236 244;
+  --color-outline-variant: 207 212 222;
+
+  --color-page-background: var(--color-surface-container-low);
+  --color-background: var(--color-surface-container-lowest);
+  --color-foreground: 27 27 29; /* onSurface */
+  --color-muted-foreground: 84 88 99; /* onSurfaceVariant */
+
+  --color-primary: 44 88 195;
+  --color-primary-contrast: 255 255 255; /* onPrimary */
+  --color-primary-container: 210 223 251;
+  --color-primary-container-contrast: 5 24 69; /* onPrimaryContainer */
+  --color-secondary: 220 229 249; /* secondaryContainer */
+  --color-secondary-contrast: 21 29 44; /* onSecondaryContainer */
+
+  /* error, onError and their containers; hover is M3's state layer, 8% of the contrast on top */
+  --color-destructive: 186 27 27;
+  --color-destructive-hover: 192 45 45;
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 255 218 212;
+  --color-error-container-hover: 240 201 195;
+  --color-error-container-contrast: 65 0 2;
+}
+
+.dark {
+  --color-surface-container-lowest: 27 28 31;
+  --color-surface-container-low: 35 36 42;
+  --color-surface-container: 39 42 49;
+  --color-surface-container-high: 44 47 55;
+  --color-outline-variant: 62 65 74;
+
+  --color-page-background: var(--color-surface-container-lowest);
+  --color-background: var(--color-surface-container-low);
+  --color-foreground: 226 225 229;
+  --color-muted-foreground: 190 191 197;
+
+  --color-primary: 182 197 250;
+  --color-primary-contrast: 30 36 56;
+  --color-primary-container: 70 75 92;
+  --color-primary-container-contrast: 219 225 252;
+  --color-secondary: 65 70 89;
+  --color-secondary-contrast: 220 225 249;
+
+  --color-destructive: 255 180 169;
+  --color-destructive-hover: 243 166 156;
+  --color-destructive-contrast: 105 0 5;
+  --color-error-container: 147 0 6;
+  --color-error-container-hover: 156 17 23;
+  --color-error-container-contrast: 255 218 214;
+}
+
+/* The Sidenav, the chat app's grey NavigationRail */
+:root {
+  --color-nav: var(--color-surface-container-high);
+  --color-nav-contrast: var(--color-muted-foreground);
+  --color-nav-active: var(--color-primary-container);
+  --color-nav-active-contrast: var(--color-primary-container-contrast);
+  --color-nav-more: var(--color-surface-container-lowest);
+  --color-nav-outline: var(--color-outline-variant);
+}
+
+.dark {
+  --color-nav-more: var(--color-surface-container);
+}
