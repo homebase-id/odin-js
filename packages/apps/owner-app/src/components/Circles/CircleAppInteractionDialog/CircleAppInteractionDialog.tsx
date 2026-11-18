@@ -104,7 +104,7 @@ const CircleAppInteractionDialog = ({
           }}
         >
           <h2 className="text-lg">{t('App Permissions')}:</h2>
-          <p className="text-sm text-slate-500">{t('This circle can reach you on these apps')}:</p>
+          <p className="text-sm text-muted-foreground">{t('This circle can reach you on these apps')}:</p>
 
           <div className="my-7">
             <div className="-my-4">
@@ -150,7 +150,7 @@ const CircleAppInteractionDialog = ({
                 return (
                   <div
                     key={index}
-                    className={`my-4 flex w-full select-none flex-row rounded-lg border p-4 dark:border-slate-800`}
+                    className={`my-4 flex w-full select-none flex-row rounded-lg border p-4`}
                     onClick={clickHandler}
                   >
                     <AppPermissionView appDef={app} key={app.appId} className="my-auto" />

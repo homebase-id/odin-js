@@ -16,7 +16,7 @@ export interface DriveSlugs {
 }
 
 const inputClassName =
-  'w-full rounded border border-gray-300 bg-white px-3 py-2 font-mono dark:border-gray-700 dark:bg-black';
+  'w-full rounded border bg-background px-3 py-2 font-mono';
 
 /**
  * The two slugs a drive needs whenever it is handed to an app (set-owner or reassign). The server
@@ -82,14 +82,14 @@ export const useDriveSlugFields = ({
           onChange={(e) => setDriveSlug(e.target.value)}
           autoComplete="off"
         />
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t('The segment this drive answers to under the app, as /apps/{app}/drives/{slug}.')}{' '}
           {t(SLUG_FORMAT_DESCRIPTION)}
         </p>
         {driveSlug && !isValidSlug(driveSlug) ? (
-          <p className="mt-1 text-sm text-red-500">{t('Not a valid slug')}</p>
+          <p className="mt-1 text-sm text-destructive">{t('Not a valid slug')}</p>
         ) : takenByApp ? (
-          <p className="mt-1 text-sm text-red-500">
+          <p className="mt-1 text-sm text-destructive">
             {t('Another drive of this app already uses this slug')}
           </p>
         ) : null}
@@ -105,11 +105,11 @@ export const useDriveSlugFields = ({
           onChange={(e) => setDriveTypeSlug(e.target.value)}
           autoComplete="off"
         />
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-muted-foreground">
           {t('A category to filter on, not an address.')} {t(SLUG_FORMAT_DESCRIPTION)}
         </p>
         {driveTypeSlug && !isValidSlug(driveTypeSlug) ? (
-          <p className="mt-1 text-sm text-red-500">{t('Not a valid slug')}</p>
+          <p className="mt-1 text-sm text-destructive">{t('Not a valid slug')}</p>
         ) : null}
       </div>
     </>

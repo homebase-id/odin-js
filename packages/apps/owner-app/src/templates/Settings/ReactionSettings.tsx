@@ -53,7 +53,7 @@ export const ReactionSettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Who can react with an emoji on your public posts?')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'People that are member of a circle that has access to react will always be able to do so'
                   )}
@@ -107,7 +107,7 @@ export const ReactionSettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Who can comment on your public posts?')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'People that are member of a circle that has access to comment will always be able to do so'
                   )}
@@ -169,7 +169,7 @@ const RadioOption = ({
       />
       <Label htmlFor={id} className="my-auto mr-2 flex flex-col">
         {label}
-        <small className="text-sm text-gray-400">{description}</small>
+        <small className="text-sm text-muted-foreground">{description}</small>
       </Label>
     </div>
   );

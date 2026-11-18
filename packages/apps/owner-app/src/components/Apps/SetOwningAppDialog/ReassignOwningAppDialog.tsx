@@ -128,7 +128,7 @@ export const ReassignOwningAppDialog = ({
           <select
             id="reassignApp"
             required
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
+            className="w-full rounded border bg-background px-3 py-2"
             value={appId}
             onChange={(e) => setAppId(e.target.value)}
           >
@@ -140,7 +140,7 @@ export const ReassignOwningAppDialog = ({
             ))}
           </select>
           {!apps?.length && !appsLoading ? (
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t('No apps registered on your identity')}
             </p>
           ) : null}
@@ -148,7 +148,7 @@ export const ReassignOwningAppDialog = ({
 
         {requireSlug ? (
           <>
-            <p className="mb-2 text-sm text-slate-400">
+            <p className="mb-2 text-sm text-muted-foreground">
               {currentDriveSlug ? `${t('Currently')} ${currentDriveSlug}. ` : ''}
               {t(
                 'Required, not derived: the address is changing, so it is stated rather than guessed.'
@@ -162,7 +162,7 @@ export const ReassignOwningAppDialog = ({
           <Label htmlFor="reassignConfirm">{t('Type REASSIGN to confirm')}</Label>
           <input
             id="reassignConfirm"
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
+            className="w-full rounded border bg-background px-3 py-2"
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
             autoComplete="off"
