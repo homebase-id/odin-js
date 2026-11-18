@@ -45,7 +45,7 @@ const homebaseHostingConfig = {
   primaryClassName:
     'border border-primary bg-primary text-primary-contrast transition-colors hover:bg-transparent hover:text-primary',
   secondaryClassName:
-    'border border-primary bg-transparent text-primary transition-colors hover:bg-primary hover:text-primary-contrast',
+    'bg-secondary text-secondary-contrast transition-colors hover:bg-secondary/80',
   accentClassName: 'text-primary',
   accentBorderClassName: 'border-primary',
   accentFocusClassName: 'focus-within:border-primary focus-within:ring-primary',
