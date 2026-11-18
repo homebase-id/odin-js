@@ -112,7 +112,7 @@ export const EmailDnsSettings = () => {
         title={
           <div className="flex flex-col">
             {t('Email')}
-            <small className="text-sm text-gray-400">
+            <small className="text-sm text-muted-foreground">
               {t('The DNS records that make email work for your domain')}
             </small>
           </div>
@@ -262,8 +262,8 @@ const CheckList = ({
         key={item}
         className={`flex flex-row items-start gap-2 rounded-lg px-4 py-3 text-sm ${
           tone === 'bad'
-            ? 'bg-orange-100 dark:bg-orange-900'
-            : 'bg-gray-100 text-slate-600 dark:bg-gray-800 dark:text-slate-300'
+            ? 'bg-warning-container text-warning-container-contrast'
+            : 'bg-surface-container-high text-muted-foreground'
         }`}
       >
         {tone === 'bad' ? <Exclamation className="mt-0.5 h-5 w-5 shrink-0" /> : null}

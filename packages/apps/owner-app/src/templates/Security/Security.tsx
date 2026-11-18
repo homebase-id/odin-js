@@ -14,7 +14,7 @@ import {useMailHealth} from "../../hooks/mail/useMailHealth";
 import {dnsTabTone, emailNeedsAttention as computeEmailNeedsAttention, TabTone} from "./dns/attention";
 
 const Dot = ({tone}: { tone: TabTone }) => (
-  <span className={`inline-block h-2 w-2 rounded-full ${tone === 'red' ? 'bg-red-500' : 'bg-orange-400'}`}/>
+  <span className={`inline-block h-2 w-2 rounded-full ${tone === 'red' ? 'bg-destructive' : 'bg-warning'}`}/>
 );
 
 const Security = () => {

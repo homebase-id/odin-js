@@ -32,9 +32,10 @@
   --color-error-surface: var(--color-error-container);
 
   /* ExtendedColors, and the RequestBanner for warnings */
-  --color-success: 76 175 80;
-  --color-warning: 255 152 0;
-  --color-info: 33 150 243;
+  /* Light status tones are M3 tone 40, readable as text; chat-kmp has one constant for both themes */
+  --color-success: 0 110 28;
+  --color-warning: 139 80 0;
+  --color-info: 0 97 164;
   --color-warning-container: 255 217 163;
   --color-warning-container-contrast: 61 44 26;
   --color-highlight: var(--color-primary-container);
@@ -73,6 +74,12 @@
   --color-error-container: 147 0 6;
   --color-error-container-hover: 156 17 23;
   --color-error-container-contrast: 255 218 214;
+
+  --color-success: 76 175 80;
+  --color-warning: 255 152 0;
+  --color-info: 33 150 243;
+  --color-warning-container: 105 60 0;
+  --color-warning-container-contrast: 255 220 190;
 
   --color-syntax-key: 147 197 253;
   --color-syntax-string: 134 239 172;

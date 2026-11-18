@@ -51,7 +51,7 @@ export function WaitForShardConfig({ request }: { request: ShamirDealPlan }) {
             ) ?? [];
 
         return (
-            <div className="p-4 bg-red-100 text-red-700 rounded">
+            <div className="p-4 bg-error-container text-error-container-contrast rounded">
                 You have an issue with one or more of your shards:
                 <ul className="list-disc ml-5 mt-2">
                     {badShards.map((p) => (
@@ -69,7 +69,7 @@ export function WaitForShardConfig({ request }: { request: ShamirDealPlan }) {
                 {recoveryInfo?.recoveryRisk ? (
                     <DealerRecoveryRiskDetails report={recoveryInfo.recoveryRisk}/>
                 ) : (
-                    <span className="text-gray-500 italic">{t("Waiting for distribution statuses…")}</span>
+                    <span className="text-muted-foreground italic">{t("Waiting for distribution statuses…")}</span>
                 )}
             </div>
 

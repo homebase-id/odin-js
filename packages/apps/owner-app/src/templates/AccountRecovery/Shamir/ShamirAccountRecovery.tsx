@@ -206,9 +206,9 @@ const ShamirAccountRecovery = () => {
         <section className="body-font flex h-full pt-24">
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <div className="">
-              <h1 className="mb-5 text-4xl dark:text-white">
+              <h1 className="mb-5 text-4xl">
                 Homebase | {t('Recover access')}
-                <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                <small className="block break-all text-muted-foreground sm:break-normal">
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
@@ -233,7 +233,7 @@ const ShamirAccountRecovery = () => {
                 <div className="my-2">
                   <p>{t('We sent an email to your recovery email address. Click the link in it to continue.')}</p>
                   <p className="mt-3">Email: <b>{status?.email}</b></p>
-                  <p className="mt-4 text-sm text-slate-500">
+                  <p className="mt-4 text-sm text-muted-foreground">
                     {t("Didn't receive the email? Check your spam folder, or")}{' '}
                     <button type="button" className="underline" onClick={() => startRecoveryMode()}>
                       {t('click here to send it again')}
@@ -254,10 +254,10 @@ const ShamirAccountRecovery = () => {
 
                   {slots && <Slots slots={slots}/>}
 
-                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
+                  <hr className="mb-5 mt-7"/>
 
                   {elsewhere && (
-                    <p className="mt-3 text-slate-400">
+                    <p className="mt-3 text-muted-foreground">
                       {t(recoveryUnderWayElsewhereMessage())}
                     </p>
                   )}
@@ -292,7 +292,7 @@ const ShamirAccountRecovery = () => {
                   e.stopPropagation();
                 }}>
                   <div className="mb-2">
-                    <p className="max-w-md text-slate-400">
+                    <p className="max-w-md text-muted-foreground">
                       {t('To regain access you will need to initiate recovery mode.')}{' '}
                       {t('Click the button below to send an email to your recovery email address.')}{' '}
                     </p>
@@ -330,7 +330,7 @@ function Slots({slots}: { slots: RecoverySlot[] }) {
       {slots.map((slot) => (
         <li key={slot.player.odinId} className="flex flex-row justify-between py-1">
           <span>{slot.player.odinId}</span>
-          <span className={slot.filled ? 'text-green-600' : 'text-slate-400'}>
+          <span className={slot.filled ? 'text-foreground' : 'text-muted-foreground'}>
             {slot.filled
               ? t('In')
               : slot.player.type === 'automatic'
@@ -407,7 +407,7 @@ function RecoveryReady({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
   if (recovered.serverMade) {
     return (
       <>
-        <p className="mb-2 max-w-md text-slate-400">
+        <p className="mb-2 max-w-md text-muted-foreground">
           {t('Your recovery was set up before your password could be saved with it. Set a new password. ' +
             'Data that only your browser could open stays locked with the old password.')}
         </p>
@@ -430,7 +430,7 @@ function RecoveryReady({returnUrl, thisBrowser, onCancel, onPasswordReset}: {
   if (resetting) {
     return (
       <>
-        <p className="mb-2 max-w-md text-slate-400">
+        <p className="mb-2 max-w-md text-muted-foreground">
           {recovery.password === undefined
             ? t('Your account opened, but no password was saved with it. Set a new password.')
             : t('Set a new password with your recovery.')}
@@ -536,7 +536,7 @@ function PasswordReset({returnUrl, setNewPassword}: {
               autoComplete="new-password"
             />
             {password !== retypePassword && retypePassword !== '' ? (
-              <p className="py-2 text-red-800 dark:text-red-200">
+              <p className="py-2 text-destructive">
                 {t("Passwords don't match")}
               </p>
             ) : null}

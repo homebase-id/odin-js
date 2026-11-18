@@ -128,7 +128,7 @@ export function RevealRecoveryKeySection() {
   } else if (status === "success" && recoveryKey?.key) {
     content = (
       <div className="space-y-4">
-        <div className="rounded-md bg-yellow-50 p-4 text-yellow-900 dark:bg-yellow-900/30 dark:text-yellow-200">
+        <div className="rounded-md bg-warning-container p-4 text-warning-container-contrast">
           <p className="font-semibold mb-2">{t("Important Security Notice")}</p>
           <p className="text-sm leading-relaxed">
             {t(
@@ -161,7 +161,7 @@ export function RevealRecoveryKeySection() {
         </ActionButton>
 
         {status === "prompt" && (
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-4 text-sm text-muted-foreground">
             {t("Click the button above to request access to your recovery key.")}
           </div>
         )}
@@ -174,12 +174,12 @@ export function RevealRecoveryKeySection() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
           <span className="block text-lg">{t('Recovery Phrase')}</span>
-          <div className="mt-1 text-sm text-gray-400">
+          <div className="mt-1 text-sm text-muted-foreground">
             {/*{t(*/}
             {/*  'Your recovery phrase lets you reset your password if you ever forget it.  Request your key by clicking the button below.  There is a 2-week waiting period to get your key'*/}
             {/*)}*/}
             You can verify your recovery phrase {' '}
-            <button onClick={() => setOpenDialog('verify-recovery-phrase')} className="text-blue-600 underline">
+            <button onClick={() => setOpenDialog('verify-recovery-phrase')} className="text-primary underline">
               here
             </button>
             .{' '}If you forgot your recovery phrase you can request it again by clicking the button below. There is a
@@ -284,7 +284,7 @@ const GenerateNewRecoveryKeySection = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
             <span className="block text-lg">{t('Recovery Phrase')}</span>
-            <div className="mt-1 text-sm text-gray-400">
+            <div className="mt-1 text-sm text-muted-foreground">
               {t('To get your recovery phrase press the button below. You should store this safely.')}
             </div>
           </div>
@@ -293,7 +293,7 @@ const GenerateNewRecoveryKeySection = () => {
     >
       {/* Pre-generation alert */}
       {status !== "success" && (
-        <div className="mb-4 rounded-md border-l-4 border-yellow-500 bg-yellow-50 p-4 text-yellow-900 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-200">
+        <div className="mb-4 rounded-md border-l-4 border-warning bg-warning-container p-4 text-warning-container-contrast">
           <p className="font-semibold">{t("Action Required")}</p>
           <p className="text-sm">
             {t("You haven’t generated your recovery phrase yet. Please generate and store it securely now.")}
@@ -303,8 +303,8 @@ const GenerateNewRecoveryKeySection = () => {
 
       {/* Post-generation alert */}
       {status === "success" && (
-        <div className="mb-4 rounded-md border-l-4 border-green-600 bg-green-50 p-4 text-green-900 dark:border-green-500 dark:bg-green-900/30 dark:text-green-200">
-          <p className="font-semibold">{t("Important Security Notice")}</p>
+        <div className="mb-4 rounded-md border-l-4 border-success bg-surface-container-high p-4">
+          <p className="font-semibold text-success">{t("Important Security Notice")}</p>
           <p className="text-sm">
             {t("Store your recovery phrase in a secure location, such as a password manager or offline storage.")}
           </p>
@@ -358,12 +358,12 @@ const ClickToReveal = ({
   };
 
   const buttonStyle =
-    "flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12 text-foreground hover:text-primary";
+    "flex h-12 w-full cursor-pointer items-center justify-center md:w-12 text-foreground hover:text-primary";
 
   return (
     <div
-      className="relative flex flex-col items-center rounded border border-gray-300 dark:border-gray-700 md:flex-row">
-      <div className="flex w-full flex-row justify-around border-b dark:border-gray-700 md:contents">
+      className="relative flex flex-col items-center rounded border md:flex-row">
+      <div className="flex w-full flex-row justify-around border-b md:contents">
         <button className={`${buttonStyle} md:border-r`} onClick={() => setShow(!show)}>
           {show ? <CloseEye className="h-6 w-6"/> : <Eye className="h-6 w-6"/>}
         </button>
@@ -373,7 +373,7 @@ const ClickToReveal = ({
       </div>
 
       <div
-        className={`w-full bg-white px-3 py-2 text-center text-[1.6rem] leading-8 tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-100 md:text-left ${
+        className={`w-full bg-background px-3 py-2 text-center text-[1.6rem] leading-8 tracking-wider text-foreground md:text-left ${
           show ? "" : "pointer-events-none select-none break-words"
         }`}>
         {show ? textToShow : redactedText}
@@ -381,7 +381,7 @@ const ClickToReveal = ({
 
       {showCopied && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white dark:bg-slate-600">
+          <span className="rounded-lg bg-foreground px-2 py-1 text-sm text-background">
             {t("Copied to clipboard")}
           </span>
         </div>
