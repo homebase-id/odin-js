@@ -38,7 +38,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
               fileKey={data?.owner.profileImageFileKey}
               lastModified={data?.owner.profileImageLastModified}
               previewThumbnail={data?.owner.profileImagePreviewThumbnail}
-              className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200"
+              className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2"
               fit="cover"
               odinId={odinId}
             />
@@ -46,7 +46,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
         </div>
         <p className="pb-4 pt-3 text-center">
           <OwnerName />
-          <small className="block text-sm text-slate-400">{t('View your online identity')}</small>
+          <small className="block text-sm text-muted-foreground">{t('View your online identity')}</small>
         </p>
       </div>
     </a>
