@@ -81,17 +81,13 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (file.fileId) {
-    if (linkPreviews?.length) {
-      throw new Error(
-        '[odin-js] PostUploader: Changing Link previews are not supported for post updates'
-      );
-    }
     return await updatePost(
       dotYouClient,
       odinId,
       file as HomebaseFile<T>,
       channelId,
       toSaveFiles,
+      linkPreviews,
       onVersionConflict,
       onUpdate
     );
@@ -138,11 +134,6 @@ const uploadPost = async <T extends PostContent>(
   const thumbnails: ThumbnailFile[] = [];
   const aesKey = encrypt ? getRandom16ByteArray() : undefined;
 
-  if (!newMediaFiles?.length && linkPreviews?.length) {
-    const linkPayload = await getPayloadForLinkPreview(linkPreviews);
-    if (linkPayload) payloads.push(linkPayload);
-  }
-
   const {
     payloads: newMediaPayloads,
     thumbnails: newMediaThumbnails,
@@ -151,6 +142,10 @@ const uploadPost = async <T extends PostContent>(
 
   payloads.push(...newMediaPayloads);
   thumbnails.push(...newMediaThumbnails);
+
+  // After the media, so a post with media keeps a media file as its primaryMediaFile
+  const linkPayload = await getPayloadForLinkPreview(linkPreviews);
+  if (linkPayload) payloads.push(linkPayload);
 
   if (file.fileMetadata.appData.content.type !== 'Article') {
     file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
@@ -237,6 +232,7 @@ const updatePost = async <T extends PostContent>(
   file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[],
+  linkPreviews?: LinkPreview[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | UpdateResult> => {
@@ -321,6 +317,7 @@ const updatePost = async <T extends PostContent>(
     channelId,
     newMediaFiles,
     deletedMediaFiles,
+    linkPreviews,
     onUpdate,
     header.fileMetadata.payloads?.map((p) => p.key) ?? []
   );
@@ -333,6 +330,8 @@ const patchPost = async <T extends PostContent>(
   channelId: string,
   newMediaFiles?: NewMediaFile[],
   deletedMediaFiles?: MediaFile[],
+  /** undefined leaves the existing link previews untouched; an empty array removes them */
+  linkPreviews?: LinkPreview[],
   onUpdate?: (progress: number) => void,
   /** The payload keys of the header just fetched from the server */
   serverPayloadKeys: string[] = []
@@ -377,6 +376,10 @@ const patchPost = async <T extends PostContent>(
   payloads.push(...newMediaPayloads);
   thumbnails.push(...newMediaThumbnails);
 
+  // appendOrOverwrite replaces an existing link previews payload
+  const linkPayload = await getPayloadForLinkPreview(linkPreviews);
+  if (linkPayload) payloads.push(linkPayload);
+
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
@@ -413,6 +416,12 @@ const patchPost = async <T extends PostContent>(
   ) {
     deletedPayloads.push({
       key: POST_FULL_TEXT_PAYLOAD_KEY,
+    });
+  }
+
+  if (linkPreviews?.length === 0 && serverPayloadKeys.includes(POST_LINKS_PAYLOAD_KEY)) {
+    deletedPayloads.push({
+      key: POST_LINKS_PAYLOAD_KEY,
     });
   }
 

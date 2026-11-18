@@ -271,6 +271,116 @@ describe('PostUploader for local files', () => {
     expect(instructions.file.fileId).toBe(existingPostFile.fileId);
   });
 
+  const linkPreviews = [{ url: 'https://example.org', title: 'Example' }];
+  const linksPayloadDescriptor = {
+    key: 'pst_links',
+    descriptorContent: undefined,
+    contentType: 'application/json',
+    bytesWritten: 0,
+    lastModified: 0,
+    thumbnails: [],
+    previewThumbnail: undefined,
+    iv: undefined,
+  };
+  const updateResponse = {
+    status: 200,
+    data: {
+      keyHeader: undefined,
+      file: { fileId: 'fileId', versionTag: 'versionTag' },
+      globalTransitIdFileIdentifier: 'globalTransitIdFileIdentifier',
+      recipientStatus: {},
+      newVersionTag: 'newVersionTag',
+    },
+  };
+
+  const getPatchManifestOps = async () => {
+    const formDataBody = mockAxios.patch.mock.calls[0][1];
+    const instructions = JSON.parse(await (formDataBody.get('instructions') as Blob).text());
+    return (
+      instructions.manifest.PayloadDescriptors as {
+        payloadKey: string;
+        payloadUpdateOperationType: string;
+      }[]
+    ).map((d) => `${d.payloadUpdateOperationType}:${d.payloadKey}`);
+  };
+
+  test('SavePost with a new post with media should also upload the link previews', async () => {
+    vi.clearAllMocks();
+
+    mockAxios.get.mockResolvedValueOnce({ status: 404, data: null });
+    mockAxios.post.mockResolvedValueOnce(updateResponse);
+
+    await savePost(
+      dotYouClient,
+      {
+        ...newPostFile,
+        fileMetadata: {
+          appData: { content: { ...newPostFile.fileMetadata.appData.content, id: '' } },
+        },
+      },
+      undefined,
+      channelId,
+      [{ file: new Blob() }],
+      linkPreviews
+    );
+    expect(mockAxios.post.mock.calls[0][0]).toBe('/drive/files/upload');
+    const payloadNames = (mockAxios.post.mock.calls[0][1] as FormData)
+      .getAll('payload')
+      .map((p) => (p as File).name);
+    expect(payloadNames).toEqual(expect.arrayContaining(['pst_mdi0', 'pst_links']));
+  });
+
+  test('SavePost of an existing post with link previews should replace the link previews payload', async () => {
+    vi.clearAllMocks();
+
+    const serverFile = {
+      ...existingPostFile,
+      fileMetadata: { ...existingPostFile.fileMetadata, payloads: [linksPayloadDescriptor] },
+    };
+    mockAxios.get
+      .mockResolvedValueOnce({ status: 200, data: serverFile })
+      .mockResolvedValueOnce({ status: 200, data: serverFile });
+    mockAxios.patch.mockResolvedValueOnce(updateResponse);
+
+    await savePost(dotYouClient, serverFile, undefined, channelId, undefined, linkPreviews);
+    expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
+    expect(await getPatchManifestOps()).toContain('appendOrOverwrite:pst_links');
+    expect(await getPatchManifestOps()).not.toContain('deletePayload:pst_links');
+  });
+
+  test('SavePost of an existing post with empty link previews should delete the link previews payload', async () => {
+    vi.clearAllMocks();
+
+    const serverFile = {
+      ...existingPostFile,
+      fileMetadata: { ...existingPostFile.fileMetadata, payloads: [linksPayloadDescriptor] },
+    };
+    mockAxios.get
+      .mockResolvedValueOnce({ status: 200, data: serverFile })
+      .mockResolvedValueOnce({ status: 200, data: serverFile });
+    mockAxios.patch.mockResolvedValueOnce(updateResponse);
+
+    await savePost(dotYouClient, serverFile, undefined, channelId, undefined, []);
+    expect(await getPatchManifestOps()).toContain('deletePayload:pst_links');
+    expect(await getPatchManifestOps()).not.toContain('appendOrOverwrite:pst_links');
+  });
+
+  test('SavePost of an existing post without link previews should leave the link previews payload', async () => {
+    vi.clearAllMocks();
+
+    const serverFile = {
+      ...existingPostFile,
+      fileMetadata: { ...existingPostFile.fileMetadata, payloads: [linksPayloadDescriptor] },
+    };
+    mockAxios.get
+      .mockResolvedValueOnce({ status: 200, data: serverFile })
+      .mockResolvedValueOnce({ status: 200, data: serverFile });
+    mockAxios.patch.mockResolvedValueOnce(updateResponse);
+
+    await savePost(dotYouClient, serverFile, undefined, channelId);
+    expect((await getPatchManifestOps()).filter((op) => op.endsWith(':pst_links'))).toEqual([]);
+  });
+
   test('SavePost should throw an error if the file is missing info', async () => {
     vi.clearAllMocks();
 
