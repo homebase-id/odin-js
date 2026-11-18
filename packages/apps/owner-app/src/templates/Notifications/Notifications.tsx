@@ -129,7 +129,7 @@ const Notifications = () => {
               size="none"
               onClick={doClearAll}
               state={removeStatus !== 'success' ? removeStatus : undefined}
-              className="ml-auto text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-100"
+              className="ml-auto text-sm text-muted-foreground hover:text-foreground"
             >
               {t('Clear all')}
             </ActionButton>
@@ -155,7 +155,7 @@ const Notifications = () => {
               size="none"
               onClick={doClearAll}
               state={removeStatus !== 'success' ? removeStatus : undefined}
-              className="ml-auto text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-100"
+              className="ml-auto text-sm text-muted-foreground hover:text-foreground"
             >
               {t('Clear all')}
             </ActionButton>
@@ -193,7 +193,7 @@ const NotificationDay = ({
 
   return (
     <>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted-foreground">
         {isToday ? t('Today') : formatToTimeAgoWithRelativeDetail(day, false, true)}
       </p>
 
@@ -305,7 +305,7 @@ const NotificationGroup = ({
         ))}
         {canExpand && isExpanded ? (
           <div className="flex max-w-sm flex-row-reverse">
-            <a onClick={() => setExpanded(false)} className="cursor-pointer text-sm text-slate-400">
+            <a onClick={() => setExpanded(false)} className="cursor-pointer text-sm text-muted-foreground">
               {t('Hide')}
             </a>
           </div>

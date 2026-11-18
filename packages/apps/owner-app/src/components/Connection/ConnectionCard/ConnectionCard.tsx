@@ -17,11 +17,11 @@ const ConnectionCard = (props: PersonCardProps) => {
   return (
     <>
       <PersonCard {...props}>
-        <h2 className="font-thiner flex flex-col dark:text-white">
+        <h2 className="font-thiner flex flex-col">
           <span className="break-words group-hover:underline">{fullName ?? props.odinId}</span>
           {fullName ? (
             <small
-              className={`d-block relative overflow-hidden text-nowrap break-words text-sm text-slate-500 after:absolute after:inset-0 after:left-auto after:w-4 after:bg-gradient-to-l after:from-background after:to-transparent after:content-[''] dark:text-slate-400`}
+              className={`d-block relative overflow-hidden text-nowrap break-words text-sm text-muted-foreground after:absolute after:inset-0 after:left-auto after:w-4 after:bg-gradient-to-l after:from-background after:to-transparent after:content-['']`}
             >
               {props.odinId}
             </small>
@@ -29,7 +29,7 @@ const ConnectionCard = (props: PersonCardProps) => {
             ''
           )}
           {isUnconfirmedAutoConnection && connectionInfo?.introducerOdinId ? (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               {t('Introduced by')} {connectionInfo.introducerOdinId}
             </p>
           ) : null}
@@ -37,7 +37,7 @@ const ConnectionCard = (props: PersonCardProps) => {
         {props.children}
         {isUnconfirmedAutoConnection ? (
           <div
-            className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-blue-400"
+            className="absolute left-3 top-3 rounded-full bg-background p-[0.2rem] text-info"
             title={t('Unconfirmed connection')}
           >
             <Question className="h-5 w-5" />

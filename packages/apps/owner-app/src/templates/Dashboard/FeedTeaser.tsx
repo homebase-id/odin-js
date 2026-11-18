@@ -25,7 +25,7 @@ export const FeedTeaser = ({ className }: { className?: string }) => {
               </div>
             ))
           ) : isFetched ? (
-            <p className="rounded-md bg-background px-4 py-4 text-slate-400">
+            <p className="rounded-md bg-background px-4 py-4 text-muted-foreground">
               {t('Fill up your feed, by following people, or connecting with other identities')}
             </p>
           ) : (

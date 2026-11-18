@@ -102,7 +102,7 @@ const ColorThemeSelector = ({
     <>
       <div className={className ?? ''} id={id}>
         <div
-          className="relative cursor-pointer rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+          className="relative cursor-pointer rounded-md border bg-background"
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className="flex min-w-[6rem] flex-row px-2 py-1">
@@ -185,8 +185,8 @@ const Option = ({
 }) => {
   return (
     <li
-      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border dark:border-slate-800 ${
-        isChecked && 'bg-slate-50 dark:bg-slate-700'
+      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border ${
+        isChecked && 'bg-surface-container-high'
       }`}
       onClick={() => onChange(colorSet)}
     >
@@ -248,8 +248,8 @@ const FullCustomOption = ({
 
   return (
     <li
-      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border dark:border-slate-800 ${
-        isChecked && 'bg-slate-50 dark:bg-slate-700'
+      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border ${
+        isChecked && 'bg-surface-container-high'
       }`}
       onClick={() => onChange(customSet)}
     >
@@ -349,7 +349,7 @@ const SingleColorSelection = ({
         {isChecked && (
           <input
             type={'text'}
-            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black dark:text-white"
+            className="w-full flex-grow p-1 px-2 py-1 uppercase"
             defaultValue={defaultVal}
             onChange={(e) => {
               const rgb = convertHexToRgb(e.target.value);

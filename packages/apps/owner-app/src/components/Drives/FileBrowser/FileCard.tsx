@@ -67,13 +67,13 @@ export const FileCard = ({
 
   return (
     <div
-      className={`relative flex ${isRow ? 'flex-row flex-wrap items-center gap-4' : 'flex-col gap-2'} rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950`}
+      className={`relative flex ${isRow ? 'flex-row flex-wrap items-center gap-4' : 'flex-col gap-2'} rounded-lg border bg-background p-3`}
     >
       <div className={isRow ? 'order-1 flex flex-row items-center gap-2' : 'contents'}>
         <FileExtLabel
           file={file}
           defaultPayload={firstPayload}
-          className={`${isRow ? '' : 'absolute right-2 top-2'} z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800`}
+          className={`${isRow ? '' : 'absolute right-2 top-2'} z-10 bg-primary-container p-1 text-[0.7rem] uppercase`}
         />
         <FileDownload
           file={file}
@@ -116,7 +116,7 @@ export const FileCard = ({
           )}
           {/* TODO: We should see if we can support remote payloads downloading  */}
           {firstPayload && canDownload ? (
-            <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 opacity-0 hover:opacity-100">
+            <div className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-surface-container-highest/50 opacity-0 hover:opacity-100">
               <FileDownload file={file} targetDrive={targetDrive} payloadKey={firstPayload.key} />
             </div>
           ) : null}
@@ -291,14 +291,14 @@ const FileViewPost = ({
                   <p className="text-sm font-semibold">{t('Post preview')}</p>
                   <div className="flex flex-row gap-2">
                     <button
-                      className="rounded bg-slate-200 px-2 py-1 text-xs dark:bg-slate-700"
+                      className="rounded bg-surface-container-highest px-2 py-1 text-xs"
                       onClick={() => setIsOpen(false)}
                     >
                       {t('Close')}
                     </button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto bg-white p-4 dark:bg-slate-900">
+                <div className="flex-1 overflow-auto bg-background p-4">
                   <PostTeaser postFile={postFilePreview} />
                 </div>
               </div>
@@ -430,7 +430,7 @@ const FileIds = ({
         href={`${driveRoot}/${file.fileSystemType.toLowerCase() === 'comment' ? 'comment/' : ''}${id}`}
       >
         <span className="flex-shrink-0 text-sm">{label}:</span>
-        <p className="ml-auto bg-transparent font-mono text-xs text-slate-400 group-hover:underline">
+        <p className="ml-auto bg-transparent font-mono text-xs text-muted-foreground group-hover:underline">
           {id}
         </p>
       </HybridLink>
@@ -488,7 +488,7 @@ const FileState = ({
   if (clientLocked) {
     return (
       <div className={`${className} flex flex-row items-center gap-1`}>
-        <p className="text-slate-500">
+        <p className="text-muted-foreground">
           {isDeposit(file) ? t('Sealed deposit') : t('Locked with the drive key')}
         </p>
       </div>
@@ -498,8 +498,8 @@ const FileState = ({
   if (!isBroken) return null;
   return (
     <div className={`${className} flex flex-row items-center gap-1`}>
-      <Exclamation className="h-4 w-4 text-red-600" />
-      <p className="text-red-500">{t('Broken content')}</p>
+      <Exclamation className="h-4 w-4 text-destructive" />
+      <p className="text-destructive">{t('Broken content')}</p>
     </div>
   );
 };

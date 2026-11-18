@@ -78,7 +78,7 @@ const DevicesWithoutAppKeyWarning = ({
   return (
     <>
       <ErrorNotification error={error} />
-      <div className="mb-4 rounded-md border border-orange-300 bg-orange-50 p-3 text-sm text-orange-900 dark:border-orange-700 dark:bg-orange-950 dark:text-orange-200">
+      <div className="mb-4 rounded-md border border-warning bg-warning-container p-3 text-sm text-warning-container-contrast">
         <p className="mb-1">
           {t('These devices will see {0} as empty until they sign in again:', upgrade.name)}
         </p>
@@ -212,20 +212,20 @@ const Login = () => {
                 />
               ) : (
                 <form onSubmit={doLogin}>
-                  <h1 className="mb-5 text-4xl dark:text-white">
+                  <h1 className="mb-5 text-4xl">
                     Homebase | Login
-                    <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                    <small className="block break-all text-muted-foreground sm:break-normal">
                       <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                     </small>
                   </h1>
                   {badUpgrade ? (
-                    <p className="mb-4 text-red-600 dark:text-red-400">
+                    <p className="mb-4 text-destructive">
                       {t(
                         'This app asked to make a drive private that cannot be made private this way.'
                       )}
                     </p>
                   ) : redealReason ? (
-                    <p className="mb-4 text-slate-600 dark:text-slate-400">
+                    <p className="mb-4 text-muted-foreground">
                       {t(
                         REDEAL_MESSAGES[redealReason],
                         ...(driveUpgrade ? upgradeArgs(driveUpgrade) : [])
@@ -233,7 +233,7 @@ const Login = () => {
                     </p>
                   ) : null}
                   <div className="mb-4">
-                    <Label htmlFor="password" className="text-sm leading-7 dark:text-gray-400">
+                    <Label htmlFor="password" className="text-sm leading-7">
                       Password
                     </Label>
                     <PasswordInput
@@ -257,7 +257,7 @@ const Login = () => {
                   </ActionButton>
                   <Link
                     to={recoveryHref}
-                    className="mt-5 block text-center text-slate-400 hover:underline"
+                    className="mt-5 block text-center text-muted-foreground hover:underline"
                   >
                     {t('Forgot your password?')}
                   </Link>

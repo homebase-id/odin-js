@@ -7,7 +7,7 @@ export const GetAppsPrompt = () => (
   <div className="mt-10 max-w-2xl">
     <div className="mb-4">
       <p className="text-2xl">{t('Take Homebase with you')}</p>
-      <p className="text-slate-400">{t('Two apps that make your Homebase part of your day.')}</p>
+      <p className="text-muted-foreground">{t('Two apps that make your Homebase part of your day.')}</p>
     </div>
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <HomebaseAppCard name={t('Base App')} />
