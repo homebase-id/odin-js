@@ -29,7 +29,7 @@ const NavPills = ({ className, items, onChange, disallowWrap }: NavPillsProps) =
         >
           <a
             className={`block cursor-pointer select-none rounded-lg px-4 py-2 ${
-              item.isActive ? 'bg-button text-white' : ''
+              item.isActive ? 'bg-primary text-primary-contrast' : ''
             }`}
             onClick={(e) => {
               e.preventDefault();
@@ -51,13 +51,13 @@ const BgHoverEffectsBlock = ({ offset, width }: { offset: number; width: number 
       className="absolute bottom-0 left-0 top-0 hidden h-full flex-row transition-transform duration-100 group-hover:flex"
       style={{ transform: `translateX(${offset}px)` }}
     >
-      <span className="absolute bottom-0 top-0 w-[8px] rounded-l-lg bg-button bg-opacity-20"></span>
+      <span className="absolute bottom-0 top-0 w-[8px] rounded-l-lg bg-primary bg-opacity-20"></span>
       <span
-        className="absolute bottom-0 top-0 w-[100px] origin-left bg-button bg-opacity-20"
+        className="absolute bottom-0 top-0 w-[100px] origin-left bg-primary bg-opacity-20"
         style={{ transform: `translateX(8px) scaleX(${(width - 16) / 100})` }}
       ></span>
       <span
-        className="absolute bottom-0 top-0 w-[8px] rounded-r-lg bg-button bg-opacity-20"
+        className="absolute bottom-0 top-0 w-[8px] rounded-r-lg bg-primary bg-opacity-20"
         style={{ transform: `translateX(${((width - 8) / 100) * 100}px)` }}
       ></span>
     </span>

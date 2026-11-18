@@ -98,7 +98,7 @@ const ExperienceBlock = ({
 const ExternalLinkImage = ({ domain, className }: { domain: string; className?: string }) => {
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
-  const bgClass = 'bg-white dark:bg-black';
+  const bgClass = 'bg-background';
 
   return (
     <div className={`relative z-0 aspect-square ${className || ''}`}>

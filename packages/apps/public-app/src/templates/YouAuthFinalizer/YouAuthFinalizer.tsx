@@ -29,7 +29,7 @@ const SignInProblem = ({ code }: { code: string }) => (
       </p>
       {/* The raw code is kept visible: it is the only thing that makes a support conversation
           about a failed sign-in tractable, and it is not sensitive. */}
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-muted-foreground">
         {t('Error')}: <span className="font-mono">{code}</span>
       </p>
     </div>

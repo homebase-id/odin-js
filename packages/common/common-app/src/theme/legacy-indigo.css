@@ -64,14 +64,3 @@
   --color-syntax-boolean: 216 180 254;
   --color-syntax-null: 253 164 175;
 }
-
-/* The article reader redefines foreground, so the ones read from it resolve again inside it */
-.article-page {
-  --color-error-container-contrast: var(--color-foreground);
-  --color-warning-container-contrast: var(--color-foreground);
-}
-
-.dark .article-page {
-  --color-error-container-contrast: 255 255 255;
-  --color-warning-container-contrast: 0 0 0;
-}
