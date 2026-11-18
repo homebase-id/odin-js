@@ -84,8 +84,8 @@ export const BaseMentionDropdown = ({
             key={identity.odinId}
             className={`flex cursor-pointer flex-row items-center gap-2 px-2 transition-colors ${
               index === activeIndex
-                ? 'bg-indigo-200 dark:bg-indigo-800'
-                : 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
+                ? 'bg-primary-container'
+                : 'hover:bg-primary-container'
             }`}
             onClick={() => doInput(identity.odinId)}
           >

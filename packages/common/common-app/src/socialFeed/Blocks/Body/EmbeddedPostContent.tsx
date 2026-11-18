@@ -45,7 +45,7 @@ export const EmbeddedPostContent = ({
       SecurityGroupType.Anonymous;
 
   return (
-    <div className={`overflow-hidden rounded-lg border dark:border-slate-700 ${className ?? ''}`}>
+    <div className={`overflow-hidden rounded-lg border border-outline-variant ${className ?? ''}`}>
       <FakeAnchor href={postPath} onClick={(e) => e.stopPropagation()}>
         <div className="p-1">
           <div className="flex flex-row">
@@ -78,7 +78,7 @@ export const EmbeddedPostContent = ({
               />
 
               {shouldHideMedia && content.primaryMediaFile ? (
-                <p className="mt-2 text-slate-400 hover:underline">{t('See media')}</p>
+                <p className="mt-2 text-muted-foreground hover:underline">{t('See media')}</p>
               ) : null}
             </div>
           </div>

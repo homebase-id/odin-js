@@ -41,8 +41,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
     <div
       className={[
         'group rounded-xl border shadow-sm',
-        'border-zinc-300 bg-white',
-        'dark:border-zinc-800 dark:bg-zinc-900',
+        'border-outline-variant bg-surface-container-lowest',
         'prose prose-zinc dark:prose-invert',
         className ?? '',
       ].join(' ')}
@@ -50,8 +49,8 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
       role="region"
     >
       {showHeader && (
-        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2 dark:border-zinc-800/80">
-          <div className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center justify-between border-b border-outline-variant px-4 py-2">
+          <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {title}
           </div>
           <CopyButton getText={getCopyText} />
@@ -70,20 +69,20 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
             {tokens.map((t, i) => {
               const cls =
                 t.cls === 'key'
-                  ? 'text-blue-700 dark:text-blue-300'
+                  ? 'text-syntax-key'
                   : t.cls === 'string'
-                    ? 'text-green-700 dark:text-green-300'
+                    ? 'text-syntax-string'
                     : t.cls === 'number'
-                      ? 'text-orange-700 dark:text-orange-300'
+                      ? 'text-syntax-number'
                       : t.cls === 'boolean'
-                        ? 'text-purple-700 dark:text-purple-300'
+                        ? 'text-syntax-boolean'
                         : t.cls === 'null'
-                          ? 'text-rose-700 dark:text-rose-300 italic'
+                          ? 'text-syntax-null italic'
                           : t.cls === 'punct'
-                            ? 'text-zinc-400 dark:text-zinc-400'
+                            ? 'text-muted-foreground'
                             : t.cls === 'ws'
                               ? ''
-                              : 'text-zinc-700 dark:text-zinc-200';
+                              : 'text-foreground';
 
               return (
                 <span key={i} className={cls}>

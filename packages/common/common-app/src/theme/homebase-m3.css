@@ -7,6 +7,8 @@
   --color-surface-container: 237 240 246;
   --color-surface-container-high: 232 236 244;
   --color-outline-variant: 207 212 222;
+  --color-surface-container-highest: 230 234 243; /* Surface4 */
+  --color-outline: 128 131 137; /* Outline */
 
   --color-page-background: var(--color-surface-container-low);
   --color-background: var(--color-surface-container-lowest);
@@ -27,6 +29,21 @@
   --color-error-container: 255 218 212;
   --color-error-container-hover: 240 201 195;
   --color-error-container-contrast: 65 0 2;
+  --color-error-surface: var(--color-error-container);
+
+  /* ExtendedColors, and the RequestBanner for warnings */
+  --color-success: 76 175 80;
+  --color-warning: 255 152 0;
+  --color-info: 33 150 243;
+  --color-warning-container: 255 217 163;
+  --color-warning-container-contrast: 61 44 26;
+  --color-highlight: var(--color-primary-container);
+
+  --color-syntax-key: 29 78 216;
+  --color-syntax-string: 21 128 61;
+  --color-syntax-number: 194 65 12;
+  --color-syntax-boolean: 126 34 206;
+  --color-syntax-null: 190 18 60;
 }
 
 .dark {
@@ -35,6 +52,8 @@
   --color-surface-container: 39 42 49;
   --color-surface-container-high: 44 47 55;
   --color-outline-variant: 62 65 74;
+  --color-surface-container-highest: 46 48 57;
+  --color-outline: 113 116 124;
 
   --color-page-background: var(--color-surface-container-lowest);
   --color-background: var(--color-surface-container-low);
@@ -54,6 +73,12 @@
   --color-error-container: 147 0 6;
   --color-error-container-hover: 156 17 23;
   --color-error-container-contrast: 255 218 214;
+
+  --color-syntax-key: 147 197 253;
+  --color-syntax-string: 134 239 172;
+  --color-syntax-number: 253 186 116;
+  --color-syntax-boolean: 216 180 254;
+  --color-syntax-null: 253 164 175;
 }
 
 /* The Sidenav, the chat app's grey NavigationRail */

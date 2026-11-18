@@ -12,8 +12,7 @@ export const CheckboxFancy = (
         className={`peer h-6 w-6 rounded-full bg-page-background
             after:content-[''] after:absolute after:inset-0 after:rounded-full
             after:border-2 after:border-page-background after:bg-page-background
-            peer-checked:after:bg-indigo-600 dark:peer-checked:after:bg-indigo-500
-            dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-indigo-800 group-hover:after:bg-indigo-600/50`}
+            peer-checked:after:bg-primary group-hover:after:bg-primary/50`}
       ></div>
     </label>
   );

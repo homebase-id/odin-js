@@ -303,13 +303,13 @@ export const ExtensionFile = ({
   return (
     <div
       onClick={canDownload ? onDownload : undefined}
-      className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600 mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
+      className={`${className || ''} relative ${className?.indexOf('aspect-') ? '' : 'aspect-square'} overflow-hidden bg-surface-container-high text-outline-variant mx-auto ${canDownload ? 'cursor-pointer' : ''}`}
     >
       <p className="absolute inset-0 p-2 text-9xl break-all">{fileName}</p>
       <div className="absolute inset-0 flex gap-3 items-center justify-center text-foreground">
         <ExtensionThumbnail
           contentType={contentType}
-          className={`${canDownload ? 'h-64 w-64 text-slate-200 dark:text-slate-600' : 'h-32 w-32 text-slate-500 dark:text-slate-400'}`}
+          className={`${canDownload ? 'h-64 w-64 text-outline-variant' : 'h-32 w-32 text-muted-foreground'}`}
         />
       </div>
 

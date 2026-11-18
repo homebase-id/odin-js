@@ -246,7 +246,7 @@ export const VolatileInput = forwardRef(
           contentEditable
           className={`before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50
             before:empty:content-[inherit] focus:outline-none after:absolute after:content-[''] after:pointer-events-none
-            after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-indigo-300`}
+            after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-primary`}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
           onPaste={onPasteHandler}

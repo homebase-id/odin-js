@@ -39,19 +39,19 @@ export const ChannelsDialog = ({
     >
       <div className="flex flex-col gap-2">
         {channels?.map((chnl) => (
-          <ChannelItem key={chnl.fileId} chnl={chnl} className="bg-slate-50 dark:bg-slate-900" />
+          <ChannelItem key={chnl.fileId} chnl={chnl} className="bg-surface-container-low" />
         ))}
         {isAddNew ? (
           <ChannelItem
             key={'new'}
             onClose={() => setIsAddNew(false)}
-            className="bg-slate-50 dark:bg-slate-900"
+            className="bg-surface-container-low"
           />
         ) : (
           <div
             key={'new'}
             onClick={() => setIsAddNew(true)}
-            className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900"
+            className="flex cursor-pointer flex-row items-center rounded-md border border-outline-variant bg-surface-container-low px-4 py-4"
           >
             <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
           </div>

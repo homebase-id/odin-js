@@ -101,14 +101,14 @@ export const RichTextRenderer = ({
 
     if (leaf.code) {
       children = (
-        <code className="bg-slate-100 p-[2px_3px_1px] rounded-md text-red-500 dark:text-orange-400 font-mono text-sm dark:bg-slate-800 border">
+        <code className="bg-surface-container-high p-[2px_3px_1px] rounded-md text-primary font-mono text-sm border">
           {children}
         </code>
       );
     }
     if (leaf.kbd) {
       children = (
-        <kbd className="bg-slate-100 px-1 rounded-md font-mono text-sm dark:bg-slate-800 border">
+        <kbd className="bg-surface-container-high px-1 rounded-md font-mono text-sm border">
           {children}
         </kbd>
       );
@@ -147,7 +147,7 @@ export const RichTextRenderer = ({
       case 'code_block':
         return (
           <code
-            className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all dark:bg-slate-800 border"
+            className="bg-surface-container-high px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all border"
           >
             {children}
           </code>
