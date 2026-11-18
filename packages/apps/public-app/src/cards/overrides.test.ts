@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cardVars } from './CardDesign';
+import { cardVars, PRESENTATIONS } from './CardDesign';
 import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { pickCard } from './pickCard';
@@ -197,6 +197,21 @@ describe('design resolution', () => {
     for (const size of ['huge', 3, null, 'Small']) {
       expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0]).toEqual(
         board.portraits[0]
+      );
+    }
+  });
+});
+
+describe('block presentation', () => {
+  it('every design takes each presentation as an override and keeps its own when unset', () => {
+    for (const preset of Object.values(CARD_PRESETS)) {
+      for (const presentation of PRESENTATIONS) {
+        const design = applyOverrides(preset, { blocks: [{ kind: 'links', presentation }] });
+        expect(design.blocks.find((b) => b.kind === 'links')?.presentation).toBe(presentation);
+      }
+      const links = (blocks: typeof preset.blocks) => blocks.find((b) => b.kind === 'links');
+      expect(links(applyOverrides(preset, { blocks: [{ kind: 'links' }] }).blocks)).toEqual(
+        links(preset.blocks)
       );
     }
   });

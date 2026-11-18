@@ -7,7 +7,6 @@ import {
   type CardDesign,
   type LayoutProps,
   type Portrait,
-  type Presentation,
 } from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
 import { LOADED_POSTS, POSTS_HREF } from '../../parts/posts';
@@ -178,8 +177,6 @@ const monogramStyle = (host: string): CSSProperties => {
 
 const initial = (link: CardLink) =>
   (Array.from(link.text.trim())[0] ?? Array.from(linkHost(link.target))[0] ?? '?').toUpperCase();
-
-const FLAT: Presentation[] = ['bare', 'row'];
 
 // Tiles and favicon wells take their corners from the portrait, so a square portrait gets square chrome
 const RADII: Record<Portrait['shape'], { tile: string; well: string; hero: string }> = {
@@ -455,9 +452,14 @@ const LinksBlock = ({
   data: CardData;
   columns?: boolean;
 }) => {
-  const flat = FLAT.includes(block.presentation);
-  if (block.kind === 'links')
-    return <LinkList links={data.links.filter(isLinkable)} flat={flat} columns={columns} />;
+  if (block.kind === 'links' && (block.presentation === 'boxed' || block.presentation === 'row'))
+    return (
+      <LinkList
+        links={data.links.filter(isLinkable)}
+        flat={block.presentation === 'row'}
+        columns={columns}
+      />
+    );
   if (block.presentation === 'boxed' && block.kind === 'moments')
     return (
       <PlaceTile
@@ -468,7 +470,8 @@ const LinksBlock = ({
         internal
       />
     );
-  return <CardBlock block={block} data={data} />;
+  const links = data.links.filter(isLinkable).map((link) => ({ ...link, text: describe(link).title }));
+  return <CardBlock block={block} data={{ ...data, links }} />;
 };
 
 const handleOf = (social: CardData['socials'][number]) =>
