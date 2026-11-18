@@ -177,7 +177,11 @@ export const ArticleReader = ({
 
   return (
     // The page in the article's palette (articleProse.css), edge to edge
-    <div className="article-page @container min-h-screen" onClick={jumpInPlace}>
+    <div
+      className="article-page @container min-h-screen"
+      data-no-bar={hideBar ? '' : undefined}
+      onClick={jumpInPlace}
+    >
       {hideBar ? null : (
         <ReaderBar onBack={onBack} end={barEnd}>
           <PostContextMenu

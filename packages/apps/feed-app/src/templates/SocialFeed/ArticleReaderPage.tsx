@@ -74,7 +74,11 @@ const ArticleReaderPage = () => {
           hideBar={isReactNative}
         />
       ) : (
-        <div className="mx-auto w-full max-w-[var(--article-w)] px-5 pt-[5.5rem]">
+        <div
+          className={`mx-auto w-full max-w-[var(--article-w)] px-5 ${
+            isReactNative ? 'pt-6 sm:pt-10' : 'pt-[5.5rem]'
+          }`}
+        >
           <LoadingBlock className="mb-3 h-10 w-full" />
           <LoadingBlock className="mb-10 h-10 w-3/5" />
           <LoadingBlock className="mb-2 h-4 w-full" />
