@@ -31,7 +31,7 @@
 }
 
 .dark select optgroup {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark {
