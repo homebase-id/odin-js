@@ -1,4 +1,4 @@
-import { FC, ReactNode, Suspense, lazy, useEffect, useState } from 'react';
+import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -50,22 +50,21 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
     imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
   }).fetch;
 
-  const [pageBackground, setPageBackground] = useState<string>();
   useEffect(() => {
     const root = document.documentElement;
-    const read = () =>
-      setPageBackground(getComputedStyle(root).getPropertyValue('--color-page-background').trim());
-    read();
-    const observer = new MutationObserver(read);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const update = () => {
+      const pageBackground = getComputedStyle(root)
+        .getPropertyValue('--color-page-background')
+        .trim();
+      if (RGB_TRIPLE.test(pageBackground))
+        meta?.setAttribute('content', `rgb(${pageBackground.replace(/ /g, ',')})`);
+    };
+    update();
+    const observer = new MutationObserver(update);
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, [colors]);
-
-  useEffect(() => {
-    if (!RGB_TRIPLE.test(pageBackground ?? '')) return;
-    // The static index.html pair is only the first-paint fallback; the browser would keep using it
-    document.querySelectorAll('meta[name="theme-color"][media]').forEach((m) => m.remove());
-  }, [pageBackground]);
 
   const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
 
@@ -78,9 +77,6 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
         </style>
       ) : null}
       <Helmet>
-        {RGB_TRIPLE.test(pageBackground ?? '') ? (
-          <meta name="theme-color" content={`rgb(${pageBackground!.replace(/ /g, ',')})`} />
-        ) : null}
         {imageData || emojiFavicon ? (
           <>
             <link rel="shortcut icon" href={imageData?.url || emojiFavicon}></link>
