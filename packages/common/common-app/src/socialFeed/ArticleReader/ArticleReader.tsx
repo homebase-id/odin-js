@@ -184,22 +184,22 @@ export const ArticleReader = ({
         />
       </ReaderBar>
 
-      {/* The rail from 1280px, when the reader itself has the 73.25rem its grid takes (6.25rem + 680px +
+      {/* The rail from 1280px, when the reader itself has the 83.75rem its grid takes (6.25rem + the article width +
           22rem and the padding): a host's sidebar can narrow it. articleProse.css hides the inline box then */}
       <div
         className={`px-5 pb-24 pt-6 sm:pt-10 ${
           rail
-            ? 'xl:@min-[73.25rem]:grid xl:@min-[73.25rem]:grid-cols-[minmax(6.25rem,1fr)_680px_minmax(22rem,1fr)]'
+            ? 'xl:@min-[83.75rem]:grid xl:@min-[83.75rem]:grid-cols-[minmax(6.25rem,1fr)_var(--article-w)_minmax(22rem,1fr)]'
             : ''
         }`}
       >
         <article
           ref={articleRef}
-          className="mx-auto w-full max-w-[680px] xl:@min-[73.25rem]:col-start-2"
+          className="mx-auto w-full max-w-[var(--article-w)] xl:@min-[83.75rem]:col-start-2"
           onClick={openImage}
         >
           {cover && postFile.fileId ? (
-            <div className="article-wide mb-8 sm:mb-10">
+            <div className="mb-8 sm:mb-10">
               <CoverZoom
                 image={cover.contentType?.startsWith('image/')}
                 fileKey={cover.key}
@@ -222,7 +222,7 @@ export const ArticleReader = ({
             </div>
           ) : null}
 
-          <h1 className="article-font text-balance text-[30px] font-bold leading-[1.2] tracking-[-0.02em] sm:text-[44px] sm:leading-[1.12]">
+          <h1 className="article-font text-[30px] font-bold leading-[1.2] tracking-[-0.02em] sm:text-[44px] sm:leading-[1.12]">
             {article.caption}
           </h1>
           {subtitle ? (
@@ -329,7 +329,7 @@ export const ArticleReader = ({
         </article>
 
         {rail ? (
-          <aside className="hidden xl:@min-[73.25rem]:col-start-3 xl:@min-[73.25rem]:row-start-1 xl:@min-[73.25rem]:block">
+          <aside className="hidden xl:@min-[83.75rem]:col-start-3 xl:@min-[83.75rem]:row-start-1 xl:@min-[83.75rem]:block">
             <OnThisPage headings={rail} />
           </aside>
         ) : null}

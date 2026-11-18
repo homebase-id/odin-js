@@ -5,6 +5,7 @@
  * and the live-block tokens below are set on <html>.
  */
 :root {
+  --article-w: 848px;
   /* Page and body text */
   --article-surface: #ffffff;
   --article-on-surface: #37352f;
@@ -193,20 +194,10 @@
   color-scheme: dark;
 }
 
-/* Covers, top-level galleries and wide live blocks take 880px of the 680px column */
-@media (min-width: 1024px) {
-  .article-wide,
-  .article-prose > div > [data-gallery],
-  .article-prose > div > [aria-roledescription='carousel'],
-  .article-prose > div > [data-live-block-wide] {
-    margin-inline: calc((680px - 880px) / 2);
-  }
-}
-
 /* With the "On this page" rail beside the article, the box above the body would repeat it; the rail
-   shows from 1280px once ArticleReader itself is 73.25rem wide */
+   shows from 1280px once ArticleReader itself is 83.75rem wide */
 @media (min-width: 1280px) {
-  @container (min-width: 73.25rem) {
+  @container (min-width: 83.75rem) {
     .article-prose[data-toc-rail] [data-article-toc] {
       display: none;
     }
