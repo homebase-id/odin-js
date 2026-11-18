@@ -151,7 +151,7 @@ const TestNotification = ({ className }: { className?: string }) => {
           <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
             {t(`What can I do?`)}
           </Link>
-          <span className="block text-sm text-gray-400">
+          <span className="block text-sm text-muted-foreground">
             {t('Reference id:')} {testNotificationData?.headers?.['odin-correlation-id']}
           </span>
         </p>
@@ -248,7 +248,7 @@ const DeviceView = ({
         <div className="mr-2 flex flex-col">
           <div>
             {subscription.friendlyName}{' '}
-            {isCurrent ? <span className="text-slate-400">({t('this device')})</span> : null}
+            {isCurrent ? <span className="text-muted-foreground">({t('this device')})</span> : null}
           </div>
           <small className="block text-sm">
             {t('Since')}: {new Date(subscription.subscriptionStartedDate).toLocaleDateString()}

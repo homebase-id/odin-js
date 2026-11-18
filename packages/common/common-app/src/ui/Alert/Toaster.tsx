@@ -40,7 +40,7 @@ export const LiveToaster = ({ drives }: { drives?: TargetDrive[] }) => {
       ))}
       {liveNotifications.length > 5 ? (
         <div className="flex justify-center">
-          <div className="w-9 rounded-lg bg-white pb-3 pt-1 text-center leading-[0] shadow-md">
+          <div className="w-9 rounded-lg bg-background pb-3 pt-1 text-center leading-[0] shadow-md">
             ...
           </div>
         </div>
@@ -164,7 +164,7 @@ export const Toast = ({
   const navigate = useNavigate();
 
   const fadeAfter =
-    'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
+    'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-background after:to-transparent';
 
   const doOpen: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
     e.preventDefault();
@@ -192,18 +192,18 @@ export const Toast = ({
     <a
       href={href}
       onClick={doOpen}
-      className={`relative flex md:max-w-sm flex-row gap-2 rounded-md bg-white px-3 py-2 shadow-md dark:bg-black dark:text-slate-300 ${href || onOpen ? 'cursor-pointer' : ''}`}
+      className={`relative flex md:max-w-sm flex-row gap-2 rounded-md bg-background px-3 py-2 shadow-md text-foreground ${href || onOpen ? 'cursor-pointer' : ''}`}
     >
       {imgSrc ? (
         <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
           <img src={imgSrc} className="h-full w-full object-cover" />
         </div>
       ) : type === 'critical' ? (
-        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300`}>
+        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-destructive`}>
           <Exclamation />
         </div>
       ) : type === 'warning' ? (
-        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-orange-400`}>
+        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-warning`}>
           <Exclamation />
         </div>
       ) : null}

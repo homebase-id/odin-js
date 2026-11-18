@@ -30,7 +30,7 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
   return (
     <div className={className}>
       <Link to={targetHref}>
-        <div className="relative h-full overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background px-4 py-4 hover:shadow-md dark:border-gray-800 lg:border lg:px-8 lg:py-16">
+        <div className="relative h-full overflow-hidden rounded-lg border-outline-variant bg-background px-4 py-4 hover:shadow-md lg:border lg:px-8 lg:py-16">
           <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">
             {channel.fileMetadata.appData.content.name}
           </h1>
@@ -39,7 +39,7 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
               {channel.fileMetadata.appData.content.description}
             </p>
           )}
-          <p className="inline-flex items-center text-button">
+          <p className="inline-flex items-center text-primary">
             {t('See all')}
             <Arrow className="ml-2 h-5 w-5" />
           </p>

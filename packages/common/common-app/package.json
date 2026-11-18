@@ -21,7 +21,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "lint": "eslint src/*",
+    "lint": "eslint src",
     "test": "vitest"
   },
   "repository": {
@@ -36,7 +36,8 @@
     "@tiptap/pm": "3.32.2",
     "@tiptap/static-renderer": "3.32.2",
     "katex": "0.18.11",
-    "lowlight": "3.3.0"
+    "lowlight": "3.3.0",
+    "marked": "15.0.6"
   },
   "peerDependencies": {
     "@tanstack/query-sync-storage-persister": "5.52.0",

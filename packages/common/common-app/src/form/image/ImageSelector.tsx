@@ -103,14 +103,14 @@ export const ImageSelector = ({
         </div>
       ) : (
         <div
-          className={`relative flex ${sizeClass} cursor-pointer flex-col bg-slate-100 dark:bg-slate-700`}
+          className={`relative flex ${sizeClass} cursor-pointer flex-col bg-surface-container-highest`}
           onClick={(e) => {
             e.preventDefault();
             setIsEdit(true);
           }}
         >
           <Exclamation className="m-auto h-8 w-8" />
-          <p className="text-center text-slate-400">{label ?? t('No image selected')}</p>
+          <p className="text-center text-muted-foreground">{label ?? t('No image selected')}</p>
         </div>
       )}
 

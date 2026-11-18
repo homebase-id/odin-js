@@ -23,7 +23,7 @@ const Order = ({
     <ol>
       {newElements.map((el, index) => (
         <li
-          className="my-2 flex flex-row rounded-sm border border-slate-200 bg-white px-2 py-1 dark:border-slate-800 dark:bg-gray-900"
+          className="my-2 flex flex-row rounded-sm border bg-background px-2 py-1"
           key={el}
         >
           <ActionButton

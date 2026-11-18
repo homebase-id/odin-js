@@ -47,8 +47,8 @@ const PermissionSelector = ({
               return (
                 <div
                   key={`${permissionLevel}`}
-                  className={`my-2 flex w-full cursor-pointer select-none flex-row items-center rounded-lg border px-4 py-3 dark:border-slate-800 ${
-                    isChecked ? 'bg-slate-50 dark:bg-slate-700' : 'bg-white dark:bg-black'
+                  className={`my-2 flex w-full cursor-pointer select-none flex-row items-center rounded-lg border px-4 py-3 ${
+                    isChecked ? 'bg-surface-container-high' : 'bg-background'
                   }`}
                   onClick={clickHandler}
                 >

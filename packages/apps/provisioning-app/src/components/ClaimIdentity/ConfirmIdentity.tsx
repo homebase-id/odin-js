@@ -55,12 +55,12 @@ const ConfirmIdentity = ({
           );
         }}
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t(`You're claiming`)}
         </p>
         <p className="mt-1 break-all font-mono text-2xl font-semibold">
           {domainPrefix}
-          <span className="text-slate-400 dark:text-slate-500">.{domainApex}</span>
+          <span className="text-muted-foreground">.{domainApex}</span>
         </p>
 
         <IdentityPreviewCard className="mt-5" domainPrefix={domainPrefix} apex={domainApex} />
@@ -74,7 +74,7 @@ const ConfirmIdentity = ({
         <div className="mt-8">
           <Label htmlFor="email">
             {t('Where can we reach you?')}
-            <small className="block text-sm font-normal text-slate-500 dark:text-slate-400">
+            <small className="block text-sm font-normal text-muted-foreground">
               {t(
                 'Your email will be used to send you updates about the status of your identity setup'
               )}
@@ -92,7 +92,7 @@ const ConfirmIdentity = ({
             placeholder="john@doe.com"
             onChange={(e) => onEmailChange(e.target.value.toLowerCase())}
           />
-          <p className="mt-3 flex flex-row items-start gap-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mt-3 flex flex-row items-start gap-2 text-xs leading-relaxed text-muted-foreground">
             <Shield className="mt-0.5 h-4 w-4 flex-none" />
             <span>
               {t('Used only for setup and account recovery. Never shared, never marketing.')}

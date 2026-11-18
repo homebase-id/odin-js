@@ -22,7 +22,7 @@ export const DeleteAccountSettings = () => {
           {t('Your account is scheduled for deletion on')} {scheduledDate.toLocaleDateString()}
         </Alert>
         <Section title={t('Cancel delete account')}>
-          <p className="mb-5 max-w-lg text-slate-400">
+          <p className="mb-5 max-w-lg text-muted-foreground">
             {t('Would you like to cancel the deletion of your account? You can do so until')}{' '}
             {scheduledDate.toLocaleDateString()}
           </p>
@@ -68,7 +68,7 @@ export const DeleteAccountSettings = () => {
     return (
       <>
         <Section title={t('Delete account')}>
-          <p className="mb-5 max-w-lg text-slate-400">
+          <p className="mb-5 max-w-lg text-muted-foreground">
             {t(
               `If you want to delete you account, you can request account deletion below.
               Once requested, you account will be scheduled for deletion after 30 days.

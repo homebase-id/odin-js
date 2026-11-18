@@ -49,14 +49,14 @@ export const RecoveredPassword = ({
         autoComplete="off"
       />
       {state === 'error' ? (
-        <p className="mt-3 text-red-600">{t('This password does not log in. Set a new one below.')}</p>
+        <p className="mt-3 text-destructive">{t('This password does not log in. Set a new one below.')}</p>
       ) : null}
       <div className="mt-5 flex flex-row-reverse">
         <ActionButton onClick={logIn} state={state === 'loading' ? 'loading' : undefined} disabled={!password}>
           {t('Log in')}
         </ActionButton>
       </div>
-      <p className="mt-4 text-sm text-slate-500">
+      <p className="mt-4 text-sm text-muted-foreground">
         <button type="button" className="underline" onClick={onReset}>
           {t('Does it not log in? Set a new password')}
         </button>

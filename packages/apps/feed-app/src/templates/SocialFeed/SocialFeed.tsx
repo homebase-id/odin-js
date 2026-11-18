@@ -106,9 +106,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                    <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <ChannelsOverview className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <IdentityLink className="overflow-hidden rounded-md border bg-background shadow-sm hover:shadow-md hover:dark:shadow-outline-variant" />
+                    <FollowHomebase className="rounded-md border bg-background shadow-sm" />
+                    <ChannelsOverview className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}
@@ -117,9 +117,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <ConnectionsView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <ConnectionsView className="rounded-md border bg-background shadow-sm" />
+                    <FollowingView className="rounded-md border bg-background shadow-sm" />
+                    <FollowersView className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}

@@ -124,7 +124,7 @@ export const MediaGallery = ({
 
                     {/* Overlay for excluded files */}
                     {index === maxVisible - 1 && countExcludedFromView > 0 ? (
-                      <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
+                      <div className="absolute inset-0 flex flex-col justify-center bg-black/40 text-6xl font-light text-white">
                         <span className="block text-center">+{countExcludedFromView}</span>
                       </div>
                     ) : isVideo ? (
@@ -137,7 +137,7 @@ export const MediaGallery = ({
                         </div>
                         {/* Duration overlay (bottom right) */}
                         {duration && duration > 0 && (
-                          <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-2 py-0.5 rounded">
+                          <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
                             {formatDuration(duration)}
                           </div>
                         )}

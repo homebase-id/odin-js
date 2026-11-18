@@ -29,7 +29,7 @@ const ShowRecoveryKey = ({onConfirm}: { onConfirm: () => void }) => {
       <div className="my-5">
         <Label>{t('Your recovery key')}</Label>
         <ClickToReveal textToShow={recoveryKey?.key}/>
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           {t(
             'Click to reveal your recovery key, for your safety make sure no one else can see your screen'
           )}
@@ -71,13 +71,13 @@ const ClickToReveal = ({textToShow}: { textToShow?: string | null | undefined })
   };
 
   const buttonStyle =
-    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12 text-foreground hover:text-primary dark:hover:text-primary-dark';
+    'flex h-12 w-full cursor-pointer items-center justify-center md:w-12 text-foreground hover:text-primary';
 
   return (
     <>
       <div
-        className="relative flex flex-col items-center rounded border border-gray-300 dark:border-gray-700 md:flex-row">
-        <div className="flex w-full flex-row justify-around border-b dark:border-gray-700 md:contents">
+        className="relative flex flex-col items-center rounded border md:flex-row">
+        <div className="flex w-full flex-row justify-around border-b md:contents">
           <button className={`${buttonStyle} md:border-r`} onClick={() => setShow(!show)}>
             {show ? <CloseEye className="h-6 w-6"/> : <Eye className="h-6 w-6"/>}
           </button>
@@ -87,7 +87,7 @@ const ClickToReveal = ({textToShow}: { textToShow?: string | null | undefined })
         </div>
 
         <div
-          className={`w-full bg-white px-3 py-2 text-center text-[1.6rem] leading-8 tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-100 md:text-left ${
+          className={`w-full bg-background px-3 py-2 text-center text-[1.6rem] leading-8 tracking-wider text-foreground md:text-left ${
             show ? '' : 'pointer-events-none select-none break-words'
           }`}
         >
@@ -96,7 +96,7 @@ const ClickToReveal = ({textToShow}: { textToShow?: string | null | undefined })
 
         {showCopied && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white dark:bg-slate-600">
+            <span className="rounded-lg bg-foreground px-2 py-1 text-sm text-background">
               {t('Copied to clipboard')}
             </span>
           </div>

@@ -115,7 +115,7 @@ export const GrantOnEditor = ({
         <option value={CircleGrantOn.Review}>{GRANT_ON_LABELS[CircleGrantOn.Review]}</option>
       </Select>
 
-      <p className="max-w-prose text-sm text-slate-400">{GRANT_ON_HINTS[pending ?? current]}</p>
+      <p className="max-w-prose text-sm text-muted-foreground">{GRANT_ON_HINTS[pending ?? current]}</p>
 
       {/* AssertDepositOnlyIfAmbientAsync treats both connect-time rules the same, so this warns on
           both: either one is minted without the owner present, and a read grant or a permission key
@@ -128,7 +128,7 @@ export const GrantOnEditor = ({
         </Alert>
       ) : null}
 
-      <p className="max-w-prose text-sm text-slate-400">
+      <p className="max-w-prose text-sm text-muted-foreground">
         {t('This decides how people join from now on. Nobody already in the circle is removed.')}
       </p>
 
@@ -180,7 +180,7 @@ const ReconcileOffer = ({
 
   return (
     <>
-      <p className="mt-1 text-sm text-slate-400">
+      <p className="mt-1 text-sm text-muted-foreground">
         {waiting} {waiting === 1 ? t('contact matches') : t('contacts match')}{' '}
         {t('this rule but are not in the circle.')}{' '}
         <button type="button" className="text-primary hover:underline" onClick={onOpen}>

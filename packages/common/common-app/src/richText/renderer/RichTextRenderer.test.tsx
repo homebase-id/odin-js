@@ -58,3 +58,14 @@ test('links only to http(s), mailto or a same-site path', () => {
   );
   vi.unstubAllGlobals();
 });
+
+test('renders h3, horizontal rules and strikethrough', () => {
+  const html = render([
+    { type: 'h3', children: [{ text: 'Three' }] },
+    { type: 'hr', children: [{ text: '' }] },
+    { type: 'p', children: [{ text: 'gone', strikethrough: true }] },
+  ]);
+  expect(html).toContain('<h3');
+  expect(html).toContain('<hr');
+  expect(html).toContain('<del>gone</del>');
+});

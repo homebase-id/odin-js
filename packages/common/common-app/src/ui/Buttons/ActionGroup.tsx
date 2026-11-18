@@ -89,7 +89,7 @@ export const ActionGroup = ({
         verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
       } z-20 ${isOpen ? 'max-h-[15rem] border' : 'max-h-0'} ${
         isSm ? 'w-full' : 'absolute w-[14rem]'
-      } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700 pointer-events-auto`}
+      } overflow-auto rounded-md border-outline-variant bg-background shadow-md pointer-events-auto`}
     >
       <ul className={`block`}>
         {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
@@ -210,7 +210,7 @@ const ActionOption = ({
   return (
     <>
       <li
-        className={`text-foreground bg-background cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-700 ${
+        className={`text-foreground cursor-pointer text-base hover:bg-foreground/10 ${
           className || ''
         }`}
       >

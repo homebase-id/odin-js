@@ -208,7 +208,7 @@ export const ShamirDistributionDialog = ({
             keepOpenOnBlur={true}
             size="2xlarge"
             footer={
-                <div className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <div className="border-t bg-background p-4">
                     {awaitConfigureShardsRequest != null ? (
                         <div className="flex w-full flex-col gap-2 sm:flex-row-reverse">
                             <ActionButton onClick={() => close()}>
@@ -297,7 +297,7 @@ export const ShamirDistributionDialog = ({
             {awaitConfigureShardsRequest == null && (
                 <>
                     {validationError && (
-                        <span className="text-red-500">{validationError}</span>
+                        <span className="text-destructive">{validationError}</span>
                     )}
 
                     <form

@@ -43,12 +43,12 @@ const homebaseHostingConfig = {
   brandSlogan: 'Reclaim the internet',
   logo: homebaseLogo,
   primaryClassName:
-    'border border-indigo-500 bg-indigo-500 text-white transition-colors hover:bg-transparent hover:text-indigo-800 dark:hover:text-indigo-300',
+    'border border-primary bg-primary text-primary-contrast transition-colors hover:bg-transparent hover:text-primary',
   secondaryClassName:
-    'border border-indigo-500 bg-white text-indigo-800 transition-colors hover:bg-indigo-500 hover:text-white dark:bg-transparent dark:text-indigo-300 dark:hover:text-white',
-  accentClassName: 'text-indigo-600 dark:text-indigo-400',
-  accentBorderClassName: 'border-indigo-500',
-  accentFocusClassName: 'focus-within:border-indigo-500 focus-within:ring-indigo-300',
+    'bg-secondary text-secondary-contrast transition hover:brightness-95 active:brightness-90',
+  accentClassName: 'text-primary',
+  accentBorderClassName: 'border-primary',
+  accentFocusClassName: 'focus-within:border-primary focus-within:ring-primary',
   termsAndConditionsLink: 'https://homebase.id/terms-and-conditions',
   privacyPolicyLink: 'https://homebase.id/privacy-policy',
   // Single cluster today; add the hosts here when this brand gains a region.

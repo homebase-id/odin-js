@@ -26,6 +26,10 @@ const getFallbackText = (body: unknown): string => {
   }
 };
 
+/** className for Markdown captions: bold headings below the post title's size, and a gap between blocks */
+export const captionBlocksClassName =
+  '[&>*+*]:mt-2 [&_p]:mb-0 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:font-semibold';
+
 export const RichTextRenderer = ({
   body,
   odinId,
@@ -101,14 +105,14 @@ export const RichTextRenderer = ({
 
     if (leaf.code) {
       children = (
-        <code className="bg-slate-100 p-[2px_3px_1px] rounded-md text-red-500 dark:text-orange-400 font-mono text-sm dark:bg-slate-800 border">
+        <code className="bg-surface-container-high p-[2px_3px_1px] rounded-md text-primary font-mono text-sm border">
           {children}
         </code>
       );
     }
     if (leaf.kbd) {
       children = (
-        <kbd className="bg-slate-100 px-1 rounded-md font-mono text-sm dark:bg-slate-800 border">
+        <kbd className="bg-surface-container-high px-1 rounded-md font-mono text-sm border">
           {children}
         </kbd>
       );
@@ -147,7 +151,7 @@ export const RichTextRenderer = ({
       case 'code_block':
         return (
           <code
-            className="bg-slate-100 px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all dark:bg-slate-800 border"
+            className="bg-surface-container-high px-3 py-3 w-full rounded-lg text-foreground font-mono text-sm flex flex-col whitespace-pre-wrap break-all border"
           >
             {children}
           </code>
@@ -176,6 +180,10 @@ export const RichTextRenderer = ({
             {children}
           </h2>
         );
+      case 'h3':
+        return <h3 className="text-lg">{children}</h3>;
+      case 'hr':
+        return <hr className="my-2 border-foreground/20" />;
       case 'ol':
         return (
           <ol className="list-decimal pl-5">

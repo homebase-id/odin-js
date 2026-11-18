@@ -105,7 +105,7 @@ export const PostInteracts = ({
   return (
     <div className={`${className ?? ''}`}>
       <div
-        className={`mt-auto flex text-foreground items-center pb-4 text-sm text-opacity-20 dark:text-opacity-30`}
+        className={`mt-auto flex text-muted-foreground items-center pb-4 text-sm`}
       >
         {!postDisabledEmoji ? (
           <LikeButton
@@ -134,7 +134,7 @@ export const PostInteracts = ({
             />
           ) : !postDisabledComment ? (
             <button
-              className={`inline-flex items-center hover:text-black dark:hover:text-white ${
+              className={`inline-flex items-center hover:text-foreground ${
                 !toggleable ? 'pointer-events-none' : ''
               }`}
               onClick={(e) => {
@@ -161,7 +161,7 @@ export const PostInteracts = ({
           className="grid cursor-default grid-flow-row gap-2  pb-4"
           onClick={(e) => e.stopPropagation()}
         >
-          <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20" />
+          <hr className="mb-4 border-t-outline-variant" />
           <Suspense fallback={null}>
             <CommentList context={reactionContext} canReact={canReact} login={login} />
           </Suspense>
@@ -183,7 +183,7 @@ export const ShareButton = ({ permalink, title }: { permalink: string; title?: s
   return (
     <>
       <button
-        className="inline-flex items-center hover:text-black dark:hover:text-white"
+        className="inline-flex items-center hover:text-foreground"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -215,7 +215,7 @@ export const RepostButton = ({
   return (
     <>
       <button
-        className={`inline-flex items-center hover:text-black dark:hover:text-white`}
+        className={`inline-flex items-center hover:text-foreground`}
         onClick={(e) => {
           e.preventDefault();
           setIsReposeDialogOpen(!isRepostDialogOpen);
@@ -345,7 +345,7 @@ const CommentsLink = ({
     <Link
       to={href}
       onAuxClick={(e) => e.stopPropagation()}
-      className="inline-flex items-center gap-1 hover:text-black dark:hover:text-white"
+      className="inline-flex items-center gap-1 hover:text-foreground"
     >
       <Bubble className="inline-block h-6 w-6" />
       {count ? <span>{count}</span> : null}
@@ -366,7 +366,7 @@ const CommentTeaserList = ({
   const allEncrypted = reactionPreview.comments.every((comment) => comment.isEncrypted);
   return (
     <div className="mb-5">
-      <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>
+      <hr className="mb-4 border-t-outline-variant"></hr>
 
       <div
         className="flex cursor-pointer flex-col gap-[0.2rem]"

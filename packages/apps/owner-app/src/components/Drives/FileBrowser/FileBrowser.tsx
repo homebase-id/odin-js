@@ -56,7 +56,7 @@ const FileBrowser = ({
           />
           <div className="flex flex-row rounded-lg border">
             <button
-              className={`border-r px-2 py-2 ${isListView ? 'bg-slate-200 dark:bg-slate-700' : ''}`}
+              className={`border-r px-2 py-2 ${isListView ? 'bg-surface-container-highest' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 setIsListView(true);
@@ -65,7 +65,7 @@ const FileBrowser = ({
               <Bars className="h-6 w-6" />
             </button>
             <button
-              className={`px-2 py-2 ${isListView ? '' : 'bg-slate-200 dark:bg-slate-700'}`}
+              className={`px-2 py-2 ${isListView ? '' : 'bg-surface-container-highest'}`}
               onClick={(e) => {
                 e.preventDefault();
                 setIsListView(false);

@@ -48,7 +48,7 @@ export const ExperienceAttributeEditor = ({
           name={MinimalProfileFields.ExperienceDecriptionId}
           defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
           onChange={onChange}
-          className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
+          className="rounded border px-2 pb-3"
           contentClassName="max-h-[50vh] overflow-auto"
         />
       </div>

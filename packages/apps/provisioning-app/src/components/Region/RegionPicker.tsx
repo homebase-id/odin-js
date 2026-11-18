@@ -24,7 +24,7 @@ export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) =>
 
   return (
     <Card className="flex flex-row flex-wrap items-center gap-3 py-3 text-sm">
-      <span className="flex-none text-slate-500 dark:text-slate-400">
+      <span className="flex-none text-muted-foreground">
         {showPills ? t('Host near') : t('Hosted in')}
       </span>
 
@@ -47,14 +47,14 @@ export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) =>
                 className={`flex-grow rounded-md border px-3 py-2 font-semibold transition-colors ${
                   region === option
                     ? `${config.accentBorderClassName} ${config.accentClassName}`
-                    : 'border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500'
+                    : 'border-outline hover:border-muted-foreground'
                 }`}
               >
                 {t(REGION_NAMES[option])}
               </button>
             ))}
           </div>
-          <p className="w-full text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="w-full text-xs leading-relaxed text-muted-foreground">
             {t(
               'Pick the region closer to where you usually live — even if you are traveling right now. Closer means faster, every day.'
             )}
@@ -65,7 +65,7 @@ export const RegionPicker = ({ region, source, onChange }: RegionPickerProps) =>
           <span className="font-semibold">
             {t(REGION_NAMES[region])}
             {source ? (
-              <span className="font-normal text-slate-500 dark:text-slate-400">
+              <span className="font-normal text-muted-foreground">
                 {' '}
                 · {t(REGION_SOURCE_LABELS[source])}
               </span>

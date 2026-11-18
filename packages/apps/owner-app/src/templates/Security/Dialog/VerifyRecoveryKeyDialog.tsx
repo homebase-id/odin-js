@@ -64,7 +64,7 @@ export const VerifyRecoveryKeyDialog = ({
                     {view == 'valid-phrase' &&
                         <div className="mb-2 rounded-lg px-3 py-2">
                             <div className="flex items-center ">
-                                <Check className="h-5 w-5 mr-2 text-green-600"/>
+                                <Check className="h-5 w-5 mr-2 text-success"/>
                                 <span className="font-medium">{t('Your phrase has been verified')}</span>
                             </div>
 
@@ -97,7 +97,7 @@ export const VerifyRecoveryKeyDialog = ({
                                 {showHint && <SubtleMessage>
                                     <div>
                                         Forgot your recovery phrase? {' '}
-                                        <Link to={'/owner/security/password-recovery'} className="text-blue-600 underline">
+                                        <Link to={'/owner/security/password-recovery'} className="text-primary underline">
                                             Click here
                                         </Link>
                                         {' '} to request to view it.
@@ -116,7 +116,7 @@ export const VerifyRecoveryKeyDialog = ({
                             </div>
 
                             {validationError && <div>
-                                <span className="text-red-500">{validationError}</span>
+                                <span className="text-destructive">{validationError}</span>
                                 <SubtleMessage>
                                     If you cannot recall your password, try your password.
                                 </SubtleMessage>

@@ -29,7 +29,7 @@ export const CollaborativeChannelItem = ({
     <div
       className={`${
         className ?? ''
-      } rounded-md border border-slate-100 px-4 py-4 dark:border-slate-800`}
+      } rounded-md border border-outline-variant px-4 py-4`}
     >
       <div className="flex flex-row items-center gap-2">
         <h2 className="text-lg">

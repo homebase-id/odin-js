@@ -77,7 +77,7 @@ export const SocialReactionsBar = forwardRef(
     if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
       return (
         <div
-          className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
+          className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md ${
             className ?? ''
           }`}
         >
@@ -88,7 +88,7 @@ export const SocialReactionsBar = forwardRef(
 
     return (
       <ReactionsBar
-        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${className || ''}`}
+        className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md ${className || ''}`}
         doLike={doLike}
         doUnlike={doUnlike}
         onMouseEnter={() => setIsHover(true)}
@@ -216,7 +216,7 @@ export const ReactionsBar = forwardRef(
             </>
           )}
           <button
-            className="flex-shrink-0 scale-100 rounded-full p-2 text-slate-400 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
+            className="flex-shrink-0 scale-100 rounded-full p-2 text-muted-foreground text-center hover:bg-surface-container-highest"
             title={t('Others')}
             onClick={() => {
               setIsCustomOpen(true);
@@ -288,8 +288,8 @@ const EmojiButton = ({
     <button
       className={`mr-[0.125rem] h-8 w-8 rounded-full flex-shrink-0 p-1 text-center text-xl last-of-type:-mr-0 ${
         isActive
-          ? 'bg-slate-300 dark:bg-slate-700'
-          : 'bg-transparent hover:bg-slate-300 hover:dark:bg-slate-700'
+          ? 'bg-surface-container-highest'
+          : 'bg-transparent hover:bg-surface-container-highest'
       }`}
       title={t('Like')}
       onClick={onClick}

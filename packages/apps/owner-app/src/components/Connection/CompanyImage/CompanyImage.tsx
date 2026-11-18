@@ -30,7 +30,7 @@ export const CompanyImage = ({
 }) => {
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
-  const bgClass = 'bg-white dark:bg-black';
+  const bgClass = 'bg-background';
 
   const AppIcon = useMemo(() => AppSpecificIcon(appId), [appId]);
 

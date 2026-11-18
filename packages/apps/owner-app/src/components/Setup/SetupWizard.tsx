@@ -83,7 +83,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
             >
                 <p className="flex flex-col">
                     Begin your journey by sharing a bit about yourself.
-                    <small className="text-sm text-slate-500">
+                    <small className="text-sm text-muted-foreground">
                         A little information can help friends recognize and connect with you on Homebase. This
                         information will be publicly available so don&apos;t add anything you would consider
                         private. And remember, here you&apos;re in control of your personal data.
@@ -93,7 +93,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
                 <div className="my-10">
                     <h2 className="mb-2 text-xl">
                         {t('Your Profile Photo')}
-                        <small className="block text-sm text-slate-400">{t('Help people recognize you')}</small>
+                        <small className="block text-sm text-muted-foreground">{t('Help people recognize you')}</small>
                     </h2>
                     <div className="flex flex-row">
                         <div className="mx-auto sm:max-w-[15rem]">
@@ -132,7 +132,7 @@ const SetupWizard = ({doInitWithData}: { doInitWithData: (data: WelcomeData) => 
                 </div>
                 <h2 className="mb-2 text-xl">
                     {t('Your info')}
-                    <small className="block text-sm text-slate-400">{t('Help people find you')}</small>
+                    <small className="block text-sm text-muted-foreground">{t('Help people find you')}</small>
                 </h2>
 
                 <div className="flex-row gap-2 sm:flex">

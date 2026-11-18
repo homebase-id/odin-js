@@ -69,8 +69,8 @@ export const EmojiDropdown = ({ query, onInput, position }: VolatileInputAutoCom
             key={emoji.unicode}
             className={`flex cursor-pointer flex-row gap-2 px-2 transition-colors ${
               index === activeIndex
-                ? 'bg-indigo-200 dark:bg-indigo-800'
-                : 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
+                ? 'bg-primary-container'
+                : 'hover:bg-primary-container'
             }`}
             onClick={() => {
               onInput(`${emoji.unicode} `);

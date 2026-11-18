@@ -40,7 +40,7 @@ export function TimeAgoUtc({
     return (
         <span className={className}>
       {relative}
-            {absolute && <span className="ml-1 text-slate-500">({absolute})</span>}
+            {absolute && <span className="ml-1 text-muted-foreground">({absolute})</span>}
     </span>
     );
 }

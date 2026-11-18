@@ -83,8 +83,8 @@ const DriveCircleAccessDialog = ({
 
                 return (
                   <div
-                    className={`my-4 flex w-full select-none flex-row rounded-lg border p-4 dark:border-slate-800 ${
-                      isChecked && 'bg-slate-50 dark:bg-slate-700'
+                    className={`my-4 flex w-full select-none flex-row rounded-lg border p-4 ${
+                      isChecked && 'bg-surface-container-high'
                     }`}
                     key={circle.id}
                   >

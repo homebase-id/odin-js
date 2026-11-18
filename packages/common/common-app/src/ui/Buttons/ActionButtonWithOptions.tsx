@@ -38,7 +38,7 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
     return options.map((option) => (
       <li
         onClick={() => onClick(option.value)}
-        className="cursor-pointer px-2 py-2 leading-tight hover:bg-slate-200 dark:hover:bg-slate-700"
+        className="cursor-pointer px-2 py-2 leading-tight hover:bg-foreground/10"
         key={option.value}
       >
         {option.name}
@@ -60,11 +60,11 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
             verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
           } right-0 w-full shadow-md ${
             isOpen ? 'max-h-[15.5rem]' : 'max-h-0'
-          } overflow-auto bg-white text-black dark:bg-slate-900 dark:text-white`}
+          } overflow-auto bg-background text-foreground`}
         >
           {optionGroups.map((group) => (
             <li className="px-2 py-1" key={group.name}>
-              <p className="font-bold text-slate-400 dark:text-slate-500">{group.name}</p>
+              <p className="font-bold text-muted-foreground">{group.name}</p>
               <ul>{renderOptions(group.options)}</ul>
             </li>
           ))}
@@ -75,7 +75,7 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
             verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
           } right-0 w-full ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
-          } overflow-auto bg-white text-black`}
+          } overflow-auto bg-background text-foreground`}
         >
           {renderOptions(options)}
         </ul>
