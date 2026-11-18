@@ -27,12 +27,14 @@ import {
   Suspense,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
   type CSSProperties,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { cleanTiptapDoc, codeLanguage } from '@homebase-id/js-lib/public';
 import {
   liveBlockKind,
@@ -64,6 +66,7 @@ import {
 import { articleHeadings, MIN_TOC_HEADINGS, type ArticleHeading } from './headingSlugs';
 import { t } from '../../helpers/i18n/dictionary';
 import { Image } from '../../media/Image';
+import { Chevron } from '../../ui/Icons/Chevron';
 import { Mention } from '../renderer/Mention';
 import type { RichTextRenderer } from '../renderer/RichTextRenderer';
 
@@ -1247,31 +1250,46 @@ export const ArticleDocRenderer = ({
   );
 };
 
-/** The headings to jump to, above the body: open from 640px, closed on a phone. */
+/** The headings to jump to, above the body, in a box that starts closed. */
 const TableOfContents = ({ headings }: { headings: ArticleHeading[] }) => {
-  // Only the first render reads the width: after that the box stays as the reader left it
-  const [open] = useState(
-    () => typeof window.matchMedia !== 'function' || window.matchMedia('(min-width: 640px)').matches
-  );
+  const [open, setOpen] = useState(false);
+  const listId = useId();
   const topLevel = Math.min(...headings.map((heading) => heading.level));
   return (
-    <nav
-      aria-label="Table of contents"
-      data-article-toc=""
-      className={`mb-6 rounded-lg border ${BORDER} px-4 py-3 text-sm`}
-    >
-      <details open={open}>
-        <summary className="cursor-pointer font-semibold">Contents</summary>
-        <ol className="mt-2">
+    <div data-article-toc="" className={`mb-8 rounded-lg border ${BORDER}`}>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen(!open)}
+        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--article-primary)]"
+      >
+        {t('On this page')}
+        <Chevron
+          className={`h-3 w-3 transition-transform ${open ? '-rotate-90' : 'rotate-90'}`}
+        />
+      </button>
+      <nav id={listId} aria-label="Table of contents" hidden={!open} className="px-3 pb-2">
+        <ul>
           {headings.map((heading) => (
-            <li key={heading.id} style={{ paddingLeft: `${(heading.level - topLevel) * 1}rem` }}>
-              <a href={`#${heading.id}`} className={`${LINK_COLOR} hover:underline`}>
-                {heading.text}
+            <li key={heading.id}>
+              <a
+                href={`#${heading.id}`}
+                // Closed before the reader scrolls, so the heading doesn't move up under it
+                onClick={() => flushSync(() => setOpen(false))}
+                className={`flex min-h-11 items-center border-l-2 border-transparent py-1 pr-2 text-sm leading-snug no-underline outline-none ${MUTED_TEXT} hover:text-[color:var(--article-on-surface)] focus-visible:ring-2 focus-visible:ring-[color:var(--article-primary)]`}
+              >
+                <span
+                  className="pl-2"
+                  style={{ marginLeft: `${(heading.level - topLevel) * 1}rem` }}
+                >
+                  {heading.text}
+                </span>
               </a>
             </li>
           ))}
-        </ol>
-      </details>
-    </nav>
+        </ul>
+      </nav>
+    </div>
   );
 };

@@ -71,6 +71,11 @@
   color: var(--article-on-surface);
 }
 
+/* Without the reader's bar (an app drawing its own), a jump lands just below the top */
+.article-page[data-no-bar] .scroll-mt-20 {
+  scroll-margin-top: 1rem;
+}
+
 /* Around it while it is open: the canvas past the page's edges, as when overscrolled */
 :root[data-article-reader],
 :root[data-article-reader] body {

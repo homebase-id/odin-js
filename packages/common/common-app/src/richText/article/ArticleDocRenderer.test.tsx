@@ -153,6 +153,9 @@ test('a table of contents lists 3+ headings with unique ids', () => {
   expect(html).toContain('href="#intro"');
   expect(html).toContain('href="#intro-2"');
   expect(html).toContain('<h2 id="intro-2"');
+  expect(html).toMatch(/<div data-article-toc=""[^>]*><button type="button" aria-expanded="false"/);
+  expect(html).toContain('On this page');
+  expect(html).toMatch(/<nav id="[^"]+" aria-label="Table of contents" hidden=""/);
 
   expect(render(doc)).not.toContain('Table of contents');
   expect(
