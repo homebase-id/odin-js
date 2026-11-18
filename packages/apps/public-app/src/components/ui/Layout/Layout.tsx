@@ -64,7 +64,7 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     if (!RGB_TRIPLE.test(pageBackground ?? '')) return;
     // The static index.html pair is only the first-paint fallback; the browser would keep using it
-    document.querySelectorAll('meta[name="theme-color"]:not([data-rh])').forEach((m) => m.remove());
+    document.querySelectorAll('meta[name="theme-color"][media]').forEach((m) => m.remove());
   }, [pageBackground]);
 
   const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
