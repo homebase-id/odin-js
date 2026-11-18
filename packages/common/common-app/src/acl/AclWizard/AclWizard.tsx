@@ -80,12 +80,12 @@ const RequiredSecurityGroupRadioGroup = ({
     return (
       <button
         className={`flex h-full w-full flex-col justify-start rounded-md px-3 py-2 text-left hover:shadow-md ${
-          checked ? 'bg-primary text-white dark:bg-primary' : 'bg-slate-100 dark:bg-slate-800'
+          checked ? 'bg-primary text-primary-contrast' : 'bg-surface-container-high'
         }`}
         onClick={() => onChange && onChange(props.value)}
       >
         {props.name}
-        <small className={`block text-sm ${checked ? 'text-slate-300' : 'text-slate-500'}`}>
+        <small className={`block text-sm ${checked ? 'text-primary-contrast/80' : 'text-muted-foreground'}`}>
           {props.description}
         </small>
       </button>

@@ -1,10 +1,11 @@
-import { FC, ReactNode, Suspense, lazy } from 'react';
+import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Toaster, useDotYouClientContext, useRawImage } from '@homebase-id/common-app';
 import { GetTargetDriveFromProfileId } from '@homebase-id/js-lib/profile';
 import { HomePageConfig } from '@homebase-id/js-lib/public';
+import { RGB_TRIPLE, siteColorVars } from './siteColorVars';
 
 const faviconSvg = (emoji: string) =>
   `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`;
@@ -49,23 +50,32 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
     imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
   }).fetch;
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const update = () => {
+      const pageBackground = getComputedStyle(root)
+        .getPropertyValue('--color-page-background')
+        .trim();
+      if (RGB_TRIPLE.test(pageBackground))
+        meta?.setAttribute('content', `rgb(${pageBackground.replace(/ /g, ',')})`);
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, [colors]);
+
   const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
 
   return (
     <>
-      <style type="text/css">
-        {`:root {
-            ${Object.keys(colors.light)
-              .map((key) => `--color-${key}: ${colors.light[key]};`)
-              .join('')}
-          }`}
-        {`html.dark {
-            ${Object.keys(colors.dark)
-              .map((key) => `--color-${key}: ${colors.dark[key]};`)
-              .join('')}
-          }`}
-        {`html.dark { background-color: rgba(var(--color-page-background)); }`}
-      </style>
+      {colors ? (
+        <style type="text/css">
+          {`:root { ${siteColorVars(colors.light)} }`}
+          {`html.dark { ${siteColorVars(colors.dark)} }`}
+        </style>
+      ) : null}
       <Helmet>
         {imageData || emojiFavicon ? (
           <>

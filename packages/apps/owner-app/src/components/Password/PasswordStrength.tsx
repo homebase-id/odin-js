@@ -26,7 +26,7 @@ export const PasswordStrength = ({
         {Array.from({ length: MAX_SCORE }).map((_, i) => (
           <div
             key={i}
-            className={`h-2 rounded-xl ${i < passwordStrength ? 'bg-green-500' : 'bg-gray-300'}`}
+            className={`h-2 rounded-xl ${i < passwordStrength ? 'bg-success' : 'bg-outline-variant'}`}
           />
         ))}
       </div>

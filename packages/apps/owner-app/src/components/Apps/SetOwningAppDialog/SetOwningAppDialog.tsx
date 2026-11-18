@@ -108,7 +108,7 @@ export const SetOwningAppDialog = ({
           return false;
         }}
       >
-        <p className="mb-5 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mb-5 text-sm text-muted-foreground">
           {t('This cannot be undone.')}{' '}
           {t(
             `Ownership is set once: the server refuses to move a ${subject} between apps afterwards, because pending enrollments and addresses are recorded against the app that owns it.`
@@ -120,7 +120,7 @@ export const SetOwningAppDialog = ({
           <select
             id="owningApp"
             required
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-black"
+            className="w-full rounded border bg-background px-3 py-2"
             value={appId}
             onChange={(e) => setAppId(e.target.value)}
           >
@@ -133,7 +133,7 @@ export const SetOwningAppDialog = ({
             ))}
           </select>
           {!apps?.length && !appsLoading ? (
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t('No apps registered on your identity')}
             </p>
           ) : null}
@@ -207,7 +207,7 @@ const GrantPreview = ({
     allDrives?.find((d) => drivesEqual(d.targetDriveInfo, drive))?.name ?? `${drive.alias}`;
 
   return (
-    <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-700 dark:bg-amber-950">
+    <div className="mb-5 rounded-lg border border-warning bg-warning-container p-4 text-sm text-warning-container-contrast">
       <p className="mb-2">
         {t(
           'This app will also be given access to the drives the circle grants, so that it can enrol people into it:'

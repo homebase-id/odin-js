@@ -90,9 +90,9 @@ const AccountRecovery = () => {
         <section className="body-font flex h-full pt-24">
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <div className="">
-              <h1 className="mb-5 text-4xl dark:text-white">
+              <h1 className="mb-5 text-4xl">
                 Homebase | {t('Recover access')}
-                <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                <small className="block break-all text-muted-foreground sm:break-normal">
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
               </h1>
@@ -140,7 +140,7 @@ const AccountRecovery = () => {
                   else doSetNewPassword();
                 }}>
                   {step === 'phraseReset' ? (
-                    <p className="mb-2 max-w-md text-slate-400">
+                    <p className="mb-2 max-w-md text-muted-foreground">
                       {recovered?.password === undefined
                         ? t('Your recovery key is right, but no password was saved with it. Set a new password.')
                         : t('Set a new password with your recovery key.')}
@@ -148,7 +148,7 @@ const AccountRecovery = () => {
                   ) : (
                   <>
                   <div className="mb-2">
-                    <p className="max-w-md text-slate-400">
+                    <p className="max-w-md text-muted-foreground">
                       {t('To regain access to your account you will need your recovery key.')}{' '}
                       {t('You received your recovery key when you first signed up')}{' '}
                     </p>
@@ -184,7 +184,7 @@ const AccountRecovery = () => {
                     </div>
                   ) : (
                   <>
-                  <hr className="mb-5 mt-7 dark:border-slate-700"/>
+                  <hr className="mb-5 mt-7"/>
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
                     <PasswordInput
@@ -216,7 +216,7 @@ const AccountRecovery = () => {
                       autoComplete="new-password"
                     />
                     {password !== retypePassword && retypePassword !== '' ? (
-                      <p className="py-2 text-red-800 dark:text-red-200">
+                      <p className="py-2 text-destructive">
                         {t("Passwords don't match")}
                       </p>
                     ) : null}

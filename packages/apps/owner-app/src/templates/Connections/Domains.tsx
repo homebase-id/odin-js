@@ -45,7 +45,7 @@ const Domains = () => {
     <>
       <PageMeta icon={Globe} title={t("Sites you've signed in to")} />
 
-      <div className="mb-6 flex max-w-2xl flex-col gap-2 text-slate-400">
+      <div className="mb-6 flex max-w-2xl flex-col gap-2 text-muted-foreground">
         <p>
           {t(
             "These are sites you've signed in to with your Homebase identity. When you sign in, the site gets a key to your identity: by default it can read only what's public, and it can read more if you add it to one or more circles."
@@ -113,7 +113,7 @@ const DomainListItem = ({
       <ErrorNotification error={actionError} />
       <HybridLink
         href={(domain.domain && `/owner/sign-ins/${domain.domain}`) ?? undefined}
-        className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+        className="bg-transparent transition-colors hover:bg-surface-container-high"
       >
         <div
           className={`group flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:gap-8 sm:px-2 ${
@@ -123,9 +123,9 @@ const DomainListItem = ({
           <div className="flex flex-row gap-2 sm:contents">
             <CompanyImage domain={domain.domain} className="w-12" />
 
-            <h2 className="font-thiner dark:text-white">
+            <h2 className="font-thiner">
               <span className="break-words">{domain.domain}</span>
-              <small className="block text-sm text-slate-400">
+              <small className="block text-sm text-muted-foreground">
                 {t('First used')}:{' '}
                 {new Date(domain.created).toLocaleString(undefined, {
                   month: 'short',
@@ -138,7 +138,7 @@ const DomainListItem = ({
               </small>
             </h2>
           </div>
-          <div className="ml-auto flex flex-row items-center text-sm text-slate-400 sm:mx-auto">
+          <div className="ml-auto flex flex-row items-center text-sm text-muted-foreground sm:mx-auto">
             {hasExtendedPermissions ? (
               <>
                 <Shield className="mr-2 h-5 w-5" />

@@ -60,7 +60,7 @@ export const PasswordRecoverySetupTab = () => {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex-1">
                                 <span className="block text-lg">{t('Password Recovery Setup')}</span>
-                                <div className="mt-1 text-sm text-gray-400">
+                                <div className="mt-1 text-sm text-muted-foreground">
                                     {t(
                                         'Setup secure password recovery so that you can receive an email if you forget your password.'
                                     )}

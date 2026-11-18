@@ -1,0 +1,66 @@
+/* The indigo look of the apps not on Material 3 yet; each app's Layout sets the page colours */
+
+/* The var() references resolve on <html>, so they rely on .dark being set there */
+:root {
+  --color-muted-foreground: 100 116 139; /* slate-500 */
+  --color-primary: 99 102 241; /* indigo-500 */
+  --color-primary-contrast: 255 255 255;
+  --color-primary-container: 199 210 254; /* indigo-200 / indigo-800 */
+  --color-secondary: var(--color-background);
+  --color-secondary-contrast: var(--color-foreground);
+
+  --color-outline: 209 213 219; /* gray-300 / gray-700 */
+  --color-outline-variant: 229 231 235; /* gray-200 / gray-700 */
+
+  --color-surface-container-lowest: 255 255 255; /* white / slate-900 */
+  --color-surface-container-low: 249 250 251; /* gray-50 / slate-900 */
+  --color-surface-container-high: 241 245 249; /* slate-100 / slate-800 */
+  --color-surface-container-highest: 241 245 249; /* slate-100 / slate-700 */
+
+  --color-destructive: 239 68 68; /* red-500 */
+  --color-destructive-hover: 220 38 38; /* red-600 */
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 254 202 202; /* red-200 / red-700 */
+  --color-error-container-hover: 248 113 113; /* red-400 / red-800 */
+  --color-error-container-contrast: var(--color-foreground);
+  --color-error-surface: 254 242 242; /* red-50 / red-900 */
+
+  --color-success: 34 197 94; /* green-500 */
+  --color-warning: 251 146 60; /* orange-400 */
+  --color-info: 96 165 250; /* blue-400 */
+  --color-warning-container: 255 247 237; /* orange-50 */
+  --color-warning-container-contrast: var(--color-foreground);
+  --color-highlight: 253 230 138; /* amber-200 / yellow-600 */
+
+  --color-syntax-key: 29 78 216; /* blue-700 / blue-300 */
+  --color-syntax-string: 21 128 61; /* green-700 / green-300 */
+  --color-syntax-number: 194 65 12; /* orange-700 / orange-300 */
+  --color-syntax-boolean: 126 34 206; /* purple-700 / purple-300 */
+  --color-syntax-null: 190 18 60; /* rose-700 / rose-300 */
+}
+
+.dark {
+  --color-primary-container: 55 48 163;
+
+  --color-outline: 55 65 81;
+  --color-outline-variant: 55 65 81;
+
+  --color-surface-container-lowest: 15 23 42;
+  --color-surface-container-low: 15 23 42;
+  --color-surface-container-high: 30 41 59;
+  --color-surface-container-highest: 51 65 85;
+
+  --color-error-container: 185 28 28;
+  --color-error-container-hover: 153 27 27;
+  --color-error-container-contrast: 255 255 255;
+  --color-error-surface: 127 29 29;
+
+  --color-warning-container-contrast: 0 0 0;
+  --color-highlight: 202 138 4;
+
+  --color-syntax-key: 147 197 253;
+  --color-syntax-string: 134 239 172;
+  --color-syntax-number: 253 186 116;
+  --color-syntax-boolean: 216 180 254;
+  --color-syntax-null: 253 164 175;
+}

@@ -34,7 +34,7 @@ export const DistributeShardsReview = ({config}: {
                     trustedPlayers={config.players}/>
             ) : (
                 <div className="flex flex-grow items-center justify-center p-5">
-                    <p className="text-slate-400">{t('You are missing trusted connections')}</p>
+                    <p className="text-muted-foreground">{t('You are missing trusted connections')}</p>
                 </div>
             )}
         </>

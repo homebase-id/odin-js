@@ -1,0 +1,19 @@
+/* The Sidenav in the legacy community app, which doesn't use homebase-m3.css: the chat app's grey Material 3 NavigationRail */
+
+:root {
+  --color-nav: 232 236 244; /* surfaceContainerHigh */
+  --color-nav-contrast: 84 88 99; /* onSurfaceVariant */
+  --color-nav-active: 210 223 251; /* primaryContainer */
+  --color-nav-active-contrast: 5 24 69; /* onPrimaryContainer */
+  --color-nav-more: 251 252 255; /* surfaceContainerLowest */
+  --color-nav-outline: 207 212 222; /* outlineVariant */
+}
+
+.dark {
+  --color-nav: 44 47 55; /* surfaceContainerHigh */
+  --color-nav-contrast: 190 191 197; /* onSurfaceVariant */
+  --color-nav-active: 70 75 92; /* primaryContainer */
+  --color-nav-active-contrast: 219 225 252; /* onPrimaryContainer */
+  --color-nav-more: 39 42 49; /* surfaceContainer, M3's menu container */
+  --color-nav-outline: 62 65 74; /* outlineVariant */
+}

@@ -32,6 +32,8 @@
   /* The page and body text as the apps' RGB channels (--color-background: 22 22 22) */
   --article-surface-rgb: 255 255 255;
   --article-on-surface-rgb: 55 53 47;
+  /* Ink at 60% over the paper */
+  --article-muted-rgb: 135 134 130;
 }
 
 :root.dark {
@@ -54,6 +56,7 @@
   --article-warning-container: #2e2a1c;
   --article-surface-rgb: 25 25 25;
   --article-on-surface-rgb: 212 212 212;
+  --article-muted-rgb: 137 137 137;
 }
 
 /*

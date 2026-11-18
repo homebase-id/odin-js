@@ -45,7 +45,7 @@ export const IdentityPreviewCard = ({
 };
 
 const Ghost = ({ children }: { children: ReactNode }) => (
-  <span className="font-sans text-slate-400 dark:text-slate-500">{children}</span>
+  <span className="font-sans text-muted-foreground">{children}</span>
 );
 
 const PreviewRow = ({
@@ -63,11 +63,11 @@ const PreviewRow = ({
     isDimmed={!isLive}
     icon={
       <Icon
-        className={`h-5 w-5 flex-none ${isLive ? config.accentClassName : 'text-slate-400 dark:text-slate-500'}`}
+        className={`h-5 w-5 flex-none ${isLive ? config.accentClassName : 'text-muted-foreground'}`}
       />
     }
   >
-    <span className="w-14 flex-none text-sm text-slate-500 dark:text-slate-400">{label}</span>
+    <span className="w-14 flex-none text-sm text-muted-foreground">{label}</span>
     <span className="min-w-0 break-all font-mono text-sm">{children}</span>
   </CardRow>
 );

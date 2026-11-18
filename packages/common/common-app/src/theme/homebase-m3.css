@@ -1,0 +1,129 @@
+/* Homebase's Material 3 colours from the chat app (chat-kmp Color.kt) */
+
+/* The var() references resolve on <html>, so they rely on .dark being set there */
+:root {
+  --color-surface-container-lowest: 251 252 255;
+  --color-surface-container-low: 242 245 249;
+  --color-surface-container: 237 240 246;
+  --color-surface-container-high: 232 236 244;
+  --color-outline-variant: 207 212 222;
+  --color-surface-container-highest: 230 234 243; /* Surface4 */
+  --color-outline: 128 131 137; /* Outline */
+
+  --color-page-background: var(--color-surface-container-low);
+  --color-background: var(--color-surface-container-lowest);
+  --color-foreground: 27 27 29; /* onSurface */
+  --color-muted-foreground: 84 88 99; /* onSurfaceVariant */
+
+  --color-primary: 44 88 195;
+  --color-primary-contrast: 255 255 255; /* onPrimary */
+  --color-primary-container: 210 223 251;
+  --color-primary-container-contrast: 5 24 69; /* onPrimaryContainer */
+  --color-secondary: 220 229 249; /* secondaryContainer */
+  --color-secondary-contrast: 21 29 44; /* onSecondaryContainer */
+
+  /* error, onError and their containers; hover is M3's state layer, 8% of the contrast on top */
+  --color-destructive: 186 27 27;
+  --color-destructive-hover: 192 45 45;
+  --color-destructive-contrast: 255 255 255;
+  --color-error-container: 255 218 212;
+  --color-error-container-hover: 240 201 195;
+  --color-error-container-contrast: 65 0 2;
+  --color-error-surface: var(--color-error-container);
+
+  /* ExtendedColors, and the RequestBanner for warnings */
+  /* Light status tones are M3 tone 40, readable as text; chat-kmp has one constant for both themes */
+  --color-success: 0 110 28;
+  --color-warning: 139 80 0;
+  --color-info: 0 97 164;
+  --color-warning-container: 255 217 163;
+  --color-warning-container-contrast: 61 44 26;
+  --color-highlight: var(--color-primary-container);
+
+  --color-syntax-key: 29 78 216;
+  --color-syntax-string: 21 128 61;
+  --color-syntax-number: 194 65 12;
+  --color-syntax-boolean: 126 34 206;
+  --color-syntax-null: 190 18 60;
+}
+
+.dark {
+  --color-surface-container-lowest: 27 28 31;
+  --color-surface-container-low: 35 36 42;
+  --color-surface-container: 39 42 49;
+  --color-surface-container-high: 44 47 55;
+  --color-outline-variant: 62 65 74;
+  --color-surface-container-highest: 46 48 57;
+  --color-outline: 113 116 124;
+
+  --color-page-background: var(--color-surface-container-lowest);
+  --color-background: var(--color-surface-container-low);
+  --color-foreground: 226 225 229;
+  --color-muted-foreground: 190 191 197;
+
+  --color-primary: 182 197 250;
+  --color-primary-contrast: 30 36 56;
+  --color-primary-container: 70 75 92;
+  --color-primary-container-contrast: 219 225 252;
+  --color-secondary: 65 70 89;
+  --color-secondary-contrast: 220 225 249;
+
+  --color-destructive: 255 180 169;
+  --color-destructive-hover: 243 166 156;
+  --color-destructive-contrast: 105 0 5;
+  --color-error-container: 147 0 6;
+  --color-error-container-hover: 156 17 23;
+  --color-error-container-contrast: 255 218 214;
+
+  --color-success: 76 175 80;
+  --color-warning: 255 152 0;
+  --color-info: 33 150 243;
+  --color-warning-container: 105 60 0;
+  --color-warning-container-contrast: 255 220 190;
+
+  --color-syntax-key: 147 197 253;
+  --color-syntax-string: 134 239 172;
+  --color-syntax-number: 253 186 116;
+  --color-syntax-boolean: 216 180 254;
+  --color-syntax-null: 253 164 175;
+}
+
+/* The Sidenav, the chat app's grey NavigationRail */
+:root {
+  --color-nav: var(--color-surface-container-high);
+  --color-nav-contrast: var(--color-muted-foreground);
+  --color-nav-active: var(--color-primary-container);
+  --color-nav-active-contrast: var(--color-primary-container-contrast);
+  --color-nav-more: var(--color-surface-container-lowest);
+  --color-nav-outline: var(--color-outline-variant);
+}
+
+.dark {
+  --color-nav-more: var(--color-surface-container);
+}
+
+/* The article reader's paper and ink (articleProse.css) in the reader's own muted text and tonal fills */
+.article-page {
+  --color-muted-foreground: var(--article-muted-rgb);
+  --color-secondary: var(--article-surface-rgb);
+  --color-secondary-contrast: var(--article-on-surface-rgb);
+}
+
+html {
+  background-color: rgb(var(--color-page-background));
+}
+
+/* Borders default to the scheme's outline-variant, in light and dark */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: color-mix(
+      in oklab,
+      rgb(var(--color-outline-variant)) var(--tw-border-alpha, 100%),
+      transparent
+    );
+  }
+}

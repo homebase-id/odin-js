@@ -35,8 +35,7 @@ export const CircleSelector = ({
     <>
       {!circles?.length && !isCirclesLoading && (
         <p
-          className="rounded-lg border bg-white px-4 py-4 dark:border-slate-800
-        dark:bg-black"
+          className="rounded-lg border border-outline-variant bg-background px-4 py-4"
         >
           {t('No circles found on your identity')}
         </p>
@@ -63,8 +62,8 @@ export const CircleSelector = ({
 
           return (
             <div
-              className={`my-2 flex w-full cursor-pointer select-none flex-row rounded-lg border px-4 py-3 dark:border-slate-800 ${
-                isChecked ? 'bg-slate-50 dark:bg-slate-700' : 'bg-white dark:bg-black'
+              className={`my-2 flex w-full cursor-pointer select-none flex-row rounded-lg border border-outline-variant px-4 py-3 ${
+                isChecked ? 'bg-surface-container-highest' : 'bg-background'
               }`}
               key={circle.id}
               onClick={clickHandler}

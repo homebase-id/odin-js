@@ -11,9 +11,9 @@ export const Select = (props: SelectProps) => {
       {...props}
       className={`w-full rounded ${
         !props.className || props.className?.indexOf('border') === -1
-          ? 'border border-gray-300 focus:border-indigo-500 dark:border-gray-700'
+          ? 'border border-outline focus:border-primary'
           : ''
-      } bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-indigo-200 dark:bg-gray-900 dark:text-gray-100 ${
+      } bg-background px-3 py-1 text-base leading-8 text-foreground outline-none transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-primary ${
         props.className
       }`}
     >

@@ -91,7 +91,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const dirtyScreenW = 'mx-[calc((100vw-100%)/-2)] w-[100vw] px-[calc((100vw-100%)/2)]';
   return (
     <section
-      className={`body-font mb-10 overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background py-6 dark:border-gray-800 sm:mx-0 sm:w-auto sm:max-w-none sm:px-5 lg:border ${dirtyScreenW} ${className ?? ''}`}
+      className={`body-font mb-10 overflow-hidden rounded-lg border-outline-variant bg-background py-6 sm:mx-0 sm:w-auto sm:max-w-none sm:px-5 lg:border ${dirtyScreenW} ${className ?? ''}`}
       style={{
         width: `${clientWidth}px`,
         marginLeft: `calc((${clientWidth}px - 100%) / -2)`,
@@ -139,7 +139,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
         {index !== 0 ? (
           <div className="absolute bottom-20 left-[-1.6rem] top-0 hidden w-14 flex-col justify-center bg-opacity-25 px-2 sm:flex">
             <button
-              className="rounded-full bg-gray-100 p-2 dark:bg-gray-900"
+              className="rounded-full bg-surface-container-high p-2"
               onClick={() => doScroll(-1)}
             >
               <Arrow className="rotate-180" />
@@ -149,7 +149,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
         {index < maxIndex ? (
           <div className="absolute bottom-20 right-[-1.6rem] top-0 hidden w-14 flex-col justify-center bg-opacity-25 px-2 sm:flex">
             <button
-              className="rounded-full bg-gray-100 p-2 dark:bg-gray-900"
+              className="rounded-full bg-surface-container-high p-2"
               onClick={() => doScroll(+1)}
             >
               <Arrow />
@@ -188,7 +188,7 @@ const PostTeaser: FC<PostTeaserProps> = ({ className, postFile, linkRoot }) => {
               probablyEncrypted={postFile.fileMetadata.isEncrypted}
             />
           ) : (
-            <div className="flex h-full w-full overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600">
+            <div className="flex h-full w-full overflow-hidden bg-surface-container-high text-outline-variant">
               <p className="absolute inset-0 p-2 text-6xl leading-none">{postContent.caption}</p>
             </div>
           )}

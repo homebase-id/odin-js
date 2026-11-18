@@ -36,14 +36,14 @@ const ProfileNav = () => {
       {isOpen ? (
         <button
           key={'close'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-300 dark:bg-slate-500`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-contrast`}
         >
           <Times className="h-5 w-5" />
         </button>
       ) : (
         <button
           key={'open'}
-          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700`}
+          className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-surface-container-highest`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isAuthenticated && isOwner ? (
@@ -66,7 +66,7 @@ const ProfileNav = () => {
         }`}
         ref={wrapperRef}
       >
-        <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">
+        <div className="min-w-[20rem] bg-surface-container-high p-8 pt-6 shadow-md">
           {isAuthenticated ? (
             <>
               <p className="mb-4">
@@ -95,7 +95,7 @@ const ProfileNav = () => {
               </p>
               <button
                 onClick={doLogout}
-                className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none"
+                className="mt-2 block w-full rounded border-0 bg-primary px-4 py-2 text-primary-contrast hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 {t('logout')}
               </button>

@@ -43,11 +43,11 @@ const ToggleRow = ({
 }) => (
     <div
         className={`flex flex-row items-center justify-between gap-2 rounded-lg ${
-            lockedHint ? 'opacity-50 cursor-not-allowed bg-slate-50' : ''
+            lockedHint ? 'opacity-50 cursor-not-allowed bg-surface-container-high' : ''
         }`}>
         <Label>
             {label}
-            <small className="block text-sm text-slate-400">{lockedHint ?? hint}</small>
+            <small className="block text-sm text-muted-foreground">{lockedHint ?? hint}</small>
         </Label>
 
         <div>

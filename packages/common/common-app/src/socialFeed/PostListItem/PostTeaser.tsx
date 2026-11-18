@@ -57,7 +57,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
       <FakeAnchor href={targetPath}>
         <ErrorBoundary>
           <div
-            className={`relative h-full rounded-lg border border-gray-200 border-opacity-60 transition-colors ${'hover:shadow-md hover:dark:shadow-slate-600'} bg-background dark:border-gray-800`}
+            className={`relative h-full rounded-lg border border-outline-variant transition-colors hover:shadow-md dark:shadow-black/30 bg-background`}
           >
             <PostSource postFile={postFile} className="rounded-t-lg" />
             <DoubleClickHeartForMedia

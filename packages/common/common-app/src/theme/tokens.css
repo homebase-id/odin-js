@@ -1,0 +1,49 @@
+/* common-app's colour tokens as Tailwind 4 utilities, from the RGB channels the theme file sets */
+@theme inline reference {
+  --color-page-background: rgb(var(--color-page-background));
+  --color-background: rgb(var(--color-background));
+  --color-foreground: rgb(var(--color-foreground));
+  --color-muted-foreground: rgb(var(--color-muted-foreground));
+
+  --color-primary: rgb(var(--color-primary));
+  --color-primary-contrast: rgb(var(--color-primary-contrast));
+  --color-primary-container: rgb(var(--color-primary-container));
+  --color-secondary: rgb(var(--color-secondary));
+  --color-secondary-contrast: rgb(var(--color-secondary-contrast));
+
+  --color-outline: rgb(var(--color-outline));
+  --color-outline-variant: rgb(var(--color-outline-variant));
+
+  --color-surface-container-lowest: rgb(var(--color-surface-container-lowest));
+  --color-surface-container-low: rgb(var(--color-surface-container-low));
+  --color-surface-container-high: rgb(var(--color-surface-container-high));
+  --color-surface-container-highest: rgb(var(--color-surface-container-highest));
+
+  --color-destructive: rgb(var(--color-destructive));
+  --color-destructive-hover: rgb(var(--color-destructive-hover));
+  --color-destructive-contrast: rgb(var(--color-destructive-contrast));
+  --color-error-container: rgb(var(--color-error-container));
+  --color-error-container-hover: rgb(var(--color-error-container-hover));
+  --color-error-container-contrast: rgb(var(--color-error-container-contrast));
+  --color-error-surface: rgb(var(--color-error-surface));
+
+  --color-success: rgb(var(--color-success));
+  --color-warning: rgb(var(--color-warning));
+  --color-info: rgb(var(--color-info));
+  --color-warning-container: rgb(var(--color-warning-container));
+  --color-warning-container-contrast: rgb(var(--color-warning-container-contrast));
+  --color-highlight: rgb(var(--color-highlight));
+
+  --color-syntax-key: rgb(var(--color-syntax-key));
+  --color-syntax-string: rgb(var(--color-syntax-string));
+  --color-syntax-number: rgb(var(--color-syntax-number));
+  --color-syntax-boolean: rgb(var(--color-syntax-boolean));
+  --color-syntax-null: rgb(var(--color-syntax-null));
+
+  --color-nav: rgb(var(--color-nav));
+  --color-nav-contrast: rgb(var(--color-nav-contrast));
+  --color-nav-active: rgb(var(--color-nav-active));
+  --color-nav-active-contrast: rgb(var(--color-nav-active-contrast));
+  --color-nav-more: rgb(var(--color-nav-more));
+  --color-nav-outline: rgb(var(--color-nav-outline));
+}

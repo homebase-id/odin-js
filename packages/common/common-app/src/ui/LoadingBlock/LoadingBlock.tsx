@@ -8,7 +8,7 @@ export const LoadingBlock = ({
   return (
     <div
       className={`${className} animate-pulse rounded ${
-        className.indexOf('bg-') === -1 ? 'bg-slate-100 dark:bg-slate-700' : ''
+        className.indexOf('bg-') === -1 ? 'bg-surface-container-highest' : ''
       }`}
       style={style}
     ></div>

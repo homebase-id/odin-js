@@ -32,8 +32,8 @@ const DrivePermissionSelector = ({
               return (
                 <div
                   key={index}
-                  className={`my-2 flex w-full select-none flex-row rounded-lg border p-4 dark:border-slate-800 ${
-                    defaultVal?.length > 0 && 'bg-slate-50 dark:bg-slate-700'
+                  className={`my-2 flex w-full select-none flex-row rounded-lg border p-4 ${
+                    defaultVal?.length > 0 && 'bg-surface-container-high'
                   }`}
                 >
                   <HardDrive className="my-auto mr-3 h-6 w-6" />
@@ -42,7 +42,7 @@ const DrivePermissionSelector = ({
                     className="mb-auto mr-2 mt-auto"
                   >
                     {drive.name}
-                    <small className="block text-sm text-slate-500">
+                    <small className="block text-sm text-muted-foreground">
                       {drive.allowAnonymousReads && t('Allows anonymous read access')}
                     </small>
                   </Label>

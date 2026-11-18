@@ -189,23 +189,23 @@ const ClaimName = ({
           <Label htmlFor="prefix0" className="mb-0">
             {t('Choose your name')}
           </Label>
-          <span className="text-sm text-slate-500 dark:text-slate-400">
+          <span className="text-sm text-muted-foreground">
             {labelCount > 1 ? t('two parts, e.g. john.doe') : t('one word, e.g. john')}
           </span>
         </div>
 
         <div
-          className={`mt-2 flex items-stretch overflow-hidden rounded-lg border bg-white transition-colors focus-within:ring-2 dark:bg-slate-900 ${
+          className={`mt-2 flex items-stretch overflow-hidden rounded-lg border bg-background transition-colors focus-within:ring-2 ${
             isTaken
-              ? 'border-red-500'
-              : `border-gray-300 dark:border-gray-700 ${config.accentFocusClassName}`
+              ? 'border-destructive'
+              : `border-outline ${config.accentFocusClassName}`
           }`}
         >
           <div className="flex min-w-0 flex-1 items-center pl-3">
             {domainApex.prefixLabels.map((serverLabel, index) => (
               <Fragment key={index}>
                 {index > 0 ? (
-                  <span aria-hidden="true" className="select-none px-1 font-mono text-slate-400">
+                  <span aria-hidden="true" className="select-none px-1 font-mono text-muted-foreground">
                     .
                   </span>
                 ) : null}
@@ -226,7 +226,7 @@ const ClaimName = ({
                   spellCheck={false}
                   maxLength={MAX_DNS_LABEL_LENGTH}
                   required
-                  className="w-full min-w-0 bg-transparent py-3 font-mono text-base text-gray-700 outline-none placeholder:text-slate-400 dark:text-gray-100 dark:placeholder:text-slate-500"
+                  className="w-full min-w-0 bg-transparent py-3 font-mono text-base text-foreground outline-none placeholder:text-muted-foreground"
                   onChange={(e) => onPrefixInput(index, e.currentTarget)}
                   onKeyDown={(e) => {
                     if ((e.key === '.' || e.key === ' ') && index < labelCount - 1) {
@@ -255,12 +255,12 @@ const ClaimName = ({
             ))}
           </div>
 
-          <div className="flex-none border-l border-gray-300 bg-slate-50 dark:border-gray-700 dark:bg-slate-800">
+          <div className="flex-none border-l border-outline bg-surface-container-high">
             <select
               aria-label={t('Domain ending')}
               value={domainApex.apex}
               onChange={(e) => onApexSelect(e.target.value)}
-              className="h-full cursor-pointer bg-transparent px-3 py-3 font-mono text-base leading-6 text-gray-700 outline-none dark:text-gray-100"
+              className="h-full cursor-pointer bg-transparent px-3 py-3 font-mono text-base leading-6 text-foreground outline-none"
             >
               {apexes.map((apex) => (
                 <option key={apex.apex} value={apex.apex}>

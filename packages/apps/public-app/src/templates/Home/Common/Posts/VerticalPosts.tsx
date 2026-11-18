@@ -67,7 +67,7 @@ const ChannelSidebar = ({ className }: { className: string }) => {
 
             navigate(targetHref);
           }}
-          className="border border-gray-200 border-opacity-60 py-4 dark:border-gray-800"
+          className="border border-outline-variant py-4"
         >
           <option value="all">{t('All channels')}</option>
           {channels?.map((channel) => (

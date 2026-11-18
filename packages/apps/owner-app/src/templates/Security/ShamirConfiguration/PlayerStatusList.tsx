@@ -187,7 +187,7 @@ export const PlayerStatusList = ({recoveryInfo}: { recoveryInfo: RecoveryInfo })
                     </div>
                 ) : (
                     <div className="flex flex-grow items-center justify-center p-5">
-                        <p className="text-slate-400">{t("No trusted connections selected")}</p>
+                        <p className="text-muted-foreground">{t("No trusted connections selected")}</p>
                     </div>
                 )}
             </div>

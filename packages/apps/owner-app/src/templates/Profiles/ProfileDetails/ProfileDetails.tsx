@@ -319,10 +319,10 @@ const ProfileSectionEditor = ({
               section={section}
               profileId={profileId}
               onClose={() => setIsEditActive(false)}
-              className="bg-white dark:bg-black"
+              className="bg-background"
             />
           ) : (
-            <section className="items-center bg-white p-3 dark:bg-black sm:flex sm:flex-row">
+            <section className="items-center bg-background p-3 sm:flex sm:flex-row">
               <p className="sm:mr-2">{section.name}</p>
               <ActionButton
                 type="secondary"

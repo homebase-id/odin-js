@@ -27,6 +27,7 @@ export * from './Blocks/Meta/Meta';
 export * from './Blocks/Meta/PostSource';
 
 export * from './Composer/PostComposer';
+export * from './Composer/WritePreview';
 
 export * from './EditPostDialog/EditPostDialog';
 export * from './RelatedArticles/RelatedArticles';

@@ -209,13 +209,13 @@ const ClaimIdentity = () => {
               {step !== 'ClaimName' && region ? ` ${t(REGION_NAMES[region])}` : ''} |{' '}
               {t('Signup')}
               {step !== 'Provisioning' ? (
-                <span className="mt-1 block text-3xl text-slate-400">
+                <span className="mt-1 block text-3xl text-muted-foreground">
                   {t('Create a new identity')}
                 </span>
               ) : null}
             </h1>
             {step !== 'Provisioning' ? (
-              <span className="mt-2 flex-none text-sm tracking-widest text-slate-400">
+              <span className="mt-2 flex-none text-sm tracking-widest text-muted-foreground">
                 {step === 'ClaimName' ? '1 / 2' : '2 / 2'}
               </span>
             ) : null}

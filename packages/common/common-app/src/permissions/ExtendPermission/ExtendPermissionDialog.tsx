@@ -41,7 +41,7 @@ export const ExtendPermissionDialog = ({
           `The ${appName} app is missing permissions. Without the necessary permissions the functionality of the ${appName} will be limited.`
         )}
       </p>
-      <p className="mt-3 text-slate-400">
+      <p className="mt-3 text-muted-foreground">
         {t(
           'This can happen when the app added new features that require additional permissions or when you revoked permission manually.'
         )}

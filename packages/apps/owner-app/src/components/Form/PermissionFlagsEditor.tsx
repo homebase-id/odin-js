@@ -34,7 +34,7 @@ const PermissionFlagsEditor = ({
   return (
     <div className={className ?? ''}>
       <div
-        className="relative cursor-pointer rounded-md bg-slate-100 dark:bg-slate-800"
+        className="relative cursor-pointer rounded-md bg-surface-container-high"
         onClick={() => setIsOpen(!isOpen)}
         ref={wrapperRef}
       >
@@ -43,9 +43,9 @@ const PermissionFlagsEditor = ({
           <Triangle className="my-auto ml-auto h-2 w-2 rotate-90" />
         </div>
         <ul
-          className={`absolute right-0 top-[100%] overflow-hidden bg-white dark:bg-slate-800 ${
+          className={`absolute right-0 top-[100%] overflow-hidden bg-background ${
             isOpen
-              ? 'z-10 max-h-[30rem] border border-slate-100 py-3 shadow-2xl dark:border-slate-700'
+              ? 'z-10 max-h-[30rem] border py-3 shadow-2xl'
               : 'max-h-0'
           }`}
         >
@@ -83,12 +83,12 @@ const Option = ({
 }) => {
   return (
     <li
-      className={`flex min-w-[16rem] cursor-pointer select-none flex-row px-4 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 ${className}`}
+      className={`flex min-w-[16rem] cursor-pointer select-none flex-row px-4 py-1 hover:bg-surface-container-high ${className}`}
       onClick={onChange}
     >
       <Check
         className={`my-auto mr-3 h-5 w-5 flex-shrink-0 ${
-          isChecked ? 'text-slate-700 dark:text-slate-200' : 'text-transparent'
+          isChecked ? 'text-foreground' : 'text-transparent'
         }`}
       />{' '}
       <span className={`mr-auto block h-full py-1`}>{children}</span>

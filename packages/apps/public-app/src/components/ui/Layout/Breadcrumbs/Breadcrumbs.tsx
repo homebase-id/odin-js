@@ -30,7 +30,7 @@ const Breadcrumbs = ({
                 <span className="ml-2">{'>'}</span>
               </Link>
             ) : (
-              <span className="text-slate-500">{ellipsisAtMaxChar(crumb.title, 20)}</span>
+              <span className="text-muted-foreground">{ellipsisAtMaxChar(crumb.title, 20)}</span>
             )}
           </li>
         );

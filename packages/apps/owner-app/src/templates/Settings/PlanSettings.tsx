@@ -9,24 +9,24 @@ export const PlanSettings = () => {
 
   return (
     <Section title={t('Plan & storage')}>
-      {isLoading && <p className="text-slate-400">{t('Loading...')}</p>}
-      {error && <p className="text-red-600">{t('Your plan could not be loaded')}</p>}
+      {isLoading && <p className="text-muted-foreground">{t('Loading...')}</p>}
+      {error && <p className="text-destructive">{t('Your plan could not be loaded')}</p>}
       {!isLoading && !error && !plan && (
-        <p className="text-slate-400">{t('This server does not have hosting plans')}</p>
+        <p className="text-muted-foreground">{t('This server does not have hosting plans')}</p>
       )}
 
       {plan && (
         <>
           <div className="mb-5">
             <Label>{t('Plan')}</Label>
-            <p className="text-slate-400">{plan.id ?? t('No plan')}</p>
+            <p className="text-muted-foreground">{plan.id ?? t('No plan')}</p>
           </div>
 
           <div className="mb-5">
             <Label>{t('Storage')}</Label>
             <StorageBar {...plan.storage} />
             {plan.storage.isOverQuota && (
-              <p className="mt-2 max-w-lg text-red-600">
+              <p className="mt-2 max-w-lg text-destructive">
                 {t(
                   'Your storage is full. New photos, videos and files are refused until you delete some, or move to a plan with more room.'
                 )}
@@ -36,7 +36,7 @@ export const PlanSettings = () => {
 
           <div className="mb-5">
             <Label>{t('Public web presence')}</Label>
-            <p className="text-slate-400">
+            <p className="text-muted-foreground">
               {plan.publicWebPresence
                 ? t('Your public home page is on')
                 : t('Your plan does not include a public home page')}
@@ -58,11 +58,11 @@ const UpgradeBox = ({ hostingProvider }: { hostingProvider?: HostingProvider | n
     : undefined;
 
   return (
-    <div className="mt-2 max-w-2xl rounded-lg border border-indigo-300 bg-indigo-50 p-5 dark:border-indigo-700 dark:bg-indigo-950">
+    <div className="mt-2 max-w-2xl rounded-lg border bg-primary-container p-5">
       <h2 className="mb-1 text-lg font-semibold">{t('Need more space?')}</h2>
       {hostingProvider && upgradeUrl ? (
         <>
-          <p className="mb-4 text-slate-600 dark:text-slate-300">
+          <p className="mb-4 text-muted-foreground">
             {t('Your plan comes from')} {hostingProvider.displayName}.{' '}
             {t('See the plans they offer, and move to a bigger one in a few steps.')}
           </p>
@@ -71,13 +71,13 @@ const UpgradeBox = ({ hostingProvider }: { hostingProvider?: HostingProvider | n
           </ActionLink>
         </>
       ) : (
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-muted-foreground">
           {hostingProvider
             ? `${t('To get more space, contact')} ${hostingProvider.displayName}.`
             : t('To get more space, contact whoever runs your Homebase server.')}
         </p>
       )}
-      <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+      <p className="mt-4 text-sm text-muted-foreground">
         {t('You can also free up space by deleting photos, videos and files.')}{' '}
         <Link to="/owner/apps" className="underline">
           {t('See what each app stores')}
@@ -90,7 +90,7 @@ const UpgradeBox = ({ hostingProvider }: { hostingProvider?: HostingProvider | n
 const StorageBar = ({ usedBytes, quotaBytes, isOverQuota }: StorageUsage) => {
   if (quotaBytes === null) {
     return (
-      <p className="text-slate-400">
+      <p className="text-muted-foreground">
         {bytesToSize(usedBytes)} {t('used')}, {t('unlimited')}
       </p>
     );
@@ -105,13 +105,13 @@ const StorageBar = ({ usedBytes, quotaBytes, isOverQuota }: StorageUsage) => {
         {text.percent === null ? t('Less than 1%') : `${text.percent}%`} {t('of')} {text.size}{' '}
         {t('used')}
       </p>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-surface-container-highest">
         <div
-          className={`h-full ${isOverQuota ? 'bg-red-600' : 'bg-indigo-500'}`}
+          className={`h-full ${isOverQuota ? 'bg-destructive' : 'bg-primary'}`}
           style={{ width: `${width}%` }}
         />
       </div>
-      <p className="mt-2 text-sm text-slate-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         {text.used.under ? `${t('Under')} ${text.used.amount}` : text.used.amount} {t('used')} ·{' '}
         {text.free} {t('free')}
       </p>

@@ -219,7 +219,7 @@ const DriveDetails = () => {
                             ))}
                         </>
                     ) : null}
-                    <li className="my-3 border-b border-slate-200 dark:border-slate-800"></li>
+                    <li className="my-3 border-b"></li>
                     <li>Id: {driveDef.targetDriveInfo.alias}</li>
                     <li>Type: {driveDef.targetDriveInfo.type}</li>
                     <li>Slug: {driveDef.driveSlug || t('None')}</li>
@@ -235,7 +235,7 @@ const DriveDetails = () => {
                                     >
                                         {owningApp.name}
                                     </Link>
-                                    <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                                    <span className="text-muted-foreground">{` ${t('(app)')}`}</span>
                                     {!driveDef.isSystemDrive && !readOnly ? (
                                         <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)}/>
                                     ) : null}
@@ -243,7 +243,7 @@ const DriveDetails = () => {
                             ) : (
                                 <>
                                     <span className="break-all font-mono">{driveDef.appId}</span>
-                                    <span className="text-slate-400">
+                                    <span className="text-muted-foreground">
                                         {` ${t('(app, no longer registered)')}`}
                                     </span>
                                     {!driveDef.isSystemDrive && !readOnly ? (
@@ -290,10 +290,10 @@ const DriveDetails = () => {
                                     {driveDef.writeOnlyPublicKeyCrc32 ?? t('Unknown')}
                                 </span>
                                 <details className="mt-1">
-                                    <summary className="cursor-pointer text-slate-400 dark:text-slate-500">
+                                    <summary className="cursor-pointer text-muted-foreground">
                                         {t('Show key')}
                                     </summary>
-                                    <span className="block break-all font-mono text-xs text-slate-500 dark:text-slate-400">
+                                    <span className="block break-all font-mono text-xs text-muted-foreground">
                                         {driveDef.writeOnlyPublicKeyJwk}
                                     </span>
                                 </details>
@@ -485,7 +485,7 @@ const purgeConfirm = (verb: string, title: string, buttonText: string, driveName
 /** The way out of an ownership that is already set. Understated on purpose -- it is the escape
     hatch, not something to invite. */
 const ReassignLink = ({onClick}: { onClick: () => void }) => (
-    <button type="button" className="ml-2 text-sm text-slate-400 hover:underline" onClick={onClick}>
+    <button type="button" className="ml-2 text-sm text-muted-foreground hover:underline" onClick={onClick}>
         {t('Change')}
     </button>
 );

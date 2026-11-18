@@ -81,12 +81,12 @@ export const VersionInfoSettings = () => {
   return (
     <>
       <Section title={t("Data Version Info")}>
-        <p className="mb-5 max-w-lg text-slate-400">
+        <p className="mb-5 max-w-lg text-muted-foreground">
           {t("This is information about your current data version.")}
         </p>
 
-        {loading && <p className="text-slate-400">{t("Loading...")}</p>}
-        {error && <p className="text-red-600">{error}</p>}
+        {loading && <p className="text-muted-foreground">{t("Loading...")}</p>}
+        {error && <p className="text-destructive">{error}</p>}
 
         {!loading && versionInfo && (
           <form
@@ -98,19 +98,19 @@ export const VersionInfoSettings = () => {
           >
             <div className="mb-2">
               <Label>{t("Server Data Version")}</Label>
-              <p className="mb-5 max-w-lg text-slate-400">
+              <p className="mb-5 max-w-lg text-muted-foreground">
                 {versionInfo.serverDataVersionNumber}
               </p>
             </div>
 
             <div className="mb-2">
               <Label>{t("Your Data Version")}</Label>
-              <p className="mb-5 max-w-lg text-slate-400 flex items-center">
+              <p className="mb-5 max-w-lg text-muted-foreground flex items-center">
                 {versionInfo.actualDataVersionNumber}
                 {versionInfo.actualDataVersionNumber ===
                   versionInfo.serverDataVersionNumber && (
                     <CheckCircle
-                      className="ml-2 h-5 w-5 text-green-500"
+                      className="ml-2 h-5 w-5 text-success"
                       aria-label={t("Versions match")}
                     />
                   )}
@@ -119,7 +119,7 @@ export const VersionInfoSettings = () => {
 
             <div className="mb-2">
               <Label>{t("Last Upgraded")}</Label>
-              <p className="mb-5 max-w-lg text-slate-400">
+              <p className="mb-5 max-w-lg text-muted-foreground">
                 <TimeAgoUtc
                   value={versionInfo.lastUpgraded}
                   showAbsolute={true}
@@ -131,7 +131,7 @@ export const VersionInfoSettings = () => {
             {versionInfo.failedDataVersionNumber != null && (
               <div className="mb-2">
                 <Label>{t("Failed Data Version")}</Label>
-                <p className="mb-5 max-w-lg text-slate-400">
+                <p className="mb-5 max-w-lg text-muted-foreground">
                   {versionInfo.failedDataVersionNumber}
                 </p>
               </div>
@@ -140,7 +140,7 @@ export const VersionInfoSettings = () => {
             {versionInfo.lastAttempted != null && (
               <div className="mb-2">
                 <Label>{t("Last Attempted")}</Label>
-                <p className="mb-5 max-w-lg text-slate-400">
+                <p className="mb-5 max-w-lg text-muted-foreground">
                   <TimeAgoUtc
                     value={versionInfo.lastAttempted}
                     showAbsolute={true}
@@ -153,7 +153,7 @@ export const VersionInfoSettings = () => {
             {versionInfo.failedBuildVersion && (
               <div className="mb-2">
                 <Label>{t("Failed Build Version")}</Label>
-                <p className="mb-5 max-w-lg text-slate-400">
+                <p className="mb-5 max-w-lg text-muted-foreground">
                   {versionInfo.failedBuildVersion}
                 </p>
               </div>
@@ -162,7 +162,7 @@ export const VersionInfoSettings = () => {
             {versionInfo.failureCorrelationId && (
               <div className="mb-2">
                 <Label>{t("Correlation Id")}</Label>
-                <p className="mb-5 max-w-lg text-slate-400">
+                <p className="mb-5 max-w-lg text-muted-foreground">
                   {versionInfo.failureCorrelationId}
                 </p>
               </div>
@@ -195,7 +195,7 @@ export const VersionInfoSettings = () => {
             )}
           </Alert>
 
-          {forceVersionError && <p className="mb-5 text-red-600">{forceVersionError}</p>}
+          {forceVersionError && <p className="mb-5 text-destructive">{forceVersionError}</p>}
 
           <form
             onSubmit={(e) => {
@@ -217,7 +217,7 @@ export const VersionInfoSettings = () => {
                 value={targetVersion}
                 onChange={(e) => setTargetVersion(e.target.value)}
               />
-              <p className="mt-2 max-w-lg text-slate-400">
+              <p className="mt-2 max-w-lg text-muted-foreground">
                 {t("The server is on data version")}{" "}
                 {versionInfo.serverDataVersionNumber}
               </p>
