@@ -67,6 +67,7 @@ export const ArticleReader = ({
   onBack,
   login,
   barEnd,
+  hideBar,
 }: {
   odinId?: string;
   channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
@@ -78,6 +79,8 @@ export const ArticleReader = ({
   login?: () => void;
   /** A host's own controls in the bar, before the post's menu: the public site's login */
   barEnd?: ReactNode;
+  /** No bar at all: a native app around the page draws its own */
+  hideBar?: boolean;
 }) => {
   const article = postFile.fileMetadata.appData.content as Article;
   const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
@@ -175,14 +178,16 @@ export const ArticleReader = ({
   return (
     // The page in the article's palette (articleProse.css), edge to edge
     <div className="article-page @container min-h-screen" onClick={jumpInPlace}>
-      <ReaderBar onBack={onBack} end={barEnd}>
-        <PostContextMenu
-          odinId={odinId}
-          authorOdinId={authorOdinId}
-          postFile={postFile}
-          channel={channel}
-        />
-      </ReaderBar>
+      {hideBar ? null : (
+        <ReaderBar onBack={onBack} end={barEnd}>
+          <PostContextMenu
+            odinId={odinId}
+            authorOdinId={authorOdinId}
+            postFile={postFile}
+            channel={channel}
+          />
+        </ReaderBar>
+      )}
 
       {/* The rail from 1280px, when the reader itself has the 83.75rem its grid takes (6.25rem + the article width +
           22rem and the padding): a host's sidebar can narrow it. articleProse.css hides the inline box then */}

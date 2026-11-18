@@ -19,6 +19,7 @@ const ArticleReaderPage = () => {
   const isOwner = dotYouClient.isOwner();
 
   const isLocal = identityKey === dotYouClient.getHostIdentity();
+  const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   const { data: channel } = useChannel({
     odinId: !isLocal ? identityKey : undefined,
@@ -70,6 +71,7 @@ const ArticleReaderPage = () => {
           isOwner={isOwner}
           isAuthenticated={true}
           onBack={doClose}
+          hideBar={isReactNative}
         />
       ) : (
         <div className="mx-auto w-full max-w-[var(--article-w)] px-5 pt-[5.5rem]">
