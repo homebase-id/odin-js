@@ -319,3 +319,43 @@ describe('links layout honours each option chat-kmp exposes for it', () => {
     expect(out).toContain('Shire Weekly');
   });
 });
+
+describe('link presentation on every design', () => {
+  const data = toCardData(
+    {
+      odinId: 'frodo.dotyou.cloud',
+      firstName: 'Frodo',
+      photo: { src: 'data:image/png;base64,AAAA' },
+      links: [
+        { id: '1', text: 'Shire Weekly', target: 'https://shire.example/w' },
+        { id: '2', text: 'Second Breakfast', target: 'https://shire.example/b' },
+      ],
+      socials: [],
+    },
+    () => undefined
+  );
+  const draw = (layout: keyof typeof CARD_PRESETS, presentation: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      blocks: [{ kind: 'links', presentation }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+
+  it.each(DESIGNS)('%s: each presentation draws the links differently', (layout) => {
+    for (const wide of layout === 'dossier' ? [false] : [false, true]) {
+      const outputs = ['bare', 'boxed', 'row', 'button'].map((p) =>
+        draw(layout as keyof typeof CARD_PRESETS, p, wide)
+      );
+      for (const out of outputs) expect(out).toContain('Shire Weekly');
+      expect(new Set(outputs).size, `${layout} wide=${wide}`).toBe(4);
+    }
+  });
+});
