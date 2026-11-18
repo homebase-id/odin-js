@@ -51,10 +51,10 @@ function App() {
         {config.id === 'ravenhosting' ? (
           <meta name="theme-color" content="#ff0000" />
         ) : (
-          <meta name="theme-color" content="#f2f5f9" media="(prefers-color-scheme: light)" />
-        )}
-        {config.id !== 'ravenhosting' && (
-          <meta name="theme-color" content="#1b1c1f" media="(prefers-color-scheme: dark)" />
+          <>
+            <meta name="theme-color" content="#f2f5f9" media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content="#1b1c1f" media="(prefers-color-scheme: dark)" />
+          </>
         )}
       </Helmet>
       {isRoutingToRegionHost ? (
