@@ -19,9 +19,9 @@ export const getDrives = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<DriveDefinition>> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
-  return client.post<PagedResult<DriveDefinition>>('drive/mgmt', params).then((response) => {
+  return client.post<PagedResult<DriveDefinition>>('/drive-management', params).then((response) => {
     return {
       ...response.data,
       results: isDebug
@@ -40,16 +40,12 @@ export const getDrivesByType = async (
   pageNumber: number,
   pageSize: number
 ): Promise<PagedResult<DriveDefinition>> => {
-  const params = {
-    driveType: type,
-    pageNumber: pageNumber,
-    pageSize: pageSize,
-  };
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   if (dotYouClient.getType() === ApiType.Owner) {
-    const client = dotYouClient.createAxiosClient();
+    const params = { driveType: type, pageNumber, pageSize };
     return client
-      .get<PagedResult<DriveDefinition>>('drive/mgmt/type?' + stringifyToQueryParams(params))
+      .get<PagedResult<DriveDefinition>>('/drive-management/type?' + stringifyToQueryParams(params))
       .then((response) => {
         return {
           ...response.data,
@@ -62,8 +58,8 @@ export const getDrivesByType = async (
         };
       });
   } else {
-    const client = dotYouClient.createAxiosClient();
-    return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
+    const params = { type, pageNumber, pageSize };
+    return client.get('/drives?' + stringifyToQueryParams(params)).then((response) => {
       return {
         ...response.data,
         results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {
@@ -122,7 +118,7 @@ export const ensureDrive = async (
   if (driveSlug !== undefined) assertValidSlug('driveSlug', driveSlug);
 
   //create the drive if it does not exist
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
 
   const foundDrive = allDrives.results.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
@@ -160,7 +156,7 @@ export const ensureDrive = async (
   };
 
   return client
-    .post('/drive/mgmt/create', data)
+    .post('/drive-management/create', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:ensureDrive]', error);
@@ -202,14 +198,14 @@ export const editDriveMetadata = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newMetadata', newMetadata);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     metadata: newMetadata,
   };
 
   return client
-    .post('/drive/mgmt/updatemetadata', data)
+    .post('/drive-management/update-metadata', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveMetadata]', error);
@@ -225,14 +221,14 @@ export const editDriveAllowAnonymousRead = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowAnonymousRead', newAllowAnonymousRead);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     allowAnonymousReads: newAllowAnonymousRead,
   };
 
   return client
-    .post('/drive/mgmt/setdrivereadmode', data)
+    .post('/drive-management/set-drive-read-mode', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowAnonymousRead]', error);
@@ -248,14 +244,14 @@ export const editDriveArchiveFlag = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newArchived', newArchived);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     archived: newArchived,
   };
 
   return client
-    .post('/drive/mgmt/set-archive-drive', data)
+    .post('/drive-management/set-archive-drive', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveArchiveFlag]', error);
@@ -272,7 +268,7 @@ const postAccepted = async (
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .post(path, { targetDrive: targetDrive })
     .then((response) => response.status === 202)
@@ -287,7 +283,7 @@ const postAccepted = async (
  * they received. Accepted (202), not done: the server removes the files in the background.
  */
 export const emptyDrive = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
-  postAccepted(dotYouClient, '/drive/mgmt/empty', targetDrive, 'emptyDrive');
+  postAccepted(dotYouClient, '/drive-management/empty', targetDrive, 'emptyDrive');
 
 /**
  * Owner only. Deletes an archived, non-system drive with all its files, its followers and every grant naming
@@ -295,7 +291,7 @@ export const emptyDrive = (dotYouClient: DotYouClient, targetDrive: TargetDrive)
  * background, and its alias cannot be reused until they have.
  */
 export const deleteDrive = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
-  postAccepted(dotYouClient, '/drive/mgmt/delete', targetDrive, 'deleteDrive');
+  postAccepted(dotYouClient, '/drive-management/delete', targetDrive, 'deleteDrive');
 
 /** A drive still being emptied or deleted in the background. */
 export interface DrivePurgeStatus {
@@ -324,9 +320,9 @@ export type DrivePurgePhase = 'removingFiles' | 'finishing' | 'retrying' | 'stop
 
 /** Owner only. Every empty and delete still being purged; empty when nothing is pending. */
 export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DrivePurgeStatus[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
-    .get<DrivePurgeStatus[]>('/drive/mgmt/purges')
+    .get<DrivePurgeStatus[]>('/drive-management/purges')
     .then((response) => response.data)
     .catch((error) => {
       console.error('[odin-js:getDrivePurges]', error);
@@ -336,7 +332,7 @@ export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DriveP
 
 /** Owner only. Restarts an empty or delete whose background job stopped. */
 export const retryDrivePurge = (dotYouClient: DotYouClient, targetDrive: TargetDrive) =>
-  postAccepted(dotYouClient, '/drive/mgmt/purges/retry', targetDrive, 'retryDrivePurge');
+  postAccepted(dotYouClient, '/drive-management/purges/retry', targetDrive, 'retryDrivePurge');
 
 export const editDriveAllowSubscriptions = async (
   dotYouClient: DotYouClient,
@@ -346,14 +342,14 @@ export const editDriveAllowSubscriptions = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowSubscriptions', newAllowSubscriptions);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     allowSubscriptions: newAllowSubscriptions,
   };
 
   return client
-    .post('/drive/mgmt/set-allow-subscriptions', data)
+    .post('/drive-management/set-allow-subscriptions', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowSubscriptions]', error);
@@ -369,14 +365,14 @@ export const editDriveAllowCdn = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowCdn', newAllowCdn);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     allowCdn: newAllowCdn,
   };
 
   return client
-    .post('/drive/mgmt/set-allow-cdn', data)
+    .post('/drive-management/set-allow-cdn', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowCdn]', error);
@@ -397,14 +393,14 @@ export const editDriveBlockEnumeration = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newBlockEnumeration', newBlockEnumeration);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     blockEnumeration: newBlockEnumeration,
   };
 
   return client
-    .post('/drive/mgmt/set-block-enumeration', data)
+    .post('/drive-management/set-block-enumeration', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveBlockEnumeration]', error);
@@ -433,7 +429,7 @@ export const setDriveOwningApp = async (
   assertValidSlug('driveSlug', driveSlug);
   assertValidSlug('driveTypeSlug', driveTypeSlug);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     appId: appId,
@@ -442,7 +438,7 @@ export const setDriveOwningApp = async (
   };
 
   return client
-    .post('/drive/mgmt/set-owner', data)
+    .post('/drive-management/set-owner', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:setDriveOwningApp]', error);
@@ -468,7 +464,7 @@ export const reassignDriveOwningApp = async (
   assertValidSlug('driveSlug', driveSlug);
   assertValidSlug('driveTypeSlug', driveTypeSlug);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     appId: appId,
@@ -477,7 +473,7 @@ export const reassignDriveOwningApp = async (
   };
 
   return client
-    .post('/drive/mgmt/reassign-owner', data)
+    .post('/drive-management/reassign-owner', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:reassignDriveOwningApp]', error);
@@ -493,14 +489,14 @@ export const editDriveAttributes = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAttributes', newAttributes);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     attributes: newAttributes,
   };
 
   return client
-    .post('/drive/mgmt/updateattributes', data)
+    .post('/drive-management/update-attributes', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAttributes]', error);
@@ -525,25 +521,8 @@ export interface DriveStatus {
   };
 }
 
+/// Owner only, on V2 as on V1; the drive is addressed by its id, which is the V1 alias
 export const getDriveStatus = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive
-): Promise<DriveStatus> => {
-  assertIfDefined('targetDrive', targetDrive);
-
-  const client = dotYouClient.createAxiosClient();
-
-  return client
-    .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))
-    .then((response) => response.data)
-    .catch((error) => {
-      console.error('[odin-js:getDriveStatus]', error);
-      throw error;
-    });
-};
-
-/// getDriveStatus on the V2 api; owner only, as V1's is
-export const getDriveStatusV2 = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive
 ): Promise<DriveStatus> => {
@@ -555,7 +534,10 @@ export const getDriveStatusV2 = async (
     .get<DriveStatus>(`/drives/${targetDrive.alias}/status`)
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[odin-js:getDriveStatusV2]', error);
+      console.error('[odin-js:getDriveStatus]', error);
       throw error;
     });
 };
+
+/** @deprecated getDriveStatus calls V2 now */
+export const getDriveStatusV2 = getDriveStatus;

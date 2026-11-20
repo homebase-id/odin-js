@@ -9,7 +9,7 @@ export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDrive
 //Handles management of the System
 const root = '/security';
 
-//api/owner/v1/security/delete-account
+//api/v2/security/delete-account
 export const markAccountDeletion = async (dotYouClient: DotYouClient, currentPassword: string) => {
   const noncePackage = await getNonce(dotYouClient);
   const currentAuthenticationPasswordReply = await prepareAuthPassword(
@@ -17,7 +17,7 @@ export const markAccountDeletion = async (dotYouClient: DotYouClient, currentPas
     noncePackage
   );
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/delete-account';
 
   return client.post(url, { currentAuthenticationPasswordReply }).then((response) => {
@@ -25,7 +25,7 @@ export const markAccountDeletion = async (dotYouClient: DotYouClient, currentPas
   });
 };
 
-//api/owner/v1/security/undelete-account
+//api/v2/security/undelete-account
 export const unmarkAccountDeletion = async (
   dotYouClient: DotYouClient,
   currentPassword: string
@@ -36,7 +36,7 @@ export const unmarkAccountDeletion = async (
     noncePackage
   );
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/undelete-account';
 
   return client.post(url, { currentAuthenticationPasswordReply }).then((response) => {
@@ -44,9 +44,9 @@ export const unmarkAccountDeletion = async (
   });
 };
 
-//api/owner/v1/security/account-status
+//api/v2/security/account-status
 export const accountDeletionStatus = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/account-status';
 
   return client.get<AccountDeletionStatus>(url).then((response) => {

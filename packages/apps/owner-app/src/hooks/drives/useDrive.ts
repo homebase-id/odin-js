@@ -9,7 +9,7 @@ import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
   editDriveMetadata,
-  getDriveStatusV2,
+  getDriveStatus,
   getDrivesByType,
   TargetDrive,
   editDriveAttributes,
@@ -51,7 +51,7 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       ?.find((drive) => drivesEqual(drive.targetDriveInfo, targetDrive));
 
   const fetchDriveDetail = async (targetDrive: TargetDrive) =>
-    await getDriveStatusV2(dotYouClient, targetDrive);
+    await getDriveStatus(dotYouClient, targetDrive);
 
   const editDescription = async ({
     targetDrive,
@@ -393,7 +393,7 @@ export const useDriveSizes = (drives: DriveDefinition[]) => {
   const results = useQueries({
     queries: drives.map((drive) => ({
       queryKey: ['drive-status', `${drive.targetDriveInfo.alias}_${drive.targetDriveInfo.type}`],
-      queryFn: () => getDriveStatusV2(dotYouClient, drive.targetDriveInfo),
+      queryFn: () => getDriveStatus(dotYouClient, drive.targetDriveInfo),
       refetchOnWindowFocus: false,
     })),
   });

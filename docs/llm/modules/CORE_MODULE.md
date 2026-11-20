@@ -351,13 +351,20 @@ Low-level upload operation
 - **options**: `{ systemFileType?, axiosConfig? }`
 - **Returns**: `Promise<UploadResult>`
 
-### `pureUpdate(dotYouClient, targetDrive, formData, options?)`
-Low-level update operation
+### `pureUpdateV2(dotYouClient, file, formData, systemFileType?, onVersionConflict?, axiosConfig?)`
+Low-level update of a local file, by file id
 - **dotYouClient**: `DotYouClient`
-- **targetDrive**: `TargetDrive`
+- **file**: `FileIdFileIdentifier`
 - **formData**: `FormData`
-- **options**: `{ systemFileType?, axiosConfig? }`
-- **Returns**: `Promise<UpdateResult>`
+- **Returns**: `Promise<UpdateResult | void>`
+
+### `pureUpdateOverPeerV2(dotYouClient, recipient, file, formData, systemFileType?, onVersionConflict?, axiosConfig?)`
+Low-level update of a file on another identity, by global transit id, with no local copy
+- **dotYouClient**: `DotYouClient`
+- **recipient**: `string`
+- **file**: `GlobalTransitIdFileIdentifier`
+- **formData**: `FormData`
+- **Returns**: `Promise<UpdateResult | void>`
 
 **Type Exports**: `BaseUploadInstructionSet`, `UploadInstructionSet`, `BaseUpdateInstructionSet`, `UpdatePeerInstructionSet`, `UpdateLocalInstructionSet`, `UpdateInstructionSet`, `isUpdateInstructionSet`, `StorageOptions`, `PushNotificationOptions`, `TransitOptions`, `SendContents`, `ScheduleOptions`, `PriorityOptions`, `UploadFileDescriptor`, `UploadFileMetadata`, `UploadManifest`, `UpdateManifest`, `UploadAppFileMetaData`, `UploadResult`, `UpdateResult`, `TransferUploadStatus`, `LocalMetadataUploadResult`
 

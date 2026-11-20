@@ -26,7 +26,7 @@ const withPhraseOpened = async <T extends { key: string | null; zkMasterKeyEncry
         : result;
 
 export const requestRecoveryKey = async (dotYouClient: DotYouClient) => {
-    const axiosClient = dotYouClient.createAxiosClient();
+    const axiosClient = dotYouClient.createAxiosClient({v2: true});
     return await axiosClient
         .post<RequestRecoveryKeyResult>(`/security/request-recovery-key`)
         .then((response) => withPhraseOpened(dotYouClient, response.data))
@@ -37,7 +37,7 @@ export const requestRecoveryKey = async (dotYouClient: DotYouClient) => {
 }
 
 export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
-    const axiosClient = dotYouClient.createAxiosClient();
+    const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
     return await axiosClient
         .get<RecoveryKeyResult>(`/security/recovery-key`)
@@ -49,7 +49,7 @@ export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
 };
 
 export const confirmUserStoredKey = async (dotYouClient: DotYouClient) => {
-    const axiosClient = dotYouClient.createAxiosClient();
+    const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
     return await axiosClient
         .post(`/security/confirm-stored-recovery-key`)

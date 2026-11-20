@@ -352,10 +352,10 @@ API endpoint prefix for public/guest operations.
 
 **Auth**: Optional (for public data).
 
-### /notify/ws
+### /notify/ws-cookie-owner
 WebSocket endpoint for owner notifications.
 
-**URL**: `wss://{identity}/api/owner/v1/notify/ws`
+**URL**: `wss://{identity}/api/v2/notify/ws-cookie-owner`
 
 ### /notify/peer/ws
 WebSocket endpoint for peer notifications.

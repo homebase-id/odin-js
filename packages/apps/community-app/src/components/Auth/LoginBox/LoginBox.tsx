@@ -11,8 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { MinimalLayout } from '../../ui/Layout/Layout';
 import { ApiType, DotYouClient } from '@homebase-id/js-lib/core';
-
-const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
+import { YOUAUTH_AUTHORIZE_PATH } from '@homebase-id/js-lib/auth';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
@@ -38,7 +37,7 @@ export const LoginBox = () => {
       api: ApiType.Guest,
     }).getRoot();
     if (isAutoAuthorize && stringifiedAuthParams)
-      window.location.href = `${host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `${host}${YOUAUTH_AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [isAutoAuthorize, stringifiedAuthParams]);
 
   return (
@@ -58,7 +57,7 @@ export const AutoAuthorize = () => {
 
   useEffect(() => {
     if (stringifiedAuthParams)
-      window.location.href = `https://${window.location.host}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+      window.location.href = `https://${window.location.host}${YOUAUTH_AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [stringifiedAuthParams]);
 
   return (

@@ -131,7 +131,7 @@ describe('PostUploader for local files', () => {
 
     await savePost(dotYouClient, newPostFile, undefined, channelId);
     expect(mockAxios.post.mock.calls.length).toBe(1);
-    expect(mockAxios.post.mock.calls[0][0]).toBe('/drive/files/upload');
+    expect(mockAxios.post.mock.calls[0][0]).toMatch(/^\/drives\/[0-9a-f]{32}\/files$/);
   });
 
   test('SavePost with an existing post should update a file header', async () => {
@@ -163,7 +163,7 @@ describe('PostUploader for local files', () => {
 
     await savePost(dotYouClient, existingPostFile, undefined, channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
-    expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
+    expect(mockAxios.patch.mock.calls[0][0]).toMatch(/^\/drives\/[0-9a-f]{32}\/files\/[^/]+$/);
     const formDataBody = mockAxios.patch.mock.calls[0][1];
     const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
     const instructions = JSON.parse(instructionsAsString);
@@ -218,7 +218,7 @@ describe('PostUploader for local files', () => {
 
     await savePost(dotYouClient, existPostFileWithPayloads, undefined, channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
-    expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
+    expect(mockAxios.patch.mock.calls[0][0]).toMatch(/^\/drives\/[0-9a-f]{32}\/files\/[^/]+$/);
 
     const formDataBody = mockAxios.patch.mock.calls[0][1];
     const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
@@ -262,7 +262,7 @@ describe('PostUploader for local files', () => {
     await savePost(dotYouClient, existingPostFile, undefined, channelId, toSaveFiles);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
 
-    expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
+    expect(mockAxios.patch.mock.calls[0][0]).toMatch(/^\/drives\/[0-9a-f]{32}\/files\/[^/]+$/);
     const appendFormDataBody = mockAxios.patch.mock.calls[0][1];
     expect(appendFormDataBody.get('payload').name).toBe('pst_mdi0');
 
@@ -360,7 +360,11 @@ describe('PostUploader for remote files', () => {
 
     await savePost(dotYouClient, existingPostFile, 'collaborative.com', channelId);
     expect(mockAxios.patch.mock.calls.length).toBe(1);
-    expect(mockAxios.patch.mock.calls[0][0]).toBe('/drive/files/update');
+    expect(mockAxios.patch.mock.calls[0][0]).toMatch(
+      new RegExp(
+        `^/peer/collaborative\\.com/drives/[0-9a-f]+/files/by-gtid/${existingPostFile.fileMetadata.globalTransitId}$`
+      )
+    );
     const formDataBody = mockAxios.patch.mock.calls[0][1];
     const instructionsAsString = await (formDataBody.get('instructions') as Blob).text();
     const instructions = JSON.parse(instructionsAsString);

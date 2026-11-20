@@ -44,7 +44,7 @@ const root = '/data-conversion';
  * header.
  */
 export const getDataVersionInfo = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/data-version-info';
   return client.get<VersionInfoResult>(url, {}).then((response) => {
     return response.data;
@@ -53,7 +53,7 @@ export const getDataVersionInfo = async (dotYouClient: DotYouClient) => {
 
 
 export const forceVersionUpgrade = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/force-version-upgrade';
   return client.post(url, {}).then((response) => {
     return response.data;
@@ -71,7 +71,7 @@ export interface TenantVersionInfo {
  * will cause the upgrade steps from that version onwards to run again.
  */
 export const forceVersionNumber = async (dotYouClient: DotYouClient, version: number) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/force-version-number';
   return client
     .post<TenantVersionInfo>(url, {}, { params: { version } })

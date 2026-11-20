@@ -5,11 +5,10 @@ export const SubscribeToPeerNotifications = async (
   peerOdinId: string,
   peerSubscriptionId: string
 ): Promise<boolean> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
-  ///api/apps/v1/notify/peer/subscriptions/push-notification
   return await axiosClient
-    .post(`notify/peer/subscriptions/push-notification`, {
+    .post(`/peer/notify/subscriptions/push-notification`, {
       identity: peerOdinId,
       subscriptionId: peerSubscriptionId,
     })

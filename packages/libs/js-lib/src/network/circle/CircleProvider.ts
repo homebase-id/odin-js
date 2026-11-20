@@ -8,7 +8,10 @@ import {
 import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 
 //Handles management of Circles
-const root = '/circles/definitions';
+// V2: /api/v2/connections/circles/definitions
+const root = '/connections/circles/definitions';
+// V2: /api/v2/connections/circles
+const rootV2 = '/connections/circles';
 
 export const CONFIRMED_CONNECTIONS_CIRCLE_ID = 'bb2683fa402aff866e771a6495765a15';
 export const AUTO_CONNECTIONS_CIRCLE_ID = '9e22b42952f74d2580e11250b651d343';
@@ -25,7 +28,7 @@ export const updateCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/update';
 
   const data: ServerCircleUpdateRequest = {
@@ -58,7 +61,7 @@ export const createCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/create';
 
   const data: ServerCircleUpdateRequest = {
@@ -86,7 +89,7 @@ export const getCircles = async (
   dotYouClient: DotYouClient,
   excludeSystemCircles: boolean
 ): Promise<CircleDefinition[]> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url =
     root +
     '/list' +
@@ -116,7 +119,7 @@ export const getCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<CircleDefinition> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/get';
 
   const circleDef = await client.post<CircleDefinition>(url, circleId).then((response) => {
@@ -148,7 +151,7 @@ export const setCircleOwningApp = async (
   circleId: string,
   appId: string
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/set-owner';
 
   return client
@@ -174,7 +177,7 @@ export const reassignCircleOwningApp = async (
   circleId: string,
   appId: string
 ): Promise<ReassignCircleOwningAppResult> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const url = root + '/reassign-owner';
 
   return client
@@ -184,26 +187,22 @@ export const reassignCircleOwningApp = async (
 };
 
 export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/disable';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/disable';
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };
 
 export const enableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/enable';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/enable';
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };
 
@@ -216,13 +215,11 @@ export const removeCircle = async (
   circleId: string,
   options?: { removeMembers?: boolean }
 ) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = root + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = rootV2 + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
 
   return client
     .post(url, circleId)
-    .then((response) => {
-      return response.data;
-    })
+    .then(() => true) // V2 answers an empty 200; V1 answered true
     .catch(dotYouClient.handleErrorResponse);
 };

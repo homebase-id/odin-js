@@ -122,7 +122,7 @@ export const configureShards = async (dotYouClient: DotYouClient, plan: ShamirDe
   dealToHolders(dotYouClient, plan, await requireZkMasterKey(dotYouClient, 'set up recovery with friends'));
 
 export const verifyRemotePlayerReadiness = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerReadinessRequest): Promise<RemotePlayerReadinessResult | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
   return await axiosClient
       .post<RemotePlayerReadinessResult>(`${root}/verify-remote-player-readiness`, request)
       .then((response) => {
@@ -135,7 +135,7 @@ export const verifyRemotePlayerReadiness = async (dotYouClient: DotYouClient, re
 }
 
 export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, request: VerifyRemotePlayerShardRequest): Promise<ShardVerificationResult | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
   return await axiosClient
     .post<ShardVerificationResult>(`${root}/verify-remote-player-shard`, request)
     .then((response) => {
@@ -148,7 +148,7 @@ export const verifyRemotePlayerShard = async (dotYouClient: DotYouClient, reques
 }
 
 export const getShamirConfiguration = async (dotYouClient: DotYouClient): Promise<DealerShardConfig | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
   return await axiosClient
     .get<DealerShardConfig>(`${root}/config`)
@@ -164,7 +164,7 @@ export const getShamirConfiguration = async (dotYouClient: DotYouClient): Promis
 export const getShardRequestList = async (
   dotYouClient: DotYouClient
 ): Promise<ShardApprovalRequest[] | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
   return await axiosClient
     .get<ShardApprovalRequest[]>(`${root}/shard-request-list`)
@@ -200,7 +200,7 @@ export const approveShardRequest = async (dotYouClient: DotYouClient, request: S
   );
 
   await dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({v2: true})
     .post(`${root}/approve-shard-request`, {odinId: request.dealer, shardId: request.shardId, index, sealedShard})
     .catch((error) => {
       console.warn(error);
@@ -216,7 +216,7 @@ export const rejectShardRequest = async (
   dotYouClient: DotYouClient,
   payload: RejectShardRequest
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
   return await axiosClient
     .post(`${root}/reject-shard-request`, payload)

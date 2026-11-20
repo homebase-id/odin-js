@@ -13,10 +13,10 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
     };
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   return client
-    .get<SecurityContex>('/security/context')
+    .get<SecurityContex>('/auth/context')
     .then((response) => response.data)
     .then((context) => {
       return {
@@ -46,10 +46,10 @@ export const getSecurityContextOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<SecurityContex> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   return client
-    .post<SecurityContex>(`/transit/query/security/context`, { odinId })
+    .get<SecurityContex>(`/peer/${encodeURIComponent(odinId)}/auth/context`)
     .then((response) => response.data)
     .then((context) => {
       return {

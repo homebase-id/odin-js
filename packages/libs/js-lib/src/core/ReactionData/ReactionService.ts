@@ -6,9 +6,7 @@ import {
   FileIdFileIdentifier,
   GlobalTransitIdFileIdentifier,
 } from '../DriveData/File/DriveFileTypes';
-
-const emojiRootTransit = '/transit/reactions';
-const emojiRoot = '/drive/files/reactions';
+import { getReactionsRootV2 } from './ReactionRoutesV2';
 
 export interface ServerReactionsListWithCursor {
   reactions: {
@@ -18,70 +16,42 @@ export interface ServerReactionsListWithCursor {
   cursor: string;
 }
 
+const mapReactionsList = (data: ServerReactionsListWithCursor) => ({
+  reactions: data.reactions.map((reaction) => ({
+    authorOdinId: reaction.odinId,
+    body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+  })),
+  cursor: data.cursor,
+});
+
 export const uploadReaction = async (
   dotYouClient: DotYouClient,
   emoji: string,
   odinId: string | undefined,
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
-): Promise<string> => {
-  const isLocal = odinId === dotYouClient.getHostIdentity();
-  const client = dotYouClient.createAxiosClient();
+): Promise<string> =>
+  dotYouClient
+    .createAxiosClient({ v2: true })
+    .post(`${getReactionsRootV2(dotYouClient, odinId, file)}/add`, {
+      reaction: JSON.stringify({ emoji: emoji }),
+    })
+    .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
+    .catch(dotYouClient.handleErrorResponse);
 
-  const data = {
-    reaction: JSON.stringify({ emoji: emoji }),
-    file: file,
-  };
-
-  if (isLocal) {
-    const url = emojiRoot + '/add';
-    return client
-      .post(url, data)
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/add';
-    return client
-      .post(url, { odinId: odinId, request: data })
-      .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
-      .catch(dotYouClient.handleErrorResponse);
-  }
-};
-
+// The server removes the caller's own reaction
 export const deleteReaction = async (
   dotYouClient: DotYouClient,
   emoji: EmojiReaction,
   odinId: string | undefined,
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
-): Promise<string> => {
-  const isLocal = odinId === dotYouClient.getHostIdentity();
-  const client = dotYouClient.createAxiosClient();
-
-  const data = {
-    odinId: emoji.authorOdinId,
-    reaction: JSON.stringify({ emoji: emoji.body }),
-    file: file,
-  };
-
-  if (isLocal) {
-    const url = emojiRoot + '/delete';
-    return client
-      .post(url, data)
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/delete';
-    return client
-      .post(url, { odinId: odinId, request: data })
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  }
-};
+): Promise<string> =>
+  dotYouClient
+    .createAxiosClient({ v2: true })
+    .post(`${getReactionsRootV2(dotYouClient, odinId, file)}/delete`, {
+      reaction: JSON.stringify({ emoji: emoji.body }),
+    })
+    .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
+    .catch(dotYouClient.handleErrorResponse);
 
 export const getReactions = async (
   dotYouClient: DotYouClient,
@@ -89,47 +59,12 @@ export const getReactions = async (
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier,
   pageSize = 15,
   cursor?: string
-): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
-  const isLocal = odinId === dotYouClient.getHostIdentity();
-  const client = dotYouClient.createAxiosClient();
-
-  const data = {
-    file: file,
-    cursor: cursor,
-    maxRecords: pageSize,
-  };
-
-  if (isLocal) {
-    const url = emojiRoot + '/list';
-    return client
-      .post<ServerReactionsListWithCursor>(url, data)
-      .then((response) => {
-        return {
-          reactions: response.data.reactions.map((reaction) => {
-            return {
-              authorOdinId: reaction.odinId,
-              body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
-            };
-          }),
-          cursor: response.data.cursor,
-        };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  } else {
-    const url = emojiRootTransit + '/list';
-    return client
-      .post<ServerReactionsListWithCursor>(url, { odinId: odinId, request: data })
-      .then((response) => {
-        return {
-          reactions: response.data.reactions.map((reaction) => {
-            return {
-              authorOdinId: reaction.odinId,
-              body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
-            };
-          }),
-          cursor: response.data.cursor,
-        };
-      })
-      .catch(dotYouClient.handleErrorResponse);
-  }
-};
+): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> =>
+  dotYouClient
+    .createAxiosClient({ v2: true })
+    .post<ServerReactionsListWithCursor>(`${getReactionsRootV2(dotYouClient, odinId, file)}/list`, {
+      cursor: cursor,
+      maxRecords: pageSize,
+    })
+    .then((response) => mapReactionsList(response.data))
+    .catch(dotYouClient.handleErrorResponse);

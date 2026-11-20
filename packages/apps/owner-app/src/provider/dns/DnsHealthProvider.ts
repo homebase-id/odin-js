@@ -1,6 +1,6 @@
 import { DotYouClient } from '@homebase-id/js-lib/core';
 
-// GET /api/owner/v1/dns/status - read-only DNS health for the owner's own domain:
+// GET /api/v2/dns/status - read-only DNS health for the owner's own domain:
 // required-record status, the optional www record, and the DNSSEC chain of trust.
 // Server-side it is built entirely on generic public-DNS lookups, so the shape is the
 // same whether the zone is hosted by Homebase, a third party, or self-hosted.
@@ -105,7 +105,7 @@ export interface DnsHealth {
 }
 
 export const getDnsHealth = async (dotYouClient: DotYouClient): Promise<DnsHealth> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const response = await client.get<DnsHealth>(`${root}/status`);
   return response.data;
 };

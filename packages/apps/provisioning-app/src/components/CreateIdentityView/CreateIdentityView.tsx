@@ -159,7 +159,7 @@ export const DomainAccessibleAlert = ({ domain }: { domain: string }) => {
   const [accessible, setAccessible] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch(`https://${domain}/api/guest/v1/auth/ident`)
+    fetch(`https://${domain}/api/v2/auth/ident`)
       .then((response) => response.json())
       .then((validation) => validation?.odinId.toLowerCase() === domain && setAccessible(true))
       .catch()

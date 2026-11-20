@@ -2,7 +2,10 @@ import { AxiosRequestConfig } from 'axios';
 import { DotYouClient } from '../../../core/DotYouClient';
 import { TargetDrive, SystemFileType } from '../../../core/core';
 import { assertIfDefined } from '../../../helpers/DataUtil';
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
+/// The server reads the recipients from the body, so the first one only stands in for the path
 export const deleteFileOverPeer = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -14,7 +17,7 @@ export const deleteFileOverPeer = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
 
   const request = {
     fileSystemType: systemFileType || 'Standard',
@@ -26,7 +29,11 @@ export const deleteFileOverPeer = async (
   };
 
   return client
-    .post('/transit/sender/files/senddeleterequest', request, axiosConfig)
+    .post(
+      `${peerDriveRootV2(recipients?.[0] ?? dotYouClient.getHostIdentity(), targetDrive.alias)}/files/senddeleterequest`,
+      request,
+      axiosConfig
+    )
     .then((response) => {
       if (response.status === 200) {
         return true;

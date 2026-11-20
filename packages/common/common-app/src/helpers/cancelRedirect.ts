@@ -21,6 +21,18 @@ export const getCancelRedirectUrl = (redirectUri: string, state?: string | null)
   }
 };
 
+const V1_AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
+const V2_AUTHORIZE_PATH = '/api/v2/youauth/authorize';
+
+/** Posts to the authorize path in the return URL: the identity refuses any other, and chat-kmp signs in on V1 */
+export const getConsentFormAction = (returnUrl: string): string => {
+  try {
+    return new URL(returnUrl).pathname === V2_AUTHORIZE_PATH ? V2_AUTHORIZE_PATH : V1_AUTHORIZE_PATH;
+  } catch {
+    return V1_AUTHORIZE_PATH;
+  }
+};
+
 /** The `state` query parameter of `url`, or undefined when it has none or is not a URL. */
 export const getStateParam = (url: string | null | undefined): string | undefined => {
   if (!url) return undefined;

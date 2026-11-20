@@ -1,6 +1,7 @@
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { EmojiReaction, TargetDrive } from '../DriveData/File/DriveFileTypes';
+import { groupReactionsByGtidRootV2, groupReactionsRootV2 } from './ReactionRoutesV2';
 
 export interface GroupEmojiReaction {
   odinId: string;
@@ -16,7 +17,6 @@ interface ServerReactionsListWithCursor {
   reactions: GroupEmojiReaction[];
   cursor: string;
 }
-const emojiRoot = '/drive/files/group/reactions';
 
 export const getGroupReactions = async (
   dotYouClient: DotYouClient,
@@ -29,18 +29,17 @@ export const getGroupReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
 
   const data = {
-    'file.targetDrive.alias.value': context.target.targetDrive.alias,
-    'file.targetDrive.type.value': context.target.targetDrive.type,
-    'file.globalTransitId': context.target.globalTransitId,
     cursor: cursor,
     maxRecords: pageSize,
   };
 
   return client
-    .get<ServerReactionsListWithCursor>(`${emojiRoot}?${stringifyToQueryParams(data)}`)
+    .get<ServerReactionsListWithCursor>(
+      `${groupReactionsByGtidRootV2(context.target.targetDrive.alias, context.target.globalTransitId)}?${stringifyToQueryParams(data)}`
+    )
     .then((response) => {
       return {
         reactions: response.data.reactions.map((reaction) => {
@@ -62,18 +61,17 @@ export const uploadGroupReaction = async (
   reaction: string,
   recipients: string[]
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
-  return await axiosClient.post(emojiRoot, {
-    transitOptions: {
-      recipients: [...recipients],
-    },
-    file: {
-      targetDrive: targetDrive,
-      globalTransitId: messageGlobalTransitId,
-    },
-    reaction: JSON.stringify({ emoji: reaction }),
-  });
+  return await axiosClient.post(
+    groupReactionsByGtidRootV2(targetDrive.alias, messageGlobalTransitId),
+    {
+      transitOptions: {
+        recipients: [...recipients],
+      },
+      reaction: JSON.stringify({ emoji: reaction }),
+    }
+  );
 };
 
 export const deleteGroupReaction = async (
@@ -87,18 +85,19 @@ export const deleteGroupReaction = async (
     targetDrive: TargetDrive;
   }
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const reactionContent = JSON.stringify({ emoji: emoji.body });
 
-  return await axiosClient.delete(emojiRoot, {
+  // With a fileId, V2 reads the globalTransitId off the local file (target.fileId on target.targetDrive)
+  const route = target.fileId
+    ? groupReactionsRootV2(target.targetDrive.alias, target.fileId)
+    : groupReactionsByGtidRootV2(targetDrive.alias, target.globalTransitId);
+
+  return await dotYouClient.createAxiosClient({ v2: true }).delete(route, {
     data: {
       transitOptions: {
         recipients: [...recipients],
       },
-      file: {
-        targetDrive: targetDrive,
-        globalTransitId: target.globalTransitId,
-      },
-      reaction: JSON.stringify({ emoji: emoji.body }),
+      reaction: reactionContent,
     },
   });
 };
