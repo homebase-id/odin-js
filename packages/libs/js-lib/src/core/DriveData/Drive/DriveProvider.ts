@@ -393,14 +393,14 @@ export const editDriveBlockEnumeration = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newBlockEnumeration', newBlockEnumeration);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const data = {
     targetDrive: targetDrive,
     blockEnumeration: newBlockEnumeration,
   };
 
   return client
-    .post('/drive/mgmt/set-block-enumeration', data)
+    .post('/drive-management/set-block-enumeration', data)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveBlockEnumeration]', error);

@@ -10,7 +10,6 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './ConnectionManager';
-import { ConnectionRequestResult } from './ConnectionRequestResult';
 
 //Handles making and reading requests to connect with others
 // V2: /api/v2/connections
@@ -198,27 +197,4 @@ export const getDetailedConnectionInfo = async (
   if (sentRequest) return { ...sentRequest };
 
   return undefined;
-};
-
-// No V2 route yet: stays on V1
-export const sendConnectionRequestWithOutcome = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  message: string,
-  circleIds: string[]
-): Promise<ConnectionRequestResult> => {
-  const url = '/circles/requests/send-request-with-outcome';
-  const data: ConnectionRequestHeader = {
-    recipient: odinId,
-    message: message,
-    circleIds: circleIds,
-  };
-
-  const client = dotYouClient.createAxiosClient();
-  return client
-    .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
 };
