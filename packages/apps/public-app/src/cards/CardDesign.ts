@@ -27,11 +27,34 @@ export const BLOCK_KINDS = ['links', 'moments', 'posts'] as const;
 export const PRESENTATIONS = ['bare', 'boxed', 'row', 'button'] as const;
 export const SOCIALS = ['glyphs', 'bar', 'wordmark', 'handles'] as const;
 export const SHAPES = ['circle', 'square', 'rounded', 'ellipse'] as const;
+export const BACKGROUNDS = [
+  'none',
+  'circles',
+  'blobs',
+  'dots',
+  'waves',
+  'lines',
+  'rings',
+  'grid',
+  'checker',
+  'zigzag',
+  'confetti',
+  'contours',
+  'halftone',
+  'sparkles',
+] as const;
+export type BackgroundId = (typeof BACKGROUNDS)[number];
 export type BlockKind = (typeof BLOCK_KINDS)[number];
 export type Presentation = (typeof PRESENTATIONS)[number];
 export type SocialsVariant = (typeof SOCIALS)[number];
 
+export const PORTRAIT_SIZES = ['small', 'medium', 'large'] as const;
+export type PortraitSize = (typeof PORTRAIT_SIZES)[number];
+const ZOOM: Record<PortraitSize, number> = { small: 0.8, medium: 1, large: 1.25 };
+export const portraitZoom = (size?: PortraitSize) => ZOOM[size ?? 'medium'];
+
 export type Portrait = {
+  size?: PortraitSize;
   source: 'photo' | 'header';
   shape: (typeof SHAPES)[number];
   ring?: number;
@@ -62,6 +85,7 @@ export type CardDesign = {
   portraits: Portrait[];
   blocks: { kind: BlockKind; presentation: Presentation }[];
   socials: SocialsVariant;
+  background?: BackgroundId;
 };
 
 export type LayoutProps = { design: CardDesign; data: CardData };

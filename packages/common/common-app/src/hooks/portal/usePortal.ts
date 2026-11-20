@@ -37,7 +37,8 @@ export function usePortal(id: string) {
   useEffect(
     function setupElement() {
       // Look for existing target dom element to append to
-      const existingParent = document.querySelector(`#${id}`);
+      // Only a direct child of body: an article heading can carry the same id
+      const existingParent = document.querySelector(`body > #${CSS.escape(id)}`);
       // Parent is either a new root or the existing dom element
       const parentElem = existingParent || createRootElement(id);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cardVars } from './CardDesign';
+import { cardVars, PRESENTATIONS } from './CardDesign';
 import { applyOverrides } from './overrides';
 import { CARD_PRESETS } from './presets';
 import { pickCard } from './pickCard';
@@ -20,6 +20,15 @@ describe('applyOverrides', () => {
       expect(applyOverrides(preset, undefined)).toEqual(preset);
       expect(applyOverrides(preset, 'x')).toEqual(preset);
       expect(applyOverrides(preset, [])).toEqual(preset);
+    }
+  });
+
+  it('reads the background pattern; default and unknown values keep the preset', () => {
+    for (const background of ['none', 'circles', 'blobs', 'dots', 'waves', 'lines']) {
+      expect(applyOverrides(board, { background }).background).toBe(background);
+    }
+    for (const background of ['default', 'bogus', 3]) {
+      expect(applyOverrides(board, { background })).toEqual(board);
     }
   });
 
@@ -179,5 +188,31 @@ describe('design resolution', () => {
       expect(r).toEqual(CARD_PRESETS.dossier);
     }
     expect(resolveEmbedDesign({ card: { overrides } })).toEqual(board);
+  });
+
+  it('reads the portrait size and drops anything else', () => {
+    for (const size of ['small', 'medium', 'large']) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0].size).toBe(size);
+    }
+    for (const size of ['huge', 3, null, 'Small']) {
+      expect(applyOverrides(board, { portraits: [{ size }] }).portraits[0]).toEqual(
+        board.portraits[0]
+      );
+    }
+  });
+});
+
+describe('block presentation', () => {
+  it('every design takes each presentation as an override and keeps its own when unset', () => {
+    for (const preset of Object.values(CARD_PRESETS)) {
+      for (const presentation of PRESENTATIONS) {
+        const design = applyOverrides(preset, { blocks: [{ kind: 'links', presentation }] });
+        expect(design.blocks.find((b) => b.kind === 'links')?.presentation).toBe(presentation);
+      }
+      const links = (blocks: typeof preset.blocks) => blocks.find((b) => b.kind === 'links');
+      expect(links(applyOverrides(preset, { blocks: [{ kind: 'links' }] }).blocks)).toEqual(
+        links(preset.blocks)
+      );
+    }
   });
 });

@@ -60,7 +60,7 @@ export const VerifyPasswordDialog = ({
         {view == 'valid-password' &&
             <div className="mb-2 rounded-lg px-3 py-2">
                 <div className="flex items-center ">
-                    <Check className="h-5 w-5 mr-2 text-green-600"/>
+                    <Check className="h-5 w-5 mr-2 text-success"/>
                     <span className="font-medium">{t('Your password is verified')}</span>
                 </div>
 
@@ -111,7 +111,7 @@ export const VerifyPasswordDialog = ({
                     />
                 </div>
               {validationError && <div>
-                  <span className="text-red-500">{validationError}</span>
+                  <span className="text-destructive">{validationError}</span>
                   <SubtleMessage>
                       If you cannot recall your password, try your recovery phrase.
                   </SubtleMessage>

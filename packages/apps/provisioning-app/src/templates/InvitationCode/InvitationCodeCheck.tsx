@@ -51,13 +51,13 @@ const InvitationCodeCheck = () => {
         <div className="mx-auto mt-20 min-h-[20rem] w-full max-w-lg text-center">
           <h1 className="mb-10 text-4xl">
             Homebase | Signup
-            <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
+            <span className="mt-1 block text-3xl text-muted-foreground">{t('Create a new identity')}</span>
           </h1>
 
           <p className="my-7 block border-y py-3 text-center italic">
             The Alpha release is by invitation only.
             {invitationCode && isValid === false ? (
-              <small className="block text-base text-red-700 dark:text-red-400">
+              <small className="block text-base text-destructive">
                 {t(`The code you supplied isn't valid (anymore)`)}
               </small>
             ) : null}

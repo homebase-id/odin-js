@@ -10,7 +10,7 @@ import { CardSocials } from '../../parts/Socials';
 import { POSTS_HREF, postDate } from '../../parts/posts';
 import { CardSignIn } from '../../parts/SignIn';
 import { CardImg } from '../../parts/CardImg';
-import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
+import { collageFrames, Cutout, firstNameOnly, Print, Tape } from './frames';
 
 // Collage | name | contact column; a column drops out when it has nothing to show.
 // Tracks are 282 / 362 / 300 at 1120 and scale down to 768.
@@ -142,11 +142,12 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
   // The top bar carries the first link
   const moreLinks = linksBlock ? data.links.filter(isUsableLink).slice(1) : [];
   const hasCollage = !!(print || cutout);
-  const hasAside = socials.length > 0 || !!data.header || moreLinks.length > 0;
+  const wordmark = design.socials === 'wordmark';
+  const hasAside = (wordmark && socials.length > 0) || !!data.header || moreLinks.length > 0;
   const grid =
     HERO_GRID[hasCollage ? (hasAside ? 'both' : 'collage') : hasAside ? 'aside' : 'none'];
   // The wordmark box shows the first social; the glyphs under the name carry the rest
-  const restData = { ...data, socials: socials.slice(1) };
+  const restData = wordmark ? { ...data, socials: socials.slice(1) } : data;
 
   return (
     <div className="relative min-h-[inherit]">
@@ -161,7 +162,8 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                 {print ? (
                   <Print
                     {...print}
-                    className="mt-11 w-[80%] px-[9px] pb-9 pt-[9px]"
+                    width={80}
+                    className="mt-11 px-[9px] pb-9 pt-[9px]"
                     tapeClassName="-top-3.5 left-1/2 h-6 w-[35%] -translate-x-1/2 -rotate-3"
                   />
                 ) : null}
@@ -169,7 +171,9 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   <Cutout
                     {...cutout}
                     ring={7}
-                    className={`w-[61%] ${print ? '-mt-2 ml-[39%]' : 'ml-[10%] mt-11'}`}
+                    width={61}
+                    rightAlign={!!print}
+                    className={print ? '-mt-2' : 'ml-[10%] mt-11'}
                   />
                 ) : null}
               </div>
@@ -186,18 +190,17 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                   {data.headline}
                 </p>
               ) : null}
-              {/* The column is ~215px between the photos at 768: the tape takes all of it, in a smaller
-                  hand and with a third line */}
-              <AudienceTape
-                audience={data.audience}
-                lines="[@container(max-width:280px)]:!line-clamp-3"
-                className="ml-2.5 mt-4 max-w-[min(100%-0.625rem,19rem)] text-[length:clamp(19px,9cqw,22px)]"
-              />
-              <CardSocials
-                variant="glyphs"
-                data={restData}
-                className="!gap-4 pl-3 pt-[22px] text-[color:var(--card-muted)] [&_a:hover]:text-[color:var(--card-ink)] [&_a]:opacity-100 [&_svg]:h-[22px] [&_svg]:w-[22px]"
-              />
+              <div className="pl-3 pt-[22px]">
+                <CardSocials
+                  variant={wordmark ? 'glyphs' : design.socials}
+                  data={restData}
+                  className={
+                    design.socials === 'bar'
+                      ? undefined
+                      : '!gap-4 text-[color:var(--card-muted)] [&_a:hover]:text-[color:var(--card-ink)] [&_a]:opacity-100 [&_svg]:h-[22px] [&_svg]:w-[22px]'
+                  }
+                />
+              </div>
             </div>
 
             {hasAside ? (
@@ -207,12 +210,14 @@ export const CollagePage = ({ design, data }: LayoutProps) => {
                     <CardBlock block={linksBlock} data={{ ...data, links: moreLinks }} />
                   </div>
                 ) : null}
-                <CardSocials
-                  variant="wordmark"
-                  data={data}
-                  boxOnly
-                  className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10"
-                />
+                {wordmark ? (
+                  <CardSocials
+                    variant="wordmark"
+                    data={data}
+                    boxOnly
+                    className="rotate-[-1deg] text-[19px] [&_svg]:h-10 [&_svg]:w-10"
+                  />
+                ) : null}
                 {/* The reference captions its map with an address; the headline already sits under the name */}
                 {data.header ? (
                   <div className="h-[170px] rotate-1 overflow-hidden rounded-2xl border-[5px] border-[color:var(--card-surface)] shadow-[0_3px_9px_rgba(0,0,0,0.18)]">

@@ -88,7 +88,7 @@ export const ChangeRecoveryEmailDialog = ({
         {view == 'done' &&
             <div className="mb-2 rounded-lg px-3 py-2">
                 <div className="flex items-center ">
-                    <Check className="h-5 w-5 mr-2 text-green-600"/>
+                    <Check className="h-5 w-5 mr-2 text-success"/>
                     <span
                         className="font-medium">{t('We have sent an email to your recovery email.  Please follow the instructions in this email to finalize your update.')}</span>
                 </div>
@@ -150,7 +150,7 @@ export const ChangeRecoveryEmailDialog = ({
                 </div>
 
               {validationError && <div>
-                  <span className="text-red-500">{validationError}</span>
+                  <span className="text-destructive">{validationError}</span>
               </div>}
 
                 <div className="mt-5 flex flex-row-reverse">

@@ -23,7 +23,7 @@ export const CommunityReactions = ({
 }: {
   msg: HomebaseFile<CommunityMessage>;
   community: HomebaseFile<CommunityDefinition> | undefined;
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
 }) => {
   const loggedOnIdentity = useDotYouClientContext().getLoggedInIdentity();
   const [showDetails, setShowDetails] = useState(false);
@@ -102,7 +102,7 @@ const ReactionButton = ({
     emoji: string;
     count: string;
   };
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
   msg: HomebaseFile<CommunityMessage>;
   community: HomebaseFile<CommunityDefinition>;
   detailedReactions: ReactionBase[] | undefined;

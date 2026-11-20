@@ -59,7 +59,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
                     <Persons className="h-4 w-4 flex-shrink-0" />
                     <span className="leading-none">
                       {chnl.fileMetadata.appData.content.name}{' '}
-                      <span className="text-sm text-slate-400">({collaborative.odinId})</span>
+                      <span className="text-sm text-muted-foreground">({collaborative.odinId})</span>
                     </span>
                   </HybridLink>
                 ))}
@@ -71,7 +71,7 @@ const ChannelsOverview = ({ className }: { className?: string }) => {
 
       <HybridLink
         href={`${FEED_ROOT_PATH}/channels`}
-        className="text-sm text-slate-400 hover:underline"
+        className="text-sm text-muted-foreground hover:underline"
       >
         {t('Manage channels')}
       </HybridLink>

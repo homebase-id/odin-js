@@ -1,13 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '../../../../common/common-app/src/tailwind-v4-compat.css';
+@import '../../../../common/common-app/src/theme/tokens.css';
+@import '../../../../common/common-app/src/theme/homebase-m3.css';
+
+@source '../../../../libs/ui-lib/src';
+@source '../../../../common/common-app/src';
+/* LiveBlock's own markup; the rest of its dist is the blocks' frames, with a Tailwind of their own */
+@source '../../../../../node_modules/@2002bishwajeet/live-blocks/dist/index.js';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --animate-slowding: slowding 1.2s ease-in-out;
+  @keyframes slowding {
+    0%,
+    60% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
 
 .dark select option {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark select optgroup {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark {
@@ -16,12 +37,4 @@
 
 .dark iframe {
   color-scheme: auto;
-}
-
-@layer base {
-  *,
-  ::before,
-  ::after {
-    @apply dark:border-gray-600;
-  }
 }

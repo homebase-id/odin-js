@@ -199,7 +199,7 @@ export const ExtendAppPermissions = () => {
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
-            <h1 className="mb-5 text-4xl dark:text-white">
+            <h1 className="mb-5 text-4xl">
               {t('Update existing app')}:<small className="block">{appRegistration?.name}</small>
             </h1>
 
@@ -211,7 +211,7 @@ export const ExtendAppPermissions = () => {
             {adoptions.map(({ drive, driveSlug }) => (
               <p
                 key={`${drive.targetDriveInfo.alias}-${drive.targetDriveInfo.type}`}
-                className="my-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-950"
+                className="my-4 rounded-lg border border-warning bg-warning-container p-3 text-sm text-warning-container-contrast"
               >
                 {t('{0} will own the drive "{1}"', appRegistration?.name ?? '', drive.name)}
                 {appRegistration?.appSlug ? (
@@ -229,7 +229,7 @@ export const ExtendAppPermissions = () => {
             ))}
 
             {adoptionError ? (
-              <p className="my-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm dark:border-red-800 dark:bg-red-950">
+              <p className="my-4 rounded-lg border border-destructive bg-error-container p-3 text-sm text-error-container-contrast">
                 {t('The drive could not be handed to the app')}:{' '}
                 {(isAxiosError(adoptionError) && adoptionError.response?.data?.title) ||
                   t('Something went wrong, please try again later')}
@@ -265,13 +265,13 @@ export const ExtendAppPermissions = () => {
               )}
             </div>
 
-            <details className="mt-6 group my-6 rounded-lg border bg-white dark:border-slate-800 dark:bg-black">
-              <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
+            <details className="mt-6 group my-6 rounded-lg border bg-background">
+              <summary className="flex cursor-pointer list-none flex-row items-center px-4 py-3 text-sm text-muted-foreground">
                 <span className="mr-auto">{t('Show details')}</span>
                 <Chevron className="h-4 w-4 transition-transform group-open:rotate-180" />
               </summary>
 
-              <div className="border-t px-4 py-4 dark:border-slate-800">
+              <div className="border-t px-4 py-4">
                 <p>
                   {t('By allowing this, the app')} &quot;{appRegistration?.name}&quot;{' '}
                   {t('will receive the following extra access on your identity')}:

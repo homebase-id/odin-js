@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const hostConfig = {
@@ -13,6 +14,7 @@ const hostConfig = {
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       srcDir: 'src',
       filename: 'sw.ts',
@@ -36,8 +38,9 @@ export default defineConfig({
       cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
-      // Allow serving files from one level up to the project root
-      allow: ['..'],
+      // One level up, and the repo root's node_modules: the reader's fonts (Inter, KaTeX) are
+      // hoisted there, and their files are fetched by url, not imported
+      allow: ['..', '../../../node_modules'],
     },
   },
   preview: {

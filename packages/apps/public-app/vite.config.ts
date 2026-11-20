@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 const hostConfig = {
   host: 'dev.dotyou.cloud',
@@ -10,7 +11,7 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     ...hostConfig,
     https: {
@@ -18,8 +19,9 @@ export default defineConfig({
       cert: fs.readFileSync('../../../dev-dotyou-cloud.crt'),
     },
     fs: {
-      // Allow serving files from one level up to the project root
-      allow: ['..'],
+      // One level up, and the repo root's node_modules: the reader's fonts (Inter, KaTeX) are
+      // hoisted there, and their files are fetched by url, not imported
+      allow: ['..', '../../../node_modules'],
     },
   },
   preview: { ...hostConfig },

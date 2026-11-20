@@ -38,8 +38,8 @@ import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 import { LinkPreview } from '@homebase-id/js-lib/media';
 import { ActionGroup, ActionButton, ErrorNotification } from '../../ui';
-import { Article, Pencil, Globe, Arrow, Lock } from '../../ui/Icons';
-import { FEED_ROOT_PATH } from '../../constants';
+import { Globe, Arrow, Lock } from '../../ui/Icons';
+import { CaptionPreview, WritePreviewToggle } from './WritePreview';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 const STORAGE_SKIP_NEXT_KEY = 'feed-skip-next-time';
@@ -58,7 +58,6 @@ export const PostComposer = ({
   excludeCustom?: boolean;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const isOwner = dotYouClient.isOwner();
   const loggedOnIdentity = dotYouClient.getLoggedInIdentity();
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
@@ -67,6 +66,7 @@ export const PostComposer = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [caption, setCaption] = useState<string>('');
+  const [isPreview, setIsPreview] = useState<boolean>();
 
   const { data: publicChannel } = useChannel({ channelKey: BlogConfig.PublicChannelId }).fetch;
   const [targetChannel, setTargetChannel] = useState<{
@@ -113,6 +113,7 @@ export const PostComposer = ({
 
   const resetUi = () => {
     setCaption('');
+    setIsPreview(undefined);
     // setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     fileInputRef.current?.value && (fileInputRef.current.value = '');
@@ -159,31 +160,36 @@ export const PostComposer = ({
           return false;
         }}
       >
-        <VolatileInput
-          defaultValue={caption}
-          onChange={(newCaption) => setCaption(newCaption)}
-          placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
-          onPaste={(e) => {
-            const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
-              (file) => ({ file })
-            );
+        {isPreview ? (
+          <CaptionPreview caption={caption} />
+        ) : (
+          <VolatileInput
+            defaultValue={caption}
+            onChange={(newCaption) => setCaption(newCaption)}
+            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+                (file) => ({ file })
+              );
 
-            if (mediaFiles.length && !embeddedPost) {
-              setFiles([...(files ?? []), ...mediaFiles]);
-              e.preventDefault();
+              if (mediaFiles.length && !embeddedPost) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : () => {
+                    doPost();
+                    return false;
+                  }
             }
-          }}
-          onSubmit={
-            isTouchDevice()
-              ? undefined
-              : () => {
-                  doPost();
-                  return false;
-                }
-          }
-          key={stateIndex}
-          autoCompleters={[AllContactMentionDropdown]}
-        />
+            key={stateIndex}
+            autoFocus={isPreview === false}
+            autoCompleters={[AllContactMentionDropdown]}
+          />
+        )}
 
         <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {files?.length ? null : (
@@ -231,22 +237,6 @@ export const PostComposer = ({
                 size="square"
                 type="mute"
                 options={[
-                  isOwner
-                    ? {
-                        label: t('Create new article'),
-                        href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
-                        icon: Article,
-                      }
-                    : undefined,
-
-                  isOwner
-                    ? {
-                        label: t('List my articles'),
-                        href: `${FEED_ROOT_PATH}/articles`,
-                        icon: Pencil,
-                      }
-                    : undefined,
-
                   reactAccess === false
                     ? {
                         label: t('Enable reactions'),
@@ -262,6 +252,7 @@ export const PostComposer = ({
               />
             </>
           ) : null}
+          <WritePreviewToggle isPreview={!!isPreview} onChange={setIsPreview} />
           <div className="ml-auto"></div>
           {!forcedChannel ? (
             <ChannelOrAclSelector
@@ -387,7 +378,7 @@ export const ChannelOrAclSelector = React.forwardRef(
       // return a different 'loading-select', so we can still use the defaultChannelValue once the channels are loaded
       return (
         <select
-          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${className ?? ''}`}
+          className={`cursor-pointer rounded-md border border-outline bg-background px-3 py-2 text-sm ${className ?? ''}`}
           defaultValue={defaultChannelValue}
           key={'loading-select'}
         >
@@ -446,7 +437,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     return (
       <>
         <select
-          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${
+          className={`cursor-pointer rounded-md border border-outline bg-background px-3 py-2 text-sm ${
             disabled ? 'pointer-events-none opacity-50' : ''
           } ${className ?? ''}`}
           defaultValue={
@@ -547,7 +538,7 @@ const ProgressIndicator = ({
       {postState === 'error' ? (
         t('Error')
       ) : (
-        <span className="animate-pulse text-sm text-foreground text-opacity-40">
+        <span className="animate-pulse text-sm text-muted-foreground">
           {progressText}
         </span>
       )}

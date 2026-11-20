@@ -32,7 +32,7 @@ const OwnerConsoleAppDetails = () => {
           { title: t('Owner console') },
         ]}
       />
-      <p className="mb-4 max-w-prose text-slate-400">
+      <p className="mb-4 max-w-prose text-muted-foreground">
         {t(
           'Drives and circles the owner console owns, and those that predate app ownership and belong to no app yet. Open one to hand it to an app.'
         )}
@@ -52,7 +52,7 @@ const OwnerConsoleAppDetails = () => {
               ))}
             </div>
           ) : (
-            <p className="text-slate-400">{t('No drives owned by the owner console')}</p>
+            <p className="text-muted-foreground">{t('No drives owned by the owner console')}</p>
           )}
         </Section>
 
@@ -65,7 +65,7 @@ const OwnerConsoleAppDetails = () => {
                 <div key={circle.id} className="my-4 flex flex-row">
                   <Link
                     to={getOwnerCirclePath(circle.appId, circle.id ?? '')}
-                    className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+                    className="flex flex-row hover:text-foreground hover:underline"
                   >
                     <CirclesIcon className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
                     <div className="mr-2 flex flex-col">
@@ -77,7 +77,7 @@ const OwnerConsoleAppDetails = () => {
               ))}
             </div>
           ) : (
-            <p className="text-slate-400">{t('No circles owned by the owner console')}</p>
+            <p className="text-muted-foreground">{t('No circles owned by the owner console')}</p>
           )}
         </Section>
       </div>

@@ -8,7 +8,7 @@ import {
   t,
   useRemoveNotifications,
 } from '@homebase-id/common-app';
-import { Feed, Article, Ellipsis, Quote } from '@homebase-id/common-app/icons';
+import { Feed, Ellipsis, Quote } from '@homebase-id/common-app/icons';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -47,6 +47,8 @@ export const SocialFeed = () => {
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
     else document.documentElement.classList.remove('overflow-hidden');
+    // Leaving with the preview open (an article's preview goes on to the reader) must leave the page scrollable
+    return () => document.documentElement.classList.remove('overflow-hidden');
   }, [postKey]);
 
   const isDesktop = document.documentElement.clientWidth >= 1024;
@@ -54,7 +56,7 @@ export const SocialFeed = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Feed')} | Homebase</title>
+        <title>{`${t('Feed')} | Homebase`}</title>
       </Helmet>
       <ExtendPermissionDialog
         appName={t('Homebase Feed')}
@@ -71,11 +73,6 @@ export const SocialFeed = () => {
             <ActionGroup
               type="secondary"
               options={[
-                {
-                  label: t('Articles'),
-                  href: `${FEED_ROOT_PATH}/articles`,
-                  icon: Article,
-                },
                 {
                   label: t('Channels'),
                   href: `${FEED_ROOT_PATH}/channels`,
@@ -109,9 +106,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                    <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <ChannelsOverview className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <IdentityLink className="overflow-hidden rounded-md border bg-background shadow-sm hover:shadow-md hover:dark:shadow-outline-variant" />
+                    <FollowHomebase className="rounded-md border bg-background shadow-sm" />
+                    <ChannelsOverview className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}
@@ -120,9 +117,9 @@ export const SocialFeed = () => {
               {isDesktop ? (
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
-                    <ConnectionsView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <ConnectionsView className="rounded-md border bg-background shadow-sm" />
+                    <FollowingView className="rounded-md border bg-background shadow-sm" />
+                    <FollowersView className="rounded-md border bg-background shadow-sm" />
                   </Suspense>
                 </div>
               ) : null}

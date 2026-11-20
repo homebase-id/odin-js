@@ -39,13 +39,14 @@ import {ApiType} from "@homebase-id/js-lib/core";
 
 const STORAGE_KEY = 'sidenavIsOpen';
 
-const navItemClassName = `my-1 py-2 px-2 flex rounded-md hover:bg-indigo-200/40 dark:hover:bg-indigo-700/50`;
-const navItemActiveClassname = `bg-indigo-200 dark:bg-indigo-700`;
+const navItemBaseClassName = `my-1 py-2 px-2 flex rounded-md`;
+const navItemClassName = `${navItemBaseClassName} hover:bg-nav-contrast/10`;
+const navItemActiveClassname = `${navItemBaseClassName} bg-nav-active text-nav-active-contrast`;
 const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
-const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
-const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
+const sidebarBg = 'bg-nav text-nav-contrast';
+const moreBg = 'bg-nav-more text-nav-contrast';
 
 export const Sidenav = ({
                           disablePinning,
@@ -103,7 +104,7 @@ export const Sidenav = ({
               {canPin ? (
                 <button
                   className={`${navItemClassName} ${
-                    isPinned ? 'md:bg-indigo-200 md:dark:bg-indigo-700 rounded-md' : ''
+                    isPinned ? 'md:bg-nav-active md:text-nav-active-contrast rounded-md' : ''
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
@@ -113,7 +114,7 @@ export const Sidenav = ({
               ) : isOpen || isPeeking ? (
                 <button
                   className={`${navItemClassName} ${
-                    isOpen ? 'md:bg-indigo-200 md:dark:bg-indigo-700 xl:hidden' : ''
+                    isOpen ? 'md:bg-nav-active xl:hidden' : ''
                   }`}
                   onClick={() => {
                     setIsPeeking(false);
@@ -226,7 +227,7 @@ const MoreItems = ({
       </a>
 
       <div
-        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-500 dark:shadow-slate-700 ${moreBg} ${
+        className={`absolute bottom-[100%] left-0 overflow-auto rounded-md shadow-md dark:shadow-black/30 ${moreBg} ${
           isOpen ? '' : 'hidden'
         }`}
         onClick={() => setIsOpen(false)}
@@ -243,7 +244,7 @@ const MoreItems = ({
 
         {logout ? (
           <>
-            <hr className="border-b dark:border-slate-500"/>
+            <hr className="border-b border-nav-outline"/>
             <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
               <Person className={`${iconClassName}`}/>
               <span className={`my-auto ml-3`}>Log out</span>
@@ -282,13 +283,13 @@ const NavItem = ({
   return (
     <NavLink
       className={({isActive}) =>
-        `${navItemClassName} ${isActive && navItemActiveClassname} relative`
+        `${isActive ? navItemActiveClassname : navItemClassName} relative`
       }
       to={to}
       end={end}
     >
       {Icon ? <Icon className={iconClassName}/> : null}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-destructive"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </NavLink>
   );
@@ -310,7 +311,7 @@ const ExternalNavItem = ({
   return (
     <a className={`${navItemClassName} relative`} href={href}>
       {Icon ? <Icon className={iconClassName}/> : null}
-      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500"/> : null}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-destructive"/> : null}
       {label ? <span className={`my-auto ml-3 overflow-hidden`}>{label}</span> : null}
     </a>
   );
@@ -364,7 +365,7 @@ const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
     <>
       <NavLink
         className={({isActive}) =>
-          `${navItemClassName} ${isActive && navItemActiveClassname} relative`
+          `${isActive ? navItemActiveClassname : navItemClassName} relative`
         }
         to={`${OWNER_ROOT}/profile`}
         onClick={(e) => {
@@ -373,7 +374,7 @@ const ProfilesNavItem = ({isOpen: isNavOpen}: { isOpen: boolean }) => {
           setIsOpen(!isOpen);
         }}
       >
-        {Heart({className: iconClassName})}
+        <Heart className={iconClassName} />
         <span className={`my-auto ml-3 flex w-full flex-row items-stretch overflow-hidden`}>
           <span>{'Personal data'} </span>
           <button className={`${iconClassName} ml-auto opacity-80 `}>
@@ -429,7 +430,7 @@ const SecurityMenuItem = () => {
     <div className="relative">
       <NavItem icon={Shield} label={'Security'} to={`${OWNER_ROOT}/security`}/>
       {needsAttention && (
-        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"/>
+        <span className="absolute top-1 left-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-nav"/>
       )}
     </div>
   );

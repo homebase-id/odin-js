@@ -88,7 +88,7 @@ export const NetworkVisibilitySettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Who can view your connections?')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'People that are member of a circle that has access to view your connections will always be able to see your connections'
                   )}
@@ -158,7 +158,7 @@ export const NetworkVisibilitySettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Disable auto-accept of connection requests sent from apps')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'Controls how incoming connection requests that were sent from an app are handled'
                   )}
@@ -191,7 +191,7 @@ export const NetworkVisibilitySettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Who can view who you follow?')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'People that are member of a circle that has access to view who you follow will always be able to see who you follow'
                   )}
@@ -258,7 +258,7 @@ export const NetworkVisibilitySettings = () => {
             title={
               <div className="flex flex-col">
                 {t('Who can introduce you to other people?')}
-                <small className="text-sm text-gray-400">
+                <small className="text-sm text-muted-foreground">
                   {t(
                     'An introduction lets one of your connections suggest that you connect with someone they know'
                   )}
@@ -315,7 +315,7 @@ const RadioOption = ({
       />
       <Label htmlFor={id} className="my-auto mr-2 flex flex-col">
         {label}
-        <small className="text-sm text-gray-400">{description}</small>
+        <small className="text-sm text-muted-foreground">{description}</small>
       </Label>
     </div>
   );

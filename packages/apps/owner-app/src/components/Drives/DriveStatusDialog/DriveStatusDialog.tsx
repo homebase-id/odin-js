@@ -31,7 +31,7 @@ export const DriveStatusDialog = ({
           <div className="flex flex-col gap-2">
             <h2 className="text-lg">Inbox</h2>
             <p>
-              <span className="block text-slate-400">{t('Oldest timestamp')}</span>
+              <span className="block text-muted-foreground">{t('Oldest timestamp')}</span>
               {outboxStatus?.inbox.oldestItemTimestamp}
               <span>
                 {outboxStatus?.inbox.oldestItemTimestamp
@@ -42,11 +42,11 @@ export const DriveStatusDialog = ({
               </span>
             </p>
             <p>
-              <span className="block text-slate-400">{t('Popped count')}</span>
+              <span className="block text-muted-foreground">{t('Popped count')}</span>
               {outboxStatus?.inbox?.poppedCount}
             </p>
             <p>
-              <span className="block text-slate-400">{t('Total items')}</span>
+              <span className="block text-muted-foreground">{t('Total items')}</span>
               {outboxStatus?.inbox?.totalItems}
             </p>
           </div>
@@ -54,15 +54,15 @@ export const DriveStatusDialog = ({
           <div className="flex flex-col gap-2">
             <h2 className="text-lg">Outbox</h2>
             <p>
-              <span className="block text-slate-400">{t('Checked out count')}</span>
+              <span className="block text-muted-foreground">{t('Checked out count')}</span>
               {outboxStatus?.outbox?.checkedOutCount}
             </p>
             <p>
-              <span className="block text-slate-400">{t('Next item run')}</span>
+              <span className="block text-muted-foreground">{t('Next item run')}</span>
               {outboxStatus?.outbox?.nextItemRun}
             </p>
             <p>
-              <span className="block text-slate-400">{t('Total items')}</span>
+              <span className="block text-muted-foreground">{t('Total items')}</span>
               {outboxStatus?.outbox?.totalItems}
             </p>
           </div>
@@ -70,11 +70,11 @@ export const DriveStatusDialog = ({
           <div className="flex flex-col gap-2">
             <h2 className="text-lg">Size info</h2>
             <p>
-              <span className="block text-slate-400">{t('Number of meta files')}</span>
+              <span className="block text-muted-foreground">{t('Number of meta files')}</span>
               {outboxStatus?.sizeInfo?.fileCount}
             </p>
             <p>
-              <span className="block text-slate-400">{t('Total size')}</span>
+              <span className="block text-muted-foreground">{t('Total size')}</span>
               {outboxStatus?.sizeInfo?.size ? bytesToSize(outboxStatus.sizeInfo.size) : '0 B'}
             </p>
           </div>

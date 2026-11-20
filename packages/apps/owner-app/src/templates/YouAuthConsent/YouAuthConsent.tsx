@@ -242,12 +242,12 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
   return (
     <>
       <Helmet>
-        <title>{t('Login')} | Homebase</title>
+        <title>{`${t('Login')} | Homebase`}</title>
       </Helmet>
       <MinimalLayout noShadedBg={true}>
         <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">
           <div className="container mx-auto p-5">
-            <div className="max-w-[35rem] dark:text-white">
+            <div className="max-w-[35rem]">
               {clientType === 'app' ? (
                 <AppDetails clientId={clientId || undefined} targetDomain={targetDomain} />
               ) : (
@@ -255,7 +255,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
               )}
 
               {clientType !== 'app' ? (
-                <div className="my-auto mt-5 flex flex-col font-normal text-gray-600 dark:text-gray-300">
+                <div className="my-auto mt-5 flex flex-col font-normal text-muted-foreground">
                   <Label htmlFor="duration">
                     {t('Auto-approve login requests from')} {targetDomain}
                   </Label>
@@ -288,7 +288,7 @@ const YouAuthConsentForm = ({ returnUrl }: { returnUrl: string }) => {
                   </a>
                 </p>
               ) : sealedAppKey.state === 'failed' ? (
-                <p className="mt-5 text-red-500">{sealedAppKey.message}</p>
+                <p className="mt-5 text-destructive">{sealedAppKey.message}</p>
               ) : null}
 
               <div className="mt-8 flex flex-col gap-2 sm:flex-row-reverse">
@@ -358,18 +358,18 @@ const ServiceDetails = ({
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
           {clientName ? (
-            <small className="block text-sm dark:text-white dark:text-opacity-80">
+            <small className="block text-sm">
               {t('Calling itself')} &quot;{clientName}&quot;
             </small>
           ) : null}
-          <small className="block text-sm dark:text-white dark:text-opacity-80">
+          <small className="block text-sm">
             &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
             {t('is requesting to verify your identity.')}
           </small>
         </h1>
       </div>
 
-      <div className="dark:text-white dark:text-opacity-80">
+      <div>
         <p className="mt-2">
           {t('By logging in you allow')} &quot;
           <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
@@ -426,7 +426,7 @@ const AppDetails = ({ clientId, targetDomain }: { clientId?: string; targetDomai
         </h1>
       </div>
 
-      <div className="dark:text-white dark:text-opacity-80">
+      <div>
         <p className="mt-2">
           {t('By logging in you allow')} &quot;
           {appRegistration?.name}&quot;{' '}

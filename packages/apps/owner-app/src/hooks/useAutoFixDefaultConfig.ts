@@ -26,7 +26,7 @@ export const useAutofixDefaultConfig = () => {
   const lastRunAutoFix = uiSettings?.lastRunAutoFix;
   const shouldRun = lastRunAutoFix !== AUTO_FIX_VERSION;
 
-  const isRunning = useRef<boolean>();
+  const isRunning = useRef<boolean>(undefined);
 
   const { fixDefaultProfileImage } = useFixDefaultProfileImage();
 

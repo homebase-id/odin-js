@@ -94,7 +94,7 @@ const DrivePermissionRequestView = ({
               </p>
             ) : driveGrant.driveMeta?.attributes ? (
               <div className="pt-2">
-                <span className="text-slate-400">
+                <span className="text-muted-foreground">
                   {t('Attributes')}:{' '}
                   {Object.keys(driveGrant.driveMeta.attributes).map((attrKey) => (
                     <span key={attrKey} className="mr-1 italic">

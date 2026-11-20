@@ -3,7 +3,9 @@ import {
   PostContent,
   Article,
   getChannelDrive,
+  POST_FULL_TEXT_PAYLOAD_KEY,
 } from '@homebase-id/js-lib/public';
+import { useMemo } from 'react';
 import {
   LoadingBlock,
   AuthorImage,
@@ -11,6 +13,7 @@ import {
   t,
   PostMeta,
   RichTextRenderer,
+  ArticleBody,
   PostInteracts,
   MediaGallery,
   EmbeddedPostContent,
@@ -18,6 +21,7 @@ import {
   ToGroupBlock,
   PostSource,
 } from '../../..';
+import { spilledCaptionRichText } from '../../helpers';
 import {
   DEFAULT_PAYLOAD_DESCRIPTOR_KEY,
   DEFAULT_PAYLOAD_KEY,
@@ -50,17 +54,27 @@ export const PostDetailCard = ({
   const mediaFiles = postFile?.fileMetadata.payloads?.filter(
     (p) => p.key !== DEFAULT_PAYLOAD_KEY && !p.key.includes(DEFAULT_PAYLOAD_DESCRIPTOR_KEY)
   );
+  const hasFullTextPayload = postFile?.fileMetadata.payloads?.some(
+    (p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY
+  );
+  const captionAsRichText = useMemo(
+    () =>
+      post && hasFullTextPayload
+        ? spilledCaptionRichText(post.caption, post.captionAsRichText)
+        : post?.captionAsRichText,
+    [post, hasFullTextPayload]
+  );
 
   return (
     <div
-      className={`bg-background rounded-lg border-gray-200 border-opacity-60  dark:border-gray-800 lg:border ${
+      className={`bg-background rounded-lg border-outline-variant lg:border ${
         className ?? ''
       }`}
     >
       <PostSource postFile={postFile} className="rounded-t-lg" />
       <div className="p-4">
         <div className="mb-5 flex w-full flex-col">
-          <div className="flex flex-row flex-wrap items-center pb-2 text-gray-500">
+          <div className="flex flex-row flex-wrap items-center pb-2 text-muted-foreground">
             {!post ? (
               <LoadingBlock className="mb-2 h-8 w-full max-w-xs" />
             ) : (
@@ -111,9 +125,9 @@ export const PostDetailCard = ({
                 post.type === 'Article' ? 'text-2xl font-medium sm:text-3xl' : ''
               }`}
             >
-              {post.type !== 'Article' && post.captionAsRichText ? (
+              {post.type !== 'Article' && captionAsRichText ? (
                 <RichTextRenderer
-                  body={post.captionAsRichText}
+                  body={captionAsRichText}
                   odinId={odinId}
                   options={{
                     defaultFileId: postFile?.fileId,
@@ -190,9 +204,10 @@ export const PostDetailCard = ({
         ) : (
           post.type === 'Article' && (
             <div className="rich-text-content mb-5 leading-relaxed">
-              <RichTextRenderer
+              <ArticleBody
                 odinId={odinId}
-                body={(post as Article)?.body}
+                article={post as Article}
+                tableOfContents={true}
                 options={
                   postFile && postFile.fileId
                     ? {

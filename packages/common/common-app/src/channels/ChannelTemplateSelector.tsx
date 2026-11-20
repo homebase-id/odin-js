@@ -19,7 +19,7 @@ export const ChannelTemplateSelector = ({
   }) => void;
 }) => {
   return (
-    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
+    <div className="grid grid-cols-2 gap-2 py-5 text-center text-muted-foreground md:grid-cols-3 md:gap-5">
       <Template
         name={name}
         icon={TemplateList}
@@ -50,7 +50,7 @@ export const ChannelTemplateSelector = ({
 
 const Template = ({
   name,
-  icon,
+  icon: Icon,
   label,
   value,
   onChange,
@@ -76,12 +76,12 @@ const Template = ({
       />
       <label
         htmlFor={value + ''}
-        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-primary dark:border-slate-900 dark:bg-slate-900"
+        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-surface-container-low bg-surface-container-low p-2 peer-checked:border-primary"
       >
         <div className="flex flex-grow flex-col justify-center">
-          {icon({
-            className: `mx-auto h-auto w-full ${value !== '0' ? 'max-w-[10rem]' : 'max-w-[5rem]'}`,
-          })}
+          <Icon
+            className={`mx-auto h-auto w-full ${value !== '0' ? 'max-w-[10rem]' : 'max-w-[5rem]'}`}
+          />
         </div>
         <p>{label}</p>
       </label>

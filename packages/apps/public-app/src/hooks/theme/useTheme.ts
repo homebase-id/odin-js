@@ -1,11 +1,17 @@
 import { useSiteData } from '@homebase-id/common-app';
 import { HomePageTheme } from '@homebase-id/js-lib/public';
 
+interface SiteColors {
+  id: string;
+  light: Record<string, string>;
+  dark: Record<string, string>;
+}
+
 interface TemplateSettings {
   themeId: HomePageTheme;
   isTabs: boolean;
   tabsOrder: string[];
-  colors: { light: Record<string, string>; dark: Record<string, string> };
+  colors?: SiteColors;
   imageFileId?: string;
   favicon?: { fileKey: string } | { emoji: string } | undefined;
 }
@@ -22,22 +28,6 @@ const DEFAULT_SETTINGS: TemplateSettings = {
   themeId: HomePageTheme.VerticalPosts,
   isTabs: true,
   tabsOrder: ['Posts', 'Links', 'About', 'Connections'],
-  colors: {
-    light: {
-      'page-background': '246 248 250',
-      background: '255 255 255',
-      foreground: '11 11 11',
-      button: '99 101 241',
-      'button-text': '255 255 255',
-    },
-    dark: {
-      'page-background': '17 24 39',
-      background: '0 0 0',
-      foreground: '250 250 250',
-      button: '99 101 141',
-      'button-text': '255 255 255',
-    },
-  },
 };
 
 export const useTheme = () => {
@@ -52,12 +42,14 @@ export const useTheme = () => {
   const isTabs =
     templateSettings.tabs === undefined ? DEFAULT_SETTINGS.isTabs : templateSettings.tabs == 'true';
   const tabsOrder = templateSettings.tabsOrder || DEFAULT_SETTINGS.tabsOrder;
+  // The "Default" set means no custom colours: the site keeps the theme file's
   const colors =
     typeof templateSettings.colors === 'object' &&
     'light' in (templateSettings.colors as Record<string, unknown>) &&
-    'dark' in (templateSettings.colors as Record<string, unknown>)
+    'dark' in (templateSettings.colors as Record<string, unknown>) &&
+    (templateSettings.colors as SiteColors).id !== 'default'
       ? templateSettings.colors
-      : DEFAULT_SETTINGS.colors;
+      : undefined;
   const favicon = templateSettings.favicon;
   const imageFileId = templateSettings.imageFileId;
 

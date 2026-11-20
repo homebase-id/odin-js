@@ -19,7 +19,7 @@ export interface CropperRef extends HTMLImageElement {
 const OUTPUT_MIME_TYPE = 'image/webp';
 
 export const GetCroppedData = (
-  cropperRef: React.RefObject<CropperRef> | React.MutableRefObject<CropperRef | undefined>
+  cropperRef: React.RefObject<CropperRef | null> | React.MutableRefObject<CropperRef | undefined>
 ): Promise<Blob | undefined> => {
   return new Promise((resolve) => {
     const imageElement = cropperRef?.current;
@@ -125,7 +125,7 @@ const AspectOption = ({
     <button
       onClick={() => onChange(currentVal === val ? undefined : val)}
       className={`rounded-md px-3 py-2 ${
-        isActive ? 'bg-indigo-400 text-white dark:bg-indigo-800 dark:text-white' : 'opacity-50'
+        isActive ? 'bg-primary text-primary-contrast' : 'opacity-50'
       }`}
     >
       {label}

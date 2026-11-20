@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import './fonts.css';
+import { CardBackground } from './parts/Background';
 import { cardVars, type LayoutId, type LayoutProps } from './CardDesign';
 import { PosterCard } from './layouts/poster/PosterCard';
 import { BoardCard } from './layouts/board/BoardCard';
@@ -22,6 +23,7 @@ export const HomebaseCard = ({ design, data, className }: LayoutProps & { classN
       style={cardVars(design)}
       className={`relative isolate overflow-hidden ${className ?? ''}`}
     >
+      <CardBackground design={design} />
       <Layout design={design} data={data} />
     </article>
   );

@@ -34,7 +34,7 @@ export const BrokenAttribute = ({
       }
     >
       <p>{t('This attribute is broken, and cannot be fixed. Please remove it.')}</p>
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-muted-foreground">
         {t('Created')}:{' '}
         {new Date(attribute.fileMetadata.created).toLocaleDateString(undefined, dateFormat)} <br />
         {t('Updated')}:{' '}

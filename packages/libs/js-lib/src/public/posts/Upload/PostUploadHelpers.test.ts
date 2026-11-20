@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPostContentForUpload } from './PostUploadHelpers';
+import { getPostContentForUpload, shouldDeleteStaleTextPayload } from './PostUploadHelpers';
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/constants';
 import { POST_FULL_TEXT_PAYLOAD_KEY } from './PostUploader';
 import type { NewHomebaseFile } from '../../../core/core';
@@ -352,5 +352,133 @@ describe('getPostContentForUpload', () => {
         } as unknown as NewHomebaseFile<PostContent>;
 
         expect(() => getPostContentForUpload(file)).toThrow();
+    });
+    describe('Article bodyDoc', () => {
+        const articleFile = (body: Article['body'], bodyDoc: Article['bodyDoc'], abstract = 'abstract') =>
+            ({
+                fileMetadata: {
+                    appData: {
+                        content: {
+                            id: 'id9', channelId: 'chan', caption: 'title', slug: 'slug9', type: 'Article',
+                            abstract, body, bodyDoc,
+                        } as Article,
+                    },
+                },
+            }) as unknown as NewHomebaseFile<Article>;
+        const paragraphs = (n: number) =>
+            Array.from({ length: n }, (_, i) => ({ type: 'p', children: [{ text: `paragraph ${i} ${makeLong('w', 80)}` }] }));
+        const docOf = (n: number) => ({
+            type: 'doc',
+            content: Array.from({ length: n }, (_, i) => ({ type: 'paragraph', content: [{ type: 'text', text: `paragraph ${i} ${makeLong('w', 80)}` }] })),
+        });
+        const bodyDocOf = (doc: Record<string, unknown>) => ({ format: 'tiptap-v1' as const, doc, slateHash: 'ab'.repeat(32) });
+
+        const textPayloadOf = async (payloads: { key: string; payload: Blob | File }[]) => {
+            const text = payloads.find((p) => p.key === POST_FULL_TEXT_PAYLOAD_KEY);
+            return text ? JSON.parse(await (text.payload as Blob).text()) : undefined;
+        };
+
+        it('keeps body and bodyDoc in the header when the whole article fits', () => {
+            const bodyDoc = bodyDocOf(docOf(2));
+            const { headerContent, additionalPayloads } = getPostContentForUpload(articleFile(paragraphs(2), bodyDoc));
+            expect(additionalPayloads).toEqual([]);
+            const header = JSON.parse(headerContent);
+            expect(header.body).toEqual(paragraphs(2));
+            expect(header.bodyDoc).toEqual(bodyDoc);
+        });
+
+        it('moves bodyDoc into the text payload with body when the article is too big', async () => {
+            const bodyDoc = bodyDocOf(docOf(60));
+            const { headerContent, additionalPayloads } = getPostContentForUpload(articleFile(paragraphs(60), bodyDoc));
+            const header = JSON.parse(headerContent);
+            expect(header.body).toBeUndefined();
+            expect(header.bodyDoc).toBeUndefined();
+            const text = await textPayloadOf(additionalPayloads);
+            expect(text.body).toEqual(paragraphs(60));
+            expect(text.bodyDoc).toEqual(bodyDoc);
+            // What readers do: merge the text payload over the header
+            expect({ ...header, ...text }).toMatchObject({ body: paragraphs(60), bodyDoc });
+        });
+
+        it('moves both when body alone would fit the header but bodyDoc does not', async () => {
+            // A long abstract forces the split; the body is small, its document is not
+            const bodyDoc = bodyDocOf(docOf(5));
+            const body = [{ type: 'p', children: [{ text: 'short' }] }];
+            const { headerContent, additionalPayloads } = getPostContentForUpload(
+                articleFile(body, bodyDoc, makeLong('a', 15000))
+            );
+            const header = JSON.parse(headerContent);
+            expect(header.body).toBeUndefined();
+            expect(header.bodyDoc).toBeUndefined();
+            const text = await textPayloadOf(additionalPayloads);
+            expect(text.body).toEqual(body);
+            expect(text.bodyDoc).toEqual(bodyDoc);
+        });
+
+        it('keeps both in the header when together they are small, even on the split path', async () => {
+            const bodyDoc = bodyDocOf({ type: 'doc', content: [] });
+            const body = [{ type: 'p', children: [{ text: 'x' }] }];
+            const { headerContent, additionalPayloads } = getPostContentForUpload(
+                articleFile(body, bodyDoc, makeLong('a', 15000))
+            );
+            const header = JSON.parse(headerContent);
+            expect(header.body).toEqual(body);
+            expect(header.bodyDoc).toEqual(bodyDoc);
+            const text = await textPayloadOf(additionalPayloads);
+            expect(Object.keys(text)).toEqual(['type', 'abstract']);
+        });
+    });
+});
+
+describe('shouldDeleteStaleTextPayload', () => {
+    const fileOf = (content: Partial<Article>) =>
+        ({
+            fileMetadata: {
+                appData: {
+                    content: { id: 'id1', channelId: 'chan', caption: 'title', slug: 'slug1', type: 'Article', ...content } as Article,
+                },
+                // The caller's local copy knows of no payloads; the server's header is what counts
+                payloads: [],
+            },
+        }) as unknown as NewHomebaseFile<Article>;
+    const uploadedKeys = (file: NewHomebaseFile<Article>) =>
+        getPostContentForUpload(file).additionalPayloads.map((p) => p.key);
+    const decide = (file: NewHomebaseFile<Article>, serverKeys: string[]) =>
+        shouldDeleteStaleTextPayload(file.fileMetadata.appData.content, uploadedKeys(file), serverKeys);
+    const bodyDoc = { format: 'tiptap-v1' as const, doc: { type: 'doc', content: [] }, slateHash: 'ab'.repeat(32) };
+    const serverKeys = [DEFAULT_PAYLOAD_KEY, POST_FULL_TEXT_PAYLOAD_KEY, 'pst_rtei0'];
+
+    it('keeps pst_text on a header-only edit from a feed teaser', () => {
+        // EditPostDialog from the feed: the caption is trimmed to the header, there is no body
+        const teaser = fileOf({ caption: makeLong('c', 390), abstract: 'abstract' });
+        expect(uploadedKeys(teaser)).not.toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(decide(teaser, serverKeys)).toBe(false);
+    });
+
+    it('keeps pst_text when the old editor saves a body that fits the header', () => {
+        const old = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'short' }] }] });
+        expect(decide(old, serverKeys)).toBe(false);
+    });
+
+    it('removes a stale pst_text when the composer saves a bodyDoc that fits the header', () => {
+        const composer = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'x' }] }], bodyDoc });
+        expect(uploadedKeys(composer)).not.toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        // Seen on the server header even though the caller's copy lists no payloads
+        expect(decide(composer, serverKeys)).toBe(true);
+    });
+
+    it('does not delete when the composer writes a new pst_text, which replaces the old one', () => {
+        const big = fileOf({
+            abstract: 'abstract',
+            body: Array.from({ length: 60 }, (_, i) => ({ type: 'p', children: [{ text: `p${i} ${makeLong('w', 80)}` }] })),
+            bodyDoc,
+        });
+        expect(uploadedKeys(big)).toContain(POST_FULL_TEXT_PAYLOAD_KEY);
+        expect(decide(big, serverKeys)).toBe(false);
+    });
+
+    it('does nothing when the server has no pst_text', () => {
+        const composer = fileOf({ abstract: 'abstract', body: [{ type: 'p', children: [{ text: 'x' }] }], bodyDoc });
+        expect(decide(composer, [DEFAULT_PAYLOAD_KEY])).toBe(false);
     });
 });

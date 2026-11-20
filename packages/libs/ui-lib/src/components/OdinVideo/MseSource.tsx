@@ -5,7 +5,7 @@ import { OdinVideoProps } from './OdinVideo';
 
 interface OdinMseProps extends OdinVideoProps {
   videoMetaData: SegmentedVideoMetadata;
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
   onFatalError?: () => void;
 }
 

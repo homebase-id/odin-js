@@ -41,19 +41,26 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
         <meta name="description" content={`${config.brandName} - ${config.brandSlogan} `} />
-        <title>Signup | {config.brandName}</title>
+        <title>{`Signup | ${config.brandName}`}</title>
 
         <link rel="apple-touch-icon" sizes="180x180" href={`/${config.id}/apple-touch-icon.png`} />
         <link rel="icon" type="image/png" sizes="32x32" href={`/${config.id}/favicon-32x32.png`} />
         <link rel="icon" type="image/png" sizes="16x16" href={`/${config.id}/favicon-16x16.png`} />
         <link rel="manifest" href={`/${config.id}/site.webmanifest`} />
         <meta name="msapplication-TileColor" content="#2b5797" />
-        <meta name="theme-color" content="#ff0000" />
+        {config.id === 'ravenhosting' ? (
+          <meta name="theme-color" content="#ff0000" />
+        ) : (
+          <>
+            <meta name="theme-color" content="#f2f5f9" media="(prefers-color-scheme: light)" />
+            <meta name="theme-color" content="#1b1c1f" media="(prefers-color-scheme: dark)" />
+          </>
+        )}
       </Helmet>
       {isRoutingToRegionHost ? (
         // Deliberately not <Layout>: its header and footer render <Link>, which
         // needs the Router this branch exists to avoid mounting
-        <div className="flex min-h-screen flex-col bg-background text-foreground">
+        <div className="flex min-h-screen flex-col text-foreground">
           <Loader className="m-auto h-20 w-20" />
         </div>
       ) : (

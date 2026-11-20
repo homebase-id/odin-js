@@ -307,7 +307,16 @@ export interface DrivePurgeStatus {
   lastErrorAt?: number;
   /** No job is working on it any more; retryDrivePurge restarts it. */
   stopped: boolean;
+  /**
+   * Where the purge is. `finishing` means no files are left but a deleted drive's last cleanup has not run yet; its
+   * alias stays taken until it has. Absent from servers older than the field.
+   */
+  phase?: DrivePurgePhase;
+  /** When the job runs next, unix ms; after a failure, the retry. Absent once stopped. */
+  nextRunAt?: number;
 }
+
+export type DrivePurgePhase = 'removingFiles' | 'finishing' | 'retrying' | 'stopped';
 
 /** Owner only. Every empty and delete still being purged; empty when nothing is pending. */
 export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DrivePurgeStatus[]> => {
@@ -367,6 +376,34 @@ export const editDriveAllowCdn = async (
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[odin-js:editDriveAllowCdn]', error);
+      throw error;
+    });
+};
+
+/**
+ * Owner only. When on, only the owner, the owner's apps and the server may list the drive's files; anyone else reaches
+ * a file only by an address they were given. The server refuses it on a system drive (403), and together with
+ * allowSubscriptions (400, cannotAllowSubscriptionsOnDriveThatBlocksEnumeration).
+ */
+export const editDriveBlockEnumeration = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newBlockEnumeration: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newBlockEnumeration', newBlockEnumeration);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    blockEnumeration: newBlockEnumeration,
+  };
+
+  return client
+    .post('/drive/mgmt/set-block-enumeration', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[odin-js:editDriveBlockEnumeration]', error);
       throw error;
     });
 };

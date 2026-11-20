@@ -21,7 +21,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "lint": "eslint src/*",
+    "lint": "eslint src",
     "test": "vitest"
   },
   "repository": {
@@ -29,16 +29,25 @@
     "url": "https://github.com/homebase-id/odin-js"
   },
   "dependencies": {
-    "@homebase-id/js-lib": "*"
+    "@2002bishwajeet/live-blocks": "0.1.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@homebase-id/js-lib": "*",
+    "@tiptap/core": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/static-renderer": "3.32.2",
+    "katex": "0.18.11",
+    "lowlight": "3.3.0",
+    "marked": "15.0.6"
   },
   "peerDependencies": {
-    "@tanstack/query-sync-storage-persister": "5.51.1",
-    "@tanstack/react-query-persist-client": "5.51.1",
-    "@tanstack/react-query": "5.51.1",
+    "@tanstack/query-sync-storage-persister": "5.52.0",
+    "@tanstack/react-query-persist-client": "5.52.1",
+    "@tanstack/react-query": "5.52.1",
     "idb-keyval": "^6.2.1",
-    "react": "^18.3.1"
+    "react": "^18.3.1 || ^19.0.0",
+    "react-dom": "^18.3.1 || ^19.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3"
+    "@types/react": "^19.3.0"
   }
 }

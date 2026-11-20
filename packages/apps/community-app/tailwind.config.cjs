@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-undef, @typescript-eslint/no-require-imports
+const legacyColors = require('../../common/common-app/tailwind-legacy-colors.cjs');
+
 /** @type {import('tailwindcss').Config} */
 // eslint-disable-next-line no-undef
 module.exports = {
@@ -10,14 +13,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#6366f1',
-        'primary-contrast': '#fff',
-        secondary: '#f1f5f9',
-        'secondary-contrast': '#000',
-
-        'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
-        background: 'rgb(var(--color-background) / <alpha-value>)',
-        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        ...legacyColors,
       },
       keyframes: {
         slowding: {

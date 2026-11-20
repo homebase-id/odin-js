@@ -175,7 +175,7 @@ const AttributeFields = ({
               name={MinimalProfileFields.BioId}
               defaultValue={attribute.data?.[MinimalProfileFields.BioId] ?? ''}
               onChange={onChange}
-              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
+              className="rounded border px-2 pb-3"
               contentClassName="max-h-[50vh] overflow-auto"
             />
           </div>
@@ -188,14 +188,14 @@ const AttributeFields = ({
           <div className="mb-5">
             <Label htmlFor={`${fileId ?? 'new'}-meta-bio`}>
               {t('Short bio')}{' '}
-              <span className="text-sm text-slate-400">({t('Max 160 characters')})</span>
+              <span className="text-sm text-muted-foreground">({t('Max 160 characters')})</span>
             </Label>
             <Textarea
               maxLength={160}
               name={MinimalProfileFields.BioId}
               defaultValue={attribute.data?.[MinimalProfileFields.BioId] ?? ''}
               onChange={onChange}
-              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
+              className="rounded border px-2 pb-3"
             />
           </div>
         </>
@@ -483,7 +483,7 @@ const LocationAttributeEditor = ({
           </div>
         </>
       ) : null} */}
-      <button onClick={() => setShowMore(!showMore)} className="text-indigo-500">
+      <button onClick={() => setShowMore(!showMore)} className="text-primary">
         {showMore ? 'Show less' : 'Show more'}
       </button>
     </>

@@ -17,21 +17,21 @@ const setupHtml = (isStandalone?: boolean) => {
       <form id="main" class="flex flex-col">
         <h1 class="text-lg">YouAuth</h1>
         <div class="flex flex-col">
-          <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600 dark:text-gray-500">
+          <label htmlFor="homebase-id" class="text-sm leading-7 text-muted-foreground">
             Homebase Id
           </label>
           <div id="selectable-wrapper" class="relative">
-            <input class="w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 peer invalid:border invalid:border-red-500" type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" />
-            <span class="absolute -top-[1.7rem] right-0 hidden peer-invalid:block peer-invalid:text-red-500">Invalid identity</span>
-            <ul id="homebase-identities" class="bg-white dark:bg-slate-950 border border-gray-300 rounded-b dark:border-gray-700 hidden"></ul>
+            <input class="w-full rounded border border-outline bg-background px-3 py-1 text-base leading-8 text-foreground outline-none transition-colors duration-200 ease-in-out focus:border-primary focus:ring-2 focus:ring-primary peer invalid:border invalid:border-destructive" type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" />
+            <span class="absolute -top-[1.7rem] right-0 hidden peer-invalid:block peer-invalid:text-destructive">Invalid identity</span>
+            <ul id="homebase-identities" class="bg-background border border-outline rounded-b hidden"></ul>
             <a id="toggle"></a>
           </div>
         </div>
 
-        <button class="cursor-pointer block my-3 rounded-md text-center w-full px-4 py-2 bg-indigo-500 text-white hover:filter hover:brightness-90">Login</button>
+        <button class="cursor-pointer block my-3 rounded-md text-center w-full px-4 py-2 bg-primary text-primary-contrast hover:filter hover:brightness-90">Login</button>
       </form>
       <p class="text-center">or</p>
-      <a class="block my-3 rounded-md text-center w-full px-4 py-2 bg-slate-200 text-black hover:filter hover:brightness-90" href="https://homebase.id/sign-up" target="_blank">Signup</a>
+      <a class="block my-3 rounded-md text-center w-full px-4 py-2 bg-surface-container-highest text-foreground hover:filter hover:brightness-90" href="https://homebase.id/sign-up" target="_blank">Signup</a>
     </div>`;
 };
 
@@ -149,7 +149,7 @@ export const LoginBox = async (
       homebaseIdentities.innerHTML = previousIdentities
         .map(
           (identity) =>
-            `<li class="group option hover:bg-slate-200 dark:hover:bg-slate-800 px-3 py-1 cursor-pointer relative" data-identity="${identity}">${identity}<a class="remove absolute inset-0 left-auto flex items-center justify-center px-2 py-1 opacity-50 md:opacity-0 transition-opacity group-hover:opacity-50 hover:opacity-100 "></a></li>`
+            `<li class="group option hover:bg-surface-container-high px-3 py-1 cursor-pointer relative" data-identity="${identity}">${identity}<a class="remove absolute inset-0 left-auto flex items-center justify-center px-2 py-1 opacity-50 md:opacity-0 transition-opacity group-hover:opacity-50 hover:opacity-100 "></a></li>`
         )
         .join('');
 

@@ -35,8 +35,8 @@ const DrivePermissionView = ({
   if (!drive) {
     return (
       <div className={`flex flex-row ${className}`} title={permissionTree}>
-        <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0 text-slate-400" />
-        <p className="my-auto text-slate-400">
+        <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0 text-muted-foreground" />
+        <p className="my-auto text-muted-foreground">
           <span className="break-all font-mono">
             {driveGrant?.permissionedDrive?.drive?.alias ?? t('Unknown drive')}
           </span>
@@ -54,14 +54,14 @@ const DrivePermissionView = ({
     >
       <Link
         to={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
-        className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+        className="flex flex-row hover:text-foreground hover:underline"
       >
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
             {drive?.name}
             {drive?.driveSlug ? (
-              <span className="ml-2 break-all font-mono text-sm text-slate-400">
+              <span className="ml-2 break-all font-mono text-sm text-muted-foreground">
                 {drive.driveSlug}
               </span>
             ) : null}
@@ -70,7 +70,7 @@ const DrivePermissionView = ({
             {/* Only app grants carry the flag; a circle grant has no storage key concept, so
                 undefined means "not applicable" rather than "no key" and stays unlabelled. */}
             {driveGrant.hasStorageKey ? (
-              <span className="text-slate-400">{`, ${t('has storage key')}`}</span>
+              <span className="text-muted-foreground">{`, ${t('has storage key')}`}</span>
             ) : null}
           </p>
           {permissionTree && (
@@ -101,12 +101,12 @@ export const DriveView = ({
     >
       <Link
         to={getOwnerDrivePath(drive.appId, drive.targetDriveInfo)}
-        className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
+        className="flex flex-row hover:text-foreground hover:underline"
       >
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <p className={`my-auto`}>{drive?.name}</p>
-          {sizeInfo ? <DriveSize {...sizeInfo} className="text-sm text-slate-400" /> : null}
+          {sizeInfo ? <DriveSize {...sizeInfo} className="text-sm text-muted-foreground" /> : null}
         </div>
         <Arrow className="my-auto ml-auto h-5 w-5" />
       </Link>

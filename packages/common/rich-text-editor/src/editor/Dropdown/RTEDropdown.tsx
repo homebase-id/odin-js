@@ -211,7 +211,7 @@ const FixedPortalWrapper = ({
   children,
   className,
 }: {
-  wrapperRef: RefObject<HTMLElement>;
+  wrapperRef: RefObject<HTMLElement | null>;
   children: React.ReactNode;
   className?: string;
 }) => {

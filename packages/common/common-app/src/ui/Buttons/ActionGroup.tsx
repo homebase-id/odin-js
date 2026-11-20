@@ -65,6 +65,17 @@ export const ActionGroup = ({
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
+  // Escape closes the menu, and only the menu: a page that goes back on Escape (the article reader) stays
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      setIsOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
   if (!options.length) return null;
 
   useEffect(() => {
@@ -78,7 +89,7 @@ export const ActionGroup = ({
         verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
       } z-20 ${isOpen ? 'max-h-[15rem] border' : 'max-h-0'} ${
         isSm ? 'w-full' : 'absolute w-[14rem]'
-      } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700 pointer-events-auto`}
+      } overflow-auto rounded-md border-outline-variant bg-background shadow-md pointer-events-auto`}
     >
       <ul className={`block`}>
         {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
@@ -163,7 +174,7 @@ export const ActionGroup = ({
 };
 
 const ActionOption = ({
-  icon,
+  icon: Icon,
   label,
   onClick,
   href,
@@ -186,7 +197,7 @@ const ActionOption = ({
         className={`text-foreground/40 bg-background cursor-not-allowed text-base ${className || ''}`}
       >
         <div className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2">
-          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
+          {Icon && <Icon className="h-5 w-5 my-auto mr-2 flex-shrink-0" />}
           <span className="flex flex-col">
             <span>{label}</span>
             {hint ? <span className="text-xs">{hint}</span> : null}
@@ -199,7 +210,7 @@ const ActionOption = ({
   return (
     <>
       <li
-        className={`text-foreground bg-background cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-700 ${
+        className={`text-foreground cursor-pointer text-base hover:bg-foreground/10 ${
           className || ''
         }`}
       >
@@ -232,7 +243,7 @@ const ActionOption = ({
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >
-          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
+          {Icon && <Icon className="h-5 w-5 my-auto mr-2 flex-shrink-0" />}
           <span className={''}>{label}</span>
         </FakeAnchor>
       </li>

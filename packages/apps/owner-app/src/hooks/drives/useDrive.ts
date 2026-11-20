@@ -16,6 +16,7 @@ import {
   editDriveAllowSubscriptions,
   editDriveArchiveFlag,
   editDriveAllowCdn,
+  editDriveBlockEnumeration,
   setDriveOwningApp,
   reassignDriveOwningApp,
   emptyDrive,
@@ -90,6 +91,16 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     newAllowCdn: boolean;
   }) => {
     return editDriveAllowCdn(dotYouClient, targetDrive, newAllowCdn);
+  };
+
+  const editBlockEnumeration = async ({
+    targetDrive,
+    newBlockEnumeration,
+  }: {
+    targetDrive: TargetDrive;
+    newBlockEnumeration: boolean;
+  }) => {
+    return editDriveBlockEnumeration(dotYouClient, targetDrive, newBlockEnumeration);
   };
 
   const editArchiveFlag = async ({
@@ -246,6 +257,25 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
           );
         } else {
           console.warn('[owner-app:useDrive] editAllowCdn mutation did not return true');
+        }
+      },
+    }),
+    editBlockEnumeration: useMutation({
+      mutationFn: editBlockEnumeration,
+      onSettled: (data, _error, variables) => {
+        const { targetDrive, newBlockEnumeration } = variables;
+        if (data === true) {
+          updateDriveCache(
+            queryClient,
+            targetDrive,
+            (base) => ({
+              ...base,
+              blockEnumeration: newBlockEnumeration,
+            }),
+            'editBlockEnumeration'
+          );
+        } else {
+          console.warn('[owner-app:useDrive] editBlockEnumeration mutation did not return true');
         }
       },
     }),

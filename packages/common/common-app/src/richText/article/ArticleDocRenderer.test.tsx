@@ -1,0 +1,702 @@
+import { describe, expect, test, vi } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server';
+import type { JSONContent } from '@tiptap/core';
+import allBlocks from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/all-blocks.json';
+import journalNote from '../../../../../libs/js-lib/src/public/posts/ArticleBody/fixtures/tiptap/journal-note.json';
+import {
+  ArticleDocRenderer,
+  sanitizeArticleDoc,
+  type ArticleDocOptions,
+} from './ArticleDocRenderer';
+import { slugify, uniqueHeadingIds } from './headingSlugs';
+
+// Browser-only code (window at import time); stand-ins show what they were given
+vi.mock('../../media/Image', () => ({
+  Image: (props: { fileKey: string; fileId: string; alt?: string }) => (
+    <img data-file-key={props.fileKey} data-file-id={props.fileId} alt={props.alt} />
+  ),
+}));
+vi.mock('../../socialFeed', () => ({ AuthorName: ({ odinId }: { odinId: string }) => odinId }));
+vi.mock('../../ui/Buttons/ActionLink', () => ({ ActionLink: () => null }));
+const liveBlock = vi.hoisted(() => ({ throws: false }));
+vi.mock('@2002bishwajeet/live-blocks', () => ({
+  LiveBlock: (props: { kind: string; source: string; wide?: boolean; initialState?: string }) => {
+    if (liveBlock.throws) throw new Error('The live block failed');
+    return (
+      <div
+        data-test-live-block={props.kind}
+        data-wide={String(props.wide)}
+        data-initial-state={props.initialState ?? 'none'}
+      >
+        {props.source}
+      </div>
+    );
+  },
+}));
+vi.stubGlobal('window', { location: { origin: 'https://me.example' } });
+
+const options: ArticleDocOptions = {
+  imageDrive: { alias: 'a', type: 't' },
+  defaultFileId: 'post-file',
+  lastModified: 1,
+};
+
+const render = (doc: unknown, props: Partial<Parameters<typeof ArticleDocRenderer>[0]> = {}) =>
+  renderToStaticMarkup(
+    <ArticleDocRenderer doc={doc as JSONContent} options={options} {...props} />
+  );
+
+test('renders every block of all-blocks.json', () => {
+  const html = render(allBlocks);
+
+  expect(html).toContain('<h1 id="every-block"');
+  expect(html).toContain('<h3 id="a-third-level-heading"');
+  for (const tag of [
+    '<strong',
+    '<em',
+    '<u>',
+    '<del>',
+    '<code',
+    '<kbd',
+    '<sup>',
+    '<sub>',
+    '<blockquote',
+    '<pre',
+    '<ul',
+    '<ol',
+    '<hr',
+  ])
+    expect(html).toContain(tag);
+  expect(html).toContain('<a href="https://example.com"');
+  expect(html).toContain('href="https://frodo.dotyou.cloud"');
+
+  // Math through KaTeX, inline and block
+  expect(html).toContain('class="katex"');
+  expect(html).toContain('katex-display');
+
+  // Code is highlighted
+  expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">const<\/span>/);
+
+  // Tables, task lists, callouts, toggles
+  expect(html).toContain('<table');
+  expect(html).toContain('<th');
+  expect(html).toMatch(/<input type="checkbox"[^>]*checked=""/);
+  expect(html).toContain('data-variant="warning"');
+  expect(html).toContain('<details');
+  expect(html).toMatch(/<summary[^>]*>.*More<\/summary>/);
+
+  // Images go through Image with the post's file; captions in figcaption
+  expect(html).toContain('<figure');
+  expect(html).toContain(
+    '<figcaption class="mt-1.5 block text-center text-sm text-[color:var(--article-on-surface-variant)]">Its caption</figcaption>'
+  );
+  expect(html).toContain('data-file-key="pst_rtei0" data-file-id="post-file" alt="A photo"');
+  expect(html).toContain('style="--image-width:320px"');
+  expect(html).toContain('data-gallery="grid"');
+  expect(html).toContain('data-file-key="pst_rtei2"');
+
+  // Link preview card
+  expect(html).toContain('href="https://example.com/post"');
+  expect(html).toContain('Example post');
+
+  // Footnotes link both ways
+  expect(html).toContain('<sup id="fnref-fn1" class="scroll-mt-20"><a href="#fn-fn1"');
+  expect(html).toContain('<li id="fn-fn1" value="1"');
+  expect(html).toContain('href="#fnref-fn1"');
+
+  // Figures never sit in a <p>
+  expect(html).not.toMatch(/<p[^>]*><figure/);
+});
+
+test('only http(s) and mailto links are rendered as links', () => {
+  const link = (href: string) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'x', marks: [{ type: 'link', attrs: { href } }] }],
+      },
+      { type: 'linkPreview', attrs: { url: href, title: 'card' } },
+    ],
+  });
+  expect(render(link('javascript:alert(1)'))).not.toContain('<a');
+  expect(render(link('data:text/html,hi'))).not.toContain('<a');
+  expect(render(link('mailto:a@b.c'))).toContain('href="mailto:a@b.c"');
+});
+
+test('raw HTML in the document is text, never markup', () => {
+  const html = render({
+    type: 'doc',
+    content: [
+      { type: 'paragraph', content: [{ type: 'text', text: '<script>alert(1)</script>' }] },
+      { type: 'toggle', attrs: { summary: '<img src=x onerror=alert(1)>' }, content: [] },
+      { type: 'image', attrs: { src: 'javascript:alert(1)', alt: 'x' } },
+      { type: 'unknownBlock', content: [{ type: 'text', text: 'kept' }] },
+    ],
+  });
+  expect(html).not.toContain('<script');
+  expect(html).not.toContain('<img src=x');
+  expect(html).not.toContain('javascript:');
+  expect(html).toContain('kept');
+});
+
+test('a table of contents lists 3+ headings with unique ids', () => {
+  const heading = (text: string, level = 2) => ({
+    type: 'heading',
+    attrs: { level },
+    content: [{ type: 'text', text }],
+  });
+  const doc = { type: 'doc', content: [heading('Intro'), heading('Intro'), heading('Sub', 3)] };
+
+  const html = render(doc, { tableOfContents: true });
+  expect(html).toContain('aria-label="Table of contents"');
+  expect(html).toContain('href="#intro"');
+  expect(html).toContain('href="#intro-2"');
+  expect(html).toContain('<h2 id="intro-2"');
+  expect(html).toMatch(/<div data-article-toc=""[^>]*><button type="button" aria-expanded="false"/);
+  expect(html).toContain('On this page');
+  expect(html).toMatch(/<nav id="[^"]+" aria-label="Table of contents" hidden=""/);
+
+  expect(render(doc)).not.toContain('Table of contents');
+  expect(
+    render({ type: 'doc', content: [heading('One'), heading('Two')] }, { tableOfContents: true })
+  ).not.toContain('Table of contents');
+});
+
+test('headings get unique ids from their text, also inside nodes the viewer drops', () => {
+  const text = (value: string, marks?: unknown[]) => ({ type: 'text', text: value, marks });
+  const heading = (content: unknown[], level = 2) => ({ type: 'heading', attrs: { level }, content });
+  // Types the viewer doesn't know: a block wrapping a heading, one after it, an inline in one, a mark
+  const unknownTypes = {
+    type: 'doc',
+    content: [
+      heading([text('Intro')]),
+      { type: 'someWidget', content: [heading([text('Intro', [{ type: 'glow' }])], 3)] },
+      { type: 'someWidget', attrs: { id: 'x' } },
+      {
+        type: 'constructor',
+        content: [heading([{ type: 'mystery', content: [text('Res')] }, text('ponses')])],
+      },
+      heading([text('Intro')]),
+    ],
+  };
+
+  const renderedIds = (doc: unknown) =>
+    [...render(doc).matchAll(/<h[1-6] id="([^"]*)"/g)].map((match) => match[1]);
+  for (const doc of [allBlocks, journalNote]) expect(renderedIds(doc).length).toBeGreaterThan(0);
+  expect(renderedIds(unknownTypes)).toEqual(['intro', 'intro-2', 'responses', 'intro-3']);
+});
+
+test('images with a fileKey need the post options', () => {
+  const doc = {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'image', attrs: { fileKey: 'k' } }] }],
+  };
+  expect(render(doc, { options: undefined })).not.toContain('<img');
+});
+
+test('with zoomImages, each image that loads is a button carrying what the viewer needs', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/a.png', alt: 'First' } },
+      {
+        type: 'gallery',
+        attrs: { layout: 'grid' },
+        content: [
+          { type: 'image', attrs: { src: 'https://x.example/b.png' } },
+          { type: 'image', attrs: { src: 'javascript:alert(1)' } },
+        ],
+      },
+    ],
+  };
+  expect(render(doc)).not.toContain('data-zoom-image');
+  const html = render(doc, { zoomImages: true });
+  expect(html.match(/<button type="button" data-zoom-image=""/g)).toHaveLength(2);
+  expect(html).toContain('data-src="https://x.example/a.png" data-alt="First"');
+  expect(html).toContain('aria-label="First: view full screen"');
+  expect(html).toContain('data-src="https://x.example/b.png"');
+  expect(html).not.toContain('javascript:');
+});
+
+test('grid and masonry galleries read left to right, and the viewer gets document order', () => {
+  const gallery = (layout: string) => ({
+    type: 'doc',
+    content: [
+      { type: 'image', attrs: { src: 'https://x.example/0.png' } },
+      {
+        type: 'gallery',
+        attrs: { layout },
+        content: [1, 2, 3, 4, 5].map((n) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${n}.png`, width: n * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  const orders = (html: string) =>
+    [...html.matchAll(/data-src="https:\/\/x\.example\/(\d)\.png" data-zoom-order="(\d)"/g)].map(
+      (m) => `${m[1]}:${m[2]}`
+    );
+
+  // Masonry: dealt into three columns, so the first of each column is 1, 2, 3
+  const masonry = render(gallery('masonry'), { zoomImages: true });
+  expect(srcs(masonry)).toEqual(['0', '1', '4', '2', '5', '3']);
+  expect(orders(masonry).sort()).toEqual(['0:0', '1:1', '2:2', '3:3', '4:4', '5:5']);
+
+  // Grid: one wrapping row in document order, each image flexing by its aspect ratio
+  const grid = render(gallery('grid'));
+  expect(srcs(grid)).toEqual(['0', '1', '2', '3', '4', '5']);
+  expect(grid).toContain('style="flex:3 1 calc(3 * var(--row-height))"');
+  expect(grid).toContain('[flex:10000_1_0px]');
+});
+
+describe('a gallery with columns', () => {
+  const gallery = (layout: string, columns: unknown, count = 5) => ({
+    type: 'doc',
+    content: [
+      {
+        type: 'gallery',
+        attrs: { layout, columns },
+        content: Array.from({ length: count }, (_, i) => ({
+          type: 'image',
+          attrs: { src: `https://x.example/${i + 1}.png`, width: (i + 1) * 100, height: 100 },
+        })),
+      },
+    ],
+  });
+  const srcs = (html: string) => [...html.matchAll(/x\.example\/(\d)\.png" alt/g)].map((m) => m[1]);
+  // Each row or column of a gallery, as the images it holds
+  const groups = (html: string, open: RegExp) =>
+    html
+      .split(open)
+      .slice(1)
+      .map((group) => srcs(group));
+
+  test('a grid has rows of exactly that many, each image sharing its row by aspect ratio', () => {
+    const html = render(gallery('grid', 2));
+    expect(html).not.toContain('--row-height');
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2'],
+      ['3', '4'],
+      ['5'],
+    ]);
+    expect(html).toContain('style="flex:1 1 0%"');
+    expect(html).toContain('style="flex:5 1 0%"');
+    // The short last row keeps room for its missing image: the gallery's mean aspect ratio, 3
+    expect(html).toContain('<span aria-hidden="true" class="h-0" style="flex:3 1 0%"></span>');
+  });
+
+  test('a full grid has no filler', () => {
+    const html = render(gallery('grid', 5));
+    expect(groups(html, /<div class="flex items-start gap-2">/)).toEqual([
+      ['1', '2', '3', '4', '5'],
+    ]);
+    expect(html).not.toContain('class="h-0"');
+  });
+
+  test('a masonry gallery has that many columns, dealt in turn', () => {
+    const html = render(gallery('masonry', 2));
+    expect(groups(html, /<div class="flex min-w-0 flex-1 flex-col gap-2">/)).toEqual([
+      ['1', '3', '5'],
+      ['2', '4'],
+    ]);
+  });
+
+  test('a row gallery holds at most that many per row', () => {
+    // Five in fours: balanced, 3 + 2; narrow rows stay pairs
+    const html = render(gallery('row', 4));
+    const breaks = [
+      ...html.matchAll(
+        /class="hidden h-2 \[flex:0_0_100%\] +([^"]*)"><\/span><figure[^>]*><img src="https:\/\/x\.example\/(\d)/g
+      ),
+    ].map((m) => `${m[2]}:${m[1].trim()}`);
+    expect(breaks).toEqual(['3:max-[480px]:block', '4:min-[481px]:block', '5:max-[480px]:block']);
+  });
+
+  test('a carousel ignores it', () => {
+    expect(render(gallery('carousel', 2))).toBe(render(gallery('carousel', undefined)));
+  });
+
+  test('anything but an integer from 1 to 6 is no setting', () => {
+    const automatic = render(gallery('grid', undefined));
+    expect(automatic).toContain('--row-height');
+    for (const columns of [0, 7, 2.5, 'two', null, -1])
+      expect(render(gallery('grid', columns))).toBe(automatic);
+    expect(render(gallery('grid', '3'))).toBe(render(gallery('grid', 3)));
+  });
+});
+
+const malformed = {
+  type: 'doc',
+  content: [
+    null,
+    'a string',
+    42,
+    {
+      type: 'constructor',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'under constructor' }] }],
+    },
+    { type: 'valueOf', attrs: { level: 2 } },
+    { type: 'toString', text: 'proto text' },
+    { type: 'paragraph', content: { type: 'text', text: 'object content' } },
+    {
+      type: 'paragraph',
+      content: [
+        null,
+        { type: 'text', text: 7 },
+        { type: 'text', text: { a: 1 } },
+        {
+          type: 'text',
+          text: 'marked',
+          marks: [null, { type: 'constructor' }, { type: 'bold' }, 'italic'],
+        },
+      ],
+    },
+    { type: 'heading', attrs: 'big', content: [{ type: 'text', text: 'Odd heading' }] },
+    {
+      type: 'bulletList',
+      content: [
+        null,
+        { type: 'listItem', content: 'nope' },
+        {
+          type: 'listItem',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'item' }] }],
+        },
+      ],
+    },
+    {
+      type: 'image',
+      attrs: {
+        src: 'https://x.example/a.png',
+        alt: { a: 1 },
+        caption: ['c'],
+        align: 'constructor',
+      },
+    },
+    { type: 'linkPreview', attrs: { url: 'https://example.com', title: { a: 1 }, description: 7 } },
+    {
+      type: 'callout',
+      attrs: { variant: 'constructor' },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'in callout' }] }],
+    },
+    { type: 7, content: [{ type: 'text', text: 'dropped' }] },
+  ],
+};
+
+test('sanitizeArticleDoc keeps only known, well-formed nodes', () => {
+  const clean = sanitizeArticleDoc(malformed);
+  const types = (node: JSONContent): string[] => [
+    node.type ?? '',
+    ...(node.content ?? []).flatMap(types),
+  ];
+  for (const type of types(clean))
+    expect([
+      'doc',
+      'paragraph',
+      'text',
+      'heading',
+      'bulletList',
+      'listItem',
+      'image',
+      'linkPreview',
+      'callout',
+    ]).toContain(type);
+  // An unknown node is replaced by its content, so its text stays
+  expect(JSON.stringify(clean)).toContain('under constructor');
+  // Content that isn't an array is dropped; text is a string; unknown and malformed marks go
+  const paragraphs = (clean.content ?? []).filter((node) => node.type === 'paragraph');
+  expect(paragraphs.some((node) => node.content === undefined)).toBe(true);
+  const texts = paragraphs.flatMap((node) => node.content ?? []);
+  expect(texts.map((node) => node.text)).toEqual(expect.arrayContaining(['7', '', 'marked']));
+  expect(texts.find((node) => node.text === 'marked')?.marks).toEqual([{ type: 'bold' }]);
+  // Never a prototype key, and no throw on anything that isn't a document
+  expect(JSON.stringify(clean)).not.toMatch(/"type":"(constructor|valueOf|toString)"/);
+  for (const doc of [
+    null,
+    undefined,
+    'doc',
+    3,
+    [],
+    { type: 'doc', content: 'x' },
+    { type: 'constructor' },
+  ])
+    expect(sanitizeArticleDoc(doc)).toEqual({ type: 'doc', content: expect.any(Array) });
+});
+
+test('a malformed document renders without throwing and keeps its text', () => {
+  let html = '';
+  expect(() => (html = render(malformed, { tableOfContents: true }))).not.toThrow();
+  for (const text of ['under constructor', 'marked', '7', 'item', 'in callout', 'Odd heading'])
+    expect(html).toContain(text);
+  expect(html).toContain('<strong class="font-bold">marked</strong>');
+  expect(html).toContain('data-variant="info"');
+  expect(html).not.toContain('[object Object]');
+  expect(html).not.toContain('function');
+  for (const doc of [
+    null,
+    undefined,
+    'doc',
+    [null],
+    { content: [null] },
+    { type: 'doc', content: { a: 1 } },
+  ])
+    expect(() => render(doc)).not.toThrow();
+});
+
+test('heading slugs follow the reference rule', () => {
+  expect(slugify('Hello, World!')).toBe('hello-world');
+  expect(slugify('  Crème brûlée  ')).toBe('creme-brulee');
+  expect(slugify('Ⅻ ½ ﬁve')).toBe('xii-1-2-five');
+  expect(slugify('日本語の見出し')).toBe('日本語の見出し');
+  expect(slugify('--- ?! ---')).toBe('section');
+  expect(slugify('')).toBe('section');
+  expect(uniqueHeadingIds(['a', 'a', 'a'])).toEqual(['a', 'a-2', 'a-3']);
+  // A generated id is never repeated by a heading whose own slug is that id
+  expect(uniqueHeadingIds(['a', 'a', 'a-2'])).toEqual(['a', 'a-2', 'a-2-2']);
+  expect(uniqueHeadingIds(['a', 'a-2', 'a'])).toEqual(['a', 'a-2', 'a-3']);
+});
+
+/** The text a reader sees: the markup without its tags, entities decoded. */
+const visibleText = (html: string) =>
+  html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&amp;/g, '&');
+
+/** Every piece of text in a document: text nodes, note-link labels, toggle titles, captions. */
+const textsOf = (node: JSONContent): string[] => [
+  ...(node.type === 'text' && node.text ? [node.text] : []),
+  ...(node.type === 'noteLink' && node.attrs?.label ? [node.attrs.label] : []),
+  ...(node.type === 'toggle' && node.attrs?.summary ? [node.attrs.summary] : []),
+  ...(node.type === 'image' && node.attrs?.caption ? [node.attrs.caption] : []),
+  ...(node.type === 'linkPreview' && node.attrs?.title ? [node.attrs.title] : []),
+  ...(node.content ?? []).flatMap(textsOf),
+];
+
+describe('a note published from Journal', () => {
+  const doc = journalNote as JSONContent;
+  // Rendered once for every test below; a throw fails the suite
+  const html = render(doc, { tableOfContents: true });
+
+  test('drops no text', () => {
+    const text = visibleText(html);
+    const missing = textsOf(doc).filter((piece) => !text.includes(piece));
+    expect(missing).toEqual([]);
+  });
+
+  test('aligns and indents headings and paragraphs', () => {
+    expect(html).toMatch(/<h2 id="centred-and-indented"[^>]*style="text-align:center"/);
+    expect(html).toMatch(/<h3 id="an-indented-third-level-heading"[^>]*style="padding-left:4rem"/);
+    expect(html).toContain('style="text-align:justify;padding-left:2rem"');
+    expect(html).toContain('style="text-align:right"');
+    for (const level of [4, 5, 6]) expect(html).toContain(`<h${level} id="heading-level-${level}"`);
+  });
+
+  test('renders every mark', () => {
+    for (const tag of [
+      '<strong',
+      '<em>',
+      '<del>',
+      '<u>underline</u>',
+      '<sub>2</sub>',
+      '<sup>2</sup>',
+      '<code',
+    ])
+      expect(html).toContain(tag);
+    expect(html).toContain('href="https://example.com/page"');
+  });
+
+  test('shows note links as their labels, never as journal: links', () => {
+    expect(visibleText(html)).toContain('a note link Another note plus Wiki title.');
+    expect(html).not.toContain('journal:');
+    expect(html).not.toContain('7d1c2a4e');
+  });
+
+  test('nests task lists and lists', () => {
+    expect(html.match(/data-type="taskList"/g)).toHaveLength(3);
+    expect(html.match(/<input type="checkbox"/g)).toHaveLength(5);
+    expect(html).toContain('<ol');
+  });
+
+  test('renders each callout variant, the toggle, the table and the preview card', () => {
+    for (const variant of ['info', 'tip', 'warning', 'error'])
+      expect(html).toContain(`data-variant="${variant}"`);
+    expect(html).toMatch(/<summary[^>]*>.*Open me<\/summary>/);
+    expect(html.match(/<th /g)).toHaveLength(2);
+    expect(html).toContain('href="https://example.com/preview-target"');
+    expect(html).toContain('src="https://picsum.photos/id/30/400/300"');
+  });
+
+  test('never puts a block element inside a <p>', () => {
+    for (const p of html.match(/<p[\s>][\s\S]*?<\/p>/g) ?? [])
+      expect(p).not.toMatch(/<(div|figure|figcaption|pre|table|ul|ol|aside|details)[\s>]/);
+  });
+
+  test('never hides the placeholder of an image it cannot load', () => {
+    const edited = render({
+      type: 'doc',
+      content: [
+        {
+          type: 'image',
+          attrs: { src: 'attachment://x/y', crop: { x: 0.1, y: 0.1, w: 0.5, h: 0.5 }, alt: 'a' },
+        },
+      ],
+    });
+    expect(edited).toContain('Image not available');
+    expect(edited).not.toContain('visibility:hidden');
+  });
+
+  test("applies an image's crop, rotation, flips, width and alignment", () => {
+    expect(html).toMatch(
+      /<figure[^>]*style="--image-width:480px" data-crop="0.1,0.1,0.6,0.8" data-rotate="90" data-flip="h"/
+    );
+    expect(html).toMatch(/<figure class="[^"]*min-\[600px\]:mx-auto/);
+    expect(html).toMatch(
+      /<figure class="[^"]*min-\[600px\]:float-right[^"]*" style="--image-width:240px" data-flip="v"/
+    );
+    expect(html).toMatch(
+      /<figure class="[^"]*min-\[600px\]:float-left[^"]*" style="--image-width:200px" data-rotate="180"/
+    );
+    // Until the image loads, the edited frame is hidden rather than showing the original
+    expect(html).toContain(
+      'data-edited-image="" class="w-full rounded-lg" style="visibility:hidden"'
+    );
+    // An image in a paragraph of text never puts a figure in a <p>
+    expect(html).not.toMatch(/<p[\s>](?:(?!<\/p>).)*<figure/);
+  });
+
+  test('shows an image it cannot load as a placeholder with its caption', () => {
+    expect(html).not.toContain('attachment://');
+    expect(html).toContain('Image not available');
+    expect(html).toContain('Its caption survives');
+  });
+
+  test('lays out each gallery', () => {
+    for (const layout of ['row', 'grid', 'masonry', 'carousel'])
+      expect(html).toContain(`data-gallery="${layout}"`);
+    // Four images in a row gallery: two rows of two, wide and narrow
+    expect(html).toMatch(
+      /<span aria-hidden="true" class="hidden [^"]*min-\[481px\]:block max-\[480px\]:block"><\/span>/
+    );
+    expect(html).toContain('aria-roledescription="carousel"');
+    expect(html).toContain('aria-label="Show image 2 of 2"');
+    // A cropped image in a gallery carries its crop, for the row's aspect ratio
+    expect(html).toContain('data-crop="0,0.25,1,0.5"');
+  });
+
+  test('highlights code by the first word of its info string only', () => {
+    expect(html).toContain('data-language="ts"');
+    expect(html).toContain('data-language="html"');
+    expect(html).toContain('data-language="react"');
+    expect(html).toContain('data-language="mermaid"');
+    // The rest of the info string reaches no attribute
+    expect(html).not.toContain('k3f9');
+    expect(html).not.toMatch(/="[^"]*id=x/);
+    // react is highlighted as JavaScript
+    expect(html).toMatch(/<span class="text-\[#d73a49\][^"]*">export<\/span>/);
+  });
+
+  test('shows live blocks as code under a label, and an svg drawing as an image, until LiveBlock loads', () => {
+    expect(html.match(/Interactive block — shown as code/g)).toHaveLength(2);
+    expect(html.match(/Diagram — shown as code/g)).toHaveLength(1);
+    expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg[^"]*" alt=""/);
+    // Their markup is text: no script, no handler, no frame
+    expect(html).not.toContain('<script');
+    expect(html).not.toContain('<button onclick');
+    expect(html).not.toContain('<iframe');
+  });
+
+  test('links footnotes both ways and lists the headings', () => {
+    expect(html).toContain('<sup id="fnref-1" class="scroll-mt-20"><a href="#fn-1"');
+    expect(html).toContain('href="#fnref-1"');
+    expect(html).toContain('aria-label="Table of contents"');
+  });
+});
+
+test('a hostile info string only ever reaches data-language as a bare word', () => {
+  const html = render({
+    type: 'doc',
+    content: [
+      {
+        type: 'codeBlock',
+        attrs: { language: 'x"><img src=x onerror=alert(1)> id=abcd' },
+        content: [{ type: 'text', text: 'code' }],
+      },
+      {
+        type: 'codeBlock',
+        attrs: { language: { not: 'a string' } },
+        content: [{ type: 'text', text: 'more code' }],
+      },
+      { type: 'codeBlock', attrs: { language: 'svg' } },
+    ],
+  });
+  expect(html).toContain('data-language="ximg"');
+  expect(html).not.toContain('onerror=');
+  expect(html).toContain('more code');
+  // An empty svg block is an empty code block, not an empty image
+  expect(html).not.toContain('data:image/svg');
+});
+
+describe('a live block', () => {
+  const doc = {
+    type: 'doc',
+    content: [
+      {
+        type: 'codeBlock',
+        attrs: { language: 'html id=k3f9 wide' },
+        content: [{ type: 'text', text: '<p>Hello</p>' }],
+      },
+    ],
+  };
+
+  test('runs in LiveBlock once its chunk has loaded, wide as its fence says and with no saved state', async () => {
+    // Server rendering shows the Suspense fallback until the lazy chunk has loaded
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block="html"'));
+    const html = render(doc);
+    expect(html).toContain('data-wide="true"');
+    expect(html).toContain('data-initial-state="none"');
+    expect(html).toContain('&lt;p&gt;Hello&lt;/p&gt;');
+    expect(html).not.toContain('shown as code');
+  });
+
+  test('shows as code under its label when LiveBlock throws', async () => {
+    await vi.waitFor(() => expect(render(doc)).toContain('data-test-live-block'));
+    liveBlock.throws = true;
+    try {
+      const html = render(doc);
+      expect(html).toContain('Interactive block — shown as code');
+      expect(html).toContain('data-language="html"');
+      expect(html).not.toContain('data-test-live-block');
+    } finally {
+      liveBlock.throws = false;
+    }
+  });
+});
+
+test('an unknown node keeps its text, and an unknown inline atom is dropped without breaking the paragraph', () => {
+  const html = render({
+    type: 'doc',
+    content: [
+      {
+        type: 'liveEmbed',
+        attrs: { src: 'x' },
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'inside unknown' }] }],
+      },
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'before ' },
+          { type: 'emoji', attrs: { name: 'x' } },
+          { type: 'text', text: 'after' },
+        ],
+      },
+    ],
+  });
+  expect(html).toContain('inside unknown');
+  expect(html).toContain('before after');
+});

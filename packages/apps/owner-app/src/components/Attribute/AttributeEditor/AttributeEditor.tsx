@@ -258,8 +258,8 @@ const AttributeEditor = ({
         isNewAttribute
           ? `transition-colors ${
               isFadeOut
-                ? 'bg-white duration-[3000ms] dark:bg-black'
-                : 'bg-indigo-50 dark:bg-indigo-900'
+                ? 'bg-background duration-[3000ms]'
+                : 'bg-highlight'
             }`
           : ''
       } ${className ?? ''}`}
@@ -300,7 +300,7 @@ const AttributeEditor = ({
             <SaveStatus className="mt-2 text-right sm:mt-0" state={saveStatus} error={saveError} />
             {isNewAttribute ? (
               <div className="flex flex-row justify-end pb-2">
-                <p className="text-slate-500">
+                <p className="text-muted-foreground">
                   {t('Accessible by: ')}{' '}
                   <AclSummary
                     acl={

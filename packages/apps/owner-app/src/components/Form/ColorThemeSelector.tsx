@@ -34,19 +34,20 @@ const options: ColorSet[] = [
   {
     name: 'Default',
     id: 'default',
+    // homebase-m3.css, which the public site uses as is for this set
     light: {
-      'page-background': '246 248 250',
-      background: '255 255 255',
-      foreground: '11 11 11',
-      button: '99 101 241',
+      'page-background': '242 245 249',
+      background: '251 252 255',
+      foreground: '27 27 29',
+      button: '44 88 195',
       'button-text': '255 255 255',
     },
     dark: {
-      'page-background': '17 24 39',
-      background: '0 0 0',
-      foreground: '250 250 250',
-      button: '99 101 141',
-      'button-text': '255 255 255',
+      'page-background': '27 28 31',
+      background: '35 36 42',
+      foreground: '226 225 229',
+      button: '182 197 250',
+      'button-text': '30 36 56',
     },
   },
   {
@@ -102,7 +103,7 @@ const ColorThemeSelector = ({
     <>
       <div className={className ?? ''} id={id}>
         <div
-          className="relative cursor-pointer rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
+          className="relative cursor-pointer rounded-md border bg-background"
           onClick={() => setIsOpen(!isOpen)}
         >
           <div className="flex min-w-[6rem] flex-row px-2 py-1">
@@ -185,8 +186,8 @@ const Option = ({
 }) => {
   return (
     <li
-      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border dark:border-slate-800 ${
-        isChecked && 'bg-slate-50 dark:bg-slate-700'
+      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border ${
+        isChecked && 'bg-surface-container-high'
       }`}
       onClick={() => onChange(colorSet)}
     >
@@ -248,8 +249,8 @@ const FullCustomOption = ({
 
   return (
     <li
-      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border dark:border-slate-800 ${
-        isChecked && 'bg-slate-50 dark:bg-slate-700'
+      className={`my-3 w-full cursor-pointer select-none overflow-hidden rounded-lg border ${
+        isChecked && 'bg-surface-container-high'
       }`}
       onClick={() => onChange(customSet)}
     >
@@ -349,7 +350,7 @@ const SingleColorSelection = ({
         {isChecked && (
           <input
             type={'text'}
-            className="w-full flex-grow p-1 px-2 py-1 uppercase text-black dark:text-white"
+            className="w-full flex-grow p-1 px-2 py-1 uppercase"
             defaultValue={defaultVal}
             onChange={(e) => {
               const rgb = convertHexToRgb(e.target.value);

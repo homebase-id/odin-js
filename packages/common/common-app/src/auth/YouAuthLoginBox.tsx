@@ -102,12 +102,12 @@ export const YouAuthLoginBox = ({
         <div className="flex flex-col">
           <label
             htmlFor="youauth-identity"
-            className="text-sm leading-7 text-gray-600 dark:text-gray-500"
+            className="text-sm leading-7 text-muted-foreground"
           >
             Homebase Id
           </label>
           <input
-            className="w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            className="w-full rounded border border-outline bg-background px-3 py-1 text-base leading-8 text-foreground outline-none transition-colors duration-200 ease-in-out focus:border-primary focus:ring-2 focus:ring-primary"
             type="text"
             name="homebase-id"
             id="youauth-identity"
@@ -121,16 +121,16 @@ export const YouAuthLoginBox = ({
               setError(null);
             }}
           />
-          {error ? <span className="text-sm text-red-500">{error}</span> : null}
+          {error ? <span className="text-sm text-destructive">{error}</span> : null}
         </div>
 
-        <button className="my-3 block cursor-pointer rounded-md bg-indigo-500 px-4 py-2 text-center text-white hover:brightness-90">
+        <button className="my-3 block cursor-pointer rounded-md bg-primary px-4 py-2 text-center text-primary-contrast hover:brightness-90">
           Login
         </button>
       </form>
       <p className="text-center">or</p>
       <a
-        className="my-3 block rounded-md bg-slate-200 px-4 py-2 text-center text-black hover:brightness-90"
+        className="my-3 block rounded-md bg-surface-container-highest px-4 py-2 text-center text-foreground hover:brightness-90"
         href="https://homebase.id/sign-up"
         target="_blank"
         rel="noopener noreferrer"

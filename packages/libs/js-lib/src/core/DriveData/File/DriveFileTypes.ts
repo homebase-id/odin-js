@@ -51,17 +51,24 @@ export enum TransferStatus {
   SourceFileDoesNotAllowDistribution = 'sourcefiledoesnotallowdistribution',
   RecipientServerNotResponding = 'recipientservernotresponding',
   RecipientIdentityReturnedServerError = 'recipientidentityreturnedservererror',
+  RecipientIdentityOutOfStorage = 'recipientidentityoutofstorage',
   RecipientIdentityReturnedBadRequest = 'recipientidentityreturnedbadrequest',
+  RecipientIdentityReturnedVersionTagMismatch = 'recipientidentityreturnedversiontagmismatch',
+  RecipientIdentityReturnedInvalidKeyHeader = 'recipientidentityreturnedinvalidkeyheader',
   UnknownServerError = 'unknownservererror',
   SendingServerTooManyAttempts = 'sendingservertoomanyattempts',
 }
 
+// RecipientIdentityOutOfStorage is left out on purpose: the server keeps the item in the outbox and
+// delivers it once the recipient has room, so that recipient is waiting, not failed
 export const FailedTransferStatuses = [
   TransferStatus.RecipientIdentityReturnedAccessDenied,
   TransferStatus.SourceFileDoesNotAllowDistribution,
   TransferStatus.RecipientServerNotResponding,
   TransferStatus.RecipientIdentityReturnedServerError,
   TransferStatus.RecipientIdentityReturnedBadRequest,
+  TransferStatus.RecipientIdentityReturnedVersionTagMismatch,
+  TransferStatus.RecipientIdentityReturnedInvalidKeyHeader,
   TransferStatus.UnknownServerError,
   TransferStatus.SendingServerTooManyAttempts,
 ];
@@ -87,7 +94,7 @@ export interface RecipientTransferHistory {
   recipient: string;
   lastUpdated: number;
   latestTransferStatus: TransferStatus;
-  isInOutbox: string;
+  isInOutbox: boolean;
   latestSuccessfullyDeliveredVersionTag: string | null;
   isReadByRecipient: boolean;
 }

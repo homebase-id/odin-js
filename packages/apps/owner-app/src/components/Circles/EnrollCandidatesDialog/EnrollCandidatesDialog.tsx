@@ -76,11 +76,11 @@ export const EnrollCandidatesDialog = ({
       {result ? (
         <Completion result={result} circle={circle} onClose={onClose} />
       ) : isLoading ? (
-        <p className="flex flex-row items-center gap-2 text-slate-400">
+        <p className="flex flex-row items-center gap-2 text-muted-foreground">
           <Loader className="h-5 w-5" /> {t('Checking who is eligible...')}
         </p>
       ) : !candidates.length ? (
-        <p className="text-slate-400">{t('Everyone eligible is already in this circle.')}</p>
+        <p className="text-muted-foreground">{t('Everyone eligible is already in this circle.')}</p>
       ) : (
         <>
           <WhatTheyGain circle={circle} />
@@ -161,7 +161,7 @@ const WhatTheyGain = ({ circle }: { circle: CircleDefinition }) => (
         ))}
       </div>
     ) : (
-      <p className="text-sm text-slate-400">{t('No drive access')}</p>
+      <p className="text-sm text-muted-foreground">{t('No drive access')}</p>
     )}
   </Alert>
 );
@@ -176,13 +176,13 @@ const CandidateRow = ({
   onToggle: () => void;
 }) => (
   <li
-    className="flex select-none flex-row items-center gap-3 rounded-lg border p-3 dark:border-slate-800"
+    className="flex select-none flex-row items-center gap-3 rounded-lg border p-3"
     onClick={onToggle}
   >
     <CheckboxToggle checked={checked} className="pointer-events-none" readOnly={true} />
     <span className="flex flex-col">
       <ContactName odinId={candidate.odinId} canSave={false} />
-      <span className="text-sm text-slate-400">
+      <span className="text-sm text-muted-foreground">
         {candidate.odinId}
         {/* Why this person is on the list at all. Lets the owner catch a review they would not
             make again, before it becomes access. */}
@@ -216,7 +216,7 @@ const Completion = ({
   return (
     <>
       <p className="mb-4 flex flex-row items-center gap-2 text-lg">
-        <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
+        <Check className="h-6 w-6 text-success" />
         {result.enrolled} {result.enrolled === 1 ? t('contact was') : t('contacts were')}{' '}
         {t('added to')} &quot;{circle.name}&quot;
       </p>
@@ -226,7 +226,7 @@ const Completion = ({
           <p className="text-sm">
             {deposited.length} {t('will join once their connection is next active.')}
           </p>
-          <ul className="mt-1 text-sm text-slate-400">
+          <ul className="mt-1 text-sm text-muted-foreground">
             {deposited.map((o) => (
               <li key={o.odinId}>{o.odinId}</li>
             ))}
@@ -239,7 +239,7 @@ const Completion = ({
           <p className="text-sm">
             {t('These were not added, because they stopped being eligible:')}
           </p>
-          <ul className="mt-1 flex flex-col text-sm text-slate-400">
+          <ul className="mt-1 flex flex-col text-sm text-muted-foreground">
             {skipped.map((o) => (
               <li key={o.odinId} className="flex flex-row items-center gap-1">
                 <Times className="h-4 w-4" /> {o.odinId}
@@ -251,7 +251,7 @@ const Completion = ({
 
       {/* Undo exists and is worth naming, along with its limit: revoking stops future access, it
           does not recall what was already readable. */}
-      <p className="mb-5 text-sm text-slate-400">
+      <p className="mb-5 text-sm text-muted-foreground">
         {t(
           'To undo, remove them from the circle. That stops further access, but does not recall anything already read.'
         )}

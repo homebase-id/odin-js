@@ -88,9 +88,7 @@ const PostOverview = () => {
   return (
     <>
       <Helmet>
-        <title>
-          {activeChannel ? activeChannel.fileMetadata.appData.content.name : t('Posts')} | Homebase
-        </title>
+        <title>{`${activeChannel ? activeChannel.fileMetadata.appData.content.name : t('Posts')} | Homebase`}</title>
       </Helmet>
 
       <section className="py-5">

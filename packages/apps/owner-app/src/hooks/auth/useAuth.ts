@@ -208,7 +208,7 @@ export const useAuth = () => {
   // An upgrade waits after the login while devices would lose the drive: the owner reads which, then continues
   const [devicesWithoutAppKey, setDevicesWithoutAppKey] = useState<DeviceWithoutAppKey[]>();
   // Kept only while the owner reads that warning: the upgrade still needs the password
-  const pendingUpgrade = useRef<{ ownerClient: OwnerClient; password: string }>();
+  const pendingUpgrade = useRef<{ ownerClient: OwnerClient; password: string }>(undefined);
 
   const authenticate = async (password: string) => {
     // Cleanup the public session: (There might have been a public login already in place)

@@ -77,7 +77,7 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, region }: P
     <div className="mx-auto w-full max-w-xl">
       <AlertError error={createIdentityError} doRetry={doCreateIdentity} />
 
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         {isDone ? t('Your identity is live') : t(`We're building`)}
       </p>
       <p className="mt-1 break-all font-mono text-2xl font-semibold">{domain}</p>
@@ -114,7 +114,7 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, region }: P
           <DomainAccessibleAlert domain={domain} />
         </>
       ) : (
-        <p className="mt-6 flex flex-row items-start gap-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="mt-6 flex flex-row items-start gap-2 text-xs leading-relaxed text-muted-foreground">
           <Shield className="mt-0.5 h-4 w-4 flex-none" />
           <span>
             {t('You can leave this page open — we will email')} <b>{email}</b>{' '}
@@ -136,7 +136,7 @@ const ProgressRow = ({
   isActive: boolean;
 }) => (
   <CardRow isDimmed={!isDone && !isActive} icon={<StepIcon isDone={isDone} isActive={isActive} />}>
-    <span className={`min-w-0 text-sm ${isDone ? '' : 'text-slate-500 dark:text-slate-400'}`}>
+    <span className={`min-w-0 text-sm ${isDone ? '' : 'text-muted-foreground'}`}>
       {label}
     </span>
   </CardRow>
@@ -144,12 +144,12 @@ const ProgressRow = ({
 
 const StepIcon = ({ isDone, isActive }: { isDone: boolean; isActive: boolean }) => {
   if (isDone) return <Check className={`h-5 w-5 flex-none ${config.accentClassName}`} />;
-  if (isActive) return <Loader className="h-5 w-5 flex-none text-slate-400" />;
+  if (isActive) return <Loader className="h-5 w-5 flex-none text-muted-foreground" />;
 
   return (
     <span
       aria-hidden="true"
-      className="ml-1.5 h-2 w-2 flex-none rounded-full border border-slate-300 dark:border-slate-600"
+      className="ml-1.5 h-2 w-2 flex-none rounded-full border border-outline"
     />
   );
 };

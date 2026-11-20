@@ -1,0 +1,1237 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0,
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "A note from Journal"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": "center",
+        "indent": 0,
+        "level": 2
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Centred and indented"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": null,
+        "indent": 2,
+        "level": 3
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "An indented third-level heading"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": "right",
+        "indent": 0
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Right aligned, with a"
+        },
+        {
+          "type": "hardBreak"
+        },
+        {
+          "type": "text",
+          "text": "hard break."
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0,
+        "level": 4
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Heading level 4"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0,
+        "level": 5
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Heading level 5"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0,
+        "level": 6
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Heading level 6"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": "justify",
+        "indent": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "A paragraph with "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "bold"
+            }
+          ],
+          "text": "bold"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "italic"
+            }
+          ],
+          "text": "italic"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "strike"
+            }
+          ],
+          "text": "strike"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "code"
+            }
+          ],
+          "text": "inline code"
+        },
+        {
+          "type": "text",
+          "text": ", "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "underline"
+            }
+          ],
+          "text": "underline"
+        },
+        {
+          "type": "text",
+          "text": ", H"
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "subscript"
+            }
+          ],
+          "text": "2"
+        },
+        {
+          "type": "text",
+          "text": "O, x"
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "superscript"
+            }
+          ],
+          "text": "2"
+        },
+        {
+          "type": "text",
+          "text": ", a "
+        },
+        {
+          "type": "text",
+          "marks": [
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://example.com/page",
+                "target": "_blank",
+                "rel": "noopener noreferrer",
+                "class": "text-blue-500 underline cursor-pointer",
+                "title": null
+              }
+            }
+          ],
+          "text": "link"
+        },
+        {
+          "type": "text",
+          "text": " and a note link "
+        },
+        {
+          "type": "noteLink",
+          "attrs": {
+            "noteId": "7d1c2a4e-0b3f-4f56-9a2e-1c2d3e4f5a6b",
+            "label": "Another note"
+          }
+        },
+        {
+          "type": "text",
+          "text": " plus "
+        },
+        {
+          "type": "noteLink",
+          "attrs": {
+            "noteId": null,
+            "label": "Wiki title"
+          }
+        },
+        {
+          "type": "text",
+          "text": ". Euler: "
+        },
+        {
+          "type": "inlineMath",
+          "attrs": {
+            "latex": "e^{i\\pi} + 1 = 0"
+          }
+        },
+        {
+          "type": "text",
+          "text": ", and a footnote"
+        },
+        {
+          "type": "footnoteReference",
+          "attrs": {
+            "id": "1"
+          }
+        },
+        {
+          "type": "text",
+          "text": "."
+        }
+      ]
+    },
+    {
+      "type": "blockMath",
+      "attrs": {
+        "latex": "\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}"
+      }
+    },
+    {
+      "type": "taskList",
+      "content": [
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": false
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null,
+                "indent": 0
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Write the article"
+                }
+              ]
+            },
+            {
+              "type": "taskList",
+              "content": [
+                {
+                  "type": "taskItem",
+                  "attrs": {
+                    "checked": true
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "attrs": {
+                        "textAlign": null,
+                        "indent": 0
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Outline"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "taskItem",
+                  "attrs": {
+                    "checked": false
+                  },
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "attrs": {
+                        "textAlign": null,
+                        "indent": 0
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Draft"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "taskList",
+                      "content": [
+                        {
+                          "type": "taskItem",
+                          "attrs": {
+                            "checked": false
+                          },
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "textAlign": null,
+                                "indent": 0
+                              },
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "Third level"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "taskItem",
+          "attrs": {
+            "checked": true
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null,
+                "indent": 0
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Pick a title"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "orderedList",
+      "attrs": {
+        "start": 1,
+        "type": null
+      },
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null,
+                "indent": 0
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "First"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null,
+                "indent": 0
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Second"
+                }
+              ]
+            },
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "attrs": {
+                        "textAlign": null,
+                        "indent": 0
+                      },
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "nested bullet"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "bulletList",
+                      "content": [
+                        {
+                          "type": "listItem",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "attrs": {
+                                "textAlign": null,
+                                "indent": 0
+                              },
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "deeper bullet"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "blockquote",
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "A plain quote."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "attrs": {
+        "variant": "info"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "An info callout."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "attrs": {
+        "variant": "tip"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "A tip callout."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "attrs": {
+        "variant": "warning"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "A warning callout."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "callout",
+      "attrs": {
+        "variant": "error"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "An error callout."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "toggle",
+      "attrs": {
+        "summary": "Open me"
+      },
+      "content": [
+        {
+          "type": "paragraph",
+          "attrs": {
+            "textAlign": null,
+            "indent": 0
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Toggle body text."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Name"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Value"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "alpha"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "1"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "beta"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1,
+                "colwidth": null,
+                "align": null
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "textAlign": null,
+                    "indent": 0
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "2"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "linkPreview",
+      "attrs": {
+        "url": "https://example.com/preview-target",
+        "title": "A preview card",
+        "description": "The description of the linked page, which can run on for a while and gets clamped to two lines in the card.",
+        "image": "https://picsum.photos/id/30/400/300",
+        "imageWidth": null,
+        "imageHeight": null
+      }
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/10/800/600",
+            "alt": "A single photo",
+            "title": null,
+            "width": 480,
+            "height": null,
+            "data-pending-id": null,
+            "align": "center",
+            "caption": "Cropped, turned a quarter and mirrored",
+            "crop": {
+              "x": 0.1,
+              "y": 0.1,
+              "w": 0.6,
+              "h": 0.8
+            },
+            "rotate": 90,
+            "flipH": true,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/40/600/400",
+            "alt": "Floated right",
+            "title": null,
+            "width": 240,
+            "height": null,
+            "data-pending-id": null,
+            "align": "right",
+            "caption": "",
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": true
+          }
+        },
+        {
+          "type": "text",
+          "text": "Text that wraps around an image floated to the right. Text that wraps around an image floated to the right. Text that wraps around an image floated to the right. Text that wraps around an image floated to the right. Text that wraps around an image floated to the right. Text that wraps around an image floated to the right. "
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/41/600/400",
+            "alt": "Floated left",
+            "title": null,
+            "width": 200,
+            "height": null,
+            "data-pending-id": null,
+            "align": "left",
+            "caption": null,
+            "crop": null,
+            "rotate": 180,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "text",
+          "text": "Text that wraps around an image floated to the left. Text that wraps around an image floated to the left. Text that wraps around an image floated to the left. Text that wraps around an image floated to the left. Text that wraps around an image floated to the left. Text that wraps around an image floated to the left. "
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "textAlign": null,
+        "indent": 0
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "attachment://0f9e8d7c6b5a/jrnl_img1",
+            "alt": "An attachment Journal did not rewrite",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": "Its caption survives",
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "attrs": {
+        "layout": "row"
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/11/800/600",
+            "alt": "Row one",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/12/600/800",
+            "alt": "Row two",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": {
+              "x": 0,
+              "y": 0.25,
+              "w": 1,
+              "h": 0.5
+            },
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/13/800/500",
+            "alt": "Row three",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/14/700/700",
+            "alt": "Row four",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "attrs": {
+        "layout": "grid"
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/15/800/600",
+            "alt": "Grid one",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/16/800/600",
+            "alt": "Grid two",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/17/800/600",
+            "alt": "Grid three",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "attrs": {
+        "layout": "masonry"
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/18/600/900",
+            "alt": "Masonry one",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/19/800/600",
+            "alt": "Masonry two",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/20/600/600",
+            "alt": "Masonry three",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "gallery",
+      "attrs": {
+        "layout": "carousel"
+      },
+      "content": [
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/21/800/600",
+            "alt": "Slide one",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "https://picsum.photos/id/22/800/600",
+            "alt": "Slide two",
+            "title": null,
+            "width": null,
+            "height": null,
+            "data-pending-id": null,
+            "align": null,
+            "caption": null,
+            "crop": null,
+            "rotate": null,
+            "flipH": null,
+            "flipV": null
+          }
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": "ts"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "const answer: number = 42;"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": "html id=k3f9 wide"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "<div id=\"app\"><button onclick=\"alert(1)\">Click</button></div>\n<script>document.title = 'pwned'</script>"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": "react id=x"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "export default function App() { return <h1>Hello</h1>; }"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": "mermaid"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "graph TD; A-->B;"
+        }
+      ]
+    },
+    {
+      "type": "codeBlock",
+      "attrs": {
+        "language": "svg"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 120 60\"><rect x=\"5\" y=\"5\" width=\"110\" height=\"50\" rx=\"8\" fill=\"#6366f1\"/><text x=\"60\" y=\"38\" font-size=\"18\" text-anchor=\"middle\" fill=\"#fff\">SVG</text><script>alert(1)</script></svg>"
+        }
+      ]
+    },
+    {
+      "type": "horizontalRule"
+    },
+    {
+      "type": "footnotes",
+      "content": [
+        {
+          "type": "footnote",
+          "attrs": {
+            "id": "1"
+          },
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "textAlign": null,
+                "indent": 0
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "The footnote text."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

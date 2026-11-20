@@ -239,7 +239,7 @@ const CircleDetails = () => {
                   >
                     {owningApp.name}
                   </Link>
-                  <span className="text-slate-400">{` ${t('(app)')}`}</span>
+                  <span className="text-muted-foreground">{` ${t('(app)')}`}</span>
                   {!isSystemCircle ? (
                     <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
                   ) : null}
@@ -247,7 +247,7 @@ const CircleDetails = () => {
               ) : (
                 <>
                   <span className="break-all font-mono">{circle.appId}</span>
-                  <span className="text-slate-400">{` ${t('(app, no longer registered)')}`}</span>
+                  <span className="text-muted-foreground">{` ${t('(app, no longer registered)')}`}</span>
                   {!isSystemCircle ? (
                     <ReassignLink onClick={() => setIsReassignOwningAppOpen(true)} />
                   ) : null}
@@ -299,13 +299,13 @@ const CircleDetails = () => {
           ) : null}
 
           <Fact label={t('Id')}>
-            <span className="break-all font-mono text-slate-400">{circleId}</span>
+            <span className="break-all font-mono text-muted-foreground">{circleId}</span>
           </Fact>
           <Fact label={t('Slug')}>
             {circle.slug ? (
               <span className="break-all font-mono">{circle.slug}</span>
             ) : (
-              <span className="text-slate-400">{t('None')}</span>
+              <span className="text-muted-foreground">{t('None')}</span>
             )}
           </Fact>
         </dl>
@@ -359,7 +359,7 @@ const CircleDetails = () => {
         title={
           <>
             {t('Apps that')} &quot;{circle.name}&quot; {t('can use')}
-            <small className="block text-sm text-slate-500">
+            <small className="block text-sm text-muted-foreground">
               {t('all contacts added will have this access')}
             </small>
           </>
@@ -382,7 +382,7 @@ const CircleDetails = () => {
         title={
           <>
             {t('Access on the following drives')}
-            <small className="block text-sm text-slate-500">
+            <small className="block text-sm text-muted-foreground">
               {t('all contacts added will have this access')}
             </small>
           </>
@@ -486,7 +486,7 @@ const CircleDetails = () => {
 /** The way out of an ownership that is already set. Understated on purpose -- it is the escape
     hatch, not something to invite. */
 const ReassignLink = ({ onClick }: { onClick: () => void }) => (
-  <button type="button" className="ml-2 text-sm text-slate-400 hover:underline" onClick={onClick}>
+  <button type="button" className="ml-2 text-sm text-muted-foreground hover:underline" onClick={onClick}>
     {t('Change')}
   </button>
 );
@@ -613,7 +613,7 @@ const CircleEnrollmentPrompt = ({ circle }: { circle: CircleDefinition }) => {
   const who = offer.grantOn === 'review' ? t('reviewed contacts are') : t('contacts are');
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-2 rounded-lg bg-slate-100 p-3 text-sm dark:bg-slate-900">
+    <div className="flex flex-row flex-wrap items-center gap-2 rounded-lg bg-surface-container-high p-3 text-sm">
       <span>
         {offer.candidates.length} {t('of your')} {who} {t('not in this circle.')}
       </span>

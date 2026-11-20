@@ -14,10 +14,10 @@ const Pager = ({
           <a
             className={`inline-flex grow items-center justify-center border-b-2 ${
               page === index
-                ? 'rounded-t border-indigo-500 bg-gray-100 text-indigo-500 dark:bg-gray-700'
+                ? 'rounded-t border-primary bg-surface-container-high text-primary'
                 : currentPage.isValid
-                ? 'border-gray-200 text-gray-900 dark:border-gray-600 dark:text-gray-600'
-                : 'border-gray-200 text-gray-400 hover:text-gray-900 dark:border-gray-600 dark:hover:text-gray-600'
+                ? 'text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
             } cursor-pointer py-3 font-medium leading-none  tracking-wider sm:w-auto sm:justify-start sm:px-6`}
             key={index}
             onClick={() => setPage(index)}

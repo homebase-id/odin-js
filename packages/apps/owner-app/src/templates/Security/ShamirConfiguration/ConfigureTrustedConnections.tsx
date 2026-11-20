@@ -14,7 +14,14 @@ import {
     VerifyRemotePlayerReadinessRequest,
 } from "../../../provider/auth/ShamirProvider";
 import {ShardTrustLevel} from "../../../provider/auth/SecurityHealthProvider";
+import {getShardRecoveryPublicKey} from "../../../provider/auth/ZeroKnowledgeProvider";
 import {Status, trustEmoji, trustLabel} from "./PlayerListItem"; // ✅ import helpers
+
+type VerificationInfo = {
+    status: Status;
+    trustLevel?: ShardTrustLevel;
+    isZeroKnowledge?: boolean;
+};
 
 export const ConfigureTrustedConnections = ({
                                                 removePlayer,
@@ -32,20 +39,24 @@ export const ConfigureTrustedConnections = ({
     forceVerify: number;
     enableVerification?: boolean;
     onVerificationComplete?: (
-        results: Record<
-            string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
-        >
+        results: Record<string, VerificationInfo>
     ) => void;
 }) => {
     const [statuses, setStatuses] = useState<
-        Record<
-            string,
-            { status: Status; trustLevel?: ShardTrustLevel; isValid?: boolean; isZeroKnowledge?: boolean }
-        >
+        Record<string, VerificationInfo>
     >({});
 
     const dotYouClient = useDotYouClientContext();
+    const pickedKey = trustedPlayers.map((p) => p.odinId).join(",");
+
+    // A friend removed is checked afresh when added again: after they review this connection, say
+    useEffect(() => {
+        const picked = new Set(trustedPlayers.map((p) => p.odinId));
+        setStatuses((prev) => {
+            const kept = Object.fromEntries(Object.entries(prev).filter(([odinId]) => picked.has(odinId)));
+            return Object.keys(kept).length === Object.keys(prev).length ? prev : kept;
+        });
+    }, [pickedKey]);
 
     useEffect(() => {
         if (!enableVerification || !trustedPlayers?.length) return;
@@ -63,18 +74,23 @@ export const ConfigureTrustedConnections = ({
 
                 try {
                     const req: VerifyRemotePlayerReadinessRequest = {odinId: player.odinId};
-                    const res = await verifyRemotePlayerReadiness(dotYouClient, req);
+                    // Their key says whether they have reviewed this connection, which every holder must have
+                    // done; a key that can't be read leaves that to the server, which checks it again
+                    const [res, callerMayWrite] = await Promise.all([
+                        verifyRemotePlayerReadiness(dotYouClient, req),
+                        getShardRecoveryPublicKey(dotYouClient, player.odinId)
+                            .then((key) => key.callerMayWrite)
+                            .catch(() => undefined),
+                    ]);
 
+                    // Only "valid" can hold a shard, which gates Next
+                    const status: Status = !res ? "error"
+                        : !res.isValid ? "invalid"
+                        : callerMayWrite === false ? "notReviewed"
+                        : "valid";
                     setStatuses((prev) => ({
                         ...prev,
-                        [player.odinId]: res
-                            ? {
-                                status: res.isValid ? "valid" : "invalid",
-                                trustLevel: res.trustLevel,
-                                isValid: res.isValid,
-                                isZeroKnowledge: res.isZeroKnowledge,
-                            }
-                            : {status: "error"},
+                        [player.odinId]: {status, trustLevel: res?.trustLevel, isZeroKnowledge: res?.isZeroKnowledge},
                     }));
                 } catch (e) {
                     console.error(e);
@@ -91,7 +107,7 @@ export const ConfigureTrustedConnections = ({
 
         verifyNewPlayers();
         // Only re-run when a new odinId appears or verification is toggled
-    }, [enableVerification, trustedPlayers.map(p => p.odinId).join(","), forceVerify, dotYouClient]);
+    }, [enableVerification, pickedKey, forceVerify, dotYouClient]);
 
 
     return (
@@ -118,7 +134,6 @@ export const ConfigureTrustedConnections = ({
                                 trustLevel={
                                     enableVerification ? info.trustLevel : undefined
                                 }
-                                isValid={enableVerification ? info.isValid : true}
                                 // Only a friend who must approve needs a zero-knowledge drive, and only a check
                                 // that reached them can say theirs isn't; a failed check shows as unavailable
                                 canApprove={
@@ -133,7 +148,7 @@ export const ConfigureTrustedConnections = ({
                 </div>
             ) : (
                 <div className="flex flex-grow items-center justify-center p-5">
-                    <p className="text-slate-400">
+                    <p className="text-muted-foreground">
                         {t("Select trusted connections from your contacts below")}
                     </p>
                 </div>
@@ -151,7 +166,6 @@ const SelectedConnectionItem = ({
                                     showPlayerType,
                                     verificationStatus,
                                     trustLevel,
-                                    isValid,
                                     canApprove = true,
                                 }: {
     player: ShamiraPlayer;
@@ -162,25 +176,20 @@ const SelectedConnectionItem = ({
     allowRemove?: boolean;
     verificationStatus: Status;
     trustLevel?: ShardTrustLevel;
-    isValid?: boolean;
     canApprove?: boolean;
 }) => {
     // ✅ Use the same color logic as PlayerListItem
     const trustColor =
         trustLevel === ShardTrustLevel.Critical && player.type === "delegate"
-            ? "text-red-600"
-            : trustLevel === ShardTrustLevel.Medium
-                ? "text-orange-600"
-                : trustLevel === ShardTrustLevel.Low
-                    ? "text-yellow-600"
-                    : "text-green-600";
+            ? "text-destructive"
+            : "";
 
     return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 mb-2">
             <div className="flex items-center gap-3">
                 <ConnectionImage
                     odinId={player.odinId}
-                    className="border border-neutral-200 dark:border-neutral-800"
+                    className="border"
                     size="sm"
                 />
                 <ConnectionName odinId={player.odinId}/>
@@ -195,19 +204,21 @@ const SelectedConnectionItem = ({
                 )}
 
                 {verificationStatus === "loading" ? (
-                    <span className="text-slate-500">{t("Verifying...")}</span>
+                    <span className="text-muted-foreground">{t("Verifying...")}</span>
+                ) : verificationStatus === "notReviewed" ? (
+                    <span className="text-xs text-destructive">
+                        {t("{0} hasn't reviewed your connection yet, so they can't hold a shard", player.odinId)}
+                    </span>
                 ) : (
-                    (verificationStatus === "invalid" ||
-                        verificationStatus === "error" ||
-                        !isValid) && (
-                        <span className="text-xs text-red-600">
+                    verificationStatus !== "valid" && verificationStatus !== "moot" && (
+                        <span className="text-xs text-destructive">
                             {t("⚠ Unavailable")}
                         </span>
                     )
                 )}
 
                 {!canApprove && verificationStatus !== "loading" && (
-                    <span className="text-xs text-orange-600">
+                    <span className="text-xs text-warning">
                         {t("Can't approve until they log in to Homebase again")}
                     </span>
                 )}
@@ -216,7 +227,7 @@ const SelectedConnectionItem = ({
                     <select
                         value={player.type}
                         onChange={(e) => onTypeChange(e.target.value as PlayerType)}
-                        className="rounded border border-slate-300 bg-white px-2 py-1 text-sm dark:bg-slate-800"
+                        className="rounded border bg-background px-2 py-1 text-sm"
                     >
                         <option value={PlayerType.Automatic}>
                             {playerTypeText(PlayerType.Automatic)}
@@ -234,7 +245,7 @@ const SelectedConnectionItem = ({
                 {allowRemove && (
                     <button
                         onClick={onRemove}
-                        className="text-red-600 hover:text-red-800 text-sm sm:text-xs sm:bg-red-500 sm:px-2 sm:py-1 sm:rounded sm:text-white sm:hover:bg-red-600"
+                        className="text-destructive text-sm hover:underline sm:hover:no-underline sm:text-xs sm:bg-destructive sm:px-2 sm:py-1 sm:rounded sm:text-destructive-contrast sm:hover:bg-destructive-hover"
                     >
                         {t("Remove")}
                     </button>

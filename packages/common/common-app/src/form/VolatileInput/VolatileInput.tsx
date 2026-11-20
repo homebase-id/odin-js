@@ -156,7 +156,7 @@ export const VolatileInput = forwardRef(
     }, [defaultValue]);
 
     // We want values to be saved directly, while the link styling is better with a debounce
-    const onInput: React.FormEventHandler<HTMLDivElement> = (e) => {
+    const onInput: React.FormEventHandler<HTMLSpanElement> = (e) => {
       if (onChange) onChange((e.target as HTMLElement).innerText);
       if (!linksArePlain) debouncedLinkStyle();
     };
@@ -244,9 +244,9 @@ export const VolatileInput = forwardRef(
         <span
           role="textbox"
           contentEditable
-          className={`before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50
+          className={`before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:text-muted-foreground
             before:empty:content-[inherit] focus:outline-none after:absolute after:content-[''] after:pointer-events-none
-            after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-indigo-300`}
+            after:inset-0 after:rounded-md focus:after:ring-2 focus:after:ring-primary`}
           onKeyDown={onKeyDown}
           onKeyUp={onKeyUp}
           onPaste={onPasteHandler}

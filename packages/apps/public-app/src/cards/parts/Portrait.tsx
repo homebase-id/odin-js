@@ -1,13 +1,15 @@
+import type { CSSProperties } from 'react';
 import { CardImg } from './CardImg';
 import type { CardData, CardPhoto } from '../useCardData';
-import type { Portrait } from '../CardDesign';
+import { portraitZoom, type Portrait } from '../CardDesign';
 
 const SHAPES: Record<Portrait['shape'], string> = {
   circle: 'rounded-full',
   square: 'rounded-none',
-  rounded: 'rounded-2xl',
+  rounded: 'rounded-[22%]',
   ellipse: 'rounded-[50%]',
 };
+// An ellipse is drawn 88:112 inside whatever box the layout gives, so it never collapses to a circle in a square box
 // hard: a dark drop straight down, as the board reference draws it (0 8px 18px at 45%)
 const SHADOWS = {
   hard: 'shadow-[0_8px_18px_rgba(0,0,0,0.45)]',
@@ -23,17 +25,25 @@ export const CardPortrait = ({
   image,
   alt,
   className,
+  style,
 }: {
   portrait: Portrait;
   image: CardPhoto | undefined;
   alt: string;
   className?: string;
+  style?: CSSProperties;
 }) => {
   if (!image) return null;
   return (
     <div
       className={`relative ${className ?? ''}`}
-      style={portrait.tilt ? { transform: `rotate(${portrait.tilt}deg)` } : undefined}
+      style={{
+        ...style,
+        ...(portrait.tilt ? { transform: `rotate(${portrait.tilt}deg)` } : null),
+        ...(portrait.size && portrait.size !== 'medium'
+          ? { zoom: portraitZoom(portrait.size) }
+          : null),
+      }}
     >
       {portrait.tape ? (
         <span
@@ -46,7 +56,11 @@ export const CardPortrait = ({
         />
       ) : null}
       <div
-        className={`h-full w-full overflow-hidden ${SHAPES[portrait.shape]} ${
+        className={`overflow-hidden ${
+          portrait.shape === 'ellipse'
+            ? 'absolute inset-y-0 left-1/2 aspect-[88/112] -translate-x-1/2'
+            : 'h-full w-full'
+        } ${SHAPES[portrait.shape]} ${
           portrait.shadow ? SHADOWS[portrait.shadow] : ''
         } ${portrait.mono ? 'grayscale' : ''}`}
         style={

@@ -5,8 +5,8 @@ import {
   getChannelDrive,
 } from '@homebase-id/js-lib/public';
 import { ReactNode, useMemo, useState } from 'react';
-import { ellipsisAtMaxChar, t } from '../../../helpers';
-import { RichTextRenderer } from '../../../richText';
+import { ellipsisAtMaxChar, spilledCaptionRichText, t } from '../../../helpers';
+import { ArticleBody, RichTextRenderer, captionBlocksClassName } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
 import { PayloadDescriptor, TargetDrive } from '@homebase-id/js-lib/core';
 import { usePostBody } from '../../../hooks/socialFeed/post/usePostBody';
@@ -68,8 +68,8 @@ export const PostBody = ({
             onExpand={() => setIsExpanded(true)}
           >
             <div className="rich-text-content leading-relaxed">
-              <RichTextRenderer
-                body={articlePost?.body}
+              <ArticleBody
+                article={articlePost}
                 options={
                   fileId
                     ? {
@@ -96,27 +96,43 @@ export const PostBody = ({
   const hasMoreToShowNonArticle = useMemo(() => {
     return (
       !!hasFullTextPayload ||
-      !!effectivePost.captionAsRichText ||
-      (effectivePost.caption?.length ?? 0) > MAX_CHAR_FOR_SUMMARY
+      (effectivePost.caption?.length ?? 0) > MAX_CHAR_FOR_SUMMARY ||
+      (!!effectivePost.captionAsRichText && effectivePost.caption.split('\n').length > 7)
     );
   }, [effectivePost, hasFullTextPayload]);
+  const captionAsRichText = useMemo(
+    () =>
+      hasFullTextPayload
+        ? spilledCaptionRichText(effectivePost.caption, effectivePost.captionAsRichText)
+        : effectivePost.captionAsRichText,
+    [effectivePost, hasFullTextPayload]
+  );
   return (
     <>
       <h1 className="text-foreground">
         {isExpanded || !hasMoreToShowNonArticle ? (
-          effectivePost.captionAsRichText ? (
+          captionAsRichText ? (
             <RichTextRenderer
-              body={effectivePost.captionAsRichText || effectivePost.caption}
+              body={captionAsRichText || effectivePost.caption}
               odinId={odinId}
+              className={captionBlocksClassName}
             />
           ) : (
             <span className="whitespace-pre-wrap">{effectivePost.caption}</span>
           )
         ) : (
           <>
-            <span className="whitespace-pre-wrap">
-              {ellipsisAtMaxChar(filteredCaption, MAX_CHAR_FOR_SUMMARY)}{' '}
-            </span>
+            {captionAsRichText ? (
+              <RichTextRenderer
+                body={captionAsRichText}
+                odinId={odinId}
+                className={`line-clamp-[7] ${captionBlocksClassName}`}
+              />
+            ) : (
+              <span className="whitespace-pre-wrap">
+                {ellipsisAtMaxChar(filteredCaption, MAX_CHAR_FOR_SUMMARY)}{' '}
+              </span>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();

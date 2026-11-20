@@ -15,7 +15,7 @@ export const useDebounce = (
 ) => {
   const { timeoutMillis = 1000 } = options || {};
 
-  const ref = useRef<DebounceCallback>();
+  const ref = useRef<DebounceCallback>(undefined);
 
   useEffect(() => {
     ref.current = callback;

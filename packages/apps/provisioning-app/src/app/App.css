@@ -1,13 +1,15 @@
+@import '../../../../common/common-app/src/theme/homebase-m3.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 .dark select option {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark select optgroup {
-  background-color: black;
+  background-color: rgb(var(--color-surface-container));
 }
 
 .dark {
@@ -16,12 +18,4 @@
 
 .dark iframe {
   color-scheme: auto;
-}
-
-@layer base {
-  *,
-  ::before,
-  ::after {
-    @apply dark:border-gray-600;
-  }
 }

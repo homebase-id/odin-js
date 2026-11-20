@@ -2,6 +2,7 @@ import { FC, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { SaveStatus } from '../Buttons/SaveStatus';
+import { IconProps } from '../Icons/Types';
 
 export const PageMeta = ({
   title,
@@ -9,17 +10,17 @@ export const PageMeta = ({
   actions,
   saveStatus,
   breadCrumbs,
-  icon,
+  icon: Icon,
 }: {
   title?: ReactNode | string;
   browserTitle?: string;
   actions?: ReactNode;
   saveStatus?: 'error' | 'idle' | 'loading' | 'success';
   breadCrumbs?: { title: string; href?: string }[];
-  icon?: FC;
+  icon?: FC<IconProps>;
 }) => {
   return (
-    <section className="-mx-2 -mt-4 mb-4 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4">
+    <section className="-mx-2 -mt-4 mb-4 border-b border-outline-variant bg-background px-2 py-1 sm:-mx-10 sm:-mt-8 sm:px-10 xl:py-4">
       <div className="flex-col">
         {breadCrumbs && (
           <ul className="mb-2 hidden flex-row xl:flex">
@@ -32,7 +33,7 @@ export const PageMeta = ({
                       <span className="ml-2">{'>'}</span>
                     </Link>
                   ) : (
-                    <span className="text-slate-500">{crumb.title}</span>
+                    <span className="text-muted-foreground">{crumb.title}</span>
                   )}
                 </li>
               );
@@ -42,20 +43,16 @@ export const PageMeta = ({
         <div className="flex w-full flex-row flex-wrap items-end gap-5">
           {title && (
             <>
-              <h1 className="my-auto flex flex-row text-2xl dark:text-white xl:text-3xl">
-                {icon &&
-                  icon({
-                    className: 'h-6 w-6 sm:h-7 sm:w-7 my-auto mr-2 flex-shrink-0',
-                  })}{' '}
+              <h1 className="my-auto flex flex-row text-2xl text-foreground xl:text-3xl">
+                {Icon && <Icon className="h-6 w-6 sm:h-7 sm:w-7 my-auto mr-2 flex-shrink-0" />}{' '}
                 {title}
               </h1>
               <Helmet>
-                <title>
-                  {browserTitle ||
-                    (typeof title !== 'object' && `${title}`) ||
-                    window.location.pathname.split('/').pop()}{' '}
-                  | Homebase
-                </title>
+                <title>{`${
+                  browserTitle ||
+                  (typeof title !== 'object' && `${title}`) ||
+                  window.location.pathname.split('/').pop()
+                } | Homebase`}</title>
               </Helmet>
             </>
           )}

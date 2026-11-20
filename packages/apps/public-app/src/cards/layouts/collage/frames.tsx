@@ -1,8 +1,7 @@
 import type { CSSProperties } from 'react';
-import type { LayoutProps, Portrait } from '../../CardDesign';
+import { portraitZoom, type LayoutProps, type Portrait } from '../../CardDesign';
 import { ownerName, type CardData, type CardPhoto } from '../../useCardData';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { AudienceChip } from '../../parts/AudienceChip';
 
 type Frame = { portrait: Portrait; image: CardPhoto | undefined; alt: string };
 
@@ -44,47 +43,31 @@ export const Tape = ({ className }: { className: string }) => (
   />
 );
 
-// A torn strip of the same tape, written on by hand in the role line's weight
-export const AudienceTape = ({
-  audience,
-  lines,
-  className,
-}: {
-  audience: CardData['audience'];
-  lines?: string;
-  className: string;
-}) => (
-  <div style={TAPE_STYLE} className={`w-fit -rotate-2 leading-[1.3] empty:hidden ${className}`}>
-    {/* The glyph box is one line tall. The end pad is inside the text's clip: the hand's last stroke
-        overhangs its letter. Each line fills before the next starts, so the strip ends just past
-        the writing. The Arabic hand is set smaller, so it always has room for a third line */}
-    <AudienceChip
-      audience={audience}
-      className="max-w-full gap-1.5 pe-1.5 ps-2.5 font-[family-name:var(--card-label)] font-medium text-[color:var(--card-ink)]"
-      hug
-      glyphClassName="h-[1.3em] w-[0.72em] [&_svg]:stroke-[2.5]"
-      textClassName={`pe-1 ${lines ?? ''}`}
-      joinedClassName="!line-clamp-3 text-[0.92em] leading-[1.25]"
-    />
-  </div>
-);
+// Slot widths are percentages of the row, which zoom does not scale, so size scales the width itself
+const scaled = (portrait: Portrait, pct: number) =>
+  Math.round(pct * portraitZoom(portrait.size) * 100) / 100;
+const slotWidth = (portrait: Portrait, pct: number) => `${scaled(portrait, pct)}%`;
 
-const tilt = (deg?: number): CSSProperties | undefined =>
-  deg ? { transform: `rotate(${deg}deg)` } : undefined;
+const frameStyle = (portrait: Portrait, pct: number): CSSProperties => {
+  const style: CSSProperties = { width: slotWidth(portrait, pct) };
+  if (portrait.tilt) style.transform = `rotate(${portrait.tilt}deg)`;
+  return style;
+};
 
 // A polaroid: the frame carries the tilt, tape and shadow; the picture sits square inside it
 export const Print = ({
   portrait,
   image,
   alt,
+  width,
   className,
   tapeClassName,
-}: Frame & { className: string; tapeClassName: string }) => {
+}: Frame & { width: number; className: string; tapeClassName: string }) => {
   if (!image) return null;
   return (
     <div
       className={`relative bg-[var(--card-surface)] ${portrait.shadow ? FRAME_SHADOWS[portrait.shadow] : ''} ${className}`}
-      style={tilt(portrait.tilt)}
+      style={frameStyle(portrait, width)}
     >
       {portrait.tape ? <Tape className={tapeClassName} /> : null}
       <CardPortrait
@@ -103,10 +86,16 @@ export const Cutout = ({
   image,
   alt,
   ring,
+  width,
+  rightAlign,
   className,
-}: Frame & { ring: number; className: string }) => (
+}: Frame & { ring: number; width: number; rightAlign?: boolean; className: string }) => (
   <CardPortrait
-    portrait={{ ...portrait, ring: portrait.ring ?? ring }}
+    portrait={{ ...portrait, size: undefined, ring: portrait.ring ?? ring }}
+    style={{
+      width: slotWidth(portrait, width),
+      ...(rightAlign ? { marginLeft: `${100 - scaled(portrait, width)}%` } : null),
+    }}
     image={image}
     alt={alt}
     className={`${portrait.shape === 'ellipse' ? 'aspect-[88/112]' : 'aspect-square'} ${className}`}

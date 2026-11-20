@@ -92,9 +92,9 @@ export const Setup = () => {
                             <LoadingPage/>
                         ) : (
                             <>
-                                <h1 className="mb-5 text-4xl dark:text-white">
+                                <h1 className="mb-5 text-4xl">
                                     Homebase | Setup
-                                    <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                                    <small className="block break-all text-muted-foreground sm:break-normal">
                                         <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                                     </small>
                                 </h1>

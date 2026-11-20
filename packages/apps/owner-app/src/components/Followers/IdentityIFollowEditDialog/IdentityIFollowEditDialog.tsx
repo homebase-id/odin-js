@@ -154,7 +154,7 @@ const IdentityIFollowEditDialog = ({
               return (
                 <li
                   key={chnl.fileMetadata.appData.uniqueId}
-                  className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+                  className="flex cursor-pointer flex-row items-center rounded-lg border bg-background p-4"
                   onClick={() => {
                     if (isChecked)
                       setChannelSelection(
@@ -172,7 +172,7 @@ const IdentityIFollowEditDialog = ({
                   <Quote className="mr-3 mt-1 h-6 w-6" />
                   <div>
                     <h2>{chnl.fileMetadata.appData.content.name}</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-600">
+                    <p className="text-sm text-muted-foreground">
                       {chnl.fileMetadata.appData.content.description}
                     </p>
                   </div>

@@ -63,7 +63,7 @@ const UpdateDriveDetailsFromApp = () => {
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
-            <h1 className="mb-5 text-4xl dark:text-white">
+            <h1 className="mb-5 text-4xl">
               {t('Request from app')}:<small className="block">{appRegistration?.name}</small>
             </h1>
 

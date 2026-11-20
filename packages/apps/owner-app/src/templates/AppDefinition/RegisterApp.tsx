@@ -279,12 +279,12 @@ const AppRegistration = ({
 
   return (
     <>
-      <h1 className="mb-5 text-4xl dark:text-white">
+      <h1 className="mb-5 text-4xl">
         {t('Create new app')}:
         <AppName name={name} origin={origin} />
         {/* The slug is permanent and first-come, so the owner should be able to see the name being
             claimed -- but it is an address, not something they are being asked to weigh. */}
-        <small className="block text-sm font-normal text-slate-400 dark:text-slate-500">
+        <small className="block text-sm font-normal text-muted-foreground">
           /apps/{appSlug}
         </small>
       </h1>
@@ -357,7 +357,7 @@ const AppRegistration = ({
                         {circle.emoji ? `${circle.emoji} ` : ''}
                         <span className="font-bold">{circle.name}</span>
                         {circle.description ? (
-                          <span className="block text-sm text-slate-400">{circle.description}</span>
+                          <span className="block text-sm text-muted-foreground">{circle.description}</span>
                         ) : null}
                       </p>
                       {circle.permissions.keys.map((permissionLevel) => (

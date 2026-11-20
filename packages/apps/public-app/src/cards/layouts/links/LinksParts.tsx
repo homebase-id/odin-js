@@ -7,15 +7,12 @@ import {
   type CardDesign,
   type LayoutProps,
   type Portrait,
-  type Presentation,
 } from '../../CardDesign';
 import { ownerName, type CardData, type CardLink } from '../../useCardData';
 import { LOADED_POSTS, POSTS_HREF } from '../../parts/posts';
 import { CardBlock, displayUrl, hasBlockContent } from '../../parts/Blocks';
 import { CardPortrait, portraitImage } from '../../parts/Portrait';
-import { CardSocials } from '../../parts/Socials';
 import { BreakAtDots, CardName } from '../../parts/Type';
-import { AudienceChip } from '../../parts/AudienceChip';
 
 const linkHost = (target: string) => {
   try {
@@ -180,8 +177,6 @@ const monogramStyle = (host: string): CSSProperties => {
 
 const initial = (link: CardLink) =>
   (Array.from(link.text.trim())[0] ?? Array.from(linkHost(link.target))[0] ?? '?').toUpperCase();
-
-const FLAT: Presentation[] = ['bare', 'row'];
 
 // Tiles and favicon wells take their corners from the portrait, so a square portrait gets square chrome
 const RADII: Record<Portrait['shape'], { tile: string; well: string; hero: string }> = {
@@ -457,9 +452,14 @@ const LinksBlock = ({
   data: CardData;
   columns?: boolean;
 }) => {
-  const flat = FLAT.includes(block.presentation);
-  if (block.kind === 'links')
-    return <LinkList links={data.links.filter(isLinkable)} flat={flat} columns={columns} />;
+  if (block.kind === 'links' && (block.presentation === 'boxed' || block.presentation === 'row'))
+    return (
+      <LinkList
+        links={data.links.filter(isLinkable)}
+        flat={block.presentation === 'row'}
+        columns={columns}
+      />
+    );
   if (block.presentation === 'boxed' && block.kind === 'moments')
     return (
       <PlaceTile
@@ -470,42 +470,67 @@ const LinksBlock = ({
         internal
       />
     );
-  return <CardBlock block={block} data={data} />;
+  const links = data.links.filter(isLinkable).map((link) => ({ ...link, text: describe(link).title }));
+  return <CardBlock block={block} data={{ ...data, links }} />;
 };
 
 const handleOf = (social: CardData['socials'][number]) =>
   typeof social.children === 'string' && social.children ? `@${social.children}` : undefined;
 
-// Glyphs and bar become tonal buttons; handles keep each network's mark beside the name, so four
-// identical handles can still be told apart. Wordmark keeps the shared build
+const TONAL =
+  'bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)]';
+
+// Glyphs are separate round buttons, bar is one connected pill, handles keep each network's mark
+// beside the name, wordmark is one tile per network with its name
 const SocialButtons = ({ design, data, className }: LayoutProps & { className: string }) => {
   if (!data.socials.length) return null;
-  if (design.socials === 'wordmark')
-    return <CardSocials variant={design.socials} data={data} className={className} />;
-  const handles = design.socials === 'handles';
-  return (
-    <ul className={`flex flex-wrap ${handles ? 'gap-2' : 'gap-3'} ${className}`}>
+  const variant = design.socials;
+  const bar = variant === 'bar';
+  const list = (
+    <ul
+      className={`flex ${
+        bar
+          ? `${TONAL} flex-wrap items-center gap-1 rounded-[1.25rem] p-1`
+          : `flex-wrap ${variant === 'glyphs' ? 'gap-3' : 'gap-2'} ${className}`
+      }`}
+    >
       {data.socials.map((social) => {
         const Icon = social.icon;
-        const handle = handles ? handleOf(social) : undefined;
         const name = social.type || linkHost(social.link);
+        const handle = variant === 'handles' ? handleOf(social) : undefined;
         return (
           <li key={social.link}>
             <a
               href={social.link}
               {...external}
               aria-label={handle ? `${name} ${handle}` : name}
-              className={`flex items-center justify-center bg-[color:color-mix(in_srgb,var(--card-accent)_12%,transparent)] text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_22%,transparent)] ${CARD_FOCUS} ${
-                handle
-                  ? 'h-8 gap-1.5 rounded-[var(--links-tile-radius)] pe-3 ps-2.5 text-[12.5px] font-medium'
-                  : 'h-10 w-10 rounded-[var(--links-well-radius)]'
+              className={`flex items-center justify-center ${CARD_FOCUS} ${
+                bar
+                  ? 'h-9 w-9 rounded-full text-[color:var(--card-accent)] transition-colors hover:bg-[color:color-mix(in_srgb,var(--card-accent)_18%,transparent)]'
+                  : variant === 'wordmark'
+                    ? `h-11 gap-2 rounded-[var(--links-tile-radius)] bg-[var(--card-surface)] pe-4 ps-3 text-[14px] font-semibold text-[color:var(--card-surface-ink)] ${TILE_SHADOW}`
+                    : `${TONAL} ${
+                        handle
+                          ? 'h-8 gap-1.5 rounded-[var(--links-tile-radius)] pe-3 ps-2.5 text-[12.5px] font-medium'
+                          : 'h-10 w-10 rounded-[var(--links-well-radius)]'
+                      }`
               }`}
             >
-              <Icon className={handle ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-[18px] w-[18px]'} />
+              <Icon
+                className={
+                  handle
+                    ? 'h-3.5 w-3.5 flex-shrink-0'
+                    : variant === 'wordmark'
+                      ? 'h-5 w-5 flex-shrink-0 text-[color:var(--card-accent)]'
+                      : 'h-[18px] w-[18px]'
+                }
+              />
               {handle ? (
                 <span dir="ltr" className="text-[color:var(--card-ink)]">
                   {handle}
                 </span>
+              ) : variant === 'wordmark' ? (
+                <span className="capitalize">{name}</span>
               ) : null}
             </a>
           </li>
@@ -513,6 +538,7 @@ const SocialButtons = ({ design, data, className }: LayoutProps & { className: s
       })}
     </ul>
   );
+  return bar ? <div className={`flex ${className}`}>{list}</div> : list;
 };
 
 const SIZES = {
@@ -520,15 +546,11 @@ const SIZES = {
     portrait: 'h-[96px] w-[96px]',
     name: 'text-[26px]',
     host: 'text-[13px]',
-    audience: 'text-[11px]',
-    audienceLines: '!line-clamp-1',
   },
   page: {
     portrait: 'h-[128px] w-[128px]',
     name: 'text-[32px]',
     host: 'text-[14px]',
-    audience: 'text-[12px]',
-    audienceLines: '!line-clamp-1 md:!line-clamp-2',
   },
 } as const;
 
@@ -576,13 +598,6 @@ export const LinksIdentity = ({
           <BreakAtDots text={data.odinId} />
         </p>
       ) : null}
-      <AudienceChip
-        audience={data.audience}
-        className={`mt-4 max-w-[min(85%,22rem)] flex-shrink-0 gap-1.5 rounded-[var(--links-tile-radius)] bg-[color:color-mix(in_srgb,var(--card-ink)_7%,transparent)] px-2.5 py-0.5 text-start font-medium leading-5 text-[color:var(--card-muted)] ${sizes.audience}`}
-        textClassName={sizes.audienceLines}
-        hug
-        glyphClassName="h-5 w-[1.15em]"
-      />
       <SocialButtons
         design={design}
         data={data}

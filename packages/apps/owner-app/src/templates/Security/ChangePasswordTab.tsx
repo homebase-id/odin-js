@@ -92,7 +92,7 @@ export const ChangePasswordTab = () => {
             <PasswordStrength password={password} userInputs={[oldPassword]} className="mb-2"/>
 
             <div className="mb-2">
-              <Label htmlFor="retypepassword" className="text-sm leading-7 dark:text-gray-400">
+              <Label htmlFor="retypepassword" className="text-sm leading-7">
                 {t('Retype your new password')}
               </Label>
               <PasswordInput
@@ -105,7 +105,7 @@ export const ChangePasswordTab = () => {
                 autoComplete="new-password"
               />
               {password !== retypePassword && retypePassword !== '' ? (
-                <p className="py-2 text-red-800 dark:text-red-200">{t("Passwords don't match")}</p>
+                <p className="py-2 text-destructive">{t("Passwords don't match")}</p>
               ) : null}
             </div>
             <div className="mt-5 flex flex-row-reverse">

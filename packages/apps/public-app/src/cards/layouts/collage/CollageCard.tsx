@@ -3,7 +3,7 @@ import { CardGround } from '../../parts/Ground';
 import { CardName } from '../../parts/Type';
 import { CardBlocks } from '../../parts/Blocks';
 import { CardSocials } from '../../parts/Socials';
-import { AudienceTape, collageFrames, Cutout, firstNameOnly, Print } from './frames';
+import { collageFrames, Cutout, firstNameOnly, Print } from './frames';
 
 export const CollageCard = ({ design, data }: LayoutProps) => {
   const [print, cutout] = collageFrames({ design, data });
@@ -17,7 +17,8 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
           {print ? (
             <Print
               {...print}
-              className="ml-[1%] w-[49%] p-2 pb-8"
+              width={49}
+              className="ml-[1%] p-2 pb-8"
               tapeClassName="-top-2.5 left-1/2 h-5 w-[38%] -translate-x-1/2 -rotate-3"
             />
           ) : null}
@@ -25,7 +26,8 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
             <Cutout
               {...cutout}
               ring={4}
-              className={`ml-auto mr-[1%] w-[38%] ${print ? 'mt-[18%]' : ''}`}
+              width={38}
+              className={`ml-auto mr-[1%] ${print ? 'mt-[18%]' : ''}`}
             />
           ) : null}
         </div>
@@ -42,10 +44,6 @@ export const CollageCard = ({ design, data }: LayoutProps) => {
             {data.headline}
           </p>
         ) : null}
-        <AudienceTape
-          audience={data.audience}
-          className="ml-1 mt-3 max-w-[min(100%-1.5rem,15rem)] text-[19px]"
-        />
       </div>
 
       <CardBlocks

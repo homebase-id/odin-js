@@ -92,6 +92,11 @@ export interface DriveDefinition {
     allowAnonymousReads: boolean;
     allowSubscriptions: boolean;
     allowCdn: boolean;
+    /**
+     * Only the owner, the owner's apps and the server may list the drive; anyone else needs a file's address. Missing
+     * from a drive list cached before the field existed: treat that as false.
+     */
+    blockEnumeration?: boolean;
     ownerOnly: boolean;
     isArchived: boolean;
     isSystemDrive: boolean;

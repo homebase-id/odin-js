@@ -36,7 +36,7 @@ const ThemeSelector = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-5 md:gap-5">
+    <div className="grid grid-cols-2 gap-2 py-5 text-center text-muted-foreground md:grid-cols-5 md:gap-5">
       <Theme
         id={id + HomePageTheme.VerticalPosts}
         name={id + name}
@@ -89,7 +89,7 @@ const ThemeSelector = ({
 const Theme = ({
   name,
   id,
-  icon,
+  icon: Icon,
   label,
   value,
   onChange,
@@ -116,12 +116,12 @@ const Theme = ({
       />
       <label
         htmlFor={id || value + ''}
-        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-indigo-500 peer-checked:bg-white dark:border-slate-900 dark:bg-slate-900 peer-checked:dark:bg-black"
+        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-transparent bg-surface-container-high p-2 peer-checked:border-primary peer-checked:bg-background"
       >
         <div className="flex flex-grow flex-col justify-center">
-          {icon({
-            className: `mx-auto h-auto w-full ${value !== '0' ? 'max-w-[10rem]' : 'max-w-[5rem]'}`,
-          })}
+          <Icon
+            className={`mx-auto h-auto w-full ${value !== '0' ? 'max-w-[10rem]' : 'max-w-[5rem]'}`}
+          />
         </div>
         <p>{label}</p>
       </label>

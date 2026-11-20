@@ -13,11 +13,11 @@ export const Pager = ({ totalPages, setPage, currentPage, className, size }: Pag
   if (currentPage === 1 && currentPage >= totalPages) return null;
 
   return (
-    <div className={`flex text-slate-300 dark:text-slate-700 ${className ?? ''}`}>
+    <div className={`flex text-foreground/40 ${className ?? ''}`}>
       <div
         className={`flex flex-row gap-2 items-center ${
           currentPage !== 1
-            ? 'cursor-pointer text-slate-600 dark:text-slate-200'
+            ? 'cursor-pointer text-muted-foreground'
             : 'pointer-events-none'
         }`}
         onClick={() => setPage(currentPage - 1)}
@@ -28,7 +28,7 @@ export const Pager = ({ totalPages, setPage, currentPage, className, size }: Pag
       <div
         className={`flex flex-row gap-2 items-center ${
           currentPage < totalPages
-            ? 'cursor-pointer text-slate-600 dark:text-slate-200'
+            ? 'cursor-pointer text-muted-foreground'
             : 'pointer-events-none'
         }`}
         onClick={() => setPage(currentPage + 1)}

@@ -162,7 +162,7 @@ describe('chat-kmp matrix fixtures', () => {
       if (f.audience === 'circle') {
         expect(texts).toContain('Friends only');
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,friends-key');
-        expect(f.payload.audience).toEqual({ kind: 'circle', label: 'Friends' });
+        expect(f.payload.audience).toEqual({ kind: 'circle' });
       } else {
         expect(texts).toEqual(['Public site']);
         expect(f.payload.data.photo?.src).toBe('data:image/jpeg;base64,public-key');
@@ -226,6 +226,50 @@ describe('chat-kmp CardDesignSpecs against what odin-js supports', () => {
   );
 });
 
+describe('portrait size on every layout that declares it', () => {
+  const photo = { src: 'https://img.example/frodo.jpg' };
+  const data = {
+    ...toCardData(
+      { odinId: 'frodo.dotyou.cloud', firstName: 'Frodo', links: [], socials: [] },
+      () => undefined
+    ),
+    photo,
+    header: photo,
+  };
+  const draw = (layout: keyof typeof CARD_PRESETS, size: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      portraits: [{ source: 'photo', shape: 'circle', size }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+  const declaring = Object.keys(specs.specs).filter((id) =>
+    specs.specs[id].options.includes('PORTRAIT_SIZE')
+  );
+
+  it('every layout that draws a portrait declares it', () => {
+    const drawing = Object.keys(specs.specs).filter((id) => specs.specs[id].portraitSlots > 0);
+    expect([...declaring].sort()).toEqual(drawing.sort());
+  });
+
+  it.each(declaring)('%s: small and large change the output on card and page', (layout) => {
+    for (const wide of [false, true]) {
+      const medium = draw(layout as keyof typeof CARD_PRESETS, 'medium', wide);
+      for (const size of specs.portraitSizes.filter((s: string) => s !== 'medium'))
+        expect(draw(layout as keyof typeof CARD_PRESETS, size, wide), `${layout} ${size}`).not.toBe(
+          medium
+        );
+    }
+  });
+});
+
 describe('links layout honours each option chat-kmp exposes for it', () => {
   const data = toCardData(
     {
@@ -256,8 +300,80 @@ describe('links layout honours each option chat-kmp exposes for it', () => {
     expect(html({ socials: 'handles' })).toContain('@frodo');
   });
 
+  it('portrait size: every size chat-kmp declares is applied', () => {
+    expect(specs.specs.links.options).toContain('PORTRAIT_SIZE');
+    expect(html({ portraits: [{ size: 'medium' }] })).not.toContain('zoom');
+    for (const size of specs.portraitSizes.filter((s: string) => s !== 'medium'))
+      expect(html({ portraits: [{ size }] }), size).toContain('zoom');
+    expect(html({ portraits: [{ size: 'small' }] })).not.toEqual(
+      html({ portraits: [{ size: 'large' }] })
+    );
+  });
+
+  it('background: a declared background changes the links card', () => {
+    expect(html({ background: 'dots' })).not.toEqual(html({ background: 'none' }));
+  });
+
   it('block order', () => {
     const out = html({ blocks: [{ kind: 'links' }] });
     expect(out).toContain('Shire Weekly');
+  });
+});
+
+describe('link presentation on every design', () => {
+  const data = toCardData(
+    {
+      odinId: 'frodo.dotyou.cloud',
+      firstName: 'Frodo',
+      photo: { src: 'data:image/png;base64,AAAA' },
+      links: [
+        { id: '1', text: 'Shire Weekly', target: 'https://shire.example/w' },
+        { id: '2', text: 'Second Breakfast', target: 'https://shire.example/b' },
+      ],
+      socials: [],
+    },
+    () => undefined
+  );
+  const draw = (layout: keyof typeof CARD_PRESETS, presentation: string, wide: boolean) => {
+    const design = applyOverrides(CARD_PRESETS[layout], {
+      blocks: [{ kind: 'links', presentation }],
+    });
+    return renderToStaticMarkup(
+      <MemoryRouter>
+        {wide ? (
+          <CardPage design={design} data={data} />
+        ) : (
+          <HomebaseCard design={design} data={data} />
+        )}
+      </MemoryRouter>
+    );
+  };
+
+  it('simple: an unlabelled link shows under every presentation', () => {
+    const bare = {
+      ...data,
+      links: [{ id: '3', text: '', target: 'https://shire.example/w' }],
+    };
+    for (const presentation of ['bare', 'boxed', 'row', 'button']) {
+      const design = applyOverrides(CARD_PRESETS.links, {
+        blocks: [{ kind: 'links', presentation }],
+      });
+      const out = renderToStaticMarkup(
+        <MemoryRouter>
+          <HomebaseCard design={design} data={bare} />
+        </MemoryRouter>
+      );
+      expect(out, presentation).toContain('>Shire<');
+    }
+  });
+
+  it.each(DESIGNS)('%s: each presentation draws the links differently', (layout) => {
+    for (const wide of layout === 'dossier' ? [false] : [false, true]) {
+      const outputs = ['bare', 'boxed', 'row', 'button'].map((p) =>
+        draw(layout as keyof typeof CARD_PRESETS, p, wide)
+      );
+      for (const out of outputs) expect(out).toContain('Shire Weekly');
+      expect(new Set(outputs).size, `${layout} wide=${wide}`).toBe(4);
+    }
   });
 });

@@ -46,7 +46,7 @@ const Links = ({
 };
 
 const BetterLink = ({
-  icon,
+  icon: Icon,
   link,
   copyText,
   children,
@@ -74,8 +74,8 @@ const BetterLink = ({
         href={link}
         className={`relative m-2 flex flex-row hover:shadow-lg focus:outline-none ${
           style === 'secondary'
-            ? `border-gray rounded border hover:bg-background`
-            : `rounded border-0 bg-button text-white transition-colors hover:bg-button hover:bg-opacity-80`
+            ? `rounded border hover:bg-background`
+            : `rounded border-0 bg-primary text-primary-contrast transition-colors hover:bg-primary hover:bg-opacity-80`
         } ${className ?? ''}`}
         target="_blank"
         rel={'noopener noreferrer'}
@@ -87,7 +87,7 @@ const BetterLink = ({
           }
         }}
       >
-        {icon({ className: `my-auto ${style === 'secondary' ? 'mr-2' : 'mr-5'} h-5 w-5` })}
+        <Icon className={`my-auto ${style === 'secondary' ? 'mr-2' : 'mr-5'} h-5 w-5`} />
         {copyText ? (
           <div className="flex w-full flex-row">
             {children}

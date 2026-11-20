@@ -91,7 +91,7 @@ const ProvisionOwnDomain = () => {
                 picker is then asking rather than telling. */}
             {config.brandName}
             {region ? ` ${t(REGION_NAMES[region])}` : ''} | {t('Signup')}
-            <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
+            <span className="mt-1 block text-3xl text-muted-foreground">{t('Create a new identity')}</span>
           </h1>
           {provisionState === 'EnteringDetails' ? (
             <EnteringDetails

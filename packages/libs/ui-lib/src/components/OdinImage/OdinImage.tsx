@@ -13,6 +13,8 @@ export interface OdinImageProps
   probablyEncrypted?: boolean;
 
   lazyLoad?: boolean;
+  /** Fetch the thumbnail or payload only once the image is within a screen of the viewport; a previewThumbnail still shows at once */
+  deferUntilNear?: boolean;
   onLoad?: () => void;
   avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
@@ -34,6 +36,7 @@ export const OdinImage = ({
   position,
   onLoad,
   lazyLoad = true,
+  deferUntilNear,
   naturalSize: naturalSizeProp,
   maxWidth,
   ...props
@@ -50,12 +53,24 @@ export const OdinImage = ({
   const [isInView, setIsInView] = useState(!lazyLoad);
   useIntersection(wrapperRef, () => setIsInView(true));
 
+  const weDontHaveSourceProps = !props.fileId || !props.fileKey || !props.targetDrive;
+
+  const [isNear, setIsNear] = useState(!deferUntilNear || typeof IntersectionObserver === 'undefined');
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (isNear || !wrapper) return;
+    const observer = new IntersectionObserver(
+      (entries) => entries.some((entry) => entry.isIntersecting) && setIsNear(true),
+      { rootMargin: '100% 0px' }
+    );
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, [isNear, deferUntilNear, weDontHaveSourceProps]);
+
   const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
 
   const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(naturalSizeProp || previewThumbnail);
   const [tinyThumb, setTinyThumb] = useState<ThumbnailMeta | undefined>();
-
-  const weDontHaveSourceProps = !props.fileId || !props.fileKey || !props.targetDrive;
 
   const calculateSize = () => {
     if (loadSize !== undefined) return;
@@ -100,8 +115,8 @@ export const OdinImage = ({
 
   useEffect(() => {
     // Once we have the tinyThumb, we can calculate the size
-    if (isTinyLoaded) calculateSize();
-  }, [isTinyLoaded]);
+    if (isTinyLoaded && isNear) calculateSize();
+  }, [isTinyLoaded, isNear]);
 
   if (weDontHaveSourceProps) return null;
 

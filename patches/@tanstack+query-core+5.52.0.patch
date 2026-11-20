@@ -1,0 +1,26 @@
+diff --git a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
+index 5af024f..b7afede 100644
+--- a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
++++ b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.cjs
+@@ -133,7 +133,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
+   return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
+ }
+ function hasNextPage(options, data) {
+-  if (!data)
++  if (!data || (!Array.isArray(data) && !Object.keys(data).length))
+     return false;
+   return getNextPageParam(options, data) != null;
+ }
+diff --git a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
+index 2100b05..e801991 100644
+--- a/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
++++ b/node_modules/@tanstack/query-core/build/modern/infiniteQueryBehavior.js
+@@ -107,7 +107,7 @@ function getPreviousPageParam(options, { pages, pageParams }) {
+   return pages.length > 0 ? options.getPreviousPageParam?.(pages[0], pages, pageParams[0], pageParams) : void 0;
+ }
+ function hasNextPage(options, data) {
+-  if (!data)
++  if (!data || (!Array.isArray(data) && !Object.keys(data).length))
+     return false;
+   return getNextPageParam(options, data) != null;
+ }

@@ -4,22 +4,13 @@ import {
   savePost as savePostFile,
   getPost,
   removePost,
-  GetTargetDriveFromChannelId,
   BlogConfig,
-  ChannelDefinition,
 } from '@homebase-id/js-lib/public';
-import {
-  NewMediaFile,
-  MediaFile,
-  getPayloadBytes,
-  SecurityGroupType,
-  UpdateResult,
-} from '@homebase-id/js-lib/core';
+import { NewMediaFile, MediaFile, UpdateResult } from '@homebase-id/js-lib/core';
 import { HomebaseFile, NewHomebaseFile, UploadResult } from '@homebase-id/js-lib/core';
-import { getRichTextFromString } from '../../../helpers/richTextHelper';
+import { markdownToRichText } from '../../../helpers/markdownToRichText';
 import { TransitUploadResult } from '@homebase-id/js-lib/peer';
 import { LinkPreview } from '@homebase-id/js-lib/media';
-import { invalidateDrafts } from '../drafts/useDrafts';
 import { invalidatePosts } from './usePostsInfinite';
 import { invalidateSocialFeeds, updateCacheSocialFeeds } from '../useSocialFeed';
 import { invalidatePost } from './usePost';
@@ -83,7 +74,7 @@ export const useManagePost = () => {
             });
           };
 
-      postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
+      postFile.fileMetadata.appData.content.captionAsRichText ??= markdownToRichText(
         postFile.fileMetadata.appData.content.caption.trim()
       );
 
@@ -102,72 +93,6 @@ export const useManagePost = () => {
         })
         .catch((err) => reject(err));
     });
-  };
-
-  const duplicatePost = async ({
-    toDuplicatePostFile,
-    channelId,
-    newPostId,
-    odinId,
-    targetChannel,
-  }: {
-    toDuplicatePostFile: HomebaseFile<PostContent>;
-    channelId: string;
-    newPostId: string;
-    odinId?: string;
-    targetChannel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
-  }) => {
-    const currentTargetDrive = GetTargetDriveFromChannelId(channelId);
-
-    // Fetch payloads from the original post
-    const mediaFiles: NewMediaFile[] = (
-      await Promise.all(
-        (toDuplicatePostFile.fileMetadata.payloads || []).map(async (payload) => {
-          const bytes = await getPayloadBytes(
-            dotYouClient,
-            currentTargetDrive,
-            toDuplicatePostFile.fileId,
-            payload.key
-          );
-          if (!bytes) return;
-          return {
-            file: new Blob([bytes.bytes], { type: payload.contentType }),
-            key: payload.key,
-            thumbnail: payload.previewThumbnail,
-          };
-        })
-      )
-    ).filter(Boolean) as NewMediaFile[];
-
-    // Save everything to a new post
-    const postFile: NewHomebaseFile<PostContent> = {
-      ...toDuplicatePostFile,
-      fileId: undefined, // Clear FileId
-      fileMetadata: {
-        ...toDuplicatePostFile.fileMetadata,
-        appData: {
-          ...toDuplicatePostFile.fileMetadata.appData,
-          fileType: BlogConfig.DraftPostFileType,
-          uniqueId: undefined, // Clear UniqueId
-          content: {
-            ...toDuplicatePostFile.fileMetadata.appData.content,
-            id: newPostId,
-            channelId: targetChannel.fileMetadata.appData.uniqueId as string,
-          },
-        },
-      },
-      serverMetadata: targetChannel.serverMetadata || {
-        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-      },
-    };
-
-    return savePostFile(
-      dotYouClient,
-      postFile,
-      odinId,
-      targetChannel.fileMetadata.appData.uniqueId as string,
-      mediaFiles
-    );
   };
 
   // slug property is need to clear the cache later, but not for the actual removeData
@@ -382,13 +307,7 @@ export const useManagePost = () => {
 
         invalidatePosts(queryClient, variables.postFile.fileMetadata.appData.content.channelId);
         invalidatePosts(queryClient, '');
-        invalidateDrafts(queryClient);
       },
-    }),
-
-    duplicate: useMutation({
-      mutationFn: duplicatePost,
-      // No optimistic mutation as it directly navigates after success; And as such would lose the cache
     }),
   };
 };

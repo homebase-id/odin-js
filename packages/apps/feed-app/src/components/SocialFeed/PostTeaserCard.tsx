@@ -15,6 +15,7 @@ import {
     ToGroupBlock,
     useDotYouClientContext,
     PostSource,
+    ArticleTeaser,
 } from '@homebase-id/common-app';
 import {useNavigate} from 'react-router-dom';
 import {DoubleClickHeartForMedia} from '@homebase-id/common-app';
@@ -54,10 +55,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
         channelKey: channelId,
     }).fetch;
 
-    const postPath = `preview/${isExternal ? odinId : identity}/${
+    // An article opens in the reader; media in the preview
+    const postPath = `${post.type === 'Article' ? 'read' : 'preview'}/${isExternal ? odinId : identity}/${
         channel?.fileMetadata.appData.uniqueId
     }/${post.id}`;
-    const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+    // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+    const isArticle = post.type === 'Article';
 
     const authorOdinId = postFile.fileMetadata.originalAuthor || odinId;
 
@@ -66,21 +69,21 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
 
     return (
         <div
-            className={`w-full break-words rounded-lg ${highlight ? 'bg-indigo-100 dark:bg-indigo-900' : ''} ${className ?? ''}`}
+            className={`w-full break-words rounded-lg ${highlight ? 'bg-primary-container' : ''} ${className ?? ''}`}
             data-odin-id={odinId}
         >
             <ErrorBoundary>
                 <FakeAnchor
-                    href={clickable ? postPath : undefined}
+                    href={isArticle ? postPath : undefined}
                     target="__blank"
                     rel="nofollow noreferrer"
                     preventScrollReset={true}
-                    className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors ${
-                        clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
-                    } dark:border-gray-800 lg:border`}
+                    className={`relative flex h-full flex-col rounded-lg transition-colors ${
+                        isArticle ? 'hover:shadow-md hover:dark:shadow-outline-variant' : ''
+                    } lg:border`}
                 >
                     <PostSource postFile={postFile} className="rounded-t-lg"/>
-                    <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
+                    <div className={`flex flex-row gap-4 px-3 pt-3 sm:px-4 ${isArticle ? 'pb-2' : 'pb-3'}`}>
                         <div className="flex-shrink-0 py-1">
                             <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
                                 <AuthorImage
@@ -92,7 +95,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                         </div>
                         <div className="flex w-20 flex-grow flex-col">
                             <div
-                                className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+                                className="mb-1 flex flex-col text-muted-foreground md:flex-row md:flex-wrap md:items-center">
                                 <h2>
                                     <AuthorName odinId={authorOdinId}/>
                                     <ToGroupBlock
@@ -112,28 +115,37 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                                 />
                             </div>
 
-                            <PostBody
-                                post={post}
-                                odinId={odinId}
-                                fileId={postFile.fileId}
-                                globalTransitId={postFile.fileMetadata.globalTransitId}
-                                lastModified={postFile.fileMetadata.updated}
-                                payloads={postFile.fileMetadata.payloads}
-                            />
+                            {isArticle ? null : (
+                                <PostBody
+                                    post={post}
+                                    odinId={odinId}
+                                    fileId={postFile.fileId}
+                                    globalTransitId={postFile.fileMetadata.globalTransitId}
+                                    lastModified={postFile.fileMetadata.updated}
+                                    payloads={postFile.fileMetadata.payloads}
+                                />
+                            )}
                         </div>
                     </div>
-                    <DoubleClickHeartForMedia
-                        odinId={odinId}
-                        postFile={postFile}
-                        // Clicks don't propogate to the parent container because of the Double Tap listener
-                        onClick={(e, index) => {
-                            if (post.type !== 'Article')
-                                navigate(`${postPath}/${index}`, {state: {referrer: window.location.pathname}});
-                            else navigate(postPath, {state: {referrer: window.location.pathname}});
-                        }}
-                        className="mb-4"
-                    />
-                    <MediaStillUploading postFile={postFile}/>
+                    {isArticle ? (
+                        // Full card width: the cover spans it, under the author row
+                        <div className="px-3 pb-1 sm:px-4">
+                            <ArticleTeaser postFile={postFile} odinId={odinId}/>
+                        </div>
+                    ) : (
+                        <>
+                            <DoubleClickHeartForMedia
+                                odinId={odinId}
+                                postFile={postFile}
+                                // Clicks don't propogate to the parent container because of the Double Tap listener
+                                onClick={(e, index) => {
+                                    navigate(`${postPath}/${index}`, {state: {referrer: window.location.pathname}});
+                                }}
+                                className="mb-4"
+                            />
+                            <MediaStillUploading postFile={postFile}/>
+                        </>
+                    )}
                     <PostInteracts
                         odinId={odinId || window.location.hostname}
                         postFile={postFile}
@@ -141,6 +153,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({className, postFile, showSumma
                         showSummary={showSummary}
                         isAuthenticated={true}
                         isOwner={true}
+                        commentsHref={isArticle ? `${postPath}#responses` : undefined}
                     />
                 </FakeAnchor>
             </ErrorBoundary>
@@ -168,7 +181,7 @@ export const NewPostTeaserCard: FC<PostTeaserCardProps> = (props) => {
     return (
         <PostTeaserCard
             {...props}
-            className={`${props.className} pointer-events-none bg-slate-100 dark:bg-slate-600`}
+            className={`${props.className} pointer-events-none bg-surface-container-highest`}
         />
     );
 };

@@ -1,9 +1,12 @@
 import {
+  BACKGROUNDS,
   BLOCK_KINDS,
   FONT_STACKS,
+  PORTRAIT_SIZES,
   PRESENTATIONS,
   SHAPES,
   SOCIALS,
+  type BackgroundId,
   type BlockKind,
   type CardDesign,
   type FontId,
@@ -17,11 +20,12 @@ import {
  * Every key is optional; anything invalid is dropped and the preset's value stays. Unknown keys are ignored.
  *   palette   { ground, ink, muted, accent, surface, surfaceInk }  each "#rrggbb"
  *   type      { display, text, label } each a FONT_STACKS key; displayCase "none"|"upper"|"italic-2nd-line"
- *   portraits [{ source "photo"|"header", shape "circle"|"square"|"rounded"|"ellipse", ring 0..12,
+ *   portraits [{ size "small"|"medium"|"large" (default medium), source "photo"|"header", shape "circle"|"square"|"rounded"|"ellipse", ring 0..12,
  *               shadow "soft"|"hard", tilt -15..15, tape bool, mono bool }]  (max 2; replaces the preset's list)
  *   blocks    [{ kind "links"|"moments"|"posts", presentation "bare"|"boxed"|"row"|"button" }]
  *             existing kinds only, first mention wins; listed order is the order, unlisted kinds are hidden
  *   socials   "glyphs"|"bar"|"wordmark"|"handles"
+ *   background "default"|"none"|"circles"|"blobs"|"dots"|"waves"|"lines"; "default" keeps the preset's own art
  */
 export type CardOverrides = {
   palette?: Partial<CardDesign['palette']>;
@@ -29,6 +33,7 @@ export type CardOverrides = {
   portraits?: Partial<Portrait>[];
   blocks?: { kind: BlockKind; presentation?: Presentation }[];
   socials?: SocialsVariant;
+  background?: BackgroundId | 'default';
 };
 
 const DISPLAY_CASES = ['none', 'upper', 'italic-2nd-line'] as const;
@@ -68,6 +73,7 @@ const portrait = (raw: unknown, base: Portrait | undefined): Portrait | undefine
       tilt: inRange(raw.tilt, -15, 15),
       tape: flag(raw.tape),
       mono: flag(raw.mono),
+      size: oneOf(PORTRAIT_SIZES, raw.size),
     }),
     source,
     shape,
@@ -134,6 +140,9 @@ export const applyOverrides = (preset: CardDesign, overrides: unknown): CardDesi
 
   const socials = oneOf(SOCIALS, overrides.socials);
   if (socials) design.socials = socials;
+
+  const background = oneOf(BACKGROUNDS, overrides.background);
+  if (background) design.background = background;
 
   return design;
 };
