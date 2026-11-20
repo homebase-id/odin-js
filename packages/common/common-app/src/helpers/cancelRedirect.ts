@@ -24,10 +24,7 @@ export const getCancelRedirectUrl = (redirectUri: string, state?: string | null)
 const V1_AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 const V2_AUTHORIZE_PATH = '/api/v2/youauth/authorize';
 
-/**
- * Where the consent form posts: the route the sign-in started on, the one in its return URL. The identity refuses a
- * return URL with any path but the one it was posted to, and a sign-in from chat-kmp or a third-party app comes in on V1.
- */
+/** Posts to the authorize path in the return URL: the identity refuses any other, and chat-kmp signs in on V1 */
 export const getConsentFormAction = (returnUrl: string): string => {
   try {
     return new URL(returnUrl).pathname === V2_AUTHORIZE_PATH ? V2_AUTHORIZE_PATH : V1_AUTHORIZE_PATH;

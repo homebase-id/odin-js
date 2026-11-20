@@ -166,9 +166,7 @@ const getSegmentUrl = async (
   // Without a shared secret the file's key header can't be opened, so an encrypted video can't play
   if (!dotYouClient.getSharedSecret()) return null;
 
-  // V2 payload reads take no shared secret, so the url is not encrypted; hls.js adds the token as a Bearer header
-  // (HlsSource). Segments are byte ranges of one file (ffmpeg's single_file), so the url must honour a Range header:
-  // on a local drive that is the ranged route (from 0, length 0 = "to the end"); the peer payload route honours it.
+  // HLS segments are byte ranges of one file, so the url must honour a Range header (local: the ranged route)
   const filePath = `drives/${videoDrive.alias}/files/${videoFileId}/payload/${videoFileKey}`;
   const query = stringifyToQueryParams({ xfst: systemFileType || 'Standard' });
 

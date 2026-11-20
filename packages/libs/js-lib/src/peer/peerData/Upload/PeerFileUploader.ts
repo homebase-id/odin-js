@@ -21,9 +21,7 @@ import { peerDriveRootV2 } from '../PeerRoutesV2';
 const isDebug = hasDebugFlag();
 
 /// Upload methods
-/// V2's send action takes the multipart upload unencrypted ([NoSharedSecretOnRequest/OnResponse]), as V1's did.
-/// The route names one peer and drive, but the server reads the recipients and remote drive from the instructions
-/// part as V1 did, so the first recipient and the remote drive stand in for the path.
+/// The server reads recipients and remote drive from the instructions, so the first ones only stand in for the path
 export const uploadFileOverPeer = async (
   dotYouClient: DotYouClient,
   instructions: TransitInstructionSet,

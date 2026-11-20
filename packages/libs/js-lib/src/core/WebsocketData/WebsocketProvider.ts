@@ -46,9 +46,7 @@ const isDebug = hasDebugFlag();
 // 'odin.notify.v1' is echoed by the server so the browser accepts the 101.
 const NOTIFY_SUBPROTOCOL = 'odin.notify.v1';
 
-// An App with a bx0900 token authenticates the WS upgrade with a Sec-WebSocket-Protocol bearer, so a
-// browser can connect cross-site where it can send neither the BX0900 header nor the SameSite cookie
-// on the upgrade. Mirrors the kube-apiserver subprotocol-bearer pattern.
+// A Sec-WebSocket-Protocol bearer: cross-site, a browser can send neither the bx0900 header nor the cookie
 const getBearerProtocol = (dotYouClient: DotYouClient): string | undefined => {
   if (dotYouClient.getType() !== ApiType.App) return undefined;
   const token = dotYouClient.getHeaders()['bx0900'];
@@ -95,8 +93,7 @@ const ConnectSocket = async (
         });
     }
 
-    // An App with no token, and the owner console, authenticate with their cookie: one route per
-    // cookie, because an app on the identity's own host sends the owner cookie too.
+    // One route per cookie: an app on the identity's own host sends the owner cookie too
     const host = dotYouClient.getRoot().split('//')[1];
     const route = bearerProtocol
       ? 'ws-token-wasm'
@@ -276,7 +273,9 @@ export const Subscribe = async (
   onDisconnect?: () => void,
   onReconnect?: () => void,
   args?: unknown, // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this,
-  refId?: string
+  refId?: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _useV2?: boolean // Every socket is V2 now
 ): Promise<void> => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();

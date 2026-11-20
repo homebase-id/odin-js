@@ -5,9 +5,7 @@ import { assertIfDefined } from '../../../helpers/DataUtil';
 import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
 import { peerDriveRootV2 } from '../PeerRoutesV2';
 
-/// V2's send-delete action takes its body and answers in the clear ([NoSharedSecretOnRequest/OnResponse]). The
-/// route names one peer, but the server reads the recipients from the body as V1 did, so the first recipient
-/// stands in for the path (the caller's own identity when there are none, which the server rejects as V1 did).
+/// The server reads the recipients from the body, so the first one only stands in for the path
 export const deleteFileOverPeer = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

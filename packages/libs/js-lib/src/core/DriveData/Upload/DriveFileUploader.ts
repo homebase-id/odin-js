@@ -25,12 +25,12 @@ import {
   buildFormData,
   buildManifest,
   buildUpdateManifest,
+  pureUpload,
   pureUploadV2,
   pureUpdateV2,
   pureUpdateOverPeerV2,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
-import { deleteFile } from '../File/DriveFileManager';
 import {
   base64ToUint8Array,
   getRandom16ByteArray,
@@ -142,11 +142,55 @@ export const uploadFile = async (
   return uploadResult;
 };
 
-/**
- * Replaces an existing file, on V2's PATCH: the file keeps its id, global transit id and AES key, and any payload
- * not sent again is deleted. PATCH can't change whether a file is encrypted, so that switch deletes the file and
- * creates it again, which gives it a new file id and global transit id.
- */
+const overwriteFileOnV1 = async (
+  dotYouClient: DotYouClient,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata,
+  payloads: PayloadFile[] | undefined,
+  thumbnails: ThumbnailFile[] | undefined,
+  encrypt: boolean,
+  onVersionConflict: (() => Promise<void | UploadResult> | void) | undefined,
+  axiosConfig: AxiosRequestConfig | undefined
+): Promise<UploadResult | void> => {
+  metadata.isEncrypted = encrypt;
+  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+  const manifest = buildManifest(payloads, thumbnails, encrypt);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
+  };
+
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    keyHeader,
+    instructionsWithManifest,
+    metadata
+  );
+  const data = await buildFormData(
+    instructionsWithManifest,
+    encryptedDescriptor,
+    payloads,
+    thumbnails,
+    keyHeader,
+    manifest
+  );
+
+  const uploadResult = await pureUpload(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig
+  );
+  if (!uploadResult) return;
+  uploadResult.keyHeader = keyHeader;
+  return uploadResult;
+};
+
+/** PATCH keeps the file's ids and key but can't switch encryption, so that switch uses V1's overwrite */
 const overwriteFile = async (
   dotYouClient: DotYouClient,
   drive: TargetDrive,
@@ -171,33 +215,16 @@ const overwriteFile = async (
   if (!existing) throw new Error(`The file to overwrite was not found: ${fileId}`);
 
   if (existing.fileMetadata.isEncrypted !== encrypt) {
-    // A stale save must not delete the newer file
-    if (metadata.versionTag && metadata.versionTag !== existing.fileMetadata.versionTag) {
-      if (onVersionConflict) return await onVersionConflict();
-      throw new Error(`The file to overwrite has changed: ${fileId}`);
-    }
-
-    await deleteFile(
+    // PATCH can't switch encryption, and deleting then re-creating loses the file if the upload fails
+    return await overwriteFileOnV1(
       dotYouClient,
-      drive,
-      fileId,
-      undefined,
-      systemFileType,
-      options?.axiosConfig,
-      true
-    );
-    return await uploadFile(
-      dotYouClient,
-      {
-        ...instructions,
-        storageOptions: { ...instructions.storageOptions, drive, overwriteFileId: undefined },
-      },
-      { ...metadata, versionTag: undefined },
+      instructions,
+      metadata,
       payloads,
       thumbnails,
       encrypt,
       onVersionConflict,
-      options
+      options?.axiosConfig
     );
   }
 
@@ -251,8 +278,7 @@ export const patchFile = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<UpdateResult | void> => {
-  // A local update goes to V2's PATCH by file id. A peer update (locale 'peer') has no local file: it names the file by
-  // its global transit id, on the one recipient V2 puts in the path.
+  // A peer update has no local file: V2 names it by global transit id on its one recipient
   const localFile = instructions.locale === 'local' ? instructions.file : undefined;
   const peerRecipient = instructions.recipients?.[0];
   if (!localFile && (instructions.recipients?.length !== 1 || !peerRecipient))

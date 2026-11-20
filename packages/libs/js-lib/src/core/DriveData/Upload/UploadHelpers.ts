@@ -197,11 +197,7 @@ export const buildFormData = async (
   return data;
 };
 
-/// V2 (/api/v2) create and update. The multipart body is the same as V1's: an `instructions` part in plain JSON, a
-/// `metadata` part encrypted with the shared secret under the instruction set's transferIv, then the payloads and
-/// thumbnails (both actions are [NoSharedSecretOnRequest]/[NoSharedSecretOnResponse], so the client sends no
-/// interceptor encryption and the response is plain JSON). The drive (and for an update, the file) is named by the path;
-/// the file system type travels in the X-ODIN-FILE-SYSTEM-TYPE header, as on V1.
+/// V2 create and update take V1's multipart body; the file system type still travels in its header
 
 /// The flattened CreateFileResult / UpdateFileResult V2 returns
 interface FileWriteResultV2 {
@@ -214,8 +210,7 @@ interface FileWriteResultV2 {
   payloads?: unknown[];
 }
 
-/// Maps V2's flattened result back into V1's shape; the target drive is the one the call addressed (drive id == alias).
-/// Everything V2 returns is kept, so `globalTransitId`, `updated` and `payloads` read as they did off V1's result.
+/// Back into V1's shape, so callers read globalTransitId, updated and payloads as before
 const toV1FileWriteResult = (result: FileWriteResultV2, targetDrive: TargetDrive) => {
   const file: FileIdFileIdentifier = { fileId: result.fileId, targetDrive };
   const globalTransitIdFileIdentifier = (
@@ -225,8 +220,7 @@ const toV1FileWriteResult = (result: FileWriteResultV2, targetDrive: TargetDrive
   return { ...result, file, globalTransitIdFileIdentifier };
 };
 
-/// Sends a V2 create/update multipart body; the result is mapped before a version-conflict handler can run, so the
-/// handler's own result passes through untouched
+/// Mapped before a version-conflict handler runs, so the handler's own result passes through
 const sendMultipartV2 = async <T>(
   dotYouClient: DotYouClient,
   method: 'post' | 'patch',
@@ -266,8 +260,47 @@ const sendMultipartV2 = async <T>(
     });
 };
 
-/// Creates a new file: POST /api/v2/drives/{driveId}/files. The instruction set must not carry an overwriteFileId;
-/// V2 refuses it. The keyHeader is left for the caller to set, as with pureUpload.
+// V1's in-place overwrite: the only one that can switch a file between encrypted and not
+export const pureUpload = async (
+  dotYouClient: DotYouClient,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<UploadResult | void> => {
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
+  const url = '/drive/files/upload';
+
+  const config: AxiosRequestConfig = {
+    ...axiosConfig,
+    headers: {
+      'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
+    },
+  };
+
+  return client
+    .post<UploadResult>(url, data, config)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          return onVersionConflict();
+        }
+      }
+
+      if (error.response?.status === 400)
+        console.error('[odin-js:pureUpload]', error.response?.data);
+      else console.error('[odin-js:pureUpload]', error);
+      throw error;
+    });
+};
+
+/// V2 refuses an overwriteFileId here; the caller sets the keyHeader
 export const pureUploadV2 = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

@@ -7,6 +7,9 @@ import { stringifyToQueryParams } from '../../../helpers/DataUtil';
 export const getDrivesByTypeOverPeer = async (
   dotYouClient: DotYouClient,
   type: string,
+  // V2 has no paging: it returns every drive of the type
+  _pageNumber: number,
+  _pageSize: number,
   odinId: string,
   systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {
@@ -16,7 +19,6 @@ export const getDrivesByTypeOverPeer = async (
     v2: true,
   });
 
-  // The server answers with every drive of the type the peer lets the caller see, as V1 did; there is no paging
   const route = `/peer/${encodeURIComponent(odinId)}/drives?${stringifyToQueryParams({ type })}`;
   return client.get(route).then((response) => {
     return {

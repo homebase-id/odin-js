@@ -54,8 +54,7 @@ export const getBlockedConnections = (
   assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient({ v2: true });
 
-  // V2 pages by cursor, not page number: ask for everything up to the end of the requested page and
-  // keep that page
+  // V2 pages by cursor: fetch up to the end of the requested page and keep that page
   const pageNumber = Math.max(1, params.pageNumber || 1);
   const count = params.pageSize * pageNumber;
   const url = rootV2 + '/blocked?' + stringifyToQueryParams({ count });

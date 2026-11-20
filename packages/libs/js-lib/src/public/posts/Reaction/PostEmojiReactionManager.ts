@@ -77,7 +77,12 @@ const mapEmojiStrings = (data: string[] | undefined) =>
 export const getMyReactions = async (
   dotYouClient: DotYouClient,
   odinId: string | undefined,
-  context: ReactionContext
+  context: ReactionContext,
+  // The server never paged this list, on V1 or V2
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _pageSize?: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _cursor?: string
 ): Promise<string[] | undefined> =>
   dotYouClient
     .createAxiosClient({ v2: true })

@@ -16,10 +16,7 @@ import {
 
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
-/// `/peer/{odinId}/drives/{driveId}`: a drive on another identity, reached through the caller's own identity.
-/// V1 put the odinId and the drive in the body or query string; V2 names them in the path, and a drive's V2 id is its
-/// V1 alias. An absent alias becomes the empty guid, so the server answers with its own validation error rather
-/// than a route miss.
+/// An absent alias becomes the empty guid, so the server answers with a validation error, not a route miss
 export const peerDriveRootV2 = (odinId: string, driveAlias: string | undefined) =>
   `/peer/${encodeURIComponent(odinId)}/drives/${driveAlias || EMPTY_GUID}`;
 
@@ -29,10 +26,7 @@ export const peerFileByIdV2 = (odinId: string, driveAlias: string, fileId: strin
 export const peerFileByGtidV2 = (odinId: string, driveAlias: string, globalTransitId: string) =>
   `${peerDriveRootV2(odinId, driveAlias)}/files/by-gtid/${globalTransitId}`;
 
-/// A peer payload read on V2, for a file route from peerFileByIdV2 or peerFileByGtidV2. The action opts out of the
-/// shared secret both ways: the query string (only a cache-busting lastModified) goes in the clear, and the body is
-/// the raw (possibly key-header encrypted) bytes, decrypted here as V1's were. A partial read uses the ranged route
-/// with the same 16-byte aligned start V1 put in its Range header.
+/// A partial read uses the ranged route with the same 16-byte aligned start V1 put in its Range header
 export const getPeerPayloadBytesV2 = async (
   dotYouClient: DotYouClient,
   fileRoute: string,

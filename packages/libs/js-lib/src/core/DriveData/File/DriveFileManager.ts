@@ -20,8 +20,7 @@ export const deleteFile = async (
 
   const client = getAxiosClientV2(dotYouClient, systemFileType);
 
-  // V2 names the file by its path. A hard delete takes no body and tells no recipients (V1 refused recipients with a
-  // 400; V2 ignores them); the empty object is only there for the shared-secret interceptor to encrypt.
+  // The empty body is only for the shared-secret interceptor to encrypt
   const fileRoot = `/drives/${targetDrive.alias}/files/${fileId}`;
   const request = hardDelete
     ? client.post(`${fileRoot}/hard-delete`, {}, axiosConfig)

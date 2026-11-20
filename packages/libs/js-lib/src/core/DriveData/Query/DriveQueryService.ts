@@ -1,6 +1,8 @@
 import { DotYouClient } from '../../DotYouClient';
 import {
   FileQueryParams,
+  GetModifiedResultOptions,
+  QueryModifiedResponse,
   GetBatchQueryResultOptions,
   QueryBatchResponse,
   QueryBatchCollectionResponse,
@@ -8,13 +10,26 @@ import {
   QueryBatchResponseWithDeletedResults,
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
+import { stringifyToQueryParams } from '../../../helpers/DataUtil';
 import { AxiosError, AxiosRequestConfig } from 'axios';
 import { decryptJsonContent, decryptKeyHeader } from '../SecurityHelpers';
+
+interface GetModifiedRequest {
+  queryParams: FileQueryParams;
+  resultOptions: GetModifiedResultOptions;
+}
 
 interface GetBatchRequestV2 {
   queryParams: Omit<FileQueryParams, 'targetDrive'>;
   resultOptionsRequest: GetBatchQueryResultOptions;
 }
+
+export const DEFAULT_QUERY_MODIFIED_RESULT_OPTION = {
+  cursor: undefined,
+  maxRecords: 10,
+  includeHeaderContent: true,
+  excludePreviewThumbnail: false,
+};
 
 export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
   cursorState: undefined,
@@ -23,6 +38,73 @@ export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
 };
 
 /// Query methods:
+// No V2 route yet: stays on V1
+export const queryModified = async (
+  dotYouClient: DotYouClient,
+  params: FileQueryParams,
+  ro?: GetModifiedResultOptions,
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
+): Promise<QueryModifiedResponse> => {
+  const { decrypt, axiosConfig } = options ?? {};
+
+  const strippedQueryParams = { ...params };
+  delete strippedQueryParams.systemFileType;
+
+  const client = dotYouClient.createAxiosClient({
+    systemFileType: params.systemFileType,
+  });
+
+  const request: GetModifiedRequest = {
+    queryParams: params,
+    resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
+  };
+
+  if (decrypt) request.resultOptions.includeHeaderContent = true;
+
+  const requestPromise = (() => {
+    const queryParams = stringifyToQueryParams({
+      ...request.queryParams,
+      ...request.resultOptions,
+    });
+
+    const getUrl = '/drive/query/modified?' + queryParams;
+    // Max Url is 1800 so we keep room for encryption overhead
+    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
+      return client.post<QueryModifiedResponse>('/drive/query/modified', request, axiosConfig);
+    } else {
+      return client.get<QueryModifiedResponse>(getUrl, axiosConfig);
+    }
+  })();
+
+  return requestPromise.then(async (response) => {
+    // Decrypt the content if requested
+    if (decrypt) {
+      return {
+        ...response.data,
+        searchResults: await Promise.all(
+          response.data.searchResults.map(async (dsr) => {
+            const keyheader = dsr.fileMetadata.isEncrypted
+              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              : undefined;
+
+            dsr.fileMetadata.appData.content = await decryptJsonContent(
+              dsr.fileMetadata,
+              keyheader
+            );
+
+            return dsr;
+          })
+        ),
+      };
+    }
+
+    return response.data;
+  });
+};
+
 type QueryBatchParamsWithoutFileState = Omit<FileQueryParams, 'fileState'>;
 interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState'> {
   fileState: (0 | 1)[];
@@ -70,8 +152,7 @@ const decryptBatchResults = async <R>(dotYouClient: DotYouClient, data: R): Prom
   ),
 });
 
-/// The query is always a POST on V2 (its body is shared-secret encrypted), with the drive in the route: its id is the
-/// V1 alias, and the query params carry no targetDrive
+/// Always a POST: V2's query body is shared-secret encrypted
 export const queryBatch = async <
   T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
   R = T extends QueryBatchParamsWithFileState
@@ -109,10 +190,7 @@ export const queryBatch = async <
     );
 };
 
-/// Runs each query as its own V2 query-batch, in parallel. V2's query-batch-collection is not used: its maxRecords
-/// is one budget for the whole call, filled greedily in order, where each query here asks for its own maxRecords.
-/// As V1's collection did, a query on a drive the caller may not read comes back empty with `invalidDrive`, rather
-/// than failing the others; any other error fails the call.
+/// Not V2's query-batch-collection: its maxRecords is one budget for every section
 export const queryBatchCollection = async (
   dotYouClient: DotYouClient,
   queries: {
@@ -164,3 +242,6 @@ export const queryBatchCollection = async (
 
   return { results };
 };
+
+/** @deprecated queryBatch calls V2 now */
+export const queryBatchV2 = queryBatch;

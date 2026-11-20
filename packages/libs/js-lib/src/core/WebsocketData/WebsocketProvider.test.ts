@@ -7,8 +7,7 @@ const loadProvider = async () => {
   return import('./WebsocketProvider');
 };
 
-// Let the connect promise executor run past its preauth `await` so the cookie path
-// reaches `new WebSocket`. The bearer path has no await before construction.
+// Lets the cookie path get past its preauth await to `new WebSocket`
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 let captured: { url: string; protocols?: string[] | string; args: unknown }[];

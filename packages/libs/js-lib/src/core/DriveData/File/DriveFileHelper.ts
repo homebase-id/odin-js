@@ -12,10 +12,7 @@ import { TargetDrive, SystemFileType, ContentType } from './DriveFileTypes';
 export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boolean) =>
   `${targetDrive.alias}-${targetDrive.type}+${id}+${decrypt}`;
 
-/// A client on the unified V2 api (`/api/v2`). `noSharedSecret` is for the actions marked
-/// [NoSharedSecretOnRequest]/[NoSharedSecretOnResponse] (payload and thumb reads): they take their query string
-/// in the clear (an encrypted `?ss=` is passed through unread) and answer with raw bytes, so the client skips
-/// the shared-secret interceptors.
+/// `noSharedSecret`: payload and thumb reads take their query in the clear and answer raw bytes
 export const getAxiosClientV2 = (
   dotYouClient: DotYouClient,
   systemFileType?: SystemFileType,
@@ -38,8 +35,7 @@ export const parseBytesToObject = <T>(
   return tryJsonParse<T>(json);
 };
 
-/// A partial read's V2 route suffix: `payload/{key}/{start}/{length}`, with a 16-byte aligned start for decrypting with
-/// an offset. A length of 0 means "to the end". Empty when the whole payload is read.
+/// The start is 16-byte aligned so an encrypted chunk can be decrypted with an offset; a length of 0 means to the end
 export const getRangePath = (chunkStart?: number, chunkEnd?: number) => {
   if (chunkStart === undefined) {
     return { startOffset: 0, updatedChunkStart: undefined, rangePath: '' };

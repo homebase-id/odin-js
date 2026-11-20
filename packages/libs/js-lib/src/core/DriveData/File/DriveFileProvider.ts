@@ -440,3 +440,6 @@ export const getLocalContentFromHeader = async <T>(
     );
   });
 };
+
+/** @deprecated getPayloadBytes calls V2 now */
+export const getPayloadBytesV2 = getPayloadBytes;

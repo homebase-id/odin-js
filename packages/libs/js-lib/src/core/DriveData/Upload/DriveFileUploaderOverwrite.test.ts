@@ -3,7 +3,7 @@ import { ApiType, DotYouClient } from '../../DotYouClient';
 import { encryptKeyHeader } from '../SecurityHelpers';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { patchFile, uploadFile } from './DriveFileUploader';
-import { pureUpdateOverPeerV2, pureUpdateV2, pureUploadV2 } from './UploadHelpers';
+import { pureUpdateOverPeerV2, pureUpdateV2, pureUpload, pureUploadV2 } from './UploadHelpers';
 import { getFileHeader } from '../File/DriveFileProvider';
 import { deleteFile } from '../File/DriveFileManager';
 import { UploadFileMetadata, UploadInstructionSet } from './DriveUploadTypes';
@@ -11,6 +11,7 @@ import { HomebaseFile, SecurityGroupType } from '../File/DriveFileTypes';
 
 vi.mock('./UploadHelpers', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./UploadHelpers')>()),
+  pureUpload: vi.fn(),
   pureUploadV2: vi.fn(),
   pureUpdateV2: vi.fn(),
   pureUpdateOverPeerV2: vi.fn(),
@@ -69,6 +70,7 @@ beforeEach(() => {
   vi.mocked(pureUploadV2).mockResolvedValue({
     file: { fileId: 'new-id', targetDrive: drive },
   } as never);
+  vi.mocked(pureUpload).mockResolvedValue({ file: { fileId, targetDrive: drive } } as never);
 });
 
 const sentInstructions = async (data: FormData) =>
@@ -123,7 +125,7 @@ test('an encrypted overwrite keeps the key of the file and returns it', async ()
   expect(result?.keyHeader?.aesKey).toEqual(new Uint8Array(16).fill(2));
 });
 
-test('switching encryption deletes the file and creates it again', async () => {
+test('switching encryption overwrites the file in place on V1, deleting nothing', async () => {
   vi.mocked(getFileHeader).mockResolvedValue(await existingFile(true));
 
   const result = await uploadFile(
@@ -135,21 +137,18 @@ test('switching encryption deletes the file and creates it again', async () => {
     false
   );
 
-  expect(deleteFile).toHaveBeenCalledWith(
-    dotYouClient,
-    drive,
-    fileId,
-    undefined,
-    undefined,
-    undefined,
-    true
-  );
+  expect(deleteFile).not.toHaveBeenCalled();
   expect(pureUpdateV2).not.toHaveBeenCalled();
-  expect(pureUploadV2).toHaveBeenCalledOnce();
-  expect(result?.file.fileId).toBe('new-id');
+  expect(pureUploadV2).not.toHaveBeenCalled();
+  expect(pureUpload).toHaveBeenCalledOnce();
+  const sent = await sentInstructions(
+    vi.mocked(pureUpload).mock.calls[0][1] as unknown as FormData
+  );
+  expect(sent.storageOptions.overwriteFileId).toBe(fileId);
+  expect(result?.file.fileId).toBe(fileId);
 });
 
-test('switching encryption from a stale version does not delete the file', async () => {
+test('switching encryption hands a version conflict to the caller', async () => {
   vi.mocked(getFileHeader).mockResolvedValue(await existingFile(true));
   const onVersionConflict = vi.fn();
 
@@ -163,9 +162,8 @@ test('switching encryption from a stale version does not delete the file', async
     onVersionConflict
   );
 
-  expect(onVersionConflict).toHaveBeenCalledOnce();
+  expect(vi.mocked(pureUpload).mock.calls[0][3]).toBe(onVersionConflict);
   expect(deleteFile).not.toHaveBeenCalled();
-  expect(pureUploadV2).not.toHaveBeenCalled();
 });
 
 test('an overwrite refuses a caller-supplied aesKey', async () => {

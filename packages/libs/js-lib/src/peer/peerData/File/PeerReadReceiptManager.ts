@@ -24,8 +24,7 @@ interface SendReadReceiptResultV2 {
   }[];
 }
 
-/// V2 names the drive (its id is the V1 alias) in the route and takes bare file ids; its results carry the file id
-/// only, so the drive is put back to keep V1's response shape
+/// V2's results carry only the file id, so the drive is put back to keep V1's shape
 export const sendReadReceipt = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

@@ -538,3 +538,6 @@ export const getDriveStatus = async (
       throw error;
     });
 };
+
+/** @deprecated getDriveStatus calls V2 now */
+export const getDriveStatusV2 = getDriveStatus;
