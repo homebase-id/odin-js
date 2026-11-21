@@ -23,7 +23,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = '/auth/owner';
 
   const response = await client.post(url, reply);
@@ -51,7 +51,7 @@ export const setFirstPassword = async (
   const reply = await prepareAuthPassword(newPassword, salts);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true, v2: true})
+    .createAxiosClient({overrideEncryption: true})
     .post('/auth/owner/passwd', {...reply, firstRunToken})
     .then((response) => {
       return response.status === 200;
@@ -74,7 +74,7 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
   const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, passwordReply, publicKey);
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true, v2: true})
+    .createAxiosClient({overrideEncryption: true})
     .post('/auth/owner/resetpasswdrk', {passwordReply, encryptedRecoveryKey})
     .then((response) => {
       return response.status === 200;
@@ -106,7 +106,7 @@ export const changePassword = async (
   }
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: false, v2: true})
+    .createAxiosClient({overrideEncryption: false})
     .post('/security/reset-password', {currentAuthenticationPasswordReply, newPasswordReply, zkKeys})
     .then((response) => {
       return response.status === 200;
@@ -121,7 +121,7 @@ export const canUseAutoRecovery = async (firstRunToken:string) => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   const url = `/config/can-use-auto-recovery?frt=${firstRunToken}`;
 
   return await client.get(url).then((response) => {
@@ -135,7 +135,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
   });
 
   return dotYouClient
-    .createAxiosClient({overrideEncryption: true, v2: true})
+    .createAxiosClient({overrideEncryption: true})
     .post('/auth/owner/ispasswordset')
     .then((response) => {
       return response.data == true;

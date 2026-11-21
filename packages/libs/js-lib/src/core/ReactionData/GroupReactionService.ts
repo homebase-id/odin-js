@@ -29,7 +29,7 @@ export const getGroupReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   const data = {
     cursor: cursor,
@@ -61,7 +61,7 @@ export const uploadGroupReaction = async (
   reaction: string,
   recipients: string[]
 ) => {
-  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
+  const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.post(
     groupReactionsByGtidRootV2(targetDrive.alias, messageGlobalTransitId),
@@ -92,7 +92,7 @@ export const deleteGroupReaction = async (
     ? groupReactionsRootV2(target.targetDrive.alias, target.fileId)
     : groupReactionsByGtidRootV2(targetDrive.alias, target.globalTransitId);
 
-  return await dotYouClient.createAxiosClient({ v2: true }).delete(route, {
+  return await dotYouClient.createAxiosClient().delete(route, {
     data: {
       transitOptions: {
         recipients: [...recipients],

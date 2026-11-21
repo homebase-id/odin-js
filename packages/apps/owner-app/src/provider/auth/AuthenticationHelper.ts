@@ -23,7 +23,7 @@ export interface PublicKeyData {
 /** The host's offline ECC key, which a reset encrypts its recovery secret to. */
 export const getPublicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> =>
   dotYouClient
-    .createAxiosClient({ overrideEncryption: true, v2: true })
+    .createAxiosClient({ overrideEncryption: true })
     .get<PublicKeyData>('/auth/owner/publickey_ecc?keyType=offlineKey')
     .then((response) => response.data);
 
@@ -52,7 +52,7 @@ interface AuthenticationPayload {
 }
 
 export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client
     .get('/auth/owner/nonce')
     .then((response) => {
@@ -63,7 +63,7 @@ export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> =
 
 /** Fresh salts, for setting a password. */
 export const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
   return client.get('/auth/owner/getsalts').then((response) => {
     return response.data;
   });

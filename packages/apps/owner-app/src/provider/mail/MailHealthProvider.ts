@@ -18,7 +18,7 @@ export interface MailHealth {
 }
 
 export const getMailHealth = async (dotYouClient: DotYouClient): Promise<MailHealth> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const response = await client.get<MailHealth>(`${root}/verify`);
   return response.data;
 };
@@ -54,7 +54,7 @@ export interface MailDnsPublishResult {
 export const publishMailDnsRecords = async (
   dotYouClient: DotYouClient
 ): Promise<MailDnsPublishResult> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const response = await client.post<MailDnsPublishResult>(`${root}/publish-dns-records`);
   return response.data;
 };

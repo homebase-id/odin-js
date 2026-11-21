@@ -81,7 +81,7 @@ export const uploadFile = async (
   isDebug &&
     console.debug(
       'request',
-      new URL(`${dotYouClient.getEndpointV2()}/drives/${drive.alias}/files`).pathname,
+      new URL(`${dotYouClient.getEndpoint()}/drives/${drive.alias}/files`).pathname,
       {
         instructions,
         metadata,
@@ -289,7 +289,7 @@ export const patchFile = async (
       'request',
       localFile
         ? new URL(
-            `${dotYouClient.getEndpointV2()}/drives/${localFile.targetDrive.alias}/files/${localFile.fileId}`
+            `${dotYouClient.getEndpoint()}/drives/${localFile.targetDrive.alias}/files/${localFile.fileId}`
           ).pathname
         : `peer update on ${peerRecipient}`,
       {
@@ -449,7 +449,7 @@ export const uploadLocalMetadataTags = async (
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
+  const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient
     .patch<LocalMetadataUploadResult>(
@@ -484,7 +484,7 @@ export const uploadLocalMetadataContent = async (
   onVersionConflict?: () => Promise<void | LocalMetadataUploadResult> | void
 ) => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
-  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
+  const axiosClient = dotYouClient.createAxiosClient();
 
   const decryptedKeyHeader = file.sharedSecretEncryptedKeyHeader
     ? await decryptKeyHeader(dotYouClient, file.sharedSecretEncryptedKeyHeader)

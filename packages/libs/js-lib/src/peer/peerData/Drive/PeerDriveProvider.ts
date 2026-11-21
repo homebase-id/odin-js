@@ -16,7 +16,6 @@ export const getDrivesByTypeOverPeer = async (
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
   const client = dotYouClient.createAxiosClient({
     systemFileType,
-    v2: true,
   });
 
   const route = `/peer/${encodeURIComponent(odinId)}/drives?${stringifyToQueryParams({ type })}`;

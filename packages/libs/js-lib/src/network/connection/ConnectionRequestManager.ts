@@ -22,7 +22,7 @@ export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<IncomingConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = RequestsRootV2 + '?' + stringifyToQueryParams({ type: 'incoming', ...params });
 
   return client
@@ -37,7 +37,7 @@ export const getPendingRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionRequest | null> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
   return client
     .get<ConnectionRequest>(url)
@@ -51,7 +51,7 @@ export const getSentRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<ConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = RequestsRootV2 + '?' + stringifyToQueryParams({ type: 'outgoing', ...params });
 
   return client
@@ -66,7 +66,7 @@ export const getSentRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionRequest> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = `${OutgoingPathRootV2}/${encodeURIComponent(odinId)}`;
 
   return client
@@ -83,7 +83,7 @@ export const acceptConnectionRequest = async (
   odinId: string,
   circleIds?: string[]
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   // The sender is the resource; the body carries only the circles to grant them
   const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
   const body: Pick<AcceptRequestHeader, 'circleIds'> = { circleIds: circleIds || [] };
@@ -101,7 +101,7 @@ export const deletePendingRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
 
   return client
@@ -117,7 +117,7 @@ export const deleteSentRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   // No notifyRemote, as before: the server's default (a one-sided cancel) applies
   const url = `${OutgoingPathRootV2}/${encodeURIComponent(odinId)}`;
 
@@ -143,7 +143,7 @@ export const sendRequest = async (
     circleIds: circleIds,
   };
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .post(url, data)
     .then(() => true) // V2 answers 201 with no body; V1 answered true
@@ -154,7 +154,7 @@ export const sendRequest = async (
 };
 
 export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = ConnectionsRootV2 + '/block';
   const data: OdinIdRequest = { odinId: odinId };
 
@@ -168,7 +168,7 @@ export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) =>
 };
 
 export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = ConnectionsRootV2 + '/unblock';
   const data: OdinIdRequest = { odinId: odinId };
 

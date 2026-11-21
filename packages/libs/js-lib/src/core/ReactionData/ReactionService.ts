@@ -31,7 +31,7 @@ export const uploadReaction = async (
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
 ): Promise<string> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post(`${getReactionsRootV2(dotYouClient, odinId, file)}/add`, {
       reaction: JSON.stringify({ emoji: emoji }),
     })
@@ -46,7 +46,7 @@ export const deleteReaction = async (
   file: FileIdFileIdentifier | GlobalTransitIdFileIdentifier
 ): Promise<string> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post(`${getReactionsRootV2(dotYouClient, odinId, file)}/delete`, {
       reaction: JSON.stringify({ emoji: emoji.body }),
     })
@@ -61,7 +61,7 @@ export const getReactions = async (
   cursor?: string
 ): Promise<{ reactions: EmojiReaction[]; cursor: string } | undefined> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post<ServerReactionsListWithCursor>(`${getReactionsRootV2(dotYouClient, odinId, file)}/list`, {
       cursor: cursor,
       maxRecords: pageSize,

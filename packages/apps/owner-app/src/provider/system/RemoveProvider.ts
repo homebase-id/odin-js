@@ -17,7 +17,7 @@ export const markAccountDeletion = async (dotYouClient: DotYouClient, currentPas
     noncePackage
   );
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/delete-account';
 
   return client.post(url, { currentAuthenticationPasswordReply }).then((response) => {
@@ -36,7 +36,7 @@ export const unmarkAccountDeletion = async (
     noncePackage
   );
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/undelete-account';
 
   return client.post(url, { currentAuthenticationPasswordReply }).then((response) => {
@@ -46,7 +46,7 @@ export const unmarkAccountDeletion = async (
 
 //api/v2/security/account-status
 export const accountDeletionStatus = async (dotYouClient: DotYouClient) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/account-status';
 
   return client.get<AccountDeletionStatus>(url).then((response) => {

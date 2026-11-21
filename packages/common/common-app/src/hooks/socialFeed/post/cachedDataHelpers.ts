@@ -170,7 +170,6 @@ const queryBatchCachedCollection = async (
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient({
     systemFileType,
-    v2: true,
   });
 
   const updatedQueries = queries.map((query) => {

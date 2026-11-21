@@ -39,7 +39,6 @@ test('pureUploadV2 posts to the drive and maps the flattened result back', async
   expect(createAxiosClient).toHaveBeenCalledWith({
     overrideEncryption: true,
     systemFileType: 'Comment',
-    v2: true,
   });
   expect(client.post.mock.calls[0][0]).toBe(`/drives/${targetDrive.alias}/files`);
   expect(result).toMatchObject({
@@ -80,7 +79,6 @@ test('pureUpdateOverPeerV2 patches the file on the recipient by its global trans
   expect(createAxiosClient).toHaveBeenCalledWith({
     overrideEncryption: true,
     systemFileType: 'Comment',
-    v2: true,
   });
   expect(client.patch.mock.calls[0][0]).toBe(
     `/peer/sam.dotyou.cloud/drives/${targetDrive.alias}/files/by-gtid/${file.globalTransitId}`

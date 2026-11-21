@@ -40,7 +40,7 @@ export const uploadFileOverPeer = async (
   )}/files/send`;
 
   isDebug &&
-    console.debug('request', new URL(`${dotYouClient.getEndpointV2()}${url}`).pathname, {
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}${url}`).pathname, {
       instructions,
       metadata,
     });
@@ -103,7 +103,7 @@ export const uploadFileOverPeer = async (
   isDebug &&
     console.debug(
       'response',
-      new URL(`${dotYouClient.getEndpointV2()}${url}`).pathname,
+      new URL(`${dotYouClient.getEndpoint()}${url}`).pathname,
       uploadResult
     );
 

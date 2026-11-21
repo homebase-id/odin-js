@@ -65,7 +65,7 @@ describe('WebsocketProvider route selection', () => {
     const { client, post, createAxiosClient } = makeClient(ApiType.App, {});
     Subscribe(client, drives, () => {}).catch(() => {});
     await flush();
-    expect(createAxiosClient).toHaveBeenCalledWith({ v2: true, overrideEncryption: true });
+    expect(createAxiosClient).toHaveBeenCalledWith({ overrideEncryption: true });
     expect(post.mock.calls[0][0]).toBe('/notify/preauth');
     expect(captured).toHaveLength(1);
     expect(captured[0].url).toBe('wss://example.com/api/v2/notify/ws-cookie-app');

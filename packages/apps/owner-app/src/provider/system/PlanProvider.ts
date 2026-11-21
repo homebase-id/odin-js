@@ -29,7 +29,7 @@ export interface IdentityPlan {
 
 /** GET /api/v2/plan. Null on a server from before hosting plans, which answers 404. */
 export const getPlan = async (dotYouClient: DotYouClient): Promise<IdentityPlan | null> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .get<IdentityPlan>('/plan')
     .then((response) => response.data)

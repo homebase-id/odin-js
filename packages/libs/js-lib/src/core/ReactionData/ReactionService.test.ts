@@ -23,7 +23,7 @@ const recordingClient = (signedIn = true) => {
   });
   const calls: { v2: boolean; method: string; url: string; data: unknown }[] = [];
   vi.spyOn(dotYouClient, 'createAxiosClient').mockImplementation((options) => {
-    const v2 = !!options?.v2;
+    const v2 = true;
     const record = (method: string) => async (url: string, data?: unknown) => {
       calls.push({ v2, method, url, data });
       return {

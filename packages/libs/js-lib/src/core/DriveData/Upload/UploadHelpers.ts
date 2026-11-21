@@ -268,7 +268,8 @@ export const pureUpload = async (
   onVersionConflict?: () => Promise<void | UploadResult> | void,
   axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
+  // V1 on purpose: only the overwrite that switches a file's encryption calls this, and V2 can't yet (odin-core #2148)
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType, v1: true });
   const url = '/drive/files/upload';
 
   const config: AxiosRequestConfig = {

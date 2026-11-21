@@ -28,7 +28,7 @@ export const updateCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/update';
 
   const data: ServerCircleUpdateRequest = {
@@ -61,7 +61,7 @@ export const createCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/create';
 
   const data: ServerCircleUpdateRequest = {
@@ -89,7 +89,7 @@ export const getCircles = async (
   dotYouClient: DotYouClient,
   excludeSystemCircles: boolean
 ): Promise<CircleDefinition[]> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url =
     root +
     '/list' +
@@ -119,7 +119,7 @@ export const getCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<CircleDefinition> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/get';
 
   const circleDef = await client.post<CircleDefinition>(url, circleId).then((response) => {
@@ -151,7 +151,7 @@ export const setCircleOwningApp = async (
   circleId: string,
   appId: string
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/set-owner';
 
   return client
@@ -177,7 +177,7 @@ export const reassignCircleOwningApp = async (
   circleId: string,
   appId: string
 ): Promise<ReassignCircleOwningAppResult> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/reassign-owner';
 
   return client
@@ -187,7 +187,7 @@ export const reassignCircleOwningApp = async (
 };
 
 export const disableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/disable';
 
   return client
@@ -197,7 +197,7 @@ export const disableCircle = async (dotYouClient: DotYouClient, circleId: string
 };
 
 export const enableCircle = async (dotYouClient: DotYouClient, circleId: string) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/enable';
 
   return client
@@ -215,7 +215,7 @@ export const removeCircle = async (
   circleId: string,
   options?: { removeMembers?: boolean }
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/delete' + (options?.removeMembers ? '?removeMembers=true' : '');
 
   return client

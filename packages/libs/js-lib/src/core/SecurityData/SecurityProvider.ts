@@ -13,7 +13,7 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
     };
   }
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .get<SecurityContex>('/auth/context')
@@ -46,7 +46,7 @@ export const getSecurityContextOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<SecurityContex> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .get<SecurityContex>(`/peer/${encodeURIComponent(odinId)}/auth/context`)

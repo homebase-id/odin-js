@@ -23,7 +23,7 @@ export const disconnectFromContact = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/disconnect';
   const data: OdinIdRequest = { odinId: odinId };
   return client
@@ -42,7 +42,7 @@ export const getConnections = async (
     cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<ActiveConnection>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/connected?' + stringifyToQueryParams(data);
   return client.get(url).then((response) => response.data);
 };
@@ -52,7 +52,7 @@ export const getBlockedConnections = (
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
   assertIfDotYouClientIsOwner(dotYouClient);
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   // V2 pages by cursor: fetch up to the end of the requested page and keep that page
   const pageNumber = Math.max(1, params.pageNumber || 1);
@@ -80,7 +80,7 @@ export const getConnectionInfo = (
 ): Promise<ConnectionInfo | undefined> => {
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = rootV2 + '/status?' + stringifyToQueryParams({ odinId });
 
   return client
@@ -144,7 +144,7 @@ export const getEnrollmentCandidates = async (
   dotYouClient: DotYouClient,
   appId: string
 ): Promise<CircleEnrollmentCandidates[]> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .get<CircleEnrollmentCandidates[]>(`${rootV2}/circles/enrollment-candidates?appId=${appId}`)
     .then((response) => response.data);
@@ -154,7 +154,7 @@ export const getEnrollmentCandidatesForCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<CircleEnrollmentCandidates> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .post<CircleEnrollmentCandidates>(
       `${rootV2}/circles/enrollment-candidates-for-circle`,
@@ -169,7 +169,7 @@ export const grantCircleToMany = async (
   circleId: string,
   odinIds: string[]
 ): Promise<EnrollmentResult> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .post<EnrollmentResult>(`${rootV2}/circles/add-many`, { circleId, odinIds })
     .then((response) => response.data);

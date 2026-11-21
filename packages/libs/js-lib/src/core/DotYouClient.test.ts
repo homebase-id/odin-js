@@ -10,7 +10,7 @@ test('App DotYouClient', () => {
   });
 
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/apps/v1');
+  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/v2');
   expect(dotYouClient.getRoot()).toEqual('https://example.com');
   expect(dotYouClient.getType()).toEqual(ApiType.App);
 });
@@ -24,7 +24,7 @@ test('Guest DotYouClient', () => {
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
   expect(dotYouClient.getRoot()).toEqual('https://example.com');
   expect(dotYouClient.getType()).toEqual(ApiType.Guest);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/guest/v1');
+  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/v2');
 });
 
 test('DotYouClient GET request interceptor', async () => {
@@ -93,4 +93,26 @@ test('DotYouClient POST request interceptor', async () => {
   const parsedData = JSON.parse(stringifiedData);
 
   expect(parsedData).toEqual(queryData);
+});
+
+test('v1 keeps the V1 base path and the bx0900 header, for the encryption-switching overwrite (odin-core #2148)', () => {
+  const dotYouClient = new DotYouClient({
+    api: ApiType.App,
+    hostIdentity: 'example.com',
+    headers: { bx0900: 'token' },
+  });
+
+  const v1 = dotYouClient.createAxiosClient({ overrideEncryption: true, v1: true });
+  expect(v1.defaults.baseURL).toEqual('https://example.com/api/apps/v1');
+  expect(v1.defaults.headers['bx0900']).toEqual('token');
+  expect(v1.defaults.headers['Authorization']).toBeUndefined();
+
+  const v2 = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  expect(v2.defaults.baseURL).toEqual('https://example.com/api/v2');
+  expect(v2.defaults.headers['Authorization']).toEqual('Bearer token');
+  expect(v2.defaults.headers['bx0900']).toBeUndefined();
+
+  expect(new DotYouClient({ api: ApiType.Guest, hostIdentity: 'example.com' }).getEndpointV1()).toEqual(
+    'https://example.com/api/guest/v1'
+  );
 });

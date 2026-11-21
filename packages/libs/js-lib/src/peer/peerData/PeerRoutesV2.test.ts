@@ -34,7 +34,7 @@ const recordingClient = () => {
     range?: unknown;
   }[] = [];
   vi.spyOn(dotYouClient, 'createAxiosClient').mockImplementation((options) => {
-    const v2 = !!options?.v2;
+    const v2 = true;
     const plain = !!options?.overrideEncryption;
     const record =
       (method: string) =>

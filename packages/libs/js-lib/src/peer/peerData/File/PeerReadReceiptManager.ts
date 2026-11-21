@@ -31,7 +31,7 @@ export const sendReadReceipt = async (
   fileIds: string[]
 ): Promise<SendReadReceiptResponse> => {
   assertIfDefined('TargetDrive', targetDrive);
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .post<SendReadReceiptResultV2>(`/drives/${targetDrive.alias}/files/send-read-receipt-batch`, {

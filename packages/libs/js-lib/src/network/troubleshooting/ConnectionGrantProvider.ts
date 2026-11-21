@@ -7,7 +7,7 @@ export const fetchCircleMembershipStatus = async (dotYouClient: DotYouClient, od
   assertIfDefined('DotYouClient is required', dotYouClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return await client
     .post<CircleMembershipStatus>(statusPath, { odinId: odinId })
     .then((res) => res.data)
@@ -41,7 +41,7 @@ export const verifyConnection = async (dotYouClient: DotYouClient, odinId: strin
   assertIfDefined('DotYouClient is required', dotYouClient);
   assertIfDefined('OdinId is required', odinId);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return await client
     .post<{ isValid: boolean }>(verifyPath, { odinId: odinId })
     .then((res) => res.data.isValid)

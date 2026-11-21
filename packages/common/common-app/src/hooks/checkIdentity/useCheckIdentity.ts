@@ -5,7 +5,7 @@ import { getDomainFromUrl } from '@homebase-id/js-lib/helpers';
 /** Whether `identity` (lowercase, with no scheme) is the identity its host says it is. */
 export const pingIdentity = async (identity: string): Promise<boolean> => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest, hostIdentity: identity });
-  return await fetch(`${dotYouClient.getEndpointV2()}/auth/ident`)
+  return await fetch(`${dotYouClient.getEndpoint()}/auth/ident`)
     .then((response) => {
       if (response.status !== 200) return;
       return response.json();

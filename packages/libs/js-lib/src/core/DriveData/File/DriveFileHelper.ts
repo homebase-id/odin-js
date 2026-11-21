@@ -20,7 +20,6 @@ export const getAxiosClientV2 = (
 ) =>
   dotYouClient.createAxiosClient({
     systemFileType,
-    v2: true,
     overrideEncryption: options?.noSharedSecret,
   });
 

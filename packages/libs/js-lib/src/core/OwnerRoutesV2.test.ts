@@ -47,7 +47,7 @@ const recordingClient = (data: unknown = { results: [] }) => {
   const dotYouClient = new DotYouClient({ api: ApiType.Owner as never, hostIdentity: 'frodo.dotyou.cloud' });
   const calls: string[] = [];
   vi.spyOn(dotYouClient, 'createAxiosClient').mockImplementation((options) => {
-    const version = options?.v2 ? 'v2' : 'v1';
+    const version = 'v2';
     const record = (method: string) => async (url: string) => {
       calls.push(`${version} ${method} ${url.split('?')[0]}`);
       return { status: 200, data };

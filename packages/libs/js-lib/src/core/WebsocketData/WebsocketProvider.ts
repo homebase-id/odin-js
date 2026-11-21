@@ -83,7 +83,7 @@ const ConnectSocket = async (
     if (apiType === ApiType.App && !bearerProtocol) {
       // we need to preauth before we can connect
       await dotYouClient
-        .createAxiosClient({ v2: true, overrideEncryption: true })
+        .createAxiosClient({ overrideEncryption: true })
         .post('/notify/preauth', undefined, {
           validateStatus: () => true,
         })
