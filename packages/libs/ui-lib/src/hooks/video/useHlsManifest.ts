@@ -171,8 +171,8 @@ const getSegmentUrl = async (
   const query = stringifyToQueryParams({ xfst: systemFileType || 'Standard' });
 
   return odinId !== identity
-    ? `${dotYouClient.getEndpointV2()}/peer/${encodeURIComponent(odinId)}/${filePath}?${query}`
-    : `${dotYouClient.getEndpointV2()}/${filePath}/0/0?${query}`;
+    ? `${dotYouClient.getEndpoint()}/peer/${encodeURIComponent(odinId)}/${filePath}?${query}`
+    : `${dotYouClient.getEndpoint()}/${filePath}/0/0?${query}`;
 };
 
 const getKeyUrl = async (aesKey: Uint8Array) => {

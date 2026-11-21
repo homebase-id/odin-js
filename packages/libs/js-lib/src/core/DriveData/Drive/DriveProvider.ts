@@ -19,7 +19,7 @@ export const getDrives = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<DriveDefinition>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client.post<PagedResult<DriveDefinition>>('/drive-management', params).then((response) => {
     return {
@@ -40,7 +40,7 @@ export const getDrivesByType = async (
   pageNumber: number,
   pageSize: number
 ): Promise<PagedResult<DriveDefinition>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   if (dotYouClient.getType() === ApiType.Owner) {
     const params = { driveType: type, pageNumber, pageSize };
@@ -118,7 +118,7 @@ export const ensureDrive = async (
   if (driveSlug !== undefined) assertValidSlug('driveSlug', driveSlug);
 
   //create the drive if it does not exist
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
 
   const foundDrive = allDrives.results.find((d) => drivesEqual(d.targetDriveInfo, targetDrive));
@@ -198,7 +198,7 @@ export const editDriveMetadata = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newMetadata', newMetadata);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     metadata: newMetadata,
@@ -221,7 +221,7 @@ export const editDriveAllowAnonymousRead = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowAnonymousRead', newAllowAnonymousRead);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     allowAnonymousReads: newAllowAnonymousRead,
@@ -244,7 +244,7 @@ export const editDriveArchiveFlag = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newArchived', newArchived);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     archived: newArchived,
@@ -268,7 +268,7 @@ const postAccepted = async (
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .post(path, { targetDrive: targetDrive })
     .then((response) => response.status === 202)
@@ -320,7 +320,7 @@ export type DrivePurgePhase = 'removingFiles' | 'finishing' | 'retrying' | 'stop
 
 /** Owner only. Every empty and delete still being purged; empty when nothing is pending. */
 export const getDrivePurges = async (dotYouClient: DotYouClient): Promise<DrivePurgeStatus[]> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return client
     .get<DrivePurgeStatus[]>('/drive-management/purges')
     .then((response) => response.data)
@@ -342,7 +342,7 @@ export const editDriveAllowSubscriptions = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowSubscriptions', newAllowSubscriptions);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     allowSubscriptions: newAllowSubscriptions,
@@ -365,7 +365,7 @@ export const editDriveAllowCdn = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAllowCdn', newAllowCdn);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     allowCdn: newAllowCdn,
@@ -393,7 +393,7 @@ export const editDriveBlockEnumeration = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newBlockEnumeration', newBlockEnumeration);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     blockEnumeration: newBlockEnumeration,
@@ -429,7 +429,7 @@ export const setDriveOwningApp = async (
   assertValidSlug('driveSlug', driveSlug);
   assertValidSlug('driveTypeSlug', driveTypeSlug);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     appId: appId,
@@ -464,7 +464,7 @@ export const reassignDriveOwningApp = async (
   assertValidSlug('driveSlug', driveSlug);
   assertValidSlug('driveTypeSlug', driveTypeSlug);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     appId: appId,
@@ -489,7 +489,7 @@ export const editDriveAttributes = async (
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('newAttributes', newAttributes);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const data = {
     targetDrive: targetDrive,
     attributes: newAttributes,
@@ -528,7 +528,7 @@ export const getDriveStatus = async (
 ): Promise<DriveStatus> => {
   assertIfDefined('targetDrive', targetDrive);
 
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .get<DriveStatus>(`/drives/${targetDrive.alias}/status`)

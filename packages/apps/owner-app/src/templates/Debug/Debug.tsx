@@ -52,7 +52,7 @@ const Debug = () => {
   }, [url, isPost, headers, params]);
 
   const doRequest = async () => {
-    const client = dotYouClient.createAxiosClient({ headers, v2: true });
+    const client = dotYouClient.createAxiosClient({ headers });
     addToOutput(`Requesting ${isPost ? 'POST' : 'GET'} ${url}\n`);
     const result = isPost
       ? await client.post(url, params).catch((data) => data.response)

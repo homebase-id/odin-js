@@ -10,7 +10,7 @@ test('App DotYouClient', () => {
   });
 
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/apps/v1');
+  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/v2');
   expect(dotYouClient.getRoot()).toEqual('https://example.com');
   expect(dotYouClient.getType()).toEqual(ApiType.App);
 });
@@ -24,7 +24,7 @@ test('Guest DotYouClient', () => {
   expect(dotYouClient).toBeInstanceOf(DotYouClient);
   expect(dotYouClient.getRoot()).toEqual('https://example.com');
   expect(dotYouClient.getType()).toEqual(ApiType.Guest);
-  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/guest/v1');
+  expect(dotYouClient.getEndpoint()).toEqual('https://example.com/api/v2');
 });
 
 test('DotYouClient GET request interceptor', async () => {

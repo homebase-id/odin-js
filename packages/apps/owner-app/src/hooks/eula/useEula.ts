@@ -5,7 +5,7 @@ export const useEula = () => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchRequired = async (): Promise<string | false> => {
-    const client = dotYouClient.createAxiosClient({ v2: true });
+    const client = dotYouClient.createAxiosClient();
     const required = await client
       .post<boolean>('/config/system/is-eula-signature-required')
       .then((response) => !!response?.data);
@@ -17,7 +17,7 @@ export const useEula = () => {
   };
 
   const markAccepted = (version: string) => {
-    const client = dotYouClient.createAxiosClient({ v2: true });
+    const client = dotYouClient.createAxiosClient();
     return client
       .post('/config/system/mark-eula-signed', {
         version,

@@ -63,7 +63,7 @@ export const getReactionSummary = async (
   context: ReactionContext
 ): Promise<EmojiReactionSummary> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post<ServerReactionsSummary>(`${reactionsRoot(dotYouClient, context)}/summary`, {})
     .then((response) => mapReactionsSummary(response.data))
     .catch((e) => {
@@ -85,7 +85,7 @@ export const getMyReactions = async (
   _cursor?: string
 ): Promise<string[] | undefined> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post<string[]>(`${reactionsRoot(dotYouClient, context)}/listbyidentity`, {
       identity: odinId || dotYouClient.getHostIdentity(),
     })

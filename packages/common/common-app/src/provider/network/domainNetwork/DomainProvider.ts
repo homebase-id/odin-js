@@ -21,7 +21,7 @@ export const getDomains = async (
     cursor?: unknown;
   }
 ): Promise<NumberCursoredResult<DomainMembership>> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   // const url = root + '/list?' + stringifyToQueryParams(data);
   // TODO: Add pagination whent the server supports it
   const url = root + '/list';
@@ -32,7 +32,7 @@ export const getDomains = async (
 };
 
 export const getDomainInfo = async (dotYouClient: DotYouClient, domain: string) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + '/domain';
 
   return client.post<DomainMembership>(url, { domain }).then((response) => {

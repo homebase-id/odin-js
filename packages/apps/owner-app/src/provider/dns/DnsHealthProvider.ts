@@ -105,7 +105,7 @@ export interface DnsHealth {
 }
 
 export const getDnsHealth = async (dotYouClient: DotYouClient): Promise<DnsHealth> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const response = await client.get<DnsHealth>(`${root}/status`);
   return response.data;
 };

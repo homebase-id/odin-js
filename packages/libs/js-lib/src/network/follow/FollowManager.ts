@@ -26,7 +26,7 @@ export const fetchFollowing = async (
   cursorState?: string,
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const params = { cursor: cursorState, count: pageSize };
   const url = root + `/identities-i-follow?${stringifyToQueryParams(params)}`;
 
@@ -43,7 +43,7 @@ export const fetchIdentityIFollow = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<FollowRequest> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/identity-i-follow?odinId=${odinId}`;
 
   return client
@@ -59,7 +59,7 @@ export const createOrUpdateFollow = async (
   request: FollowRequest,
   synchronizeFeedHistoryNow?: boolean
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/follow`;
 
   return client
@@ -77,7 +77,7 @@ export const syncFeedHistoryForFollowing = async (
   dotYouClient: DotYouClient,
   request: { odinId: string }
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/sync-feed-history`;
 
   return client
@@ -92,7 +92,7 @@ export const Unfollow = async (
   dotYouClient: DotYouClient,
   request: UnfollowRequest
 ): Promise<boolean | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/unfollow`;
 
   return client
@@ -108,7 +108,7 @@ export const fetchFollowers = async (
   cursorState?: string,
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const params = { cursor: cursorState, count: pageSize };
   const url = root + `/following-me?${stringifyToQueryParams(params)}`;
 
@@ -125,7 +125,7 @@ export const fetchFollower = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<FollowRequest> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/follower?odinId=${odinId}`;
 
   return client
@@ -139,7 +139,7 @@ export const fetchFollower = async (
 export const fetchFollowDetail = async (
   dotYouClient: DotYouClient
 ): Promise<FollowRequest | null> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = root + `/follower-configuration`;
 
   return client

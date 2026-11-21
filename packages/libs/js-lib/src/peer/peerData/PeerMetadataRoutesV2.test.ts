@@ -19,7 +19,7 @@ const recordingClient = (data: unknown) => {
   vi.spyOn(dotYouClient, 'createAxiosClient').mockImplementation((options) => {
     return {
       get: async (url: string) => {
-        calls.push([!!options?.v2, url]);
+        calls.push([true, url]);
         return { data };
       },
     } as unknown as ReturnType<DotYouClient['createAxiosClient']>;

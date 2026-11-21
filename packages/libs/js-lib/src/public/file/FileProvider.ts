@@ -56,7 +56,7 @@ export const publishFile = async (
   sections: QueryParamsSection[],
   crossOriginBehavior: 'allowAllOrigins' | 'default' = 'default'
 ) => {
-  const httpClient = dotYouClient.createAxiosClient({ v2: true });
+  const httpClient = dotYouClient.createAxiosClient();
 
   const fileRequest: PublishStaticFileRequest = {
     filename: fileName,
@@ -85,7 +85,7 @@ export const publishProfileCardFile = async (
     sameAs: { type: string; url: string | undefined }[]
   }
 ) => {
-  const httpClient = dotYouClient.createAxiosClient({ v2: true });
+  const httpClient = dotYouClient.createAxiosClient();
 
   return await httpClient.post('/optimization/cdn/profile-card', {
     profileCardJson: JSON.stringify(profileCard),
@@ -97,7 +97,7 @@ export const publishProfileImageFile = async (
   imageBuffer: Uint8Array,
   contentType: string
 ) => {
-  const httpClient = dotYouClient.createAxiosClient({ v2: true });
+  const httpClient = dotYouClient.createAxiosClient();
 
   const fileRequest: PublishProfileImage = {
     image64: uint8ArrayToBase64(imageBuffer),

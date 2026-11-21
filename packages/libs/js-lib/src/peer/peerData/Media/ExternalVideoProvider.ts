@@ -56,7 +56,7 @@ export const getDecryptedVideoUrlOverPeer = async (
     systemFileType,
   });
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpointV2();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
 
     return `${host}/drives/${targetDrive.alias}/files/${fileId}/payload/${key}/0/0?${stringifyToQueryParams(
       {
@@ -96,7 +96,7 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
     }
   );
   if (!meta?.fileMetadata.isEncrypted) {
-    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpointV2();
+    const host = new DotYouClient({ hostIdentity: odinId, api: ApiType.Guest }).getEndpoint();
     return `${host}/drives/${targetDrive.alias}/files/${meta?.fileId}/payload/${key}/0/0?${stringifyToQueryParams(
       {
         xfst: systemFileType || 'Standard',

@@ -7,7 +7,7 @@ export const hasValidPublicToken = async (): Promise<boolean> => {
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const response = await client.get('/home/auth/is-authenticated', {
     validateStatus: () => true,
   });
@@ -19,7 +19,7 @@ export const getEccPublicKey = async (): Promise<string> => {
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   return await client
     .get('/public/keys/offline-ecc', { validateStatus: () => true })
     .then((response) => response.data);
@@ -31,7 +31,7 @@ export const logoutPublicSession = async (): Promise<void> => {
       hostIdentity: window.location.hostname,
       api: ApiType.Guest,
     });
-    const client = dotYouClient.createAxiosClient({ v2: true });
+    const client = dotYouClient.createAxiosClient();
     await client.get('/home/auth/delete-token');
   } catch (ex) {
     console.warn('Failed to logout on the server', ex);

@@ -90,7 +90,6 @@ export const queryBatch = async <
 
   const client = dotYouClient.createAxiosClient({
     systemFileType: params.systemFileType,
-    v2: true,
   });
 
   const { targetDrive, ...queryParams } = toBatchQueryParams(params);

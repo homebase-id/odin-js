@@ -13,7 +13,7 @@ export const processInbox = async (
   targetDrive: TargetDrive,
   batchSize?: number
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .get<ProcessInboxResponse>(

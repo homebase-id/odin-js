@@ -16,7 +16,7 @@ export const sendIntroduction = async (
   dotYouClient: DotYouClient,
   introduction: IntroductionGroup
 ): Promise<IntroductionResult | null> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   if (introduction.recipients.length < 2) {
     return null;
@@ -53,7 +53,7 @@ export interface Introduction {
 export const getReceivedIntroductions = async (
   dotYouClient: DotYouClient
 ): Promise<Introduction[] | null> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .get<Introduction[]>(IntroductionsRootV2)
@@ -67,7 +67,7 @@ export const getReceivedIntroductions = async (
 export const removeAllReceivedIntroductions = async (
   dotYouClient: DotYouClient
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
 
   return client
     .delete(IntroductionsRootV2)

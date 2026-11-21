@@ -410,7 +410,7 @@ const SecurityMenuItem = () => {
 
   const getNeedsAttention = async (): Promise<boolean> => {
     const dotYouClient = new OwnerClient({api: ApiType.Owner});
-    const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
+    const client = dotYouClient.createAxiosClient({overrideEncryption: true});
     const url = "/security/recovery/needs-attention";
     try {
 

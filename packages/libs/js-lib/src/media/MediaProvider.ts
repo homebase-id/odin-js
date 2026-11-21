@@ -100,7 +100,7 @@ export const getAnonymousDirectImageUrl = (
   lastModified?: number
 ) => {
   const dotYouClient = new DotYouClient({ hostIdentity: identity, api: ApiType.Guest });
-  return `${dotYouClient.getEndpointV2()}/drives/${targetDrive.alias}/files/${fileId}/payload/${fileKey}${
+  return `${dotYouClient.getEndpoint()}/drives/${targetDrive.alias}/files/${fileId}/payload/${fileKey}${
     size ? `/thumb/${size.pixelWidth}/${size.pixelHeight}` : '/0/0'
   }?${stringifyToQueryParams({
     lastModified: lastModified,

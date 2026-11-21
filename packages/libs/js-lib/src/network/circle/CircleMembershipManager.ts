@@ -11,7 +11,7 @@ export const removeMemberFromCircle = async (
   dotYouClient: DotYouClient,
   membershipGrant: { odinId: string; circleId: string }
 ) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = connectionsRootV2 + '/revoke';
 
   return client
@@ -30,7 +30,7 @@ export const fetchMembersOfCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
 ): Promise<Membership[]> => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const url = membershipRoot + '/list';
 
   return client

@@ -28,7 +28,7 @@ export const getLinkPreview = async (
   dotYouClient: DotYouClient,
   url: string
 ): Promise<LinkPreview | null> => {
-  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
+  const axiosClient = dotYouClient.createAxiosClient();
   const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
 
   const cacheKey = standardizedUrl;

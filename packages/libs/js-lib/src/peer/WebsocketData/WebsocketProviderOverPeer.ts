@@ -98,7 +98,7 @@ const getOrFetchPeerToken = async (
   // Fetch new token
   isDebug && console.debug('[WebsocketProviderOverPeer] Fetching new peer token');
   const token = await dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post<{
       authenticationToken64: string;
       sharedSecret: string;

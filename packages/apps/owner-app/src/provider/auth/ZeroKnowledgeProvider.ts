@@ -66,12 +66,12 @@ export const getDealNeedsDealing = async (dotYouClient: DotYouClient) =>
 
 const getZkStatus = async (dotYouClient: DotYouClient): Promise<ZkStatus> =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<ZkStatus>('/security/zk')
     .then((response) => response.data);
 
 const saveZkKeys = async (dotYouClient: DotYouClient, request: ZkKeysRequest) =>
-  dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/keys', request);
+  dotYouClient.createAxiosClient().post('/security/zk/keys', request);
 
 // These want the password itself, not just the session, so the login proves it again. Each copy is
 // written only when it's missing: it's sealed, so this browser can't check it.
@@ -86,7 +86,7 @@ const saveMissingPasswordCopies = async (dotYouClient: DotYouClient, password: s
       shamirPublicKeyJwk ? sealPassword(password, shamirPublicKeyJwk) : undefined,
       preparePasswordProof(dotYouClient, password),
     ]);
-  return dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/password', {
+  return dotYouClient.createAxiosClient().post('/security/zk/password', {
     phrasePublicKeyEncryptedPassword,
     shamirPublicKeyEncryptedPassword,
     currentAuthenticationPasswordReply,
@@ -95,7 +95,7 @@ const saveMissingPasswordCopies = async (dotYouClient: DotYouClient, password: s
 
 const handOverPhrase = async (dotYouClient: DotYouClient, password: string, nonce: NonceData) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post<{ phrase: string }>('/security/zk/phrase-handover', {
       currentAuthenticationPasswordReply: await prepareAuthPassword(password, nonce),
     })
@@ -113,7 +113,7 @@ const takeOverPhrase = async (dotYouClient: DotYouClient, password: string, mast
   ]);
   const copies: ZkPhraseCopiesRequest = await makePhraseCopies(phrase, masterKey);
 
-  return dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/phrase-takeover', {
+  return dotYouClient.createAxiosClient().post('/security/zk/phrase-takeover', {
     ...copies,
     phrasePublicKeyEncryptedPassword: await sealPassword(password, copies.phrasePublicKeyJwk),
     currentAuthenticationPasswordReply,
@@ -122,14 +122,14 @@ const takeOverPhrase = async (dotYouClient: DotYouClient, password: string, mast
 
 const getSessionKey = async (dotYouClient: DotYouClient) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<{ sessionKey64: string }>('/security/zk/session-key')
     .then((response) => base64ToUint8Array(response.data.sessionKey64));
 
 const convertShardRecoveryDrive = async (
   dotYouClient: DotYouClient,
   request: ZkConvertDriveRequest
-) => dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/convert-shard-recovery-drive', request);
+) => dotYouClient.createAxiosClient().post('/security/zk/convert-shard-recovery-drive', request);
 
 /**
  * A built-in drive the server leaves for this browser to create, Private or Selective Share, with keys only the
@@ -147,7 +147,7 @@ interface MissingZkDrive {
  * that waited for it. A drive that fails is left for the next login, and doesn't hold up the others.
  */
 const createMissingZkDrives = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const missing = (await client.get<MissingZkDrive[]>('/security/zk/missing-drives')).data;
   for (const drive of missing) {
     try {
@@ -205,7 +205,7 @@ const forgetAutomatedDealPending = () => {
 // Not getShamirConfiguration: that reads a failure as "no deal", which would deal over one
 const getDeal = (dotYouClient: DotYouClient) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<DealerShardConfig | ''>('/security/recovery/config')
     .then((response) => response.data || null);
 
@@ -216,7 +216,7 @@ const getDeal = (dotYouClient: DotYouClient) =>
  */
 export const getShardRecoveryPublicKey = (dotYouClient: DotYouClient, odinId: string) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<{ publicKeyJwk: string; isZeroKnowledge: boolean; callerMayWrite: boolean }>(
       `/peer/${encodeURIComponent(odinId)}/apps/recovery/drives/shard-recovery/public-key`
     )
@@ -273,7 +273,7 @@ const dealAgain = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
 /** Sends a deal this browser made; throws with a message to show. */
 export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsRequest, failure: string) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .post('/security/recovery/configure-shards', request)
     .catch((error) => {
       console.warn(error);
@@ -293,7 +293,7 @@ export const postDeal = (dotYouClient: DotYouClient, request: ConfigureShardsReq
  */
 export const dealAutomatedRecovery = async (dotYouClient: DotYouClient, masterKey: Uint8Array) => {
   const automated = await dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<ShamirDealPlan>('/security/recovery/automated-recovery-players', {
       validateStatus: (s) => s === 200 || s === 404,
     })
@@ -434,12 +434,12 @@ export const ensureZeroKnowledgeKeys = async (dotYouClient: DotYouClient, passwo
 
 const getZkAppKeys = (dotYouClient: DotYouClient) =>
   dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<ZkAppKeys[]>('/security/zk/app-keys')
     .then((response) => response.data);
 
 const saveZkAppKeys = (dotYouClient: DotYouClient, request: ZkAppKeysRequest) =>
-  dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/app-keys', request);
+  dotYouClient.createAxiosClient().post('/security/zk/app-keys', request);
 
 /** Saves what an app is missing: its key, and its copy of each zero-knowledge drive it is granted. */
 const backfillAppKey = async (dotYouClient: DotYouClient, app: ZkAppKeys, masterKey: Uint8Array) => {
@@ -529,7 +529,7 @@ export const makeDriveZeroKnowledge = async (
   { drive, name, sharingModel }: DriveUpgrade
 ) => {
   const driveId = formatGuidId(drive.alias); // the server reads a Guid from JSON only with dashes
-  const client = dotYouClient.createAxiosClient({ v2: true });
+  const client = dotYouClient.createAxiosClient();
   const failed = (error: unknown) => {
     console.warn(error);
     throw new Error(
@@ -625,7 +625,7 @@ export const getTypedPhraseCheck = async (phrase: string) => getPhraseCheck(awai
  */
 export const reenterRecoveryPhrase = async (dotYouClient: DotYouClient, phrase: string) => {
   const masterKey = await requireZkMasterKey(dotYouClient, 'keep your recovery phrase');
-  await dotYouClient.createAxiosClient({ v2: true }).post('/security/zk/phrase-reentry', await makePhraseCopies(phrase, masterKey));
+  await dotYouClient.createAxiosClient().post('/security/zk/phrase-reentry', await makePhraseCopies(phrase, masterKey));
 };
 
 /**
@@ -639,7 +639,7 @@ export const recoverFromPhrase = async (
   phrase: string
 ): Promise<PasswordRecovery | 'notTakenOver' | 'needsReentry'> => {
   const response = await dotYouClient
-    .createAxiosClient({ v2: true })
+    .createAxiosClient()
     .get<ZkPhraseRecovery>('/auth/owner/zk-phrase-recovery', {
       validateStatus: (s) => s === 200 || s === 404 || s === 409,
     });
@@ -670,7 +670,7 @@ export const resetPasswordWithResetKey = async (
   const encryptedResetKey = await encryptRecoveryKey(uint8ArrayToBase64(recovery.resetKey), passwordReply, publicKey);
 
   return dotYouClient
-    .createAxiosClient({ overrideEncryption: true, v2: true })
+    .createAxiosClient({ overrideEncryption: true })
     .post('/auth/owner/zk-reset', { encryptedResetKey, passwordReply, zkKeys })
     .then((response) => response.status === 200)
     .catch((error) => {
