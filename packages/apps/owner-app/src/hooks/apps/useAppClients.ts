@@ -1,12 +1,10 @@
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   GetAppClients,
-  RegisterAppClient,
   RemoveClient,
   RevokeClient,
   AllowClient,
 } from '../../provider/app/AppManagementProvider';
-import { AppClientRegistrationRequest } from '../../provider/app/AppManagementProviderTypes';
 import { useDotYouClientContext } from '@homebase-id/common-app';
 
 export const useAppClients = ({ appId }: { appId?: string }) => {
@@ -15,24 +13,6 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
 
   const fetch = async ({ appId }: { appId: string }) => {
     return await GetAppClients(dotYouClient, appId);
-  };
-
-  const registerClient = async ({
-    appId,
-    jwkBase64UrlPublicKey,
-    clientFriendlyName,
-  }: {
-    appId: string;
-    jwkBase64UrlPublicKey: string;
-    clientFriendlyName: string;
-  }) => {
-    const clientRegRequest: AppClientRegistrationRequest = {
-      appId: appId,
-      jwkBase64UrlPublicKey: jwkBase64UrlPublicKey,
-      clientFriendlyName: clientFriendlyName,
-    };
-
-    return RegisterAppClient(dotYouClient, clientRegRequest);
   };
 
   const removeClient = async ({
@@ -72,13 +52,6 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
       refetchOnWindowFocus: false,
       retry: false,
       enabled: !!appId,
-    }),
-    registerClient: useMutation({
-      mutationFn: registerClient,
-      onSuccess: (data, param) => invalidateAppClients(queryClient, param.appId),
-      onError: (ex) => {
-        console.error(ex);
-      },
     }),
     removeClient: useMutation({
       mutationFn: removeClient,

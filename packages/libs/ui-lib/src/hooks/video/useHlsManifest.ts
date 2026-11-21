@@ -5,7 +5,6 @@ import {
   SystemFileType,
   TargetDrive,
   decryptKeyHeader,
-  InterceptionEncryptionUtil,
 } from '@homebase-id/js-lib/core';
 import {
   stringifyToQueryParams,
@@ -164,24 +163,16 @@ const getSegmentUrl = async (
       systemFileType
     );
 
-  const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    return null;
-  }
+  // Without a shared secret the file's key header can't be opened, so an encrypted video can't play
+  if (!dotYouClient.getSharedSecret()) return null;
 
-  const params = {
-    ...videoDrive,
-    fileId: videoFileId,
-    key: videoFileKey,
-    xfst: systemFileType || 'Standard',
-  };
+  // HLS segments are byte ranges of one file, so the url must honour a Range header (local: the ranged route)
+  const filePath = `drives/${videoDrive.alias}/files/${videoFileId}/payload/${videoFileKey}`;
+  const query = stringifyToQueryParams({ xfst: systemFileType || 'Standard' });
 
-  const unenryptedThumbUrl =
-    odinId !== identity
-      ? `${dotYouClient.getEndpoint()}/transit/query/payload?${stringifyToQueryParams({ odinId, ...params })}`
-      : `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams(params)}`;
-
-  return InterceptionEncryptionUtil.encryptUrl(unenryptedThumbUrl, ss);
+  return odinId !== identity
+    ? `${dotYouClient.getEndpointV2()}/peer/${encodeURIComponent(odinId)}/${filePath}?${query}`
+    : `${dotYouClient.getEndpointV2()}/${filePath}/0/0?${query}`;
 };
 
 const getKeyUrl = async (aesKey: Uint8Array) => {

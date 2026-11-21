@@ -1,13 +1,13 @@
 import { DotYouClient } from '@homebase-id/js-lib/core';
 
-// GET /api/owner/v1/mail/verify - live per-tenant email checks that a DNS record
+// GET /api/v2/mail/owner/verify - live per-tenant email checks that a DNS record
 // comparison cannot make: the DKIM pair proof (sign a test vector with the stored
 // private key, verify it against the public key in the live DNS TXT) and public-key
 // drift across the publication surfaces (WKD, DID).
 //
 // Heavier than the DNS status call - it signs and makes outbound HTTPS requests - so
 // callers should only run it for identities that actually have email set up.
-const root = '/mail';
+const root = '/mail/owner';
 
 export interface MailHealth {
   // False when email was never activated for this identity; errors/warnings are then empty
@@ -18,12 +18,12 @@ export interface MailHealth {
 }
 
 export const getMailHealth = async (dotYouClient: DotYouClient): Promise<MailHealth> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const response = await client.get<MailHealth>(`${root}/verify`);
   return response.data;
 };
 
-// POST /api/owner/v1/mail/publish-dns-records - (re)writes this identity's static mail DNS
+// POST /api/v2/mail/owner/publish-dns-records - (re)writes this identity's static mail DNS
 // records (MX, SPF, DMARC, MTA-STS, TLS-RPT, mta-sts CNAME) into whichever zone holds the
 // tenant's records, and (re)registers the domain with the outbound relay, publishing its
 // CNAMEs too. A relay refusal comes back in relayError.
@@ -54,7 +54,7 @@ export interface MailDnsPublishResult {
 export const publishMailDnsRecords = async (
   dotYouClient: DotYouClient
 ): Promise<MailDnsPublishResult> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   const response = await client.post<MailDnsPublishResult>(`${root}/publish-dns-records`);
   return response.data;
 };

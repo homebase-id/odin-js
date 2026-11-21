@@ -10,19 +10,20 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './ConnectionManager';
-import { ConnectionRequestResult } from './ConnectionRequestResult';
 
 //Handles making and reading requests to connect with others
-const Root = '/circles/requests';
-const SentPathRoot: string = Root + '/sent';
-const PendingPathRoot: string = Root + '/pending';
+// V2: /api/v2/connections
+const ConnectionsRootV2 = '/connections';
+const RequestsRootV2 = ConnectionsRootV2 + '/requests';
+const IncomingPathRootV2 = RequestsRootV2 + '/incoming';
+const OutgoingPathRootV2 = RequestsRootV2 + '/outgoing';
 
 export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<IncomingConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = RequestsRootV2 + '?' + stringifyToQueryParams({ type: 'incoming', ...params });
 
   return client
     .get(url)
@@ -36,11 +37,10 @@ export const getPendingRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionRequest | null> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = PendingPathRoot + '/single';
-  const data: OdinIdRequest = { odinId: odinId };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
   return client
-    .post<ConnectionRequest>(url, data)
+    .get<ConnectionRequest>(url)
     .then((response) => {
       return { ...response.data, status: 'pending' } as const;
     })
@@ -51,8 +51,8 @@ export const getSentRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<ConnectionRequest>> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = SentPathRoot + '/list?' + stringifyToQueryParams(params);
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = RequestsRootV2 + '?' + stringifyToQueryParams({ type: 'outgoing', ...params });
 
   return client
     .get(url)
@@ -66,12 +66,11 @@ export const getSentRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionRequest> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = SentPathRoot + '/single';
-  const data: OdinIdRequest = { odinId: odinId };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = `${OutgoingPathRootV2}/${encodeURIComponent(odinId)}`;
 
   return client
-    .post(url, data)
+    .get(url)
     .then((response) => {
       if (!response?.data) return null;
       return { ...response.data, status: 'sent' };
@@ -84,53 +83,51 @@ export const acceptConnectionRequest = async (
   odinId: string,
   circleIds?: string[]
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = PendingPathRoot + '/accept/';
-
-  const header: AcceptRequestHeader = {
-    sender: odinId,
-    circleIds: circleIds || [],
-    permissions: undefined,
-  };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  // The sender is the resource; the body carries only the circles to grant them
+  const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
+  const body: Pick<AcceptRequestHeader, 'circleIds'> = { circleIds: circleIds || [] };
 
   return client
-    .post(url, header)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .put(url, body)
+    .then(() => true) // V2 answers 204; V1 answered true
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const deletePendingRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = PendingPathRoot + '/delete';
-  const data: OdinIdRequest = { odinId: odinId };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = `${IncomingPathRootV2}/${encodeURIComponent(odinId)}`;
 
   return client
-    .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .delete(url)
+    .then(() => true) // V2 answers 204; V1 answered true
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const deleteSentRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<boolean> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = SentPathRoot + '/delete';
-  const data: OdinIdRequest = { odinId: odinId };
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  // No notifyRemote, as before: the server's default (a one-sided cancel) applies
+  const url = `${OutgoingPathRootV2}/${encodeURIComponent(odinId)}`;
 
   return client
-    .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .delete(url)
+    .then(() => true) // V2 answers 204; V1 answered true
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const sendRequest = async (
@@ -139,54 +136,31 @@ export const sendRequest = async (
   message: string,
   circleIds: string[]
 ): Promise<boolean> => {
-  const url = Root + '/sendrequest';
+  const url = RequestsRootV2;
   const data: ConnectionRequestHeader = {
     recipient: odinId,
     message: message,
     circleIds: circleIds,
   };
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return client
     .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};
-
-export const sendConnectionRequestWithOutcome = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  message: string,
-  circleIds: string[]
-): Promise<ConnectionRequestResult> => {
-  const url = Root + '/send-request-with-outcome';
-  const data: ConnectionRequestHeader = {
-    recipient: odinId,
-    message: message,
-    circleIds: circleIds,
-  };
-
-  const client = dotYouClient.createAxiosClient();
-  return client
-    .post(url, data)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .then(() => true) // V2 answers 201 with no body; V1 answered true
+    .catch((error) => {
+      dotYouClient.handleErrorResponse(error);
+      throw error;
+    });
 };
 
 export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = '/circles/connections/block';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = ConnectionsRootV2 + '/block';
   const data: OdinIdRequest = { odinId: odinId };
 
   return client
-    .post<boolean>(url, data)
-    .then((response) => {
-      return response.data;
-    })
+    .post(url, data)
+    .then(() => true) // V2 answers an empty 200; V1 answered the service's bool
     .catch((err) => {
       dotYouClient.handleErrorResponse(err);
       return false;
@@ -194,15 +168,13 @@ export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) =>
 };
 
 export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
-  const client = dotYouClient.createAxiosClient();
-  const url = '/circles/connections/unblock';
+  const client = dotYouClient.createAxiosClient({ v2: true });
+  const url = ConnectionsRootV2 + '/unblock';
   const data: OdinIdRequest = { odinId: odinId };
 
   return client
-    .post<boolean>(url, data)
-    .then((response) => {
-      return response.data;
-    })
+    .post(url, data)
+    .then(() => true) // V2 answers an empty 200; V1 answered the service's bool
     .catch((err) => {
       dotYouClient.handleErrorResponse(err);
       return false;

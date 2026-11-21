@@ -169,7 +169,6 @@ const uploadPost = async <T extends PostContent>(
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       drive: targetDrive,
-      overwriteFileId: file.fileId,
     },
     transitOptions: {
       recipients: [],

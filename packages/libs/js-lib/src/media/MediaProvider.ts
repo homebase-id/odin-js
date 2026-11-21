@@ -89,6 +89,7 @@ export const getDecryptedMediaUrl = async (
   });
 };
 
+/** The ranged route from 0 ("to the end"): the only V2 payload route that honours a Range header */
 export const getAnonymousDirectImageUrl = (
   identity: string,
   targetDrive: TargetDrive,
@@ -99,15 +100,9 @@ export const getAnonymousDirectImageUrl = (
   lastModified?: number
 ) => {
   const dotYouClient = new DotYouClient({ hostIdentity: identity, api: ApiType.Guest });
-  return `${dotYouClient.getEndpoint()}/drive/files/${
-    size ? 'thumb' : 'payload'
+  return `${dotYouClient.getEndpointV2()}/drives/${targetDrive.alias}/files/${fileId}/payload/${fileKey}${
+    size ? `/thumb/${size.pixelWidth}/${size.pixelHeight}` : '/0/0'
   }?${stringifyToQueryParams({
-    alias: targetDrive.alias,
-    type: targetDrive.type,
-    fileId: fileId,
-    ...(size
-      ? { payloadKey: fileKey, width: size.pixelWidth, height: size.pixelHeight }
-      : { key: fileKey }),
     lastModified: lastModified,
     xfst: systemFileType || 'Standard',
     iac: true, // iac is a flag that tells the identity to ignore any auth cookies

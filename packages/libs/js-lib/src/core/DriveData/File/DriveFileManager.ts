@@ -1,6 +1,7 @@
 import { AxiosRequestConfig } from 'axios';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 import { DotYouClient } from '../../DotYouClient';
+import { getAxiosClientV2 } from './DriveFileHelper';
 import { SystemFileType } from './DriveFileTypes';
 import { TargetDrive } from './DriveFileTypes';
 
@@ -17,20 +18,15 @@ export const deleteFile = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
-  const request = {
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    recipients: recipients,
-  };
+  // The empty body is only for the shared-secret interceptor to encrypt
+  const fileRoot = `/drives/${targetDrive.alias}/files/${fileId}`;
+  const request = hardDelete
+    ? client.post(`${fileRoot}/hard-delete`, {}, axiosConfig)
+    : client.post(`${fileRoot}/delete`, { recipients: recipients }, axiosConfig);
 
-  return client
-    .post(`/drive/files/${hardDelete ? 'harddelete' : 'delete'}`, request, axiosConfig)
+  return request
     .then((response) => {
       if (response.status === 200) {
         return true;
@@ -55,22 +51,17 @@ export const deleteFiles = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileIds', fileIds);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const request = {
     requests: fileIds.map((fileId) => ({
-      file: {
-        targetDrive: targetDrive,
-        fileId: fileId,
-      },
+      fileId: fileId,
       recipients: recipients,
     })),
   };
 
   return client
-    .post('/drive/files/deletefileidbatch', request, axiosConfig)
+    .post(`/drives/${targetDrive.alias}/files/delete-batch/by-file-id`, request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 
@@ -93,20 +84,17 @@ export const deleteFilesByGroupId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GroupIds', groupIds);
 
-  const client = dotYouClient.createAxiosClient({
-    systemFileType,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const request = {
     requests: groupIds.map((groupId) => ({
-      targetDrive: targetDrive,
       groupId: groupId,
       recipients: recipients,
     })),
   };
 
   return client
-    .post('/drive/files/deletegroupidbatch', request, axiosConfig)
+    .post(`/drives/${targetDrive.alias}/files/delete-batch/by-group-id`, request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { getCancelRedirectUrl, getStateParam } from './cancelRedirect';
+import { getCancelRedirectUrl, getConsentFormAction, getStateParam } from './cancelRedirect';
 
 const params = (href: string) => Object.fromEntries(new URL(href).searchParams);
 
@@ -61,4 +61,18 @@ test('getStateParam reads state from a URL and tolerates anything else', () => {
   expect(getStateParam('https://frodo.dotyou.cloud/authorize')).toBeUndefined();
   expect(getStateParam('backend-will-decide')).toBeUndefined();
   expect(getStateParam(null)).toBeUndefined();
+});
+
+test('getConsentFormAction posts to the route the sign-in started on', () => {
+  expect(getConsentFormAction('https://frodo.dotyou.cloud/api/v2/youauth/authorize?client_id=a')).toBe(
+    '/api/v2/youauth/authorize'
+  );
+  expect(getConsentFormAction('https://frodo.dotyou.cloud/api/owner/v1/youauth/authorize?client_id=a')).toBe(
+    '/api/owner/v1/youauth/authorize'
+  );
+});
+
+test('getConsentFormAction falls back to V1 for anything else', () => {
+  expect(getConsentFormAction('not a url')).toBe('/api/owner/v1/youauth/authorize');
+  expect(getConsentFormAction('https://frodo.dotyou.cloud/elsewhere')).toBe('/api/owner/v1/youauth/authorize');
 });

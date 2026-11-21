@@ -15,10 +15,13 @@ import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
 const isDebug = hasDebugFlag();
 
 /// Upload methods
+/// The server reads recipients and remote drive from the instructions, so the first ones only stand in for the path
 export const uploadFileOverPeer = async (
   dotYouClient: DotYouClient,
   instructions: TransitInstructionSet,
@@ -31,15 +34,16 @@ export const uploadFileOverPeer = async (
     axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<TransitUploadResult | void> => {
+  const url = `${peerDriveRootV2(
+    instructions.recipients?.[0] ?? dotYouClient.getHostIdentity(),
+    instructions.remoteTargetDrive?.alias
+  )}/files/send`;
+
   isDebug &&
-    console.debug(
-      'request',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
-      {
-        instructions,
-        metadata,
-      }
-    );
+    console.debug('request', new URL(`${dotYouClient.getEndpointV2()}${url}`).pathname, {
+      instructions,
+      metadata,
+    });
 
   metadata.isEncrypted = encrypt || !!options?.aesKey;
 
@@ -69,12 +73,8 @@ export const uploadFileOverPeer = async (
     manifest
   );
 
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
-    systemFileType: systemFileType,
-  });
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
 
-  const url = '/transit/sender/files/send';
   const config = {
     ...options?.axiosConfig,
     headers: {
@@ -103,7 +103,7 @@ export const uploadFileOverPeer = async (
   isDebug &&
     console.debug(
       'response',
-      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
+      new URL(`${dotYouClient.getEndpointV2()}${url}`).pathname,
       uploadResult
     );
 

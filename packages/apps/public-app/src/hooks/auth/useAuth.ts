@@ -87,7 +87,7 @@ export const useYouAuthAuthorization = () => {
       public_key: pk,
       permission_request: '',
       state: JSON.stringify(state),
-      redirect_uri: `https://${window.location.host}/api/guest/v1/builtin/home/auth/auth-code-callback`,
+      redirect_uri: `https://${window.location.host}/api/v2/home/auth/auth-code-callback`,
       cipher: 'aes-gcm',
     };
   };

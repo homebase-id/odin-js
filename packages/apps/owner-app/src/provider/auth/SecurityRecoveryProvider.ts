@@ -54,7 +54,7 @@ const dotYouClient = new OwnerClient({
 });
 
 export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
   return await axiosClient
     .get(`${root}/status`)
     .then((response) => {
@@ -71,7 +71,7 @@ export const getRecoveryStatus = async (): Promise<ShamirRecoveryStatusRedacted>
  * rebuilt, with a new password. True when the password was set.
  */
 export const finalizeRecovery = async (secret: Uint8Array, newPassword: string): Promise<boolean> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
 
   const salts = await getSalts(dotYouClient);
   const passwordReply = await prepareAuthPassword(newPassword, salts);
@@ -96,7 +96,7 @@ export const finalizeRecovery = async (secret: Uint8Array, newPassword: string):
  * with it, so the page says so itself. True when the email was sent.
  */
 export const exitRecoveryMode = async (): Promise<boolean> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
   return await axiosClient
     .post(`${root}/exit-recovery-mode`)
     .then(() => true)
@@ -209,7 +209,7 @@ const getOrMakeRecoveryKey = async (): Promise<RecoveryKeyPair> => {
 export const enterRecoveryMode = async (id: string): Promise<string | null> => {
   const key = getStoredRecoveryKey();
   return dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({v2: true})
     .post(`${root}/verify-enter`, {id, recoveryPublicKeyJwk: key?.publicKeyJwk})
     .then(() => null)
     .catch((error) => {
@@ -230,7 +230,7 @@ export const recoverInThisBrowser = async (): Promise<BundleRecovery> => {
   if (!key) throw new Error('This browser did not start the recovery');
 
   const sealedBundle64 = await dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({v2: true})
     .get<{ sealedBundle64: string }>(`${root}/recovery-bundle`)
     .then((response) => response.data.sealedBundle64);
   return recoverFromBundle(sealedBundle64, base64ToUint8Array(key.privateKey64));
@@ -255,7 +255,7 @@ export const openSlots = async (status: ShamirRecoveryStatusRedacted | null): Pr
  */
 export const fillSlot = async (shardId: string, code: string): Promise<string | null> =>
   dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({v2: true})
     .post(`${root}/fill-slot`, {shardId, code})
     .then(() => null)
     .catch((error) => {
@@ -271,7 +271,7 @@ export const fillSlot = async (shardId: string, code: string): Promise<string | 
  * was asked for; throws with a message to show (translation key) when refused.
  */
 export const initiateRecoveryMode = async (): Promise<boolean> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({v2: true});
   const {publicKeyJwk} = await getOrMakeRecoveryKey();
   return await axiosClient
     .post(`${root}/initiate-recovery-mode`, {recoveryPublicKeyJwk: publicKeyJwk})

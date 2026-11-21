@@ -4,17 +4,10 @@ import { TargetDrive, HomebaseFile, SystemFileType } from '../../../core/core';
 import {
   assertIfDefined,
   tryJsonParse,
-  stringifyToQueryParams,
   assertIfDefinedAndNotDefault,
 } from '../../../helpers/DataUtil';
-import { getAxiosClient } from '../../../core/DriveData/File/DriveFileHelper';
-
-interface GetFileRequest {
-  odinId: string;
-  alias: string;
-  type: string;
-  uniqueId: string;
-}
+import { getAxiosClientV2 } from '../../../core/DriveData/File/DriveFileHelper';
+import { peerDriveRootV2 } from '../PeerRoutesV2';
 
 const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
@@ -75,16 +68,10 @@ export const getFileHeaderBytesOverPeerByUniqueId = async (
     if (cacheData) return cacheData;
   }
 
-  const client = getAxiosClient(dotYouClient, systemFileType);
-
-  const request: GetFileRequest = {
-    odinId: odinId,
-    ...targetDrive,
-    uniqueId,
-  };
+  const client = getAxiosClientV2(dotYouClient, systemFileType);
 
   const promise = client
-    .get('/transit/query/header_byuniqueId?' + stringifyToQueryParams(request))
+    .get(`${peerDriveRootV2(odinId, targetDrive.alias)}/files/by-uid/${uniqueId}/header`)
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

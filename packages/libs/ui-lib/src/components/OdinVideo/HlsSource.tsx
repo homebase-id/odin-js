@@ -60,8 +60,10 @@ export const HlsSource = ({
     if (!needsHlsJs || !hlsManifest) return;
     if (videoRef.current) {
       const hlsInstance = new hls({
-        xhrSetup: (xhr) => {
-          const headers: Record<string, string> = dotYouClient.getHeaders();
+        xhrSetup: (xhr, url) => {
+          const headers = url.includes('/api/v2/')
+            ? dotYouClient.getHeadersV2()
+            : dotYouClient.getHeaders();
           for (const [key, value] of Object.entries(headers)) {
             xhr.setRequestHeader(key, value);
           }

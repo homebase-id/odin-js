@@ -23,7 +23,6 @@ export interface TransitInstructionSet
   priority?: PriorityOptions;
 
   recipients: string[];
-  storageIntent?: 'metadataOnly';
 
   notificationOptions?: PushNotificationOptions;
 }

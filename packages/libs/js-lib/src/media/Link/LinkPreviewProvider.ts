@@ -28,7 +28,7 @@ export const getLinkPreview = async (
   dotYouClient: DotYouClient,
   url: string
 ): Promise<LinkPreview | null> => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
   const standardizedUrl = url.startsWith('http') ? url : `https://${url}`;
 
   const cacheKey = standardizedUrl;
@@ -38,7 +38,7 @@ export const getLinkPreview = async (
   if (cacheEntry) return cacheEntry;
 
   const promise = axiosClient
-    .get<LinkPreviewFromServer>(`/utils/links/extract?url=${encodeURIComponent(standardizedUrl)}`)
+    .get<LinkPreviewFromServer>(`/links/extract?url=${encodeURIComponent(standardizedUrl)}`)
     .then((response) => {
       if (!response.data) return null;
       return {

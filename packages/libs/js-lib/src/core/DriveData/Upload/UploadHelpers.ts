@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../DotYouClient';
+import { getAxiosClientV2 } from '../File/DriveFileHelper';
 
 import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
@@ -9,6 +10,7 @@ import {
   UpdateResult,
   UpdateInstructionSet,
   UpdateManifest,
+  TransferUploadStatus,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -27,6 +29,9 @@ import {
   PayloadFile,
   KeyHeader,
   PayloadFileWithManualEncryption,
+  TargetDrive,
+  FileIdFileIdentifier,
+  GlobalTransitIdFileIdentifier,
 } from '../File/DriveFileTypes';
 import { AxiosRequestConfig } from 'axios';
 import { getSecuredBlob } from '../../../helpers/BlobHelpers';
@@ -192,6 +197,70 @@ export const buildFormData = async (
   return data;
 };
 
+/// V2 create and update take V1's multipart body; the file system type still travels in its header
+
+/// The flattened CreateFileResult / UpdateFileResult V2 returns
+interface FileWriteResultV2 {
+  fileId: string;
+  driveId: string;
+  globalTransitId?: string | null;
+  recipientStatus: { [key: string]: TransferUploadStatus };
+  newVersionTag: string;
+  updated?: number | null;
+  payloads?: unknown[];
+}
+
+/// Back into V1's shape, so callers read globalTransitId, updated and payloads as before
+const toV1FileWriteResult = (result: FileWriteResultV2, targetDrive: TargetDrive) => {
+  const file: FileIdFileIdentifier = { fileId: result.fileId, targetDrive };
+  const globalTransitIdFileIdentifier = (
+    result.globalTransitId ? { globalTransitId: result.globalTransitId, targetDrive } : null
+  ) as GlobalTransitIdFileIdentifier;
+
+  return { ...result, file, globalTransitIdFileIdentifier };
+};
+
+/// Mapped before a version-conflict handler runs, so the handler's own result passes through
+const sendMultipartV2 = async <T>(
+  dotYouClient: DotYouClient,
+  method: 'post' | 'patch',
+  url: string,
+  targetDrive: TargetDrive,
+  data: FormData,
+  systemFileType: SystemFileType | undefined,
+  onVersionConflict: (() => Promise<void | T> | void) | undefined,
+  axiosConfig: AxiosRequestConfig | undefined,
+  logName: string
+) => {
+  const client = getAxiosClientV2(dotYouClient, systemFileType, { noSharedSecret: true });
+
+  const config: AxiosRequestConfig = {
+    ...axiosConfig,
+    headers: {
+      'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
+    },
+  };
+
+  return client[method]<FileWriteResultV2>(url, data, config)
+    .then((response) => toV1FileWriteResult(response.data, targetDrive))
+    .catch((error) => {
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          return onVersionConflict();
+        }
+      }
+
+      if (error.response?.status === 400)
+        console.error(`[odin-js:${logName}]`, error.response?.data);
+      else console.error(`[odin-js:${logName}]`, error);
+      throw error;
+    });
+};
+
+// V1's in-place overwrite: the only one that can switch a file between encrypted and not
 export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
@@ -231,45 +300,71 @@ export const pureUpload = async (
     });
 };
 
-export const pureUpdate = async (
+/// V2 refuses an overwriteFileId here; the caller sets the keyHeader
+export const pureUploadV2 = async (
   dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => Promise<void | UploadResult> | void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<UploadResult | void> =>
+  sendMultipartV2<UploadResult>(
+    dotYouClient,
+    'post',
+    `/drives/${targetDrive.alias}/files`,
+    targetDrive,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig,
+    'pureUploadV2'
+  ).then((result) =>
+    result && !('keyHeader' in result) ? { ...result, keyHeader: undefined } : result
+  );
+
+/// Updates a local file by its file id: PATCH /api/v2/drives/{driveId}/files/{fileId}
+export const pureUpdateV2 = async (
+  dotYouClient: DotYouClient,
+  file: FileIdFileIdentifier,
   data: FormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => Promise<void | UpdateResult> | void,
   axiosConfig?: AxiosRequestConfig
-): Promise<UpdateResult | void> => {
-  const client = dotYouClient.createAxiosClient({
-    overrideEncryption: true,
+): Promise<UpdateResult | void> =>
+  sendMultipartV2<UpdateResult>(
+    dotYouClient,
+    'patch',
+    `/drives/${file.targetDrive.alias}/files/${file.fileId}`,
+    file.targetDrive,
+    data,
     systemFileType,
-  });
-  const url = '/drive/files/update';
+    onVersionConflict,
+    axiosConfig,
+    'pureUpdateV2'
+  );
 
-  const config = {
-    ...axiosConfig,
-    headers: {
-      'content-type': 'multipart/form-data',
-      ...axiosConfig?.headers,
-    },
-  };
-
-  return client
-    .patch(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch') {
-        if (!onVersionConflict) {
-          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
-        } else {
-          return onVersionConflict();
-        }
-      }
-
-      console.error('[odin-js:pureUpdate]', error);
-      throw error;
-    });
-};
+/// Updates a file on another identity, with no local copy: PATCH /api/v2/peer/{odinId}/drives/{driveId}/files/by-gtid/{gtid}
+export const pureUpdateOverPeerV2 = async (
+  dotYouClient: DotYouClient,
+  recipient: string,
+  file: GlobalTransitIdFileIdentifier,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => Promise<void | UpdateResult> | void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<UpdateResult | void> =>
+  sendMultipartV2<UpdateResult>(
+    dotYouClient,
+    'patch',
+    `/peer/${encodeURIComponent(recipient)}/drives/${file.targetDrive.alias}/files/by-gtid/${file.globalTransitId}`,
+    file.targetDrive,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig,
+    'pureUpdateOverPeerV2'
+  );
 
 export const GenerateKeyHeader = (aesKey?: Uint8Array): KeyHeader => {
   return {

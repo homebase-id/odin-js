@@ -99,7 +99,7 @@ export const getRecoveryInfo = async (live: boolean = true): Promise<RecoveryInf
     api: ApiType.Owner,
   });
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false, v2: true});
 
   const url = `${root}/recovery-info?live=${live}`;
   return await client
@@ -120,7 +120,7 @@ export const updateMonthlyReportSetting = async (enabled: boolean): Promise<bool
     api: ApiType.Owner,
   });
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false, v2: true});
 
   const url = `${root}/update-monthly-security-health-report-status?enabled=${enabled}`;
   return await client
@@ -139,7 +139,7 @@ export const getMonthlyReportSetting = async (): Promise<boolean> => {
     api: ApiType.Owner,
   });
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false, v2: true});
 
   const url = `${root}/monthly-security-health-report-status`;
   return await client
@@ -159,7 +159,7 @@ export const getShardHealthStatus = async (): Promise<PeriodicSecurityHealthChec
     api: ApiType.Owner,
   });
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: false});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: false, v2: true});
 
   const url = `${root}/shard-health-status`;
   return await client
@@ -187,7 +187,7 @@ export const verifyRecoveryKey = async (dotYouClient: DotYouClient, recoveryKey:
   }
 
   return dotYouClient
-    .createAxiosClient()
+    .createAxiosClient({v2: true})
     .post(`${root}/verify-recovery-key`, {phraseCheck64})
     .then((response) => response.status === 200)
     .catch(() => false);
@@ -202,7 +202,7 @@ export const verifyPassword = async (password: string): Promise<boolean> => {
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
   const url = `${root}/verify-password`;
 
   return await client.post(url, reply)
@@ -227,7 +227,7 @@ export const updateRecoveryEmail = async (recoveryEmail: string, password: strin
   const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const client = dotYouClient.createAxiosClient({overrideEncryption: true});
+  const client = dotYouClient.createAxiosClient({overrideEncryption: true, v2: true});
   const url = `${root}/update-recovery-email`;
 
   return await client.post(url, {

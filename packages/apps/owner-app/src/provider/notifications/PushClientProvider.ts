@@ -7,9 +7,9 @@ export const getApplicationServerKey = async () => {
     hostIdentity: window.location.hostname,
     api: ApiType.Guest,
   });
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ v2: true });
   return await client
-    .get<string>('/public/keys/notifications_pk', {
+    .get<string>('/public/keys/notifications-pk', {
       validateStatus: () => true,
     })
     .then((response) => response.data);
@@ -28,7 +28,7 @@ export const registerNewDevice = async (
   const jsonObject = subscription.toJSON();
   if (!subscription || !jsonObject.keys) throw new Error('Invalid subscription');
 
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient.post('/notify/push/subscribe', {
     friendlyName: clientFriendlyName || `${getBrowser()} ${getOperatingSystem().name}`,
@@ -47,7 +47,7 @@ export interface PushNotificationSubscription {
 }
 
 export const getCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient
     .get<PushNotificationSubscription>('/notify/push/subscription')
@@ -56,7 +56,7 @@ export const getCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
 };
 
 export const getRegisteredDevices = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient
     .get<PushNotificationSubscription[]>('/notify/push/list')
@@ -64,20 +64,20 @@ export const getRegisteredDevices = async (dotYouClient: DotYouClient) => {
 };
 
 export const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient.post(`/notify/push/unsubscribe/`);
 };
 
 export const removeRegisteredDevice = async (dotYouClient: DotYouClient, key: string) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
   assertIfDefined('key', key);
 
   return await axiosClient.delete(`/notify/push/subscription?key=${key}`);
 };
 
 export const removeAllRegisteredDevice = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
 
   return await axiosClient.post(`/notify/push/unsubscribeAll/`);
 };

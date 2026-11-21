@@ -15,8 +15,8 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
   // the call to the endpoint will automatically include the
   // cookie.  we just need to check the success code
 
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
-  return client.get('/authentication/verifyToken').then((response) => {
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
+  return client.get('/auth/owner/verifyToken').then((response) => {
     return response.data;
   });
 };
@@ -25,10 +25,10 @@ const logoutOwner = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({
     api: ApiType.Owner,
   });
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, v2: true });
 
-  //withCredentials lets us set the cookies return from the /admin/authentication endpoint
-  return client.get('/authentication/logout', { withCredentials: true }).then((response) => {
+  //withCredentials lets us set the cookies return from the owner logout endpoint
+  return client.get('/auth/owner/logout', { withCredentials: true }).then((response) => {
     return response.data;
   });
 };
@@ -114,6 +114,6 @@ export const logoutOwnerAndAllApps = async (
 };
 
 const removeCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
-  const axiosClient = dotYouClient.createAxiosClient();
+  const axiosClient = dotYouClient.createAxiosClient({ v2: true });
   return await axiosClient.post(`/notify/push/unsubscribe/`);
 };
