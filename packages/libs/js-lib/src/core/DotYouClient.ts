@@ -24,6 +24,8 @@ interface createAxiosClientOptions {
   overrideEncryption?: boolean;
   headers?: Record<string, string>;
   systemFileType?: SystemFileType;
+  // Only for the overwrite that switches a file's encryption, which V2 can't do yet (odin-core #2148)
+  v1?: boolean;
 }
 
 export class BaseDotYouClient {
@@ -79,6 +81,19 @@ export class BaseDotYouClient {
     return this.getRoot() + '/api/v2';
   }
 
+  // The V1 endpoint, kept for the one call V2 can't serve yet: switching a file's encryption (odin-core #2148)
+  getEndpointV1(): string {
+    switch (this._options?.api) {
+      case ApiType.Owner:
+        return this.getRoot() + '/api/owner/v1';
+      case ApiType.App:
+        return this.getRoot() + '/api/apps/v1';
+      case ApiType.Guest:
+        return this.getRoot() + '/api/guest/v1';
+    }
+    return this.getRoot();
+  }
+
   // V2 reads an app's token from `Authorization: Bearer`, not from the bx0900 header V1 uses
   getHeadersV2(headers: Record<string, string> = this.getHeaders()): Record<string, string> {
     const { bx0900, ...rest } = headers;
@@ -98,9 +113,9 @@ export class BaseDotYouClient {
       ...options?.headers,
     };
     const client = axios.create({
-      baseURL: this.getEndpoint(),
+      baseURL: options?.v1 ? this.getEndpointV1() : this.getEndpoint(),
       withCredentials: isLocalStorageAvailable(),
-      headers: this.getHeadersV2(headers),
+      headers: options?.v1 ? headers : this.getHeadersV2(headers),
     });
 
     if (options?.overrideEncryption) return client;
